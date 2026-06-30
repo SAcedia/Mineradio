@@ -414,7 +414,8 @@ function makeShelfManager() {
 
     if (card.isCenter) {
       var actionY = H - pad - 78;
-      if (item.type === 'playlist') {
+      if (item.type === 'playlist' || item.type === 'localPlaylist' || item.type === 'localLiked') {
+        var btnLabel = item.type === 'localLiked' ? '▶ 播放红心' : '▶ 播放歌单';
         makeRoundRect(ctx, tx, actionY, 138, 38, 18);
         var playGrad = ctx.createLinearGradient(tx, actionY, tx + 138, actionY + 38);
         playGrad.addColorStop(0, 'rgba(255,255,255,0.88)');
@@ -425,15 +426,17 @@ function makeShelfManager() {
         ctx.lineWidth = 1.1; ctx.stroke();
         ctx.font = '800 14px Inter, "Microsoft YaHei", Arial';
         ctx.fillStyle = readableInkForHex(shelfAccentHex());
-        ctx.fillText('▶ 播放歌单', tx + 25, actionY + 24);
+        ctx.fillText(btnLabel, tx + 25, actionY + 24);
 
-        makeRoundRect(ctx, tx + 150, actionY, 104, 38, 18);
-        ctx.fillStyle = 'rgba(255,255,255,0.055)'; ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.14)';
-        ctx.lineWidth = 1.1; ctx.stroke();
-        ctx.font = '700 14px Inter, "Microsoft YaHei", Arial';
-        ctx.fillStyle = 'rgba(255,255,255,0.78)';
-        ctx.fillText('详情', tx + 184, actionY + 24);
+        if (item.type === 'playlist') {
+          makeRoundRect(ctx, tx + 150, actionY, 104, 38, 18);
+          ctx.fillStyle = 'rgba(255,255,255,0.055)'; ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+          ctx.lineWidth = 1.1; ctx.stroke();
+          ctx.font = '700 14px Inter, "Microsoft YaHei", Arial';
+          ctx.fillStyle = 'rgba(255,255,255,0.78)';
+          ctx.fillText('详情', tx + 184, actionY + 24);
+        }
       } else if (item.type === 'queue') {
         ctx.font = '600 14px Inter, "Microsoft YaHei", Arial';
         ctx.fillStyle = shelfAccentRgba(0.84);
@@ -466,7 +469,11 @@ function makeShelfManager() {
       ? { kind:'loadPlaylist', playlistId: item.playlistId, title: item.title }
       : (item.type === 'podcastCollection'
         ? { kind:'loadPlaylist', playlistId: 'podcast:' + item.podcastKey, title: item.title }
-        : (item.type === 'queue' ? { kind:'playQueue', index: item.queueIndex } : { kind:'empty' }));
+        : (item.type === 'localPlaylist'
+          ? { kind:'loadLocalPlaylist', playlistId: item.playlistId, title: item.title }
+          : (item.type === 'localLiked'
+            ? { kind:'loadLocalLiked', title: item.title }
+            : (item.type === 'queue' ? { kind:'playQueue', index: item.queueIndex } : { kind:'empty' }))));
     group.add(mesh);
     var card = { canvas: cv, ctx: ctx, texture: tx, mesh: mesh, item: item, index: i, isCenter: false, selected: i === selectedIdx, floatMix: 0, fxPulse: 0, dofBlur: 0, dofBucket: -1, drawKey: '' };
     return card;
@@ -1056,7 +1063,7 @@ void main(){ vec4 t = texture2D(uDotTex, gl_PointCoord); if (t.a < 0.02) discard
     triggerAction: function(action) {
       if (!action) return;
       var card = cards.find(function(c) { return c.mesh.userData.action === action; });
-      pulseCard(card, action.kind === 'loadPlaylist' ? 1.0 : 0.70);
+      pulseCard(card, action.kind === 'loadPlaylist' || action.kind === 'loadLocalPlaylist' || action.kind === 'loadLocalLiked' ? 1.0 : 0.70);
       if (action.kind === 'playQueue') {
         playQueueAt(action.index);
       } else if (action.kind === 'loadPlaylist') {
@@ -1066,6 +1073,10 @@ void main(){ vec4 t = texture2D(uDotTex, gl_PointCoord); if (t.a < 0.02) discard
         setShelfPinnedOpen(true, true);
         if (typeof updateEmptyHomeVisibility === 'function') updateEmptyHomeVisibility({ forceLoad: false });
         if (typeof setFocusZone === 'function') setFocusZone('shelf-detail', true);
+      } else if (action.kind === 'loadLocalPlaylist') {
+        if (typeof showLocalPlaylistDetail === 'function') showLocalPlaylistDetail(action.playlistId);
+      } else if (action.kind === 'loadLocalLiked') {
+        if (typeof showLocalPlaylistDetail === 'function') showLocalPlaylistDetail('__liked__');
       } else if (action.kind === 'empty') {
         togglePlaylistPanel(true);
       }
@@ -1089,6 +1100,12 @@ void main(){ vec4 t = texture2D(uDotTex, gl_PointCoord); if (t.a < 0.02) discard
         setShelfPinnedOpen(true, true);
         if (typeof updateEmptyHomeVisibility === 'function') updateEmptyHomeVisibility({ forceLoad: false });
         if (typeof setFocusZone === 'function') setFocusZone('shelf-detail', true);
+      }
+      if (action.kind === 'loadLocalPlaylist') {
+        if (typeof showLocalPlaylistDetail === 'function') showLocalPlaylistDetail(action.playlistId);
+      }
+      if (action.kind === 'loadLocalLiked') {
+        if (typeof showLocalPlaylistDetail === 'function') showLocalPlaylistDetail('__liked__');
       }
       if (action.kind === 'empty') togglePlaylistPanel(true);
     },
