@@ -2383,4 +2383,6 @@ function setCamMode(m) {
   saveLyricLayout();
 }
 
+bindFxPanel();
+
 // ============================================================
