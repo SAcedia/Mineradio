@@ -566,7 +566,7 @@ async function loadHomeDiscover(force) {
   homeDiscoverState.error = '';
   renderHomeDiscover();
   try {
-    var data = await apiJson('/api/discover/home?t=' + Date.now());
+    var data = await neteaseDiscoverHome();
     if (token !== homeDiscoverToken) return;
     homeDiscoverState.loggedIn = !!(data && data.loggedIn);
     homeDiscoverState.mode = data && data.mode || (homeDiscoverState.loggedIn ? 'member' : 'starter');
@@ -730,7 +730,7 @@ function locateWeatherRadio() {
   function useIpFallback() {
     if (locationSettled || ipFallbackStarted) return;
     ipFallbackStarted = true;
-    apiJson('/api/weather/ip-location?t=' + Date.now()).then(function(data){
+    neteaseWeatherIpLocation().then(function(data){
       var loc = data && data.location;
       if (!loc || !isFinite(Number(loc.latitude)) || !isFinite(Number(loc.longitude))) throw new Error(data && data.error || 'IP_LOCATION_FAILED');
       if (locationSettled) return;
@@ -1894,7 +1894,7 @@ function syncLikeStatusForSongs(songs) {
   var ids = songs.filter(isCloudSong).map(function(s){ return String(s.id); });
   if (!ids.length) return;
   var token = ++likeStatusToken;
-  apiJson('/api/song/like/check?ids=' + encodeURIComponent(ids.join(','))).then(function(r){
+  neteaseLikeCheck(ids).then(function(r){
     if (token < likeStatusToken - 3 || !r || !r.liked) return;
     Object.keys(r.liked).forEach(function(id){ likedSongMap[String(id)] = !!r.liked[id]; });
     safeRenderQueuePanel('like-status-sync', { scrollCurrent: miniQueueOpen });
@@ -1967,7 +1967,7 @@ async function toggleLikeSong(song) {
   safeRenderQueuePanel('like-toggle-optimistic', { scrollCurrent: miniQueueOpen });
   refreshSearchResultActionStates();
   try {
-    var r = await apiJson('/api/song/like?id=' + encodeURIComponent(id) + '&like=' + encodeURIComponent(String(next)));
+    var r = await neteaseLike(id, String(next));
     if (r && r.error) throw new Error(r.error);
     likedSongMap[id] = next;
     showToast(next ? '已加入红心喜欢' : '已取消红心');
@@ -2056,7 +2056,7 @@ async function createPlaylistFromCollect() {
   var name = input ? input.value.trim() : '';
   if (!name) { showToast('先输入歌单名称'); return; }
   try {
-    var r = await apiJson('/api/playlist/create?name=' + encodeURIComponent(name));
+    var r = await neteasePlaylistCreate(name);
     if (r && r.error) throw new Error(r.error);
     if (input) input.value = '';
     showToast('歌单已创建');
@@ -2084,7 +2084,7 @@ async function verifySongInPlaylist(pid, songId) {
       await new Promise(function(resolve){ setTimeout(resolve, attempt === 1 ? 360 : 820); });
     }
     try {
-      var detail = await apiJson('/api/playlist/tracks?id=' + encodeURIComponent(pid));
+      var detail = await neteasePlaylistTracks(pid);
       var tracks = (detail && detail.tracks) || [];
       for (var i = 0; i < tracks.length; i++) {
         if (String(tracks[i].id) === songId) return true;

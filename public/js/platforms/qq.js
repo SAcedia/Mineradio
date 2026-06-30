@@ -7,34 +7,37 @@ function qqApi(path, params) {
   return apiJson('/api/qq' + path + qs);
 }
 
-function qqSearch(keywords, limit) {
-  return qqApi('/search', 'keywords=' + encodeURIComponent(keywords) + '&limit=' + (limit || 12));
+function qqQs(names, args) {
+  var parts = [];
+  for (var i = 0; i < names.length; i++) {
+    var key = names[i];
+    var val = args[key];
+    if (val != null) parts.push(key + '=' + encodeURIComponent(val));
+  }
+  return parts.join('&');
 }
 
-function qqSongUrl(song, quality) {
-  var mid = encodeURIComponent(song.mid || song.songmid || song.id || '');
-  var mediaMid = encodeURIComponent(song.mediaMid || song.media_mid || '');
-  var qs = 'mid=' + mid + '&mediaMid=' + mediaMid;
-  if (quality) qs += '&quality=' + encodeURIComponent(quality);
-  return qqApi('/song/url', qs);
-}
+var qqAPIList = [
+  { name: 'Search',        path: '/search',         params: ['keywords','limit'] },
+  { name: 'SongUrl',       path: '/song/url',       params: ['mid','mediaMid','quality'] },
+  { name: 'PlaylistTracks',path: '/playlist/tracks', params: ['id'] },
+  { name: 'LoginStatus',   path: '/login/status',   params: [] },
+  { name: 'LoginCookie',   path: '/login/cookie',   params: ['cookie'] },
+  { name: 'Logout',        path: '/logout',         params: [] },
+  { name: 'UserPlaylists', path: '/user/playlists', params: [] },
+];
 
-function qqPlaylistTracks(id) {
-  return qqApi('/playlist/tracks', 'id=' + encodeURIComponent(id));
-}
-
-function qqLoginStatus() {
-  return qqApi('/login/status', 't=' + Date.now());
-}
-
-function qqLoginCookie(cookieStr) {
-  return qqApi('/login/cookie', 'cookie=' + encodeURIComponent(cookieStr));
-}
-
-function qqLogout() {
-  return qqApi('/logout');
-}
-
-function qqUserPlaylists() {
-  return qqApi('/user/playlists');
+for (var i = 0; i < qqAPIList.length; i++) {
+  (function(entry) {
+    var fnName = 'qq' + entry.name;
+    var fn = window[fnName];
+    if (!fn) {
+      fn = function() {
+        var args = {};
+        for (var ai = 0; ai < entry.params.length; ai++) args[entry.params[ai]] = arguments[ai];
+        return qqApi(entry.path, qqQs(entry.params, args));
+      };
+    }
+    window[fnName] = fn;
+  })(qqAPIList[i]);
 }

@@ -7,16 +7,38 @@ function youtubeApi(path, params) {
   return apiJson('/api/youtube' + path + qs);
 }
 
-function youtubeSearch(keywords, limit) {
-  return youtubeApi('/search', 'keywords=' + encodeURIComponent(keywords) + '&limit=' + (limit || 18));
+function youtubeQs(names, args) {
+  var parts = [];
+  for (var i = 0; i < names.length; i++) {
+    var key = names[i];
+    var val = args[key];
+    if (val != null) parts.push(key + '=' + encodeURIComponent(val));
+  }
+  return parts.join('&');
 }
 
-function youtubeSongUrl(id, quality) {
-  var params = 'id=' + encodeURIComponent(id);
-  if (quality) params += '&quality=' + encodeURIComponent(quality);
-  return youtubeApi('/song/url', params);
-}
+var youtubeAPIList = [
+  { name: 'Search',      path: '/search',     params: ['keywords','limit'] },
+  { name: 'SongUrl',     path: '/song/url',   params: ['id','quality'] },
+  { name: 'Trending',    path: '/trending',   params: ['region'] },
+  { name: 'Login',       path: '/login',      params: ['cookie'] },
+  { name: 'Logout',      path: '/logout',     params: [] },
+  { name: 'Playlists',   path: '/playlists',  params: [] },
+  { name: 'LikeCheck',   path: '/like/check', params: ['id'] },
+  { name: 'Like',        path: '/like',       params: ['id','like'] },
+];
 
-function youtubeTrending() {
-  return youtubeApi('/trending', 't=' + Date.now());
+for (var i = 0; i < youtubeAPIList.length; i++) {
+  (function(entry) {
+    var fnName = 'youtube' + entry.name;
+    var fn = window[fnName];
+    if (!fn) {
+      fn = function() {
+        var args = {};
+        for (var ai = 0; ai < entry.params.length; ai++) args[entry.params[ai]] = arguments[ai];
+        return youtubeApi(entry.path, youtubeQs(entry.params, args));
+      };
+    }
+    window[fnName] = fn;
+  })(youtubeAPIList[i]);
 }
