@@ -1,6 +1,6 @@
 //  Cover helpers
 // ============================================================
-function readCustomCoverMap() {
+window.readCustomCoverMap = function() {
   try {
     var raw = localStorage.getItem(CUSTOM_COVER_STORE_KEY);
     var parsed = raw ? JSON.parse(raw) : {};
@@ -9,7 +9,7 @@ function readCustomCoverMap() {
     return {};
   }
 }
-function saveCustomCoverMap() {
+window.saveCustomCoverMap = function() {
   try {
     localStorage.setItem(CUSTOM_COVER_STORE_KEY, JSON.stringify(customCoverMap || {}));
     return true;
@@ -18,26 +18,26 @@ function saveCustomCoverMap() {
     return false;
   }
 }
-function isInlineCoverSrc(src) {
+window.isInlineCoverSrc = function(src) {
   return typeof src === 'string' && (/^data:image\//i.test(src) || /^blob:/i.test(src));
 }
-function isProxyableCoverUrl(url) {
+window.isProxyableCoverUrl = function(url) {
   return /^https?:\/\//i.test(String(url || ''));
 }
-function coverProxySrc(url, cacheBust) {
+window.coverProxySrc = function(url, cacheBust) {
   if (!url) return '';
   if (isInlineCoverSrc(url)) return url;
   if (!isProxyableCoverUrl(url)) return '';
   return '/api/cover?url=' + encodeURIComponent(url) + (cacheBust ? '&v=' + Date.now() : '');
 }
-function coverUrlWithSize(url, size) {
+window.coverUrlWithSize = function(url, size) {
   if (!url || isInlineCoverSrc(url) || !/^https?:\/\//i.test(url)) return url || '';
   if (!size) return url;
   var param = 'param=' + size + 'y' + size;
   if (/[?&]param=\d+y\d+/i.test(url)) return url.replace(/([?&])param=\d+y\d+/i, '$1' + param);
   return url + (url.indexOf('?') >= 0 ? '&' : '?') + param;
 }
-function songCustomCoverKey(song) {
+window.songCustomCoverKey = function(song) {
   if (!song) return '';
   if (song.customCoverKey) return String(song.customCoverKey);
   if (song.provider === 'qq' || song.source === 'qq' || song.type === 'qq') return 'qq:' + (song.mid || song.songmid || song.id || (song.name + '|' + song.artist));
@@ -48,27 +48,27 @@ function songCustomCoverKey(song) {
   var artist = String(song.artist || '').trim();
   return (title || artist) ? ('meta:' + (title + '|' + artist).slice(0, 220)) : '';
 }
-function getCustomCoverForSong(song) {
+window.getCustomCoverForSong = function(song) {
   if (!song) return '';
   if (song.customCover) return song.customCover;
   var key = songCustomCoverKey(song);
   return key && customCoverMap[key] ? customCoverMap[key] : '';
 }
-function hydrateCustomCover(song) {
+window.hydrateCustomCover = function(song) {
   if (!song) return song;
   var custom = getCustomCoverForSong(song);
   if (custom) song.customCover = custom;
   return song;
 }
-function songCoverSrc(song, size) {
+window.songCoverSrc = function(song, size) {
   var custom = getCustomCoverForSong(song);
   if (custom) return custom;
   return song && song.cover ? coverUrlWithSize(song.cover, size) : '';
 }
-function cssImageUrl(url) {
+window.cssImageUrl = function(url) {
   return String(url || '').replace(/\\/g, '\\\\').replace(/"/g, '%22');
 }
-function setCustomCoverForCurrent(dataUrl, opts) {
+window.setCustomCoverForCurrent = function(dataUrl, opts) {
   if (!dataUrl) return;
   var song = currentCoverSong();
   var saved = false;
@@ -92,7 +92,7 @@ function setCustomCoverForCurrent(dataUrl, opts) {
   updateCustomCoverButton();
   showToast(song ? (!hasKey ? '封面已应用' : (saved ? '封面已保存' : '封面已应用，存储空间不足')) : '已应用临时封面');
 }
-function updateCustomCoverButton() {
+window.updateCustomCoverButton = function() {
   var btn = document.getElementById('clear-cover-btn');
   var hasCover = !!getCustomCoverForSong(currentCoverSong());
   var area = document.getElementById('search-area');
@@ -102,7 +102,7 @@ function updateCustomCoverButton() {
   btn.title = hasCover ? '取消自定义封面' : '当前没有自定义封面';
   btn.setAttribute('aria-label', btn.title);
 }
-function clearCustomCoverForCurrent() {
+window.clearCustomCoverForCurrent = function() {
   var song = currentCoverSong();
   if (!song) {
     showToast('先播放或选择一首歌');

@@ -1,6 +1,6 @@
 //  API 助手
 // ============================================================
-async function apiJson(url, opts) {
+window.apiJson = async function(url, opts) {
   opts = opts || {};
   var timeoutMs = Number(opts.timeoutMs) || 0;
   var fetchOpts = Object.assign({}, opts);
@@ -18,7 +18,8 @@ async function apiJson(url, opts) {
     if (timer) clearTimeout(timer);
   }
 }
-function escHtml(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+window.escHtml = function(s) {
+ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 function normalizePlaybackQuality(value) {
   value = String(value || '').toLowerCase();
   if (value === 'jymaster' || value === 'master' || value === 'svip') return 'jymaster';

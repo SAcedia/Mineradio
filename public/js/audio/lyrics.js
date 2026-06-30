@@ -1,7 +1,7 @@
 // ============================================================
 //  歌词
 // ============================================================
-async function fetchLyric(songOrId, token, preferSource) {
+window.fetchLyric = async function(songOrId, token, preferSource) {
   try {
     // 没有指定 source 时（正常切歌），重置为默认源
     if (!preferSource) {
@@ -75,14 +75,14 @@ async function fetchLyric(songOrId, token, preferSource) {
     applyPreferredLyricsForCurrent(true);
   }
 }
-function currentLyricFallbackText() {
+window.currentLyricFallbackText = function() {
   var song = currentLyricSong() || {};
   var title = (song.name || document.getElementById('thumb-title').textContent || '').trim();
   var artist = (song.artist || document.getElementById('thumb-artist').textContent || '').trim();
   if (!title) return '';
   return artist ? title + ' - ' + artist : title;
 }
-function isNoLyricText(text) {
+window.isNoLyricText = function(text) {
   var compact = String(text || '').replace(/\s+/g, '').replace(/[，,。.!！?？、~～]/g, '');
   return !compact ||
     compact === '纯音乐请欣赏' ||
@@ -90,18 +90,18 @@ function isNoLyricText(text) {
     compact === '暂无歌词敬请期待' ||
     compact === '此歌曲为没有填词的纯音乐请您欣赏';
 }
-function withLyricFallback(lines) {
+window.withLyricFallback = function(lines) {
   lines = Array.isArray(lines) ? lines.filter(function(line){ return line && String(line.text || '').trim(); }) : [];
   if (lines.length && !lines.every(function(line){ return isNoLyricText(line.text); })) return lines;
   var text = currentLyricFallbackText();
   return text ? [{ t:0, text:text, duration:9999, charCount:Math.max(1, text.length), fallback:true }] : [];
 }
-function lyricTagTimeToSeconds(min, sec, frac) {
+window.lyricTagTimeToSeconds = function(min, sec, frac) {
   var t = (parseInt(min, 10) || 0) * 60 + (parseInt(sec, 10) || 0);
   if (frac) t += (parseInt(frac, 10) || 0) / Math.pow(10, Math.min(3, frac.length));
   return t;
 }
-function finalizeLyricLineDurations(lines) {
+window.finalizeLyricLineDurations = function(lines) {
   lines.sort(function(a, b){ return a.t - b.t; });
   for (var i = 0; i < lines.length; i++) {
     var next = lines[i + 1];
@@ -112,7 +112,7 @@ function finalizeLyricLineDurations(lines) {
   }
   return lines;
 }
-function parseLyricText(text) {
+window.parseLyricText = function(text) {
   var lines = [], reg = /\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\]/g;
   text.split(/\r?\n/).forEach(function(line){
     var times = [], m;
@@ -125,7 +125,7 @@ function parseLyricText(text) {
   });
   return finalizeLyricLineDurations(lines);
 }
-function parseYrcText(text) {
+window.parseYrcText = function(text) {
   var lines = [];
   String(text || '').split(/\r?\n/).forEach(function(line){
     var m = line.match(/^\[(\d+),(\d+)\](.*)$/);
@@ -160,7 +160,7 @@ function parseYrcText(text) {
   });
   return finalizeLyricLineDurations(lines);
 }
-function _prefetchAdjacent(centerIdx) {
+window._prefetchAdjacent = function(centerIdx) {
   if (!Array.isArray(playQueue) || playQueue.length < 2) return;
   _prefetchToken++;
   var tok = _prefetchToken;
@@ -205,17 +205,17 @@ function _prefetchAdjacent(centerIdx) {
     })(i);
   }
 }
-var _lyricOffsetToastTimer = null;
-function _saveLyricOffset() {
+window._lyricOffsetToastTimer = null;
+window._saveLyricOffset = function() {
   try { localStorage.setItem('mineradio-lyric-offset', String(_lyricOffset || 0)); } catch (e) {}
 }
-function _loadLyricOffset() {
+window._loadLyricOffset = function() {
   try {
     var v = parseFloat(localStorage.getItem('mineradio-lyric-offset'));
     if (isFinite(v)) _lyricOffset = Math.max(-30, Math.min(30, v));
   } catch (e) {}
 }
-function updateLyricOffsetVisibility() {
+window.updateLyricOffsetVisibility = function() {
   // 只在 YouTube 歌曲 + 歌词开启时显示
   var song = playQueue && currentIdx >= 0 ? playQueue[currentIdx] : null;
   var isYT = song && songProviderKey(song) === 'youtube';
@@ -232,7 +232,7 @@ function updateLyricOffsetVisibility() {
     srcBtn.style.display = (parentVisible && lyricSourceMode === 'original') ? '' : 'none';
   }
 }
-function showLyricOffsetToast() {
+window.showLyricOffsetToast = function() {
   if (typeof _lyricOffset === 'undefined') _lyricOffset = 0;
   var val = document.getElementById('lyric-offset-value');
   var rst = document.getElementById('lyric-offset-btn-reset');
@@ -245,10 +245,10 @@ function showLyricOffsetToast() {
   if (_lyricOffset === 0) return;
   _lyricOffsetToastTimer = setTimeout(function(){}, 1500);
 }
-var _lyricSources = ['lrclib', 'music-kit', 'netease', 'kugou', 'yt-captions'];
-var _lyricSourceLabels = { 'lrclib': 'LRC', 'music-kit': 'YT', 'netease': '网', 'kugou': '酷', 'yt-captions': 'CC' };
-var _lyricSourceIdx = 0;
-function cycleLyricSource() {
+window._lyricSources = ['lrclib', 'music-kit', 'netease', 'kugou', 'yt-captions'];
+window._lyricSourceLabels = { 'lrclib': 'LRC', 'music-kit': 'YT', 'netease': '网', 'kugou': '酷', 'yt-captions': 'CC' };
+window._lyricSourceIdx = 0;
+window.cycleLyricSource = function() {
   _lyricSourceIdx = (_lyricSourceIdx + 1) % _lyricSources.length;
   var src = _lyricSources[_lyricSourceIdx];
   var btn = document.getElementById('lyric-source-btn');
@@ -260,11 +260,11 @@ function cycleLyricSource() {
   }
   showToast('歌词来源: ' + (_lyricSourceLabels[src] || src));
 }
-function renderLyrics() {
+window.renderLyrics = function() {
   // v8: 歌词渲染由 stageLyrics 在每帧 tickLyricsParticles 里推动
   clearStageLyrics();
 }
-function toggleLyricsPanel(force) {
+window.toggleLyricsPanel = function(force) {
   if (force === false) fx.particleLyrics = false;
   else if (force === true) fx.particleLyrics = true;
   else fx.particleLyrics = !fx.particleLyrics;
@@ -278,7 +278,8 @@ function toggleLyricsPanel(force) {
   lyricsVisible = fx.particleLyrics;
   updateLyricOffsetVisibility();
 }
-function updateLyricsHighlight() { /* v8: 由 tickLyricsParticles 接管 */ }
+window.updateLyricsHighlight = function() {
+ /* v8: 由 tickLyricsParticles 接管 */ }
 
 function setLyricSource(source) {
   if (source === 'auto') {

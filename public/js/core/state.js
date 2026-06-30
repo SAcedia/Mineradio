@@ -1,74 +1,116 @@
-var uiSfxCtx = null, lastShelfSelectSfxAt = 0;
-var FFT_SIZE = 2048;
-var frequencyData = new Uint8Array(FFT_SIZE / 2);
-var timeDomainData = new Uint8Array(FFT_SIZE);
-var BEAT_FFT_SIZE = 2048;
-var beatFrequencyData = new Uint8Array(BEAT_FFT_SIZE / 2);
-var beatTimeDomainData = new Uint8Array(BEAT_FFT_SIZE);
-var bass = 0, mid = 0, treble = 0, audioEnergy = 0, beatPulse = 0, prevEnergy = 0;
-var lyricSunEnergy = 0, lyricSunTarget = 0, lyricSunHold = 0, lyricSunAvg = 0, lyricSunPeak = 0.55;
-var smoothBass = 0, smoothMid = 0, smoothTreb = 0, smoothEnergy = 0;
-var bassPeak = 0.12, midPeak = 0.10, treblePeak = 0.08, energyPeak = 0.10;
+window.uiSfxCtx = null;
+window.lastShelfSelectSfxAt = 0;
+window.FFT_SIZE = 2048;
+window.frequencyData = new Uint8Array(FFT_SIZE / 2);
+window.timeDomainData = new Uint8Array(FFT_SIZE);
+window.BEAT_FFT_SIZE = 2048;
+window.beatFrequencyData = new Uint8Array(BEAT_FFT_SIZE / 2);
+window.beatTimeDomainData = new Uint8Array(BEAT_FFT_SIZE);
+window.bass = 0;
+window.mid = 0;
+window.treble = 0;
+window.audioEnergy = 0;
+window.beatPulse = 0;
+window.prevEnergy = 0;
+window.lyricSunEnergy = 0;
+window.lyricSunTarget = 0;
+window.lyricSunHold = 0;
+window.lyricSunAvg = 0;
+window.lyricSunPeak = 0.55;
+window.smoothBass = 0;
+window.smoothMid = 0;
+window.smoothTreb = 0;
+window.smoothEnergy = 0;
+window.bassPeak = 0.12;
+window.midPeak = 0.10;
+window.treblePeak = 0.08;
+window.energyPeak = 0.10;
 var beatOnsetFlag = false;        // beat 上升沿瞬时标志,每帧消费一次
 var lastStrongDrop = 0;           // 用于 burst 预设的强 drop 时刻
 
-var lyricsLines = [], lyricsVisible = false, lyricsHasNativeKaraoke = false, lyricsTimingSource = 'none';
-var playlist = [], playQueue = [], currentIdx = -1, playing = false, playToggleBusy = false;
-var searchMode = 'song', podcastResults = [], podcastPrograms = [], podcastCurrentRadio = null;
-var loginStatus = { loggedIn: false, vipType: 0, vipLevel: 'none', isVip: false, isSvip: false, vipLabel: '无VIP' };
-var qqLoginStatus = { provider: 'qq', loggedIn: false, preview: false, nickname: 'QQ 音乐', userId: '', avatar: '', vipType: 0 };
-var qqLoginAutoRefreshTimer = null;
-var qqLoginWasLoggedIn = false;
-var loginProvider = 'netease';
-var activeAccountProvider = 'netease';
-var dualAccountMode = false;
-var qqCookieBusy = false;
-var neteaseWebLoginBusy = false;
-var qqWebLoginBusy = false;
-var qqManualCookieOpen = false;
-var loginStatusChecked = false, loginStatusCheckFailed = false;
-var qrPollTimer = null, qrKey = null;
-var volumeTween = null, trackSwitchToken = 0;
-var audioFadeTimer = null, audioElementFadeFrame = 0, audioFadeSerial = 0;
-var AUDIO_FADE_IN_MS = 460;
-var AUDIO_FADE_OUT_MS = 420;
-var AUDIO_SILENCE_GAIN = 0.0001;
-var userPlaylists = [], qqPlaylists = [], myPodcastCollections = [], myPodcastItems = {}, playlistCoverCache = {};
+window.lyricsLines = [];
+window.lyricsVisible = false;
+window.lyricsHasNativeKaraoke = false;
+window.lyricsTimingSource = 'none';
+window.playlist = [];
+window.playQueue = [];
+window.currentIdx = -1;
+window.playing = false;
+window.playToggleBusy = false;
+window.searchMode = 'song';
+window.podcastResults = [];
+window.podcastPrograms = [];
+window.podcastCurrentRadio = null;
+window.loginStatus = { loggedIn: false, vipType: 0, vipLevel: 'none', isVip: false, isSvip: false, vipLabel: '无VIP' };
+window.qqLoginStatus = { provider: 'qq', loggedIn: false, preview: false, nickname: 'QQ 音乐', userId: '', avatar: '', vipType: 0 };
+window.qqLoginAutoRefreshTimer = null;
+window.qqLoginWasLoggedIn = false;
+window.loginProvider = 'netease';
+window.activeAccountProvider = 'netease';
+window.dualAccountMode = false;
+window.qqCookieBusy = false;
+window.neteaseWebLoginBusy = false;
+window.qqWebLoginBusy = false;
+window.qqManualCookieOpen = false;
+window.loginStatusChecked = false;
+window.loginStatusCheckFailed = false;
+window.qrPollTimer = null;
+window.qrKey = null;
+window.volumeTween = null;
+window.trackSwitchToken = 0;
+window.audioFadeTimer = null;
+window.audioElementFadeFrame = 0;
+window.audioFadeSerial = 0;
+window.AUDIO_FADE_IN_MS = 460;
+window.AUDIO_FADE_OUT_MS = 420;
+window.AUDIO_SILENCE_GAIN = 0.0001;
+window.userPlaylists = [];
+window.qqPlaylists = [];
+window.myPodcastCollections = [];
+window.myPodcastItems = {};
+window.playlistCoverCache = {};
 var localBeatMapCache = null;   // initialized by beat-analysis.js on load
 var localBeatMapPrefs = null;   // initialized by beat-analysis.js on load
 var playbackQuality = null;     // initialized by api-helper.js on load
-var qqPlaybackQualityCeiling = '';
-var coverCropState = null, coverCropBound = false;
-var currentLocalSong = null;
-var lyricSourceMode = 'original';
-var originalLyricsState = { lines: [], hasNativeKaraoke: false, timingSource: 'none' };
+window.qqPlaybackQualityCeiling = '';
+window.coverCropState = null;
+window.coverCropBound = false;
+window.currentLocalSong = null;
+window.lyricSourceMode = 'original';
+window.originalLyricsState = { lines: [], hasNativeKaraoke: false, timingSource: 'none' };
 var _lyricOffset = 0; // 歌词时间轴手动偏移（秒），Alt+[ 减 / Alt+] 增 / 按钮调节
-var _prefetchToken = 0;
-var localBeatAnalysis = { song:null, audioUrl:'', mode:'mr', active:false, token:0 };
-var likedSongMap = {}, likeBusyMap = {}, likeStatusToken = 0;
-var collectTargetSong = null, collectBusy = false;
-var uploadTipTimer = null, uploadTipAttempts = 0;
-var visualGuideActive = false, visualGuideStep = 0, visualGuideResizeBound = false;
-var visualGuideState = { bottomWasVisible: false, searchWasPeek: false, manual: false };
-var emptyHomeActive = false;
-var homeForcedOpen = false;
-var homeSuppressed = false;
-var homeDiscoverState = { loading: false, loaded: false, loggedIn: false, mode: 'starter', songs: [], playlists: [], podcasts: [], youtubeSongs: [], error: '', updatedAt: 0 };
-var homeDiscoverToken = 0;
-var homeVisualPresetActive = false;
-var homeVisualPrevPreset = 0;
-var HOME_LISTEN_STATS_KEY = 'mineradio-listen-stats-v1';
-var HOME_WEATHER_CITY_KEY = 'mineradio-weather-city';
-var homeWeatherRadioState = { loading: false, loaded: false, city: localStorage.getItem(HOME_WEATHER_CITY_KEY) || '上海', weather: null, radio: null, error: '', updatedAt: 0 };
-var homeWeatherToken = 0;
-var homeWeatherLoadTimer = null;
-var homeWeatherLoadPromise = null;
-var weatherRadioStartBusy = false;
-var activeRadioContext = null;
+window._prefetchToken = 0;
+window.localBeatAnalysis = { song:null, audioUrl:'', mode:'mr', active:false, token:0 };
+window.likedSongMap = {};
+window.likeBusyMap = {};
+window.likeStatusToken = 0;
+window.collectTargetSong = null;
+window.collectBusy = false;
+window.uploadTipTimer = null;
+window.uploadTipAttempts = 0;
+window.visualGuideActive = false;
+window.visualGuideStep = 0;
+window.visualGuideResizeBound = false;
+window.visualGuideState = { bottomWasVisible: false, searchWasPeek: false, manual: false };
+window.emptyHomeActive = false;
+window.homeForcedOpen = false;
+window.homeSuppressed = false;
+window.homeDiscoverState = { loading: false, loaded: false, loggedIn: false, mode: 'starter', songs: [], playlists: [], podcasts: [], youtubeSongs: [], error: '', updatedAt: 0 };
+window.homeDiscoverToken = 0;
+window.homeVisualPresetActive = false;
+window.homeVisualPrevPreset = 0;
+window.HOME_LISTEN_STATS_KEY = 'mineradio-listen-stats-v1';
+window.HOME_WEATHER_CITY_KEY = 'mineradio-weather-city';
+window.homeWeatherRadioState = { loading: false, loaded: false, city: localStorage.getItem(HOME_WEATHER_CITY_KEY) || '上海', weather: null, radio: null, error: '', updatedAt: 0 };
+window.homeWeatherToken = 0;
+window.homeWeatherLoadTimer = null;
+window.homeWeatherLoadPromise = null;
+window.weatherRadioStartBusy = false;
+window.activeRadioContext = null;
 var listenStatsState = null;    // initialized by api-helper.js on load
-var listenSession = null;
-var appPerfMarks = [];
-function markAppPerf(name) {
+window.listenSession = null;
+window.appPerfMarks = [];
+window.markAppPerf = function(name) {
   try {
     var value = performance.now();
     appPerfMarks.push({ name: name, value: Math.round(value) });
@@ -77,7 +119,7 @@ function markAppPerf(name) {
   } catch (e) {}
 }
 markAppPerf('script-start');
-function installStartupLongTaskObserver() {
+window.installStartupLongTaskObserver = function() {
   try {
     if (!('PerformanceObserver' in window)) return;
     var observer = new PerformanceObserver(function(list){
@@ -91,18 +133,28 @@ function installStartupLongTaskObserver() {
   } catch (e) {}
 }
 installStartupLongTaskObserver();
-var queueViewTab = 'queue', playMode = 'loop', miniQueueOpen = false;
-var miniQueueRenderSeq = 0, queueRenderSeq = 0, playlistRenderSeq = 0;
-var queuePanelDirty = false;
-var PLAYLIST_PANEL_BATCH_SIZE = 28;
-var playlistPanelRenderLimit = PLAYLIST_PANEL_BATCH_SIZE;
-var playlistPanelLazyBound = false;
-var PLAYLIST_DETAIL_INITIAL_RENDER = 64;
-var PLAYLIST_DETAIL_BATCH_SIZE = 48;
-var smoothWheelScrollBound = false;
-var coverProcessToken = 0, aiDepthPipeline = null, aiDepthReady = false, aiDepthBusy = false, aiDepthFailUntil = 0;
-var coverDepthCache = Object.create(null), coverDepthCacheKeys = [];
-var aiDepthLastRunAt = 0, aiDepthMinGapMs = 18000;
+window.queueViewTab = 'queue';
+window.playMode = 'loop';
+window.miniQueueOpen = false;
+window.miniQueueRenderSeq = 0;
+window.queueRenderSeq = 0;
+window.playlistRenderSeq = 0;
+window.queuePanelDirty = false;
+window.PLAYLIST_PANEL_BATCH_SIZE = 28;
+window.playlistPanelRenderLimit = PLAYLIST_PANEL_BATCH_SIZE;
+window.playlistPanelLazyBound = false;
+window.PLAYLIST_DETAIL_INITIAL_RENDER = 64;
+window.PLAYLIST_DETAIL_BATCH_SIZE = 48;
+window.smoothWheelScrollBound = false;
+window.coverProcessToken = 0;
+window.aiDepthPipeline = null;
+window.aiDepthReady = false;
+window.aiDepthBusy = false;
+window.aiDepthFailUntil = 0;
+window.coverDepthCache = Object.create(null);
+window.coverDepthCacheKeys = [];
+window.aiDepthLastRunAt = 0;
+window.aiDepthMinGapMs = 18000;
 var updatePreviewState = {
   visible: false,
   open: false,
@@ -145,7 +197,7 @@ var updatePreviewState = {
     '单实例与快捷方式修复'
   ]
 };
-function applyUserCapsuleAutoHideState() {
+window.applyUserCapsuleAutoHideState = function() {
   document.body.classList.toggle('user-capsule-auto-hide', !!userCapsuleAutoHide);
   var btn = document.getElementById('user-capsule-hide-btn');
   if (btn) {
@@ -154,14 +206,14 @@ function applyUserCapsuleAutoHideState() {
     btn.title = userCapsuleAutoHide ? '取消自动隐藏账号胶囊' : '自动隐藏账号胶囊';
   }
 }
-function toggleUserCapsuleAutoHide(e) {
+window.toggleUserCapsuleAutoHide = function(e) {
   if (e && e.stopPropagation) e.stopPropagation();
   userCapsuleAutoHide = !userCapsuleAutoHide;
   saveBooleanPreference(USER_CAPSULE_AUTO_HIDE_STORE_KEY, userCapsuleAutoHide);
   applyUserCapsuleAutoHideState();
   showToast(userCapsuleAutoHide ? '账号胶囊已自动隐藏' : '账号胶囊已固定显示');
 }
-function updateUserCapsuleAutoHideFromPointer(x, y) {
+window.updateUserCapsuleAutoHideFromPointer = function(x, y) {
   if (!userCapsuleAutoHide || immersiveMode) {
     document.body.classList.remove('user-capsule-peek');
     return;
@@ -169,7 +221,7 @@ function updateUserCapsuleAutoHideFromPointer(x, y) {
   var nearTopRight = x > innerWidth - 112 && y < 126;
   document.body.classList.toggle('user-capsule-peek', nearTopRight);
 }
-function applyFxFabAutoHideState(opts) {
+window.applyFxFabAutoHideState = function(opts) {
   opts = opts || {};
   document.body.classList.toggle('fx-fab-auto-hide', !!fxFabAutoHide);
   if (!fxFabAutoHide) {
@@ -186,14 +238,14 @@ function applyFxFabAutoHideState(opts) {
     btn.title = fxFabAutoHide ? '取消自动隐藏视觉控制台' : '自动隐藏视觉控制台';
   }
 }
-function toggleFxFabAutoHide(e) {
+window.toggleFxFabAutoHide = function(e) {
   if (e && e.stopPropagation) e.stopPropagation();
   fxFabAutoHide = !fxFabAutoHide;
   saveBooleanPreference(FX_FAB_AUTO_HIDE_STORE_KEY, fxFabAutoHide);
   applyFxFabAutoHideState({ forceHidden: fxFabAutoHide });
   showToast(fxFabAutoHide ? '视觉控制台按钮已自动隐藏' : '视觉控制台按钮已固定显示');
 }
-function updateFxFabAutoHideFromPointer(x, y) {
+window.updateFxFabAutoHideFromPointer = function(x, y) {
   if (!fxFabAutoHide || !diyPlayerMode || immersiveMode) {
     document.body.classList.remove('fx-fab-peek');
     fxFabAutoHideRevealArmed = true;
@@ -205,7 +257,7 @@ function updateFxFabAutoHideFromPointer(x, y) {
   if (!nearBottomRight) fxFabAutoHideRevealArmed = true;
   document.body.classList.toggle('fx-fab-peek', panelOpen || (nearBottomRight && fxFabAutoHideRevealArmed));
 }
-function layoutFullscreenDiyZone() {
+window.layoutFullscreenDiyZone = function() {
   var width = innerWidth < 820 ? 104 : 128;
   var height = innerWidth < 720 ? 48 : 52;
   var left = innerWidth - 510;
@@ -226,14 +278,14 @@ function layoutFullscreenDiyZone() {
   document.documentElement.style.setProperty('--fullscreen-diy-width', width + 'px');
   return { left: left, top: top, width: width, height: height };
 }
-function shouldSuppressFullscreenDiyPeek() {
+window.shouldSuppressFullscreenDiyPeek = function() {
   var fxPanel = document.getElementById('fx-panel');
   var hotkeyModal = document.getElementById('hotkey-modal');
   var fxPanelOpen = !!(fxPanel && (fxPanel.classList.contains('peek') || fxPanel.classList.contains('show')));
   var hotkeyOpen = !!(hotkeyModal && hotkeyModal.classList.contains('show'));
   return !!(visualGuideActive || fxPanelOpen || hotkeyOpen);
 }
-function updateFullscreenDiyPeekFromPointer(x, y) {
+window.updateFullscreenDiyPeekFromPointer = function(x, y) {
   var ds = desktopRuntimeState || {};
   var isFullscreen = !!(ds.fullscreen || desktopFullscreenActive || document.fullscreenElement || document.body.classList.contains('desktop-fullscreen'));
   if (!isFullscreen || immersiveMode || shouldSuppressFullscreenDiyPeek()) {
@@ -250,10 +302,10 @@ function updateFullscreenDiyPeekFromPointer(x, y) {
   var active = x >= hitLeft && x <= hitRight && y >= hitTop && y <= hitBottom;
   document.body.classList.toggle('fullscreen-diy-peek', active);
 }
-function isDiyMode() {
+window.isDiyMode = function() {
   return !!diyPlayerMode;
 }
-function syncDiyModeButton() {
+window.syncDiyModeButton = function() {
   ['diy-mode-btn', 'fullscreen-diy-btn'].forEach(function(id) {
     var btn = document.getElementById(id);
     if (!btn) return;
@@ -263,7 +315,7 @@ function syncDiyModeButton() {
     btn.setAttribute('aria-label', btn.title);
   });
 }
-function applyDiyMode(on, opts) {
+window.applyDiyMode = function(on, opts) {
   opts = opts || {};
   diyPlayerMode = !!on;
   document.documentElement.classList.toggle('diy-mode-preload', diyPlayerMode);
@@ -289,16 +341,16 @@ function applyDiyMode(on, opts) {
     });
   }
 }
-function toggleDiyMode() {
+window.toggleDiyMode = function() {
   applyDiyMode(!diyPlayerMode, { save: true, toast: true, animate: true });
   if (visualGuideActive) {
     visualGuideState.mode = diyPlayerMode ? 'diy' : 'simple';
     showVisualGuideStep(0);
   }
 }
-var targetVolume = readSavedVolume();
-var lastNonZeroVolume = targetVolume > 0.01 ? targetVolume : 0.8;
-var volumeCloseTimer = null;
+window.targetVolume = readSavedVolume();
+window.lastNonZeroVolume = targetVolume > 0.01 ? targetVolume : 0.8;
+window.volumeCloseTimer = null;
 
 // v7.2: 离线节拍预解析
 //   每次切歌, fetch 完整音频 → OfflineAudioContext 分析 → 标出真鼓点
@@ -308,22 +360,22 @@ var currentBeatMap = null;   // 当前播放的歌的 beatMap
 var beatMapNextIdx = 0;      // 下一个待触发的 kick index
 var beatMapBusy = false;     // 正在分析中
 var beatMapToken = 0;        // 取消旧分析
-var beatAnalysisTimer = null;
-var beatAnalysisStartedAt = 0;
-var beatPrefetchTimer = null;
-var beatPrefetchBusy = false;
-var beatPrefetchToken = 0;
-var beatPrefetchLastKey = '';
-var BEAT_PREFETCH_LIMIT = 2;
-var beatDiskCacheStatus = { checked:false, enabled:false, mode:'unknown', reason:'' };
-var beatDiskCacheNoticeLogged = false;
-var djBeatMapCache = {};
-var currentDjBeatMap = null;
-var djBeatMapNextIdx = 0;
-var djBeatPulseNextIdx = 0;
-var djBeatMapBusy = false;
-var djBeatMapToken = 0;
-var djBeatAnalysisTimer = null;
+window.beatAnalysisTimer = null;
+window.beatAnalysisStartedAt = 0;
+window.beatPrefetchTimer = null;
+window.beatPrefetchBusy = false;
+window.beatPrefetchToken = 0;
+window.beatPrefetchLastKey = '';
+window.BEAT_PREFETCH_LIMIT = 2;
+window.beatDiskCacheStatus = { checked:false, enabled:false, mode:'unknown', reason:'' };
+window.beatDiskCacheNoticeLogged = false;
+window.djBeatMapCache = {};
+window.currentDjBeatMap = null;
+window.djBeatMapNextIdx = 0;
+window.djBeatPulseNextIdx = 0;
+window.djBeatMapBusy = false;
+window.djBeatMapToken = 0;
+window.djBeatAnalysisTimer = null;
 var beatAnalysisConfig = {
   delayMs: 1600,
   minPlaybackSec: 1.2,
@@ -351,8 +403,10 @@ var beatCam = {
   prevAudioTime: -1,
   stats: { map: 0, live: 0, merged: 0, liveBlocked: 0 }
 };
-var liveCamAvg = 0, liveCamPeak = 0.28, liveCamLastRaw = 0;
-var cinemaDynamics = { avg: 0, lowAvg: 0, peak: 0.30, scale: 0.82 };
+window.liveCamAvg = 0;
+window.liveCamPeak = 0.28;
+window.liveCamLastRaw = 0;
+window.cinemaDynamics = { avg: 0, lowAvg: 0, peak: 0.30, scale: 0.82 };
 var cinemaTrackProfile = {
   scale: 1.0,
   target: 1.0,
@@ -395,17 +449,17 @@ var djMode = {
   lastBeatAt: -10
 };
 
-function isPodcastSong(song) {
+window.isPodcastSong = function(song) {
   return !!(song && song.type === 'podcast');
 }
 
-function djSongKey(song) {
+window.djSongKey = function(song) {
   if (!song) return '';
   if (song.localKey) return 'local:' + song.localKey;
   return 'podcast:' + (song.programId || song.id || song.name || '');
 }
 
-function resetDjModeMeter() {
+window.resetDjModeMeter = function() {
   djMode.tempoGap = 0;
   djMode.tempoConfidence = 0;
   djMode.sectionEnergy = 0;
@@ -415,20 +469,20 @@ function resetDjModeMeter() {
   djMode.lastBeatAt = -10;
 }
 
-function resetDjBeatMapState() {
+window.resetDjBeatMapState = function() {
   currentDjBeatMap = null;
   djBeatMapNextIdx = 0;
   djBeatPulseNextIdx = 0;
 }
 
-function cancelDjBeatAnalysisTimer() {
+window.cancelDjBeatAnalysisTimer = function() {
   if (djBeatAnalysisTimer) {
     clearTimeout(djBeatAnalysisTimer);
     djBeatAnalysisTimer = null;
   }
 }
 
-function setDjModeActive(active, song) {
+window.setDjModeActive = function(active, song) {
   active = !!active;
   var key = active ? djSongKey(song) : '';
   var changed = djMode.active !== active || djMode.songKey !== key;
@@ -450,7 +504,7 @@ function setDjModeActive(active, song) {
   }
 }
 
-function maybeAnnounceDjMode() {
+window.maybeAnnounceDjMode = function() {
   if (!djMode.active) return;
   var now = performance.now();
   if (now - djMode.lastNoticeAt > 8000) {
@@ -463,33 +517,33 @@ function maybeAnnounceDjMode() {
 var DEVELOPMENT_LOCKED_FX = {
   wallpaperMode: true
 };
-function isDevelopmentLockedFx(key) {
+window.isDevelopmentLockedFx = function(key) {
   return !!DEVELOPMENT_LOCKED_FX[key];
 }
-function normalizeDevelopmentLockedFxState() {
+window.normalizeDevelopmentLockedFxState = function() {
   if (!fx) return;
   fx.wallpaperMode = false;
 }
-var playbackVisualPreset = readSavedPlaybackVisualPreset();
-var startupVisualPreviewActive = false;
-var fx = Object.assign({}, fxDefaults, readSavedLyricLayout());
+window.playbackVisualPreset = readSavedPlaybackVisualPreset();
+window.startupVisualPreviewActive = false;
+window.fx = Object.assign({}, fxDefaults, readSavedLyricLayout());
 normalizeDevelopmentLockedFxState();
-var presetTransition = { active:false, start:-10, duration:0.92, from:0, to:0 };
-var controlsAutoHide = readBooleanPreference(CONTROLS_AUTO_HIDE_STORE_KEY, false);
-var controlsHovering = false;
-var controlsHideTimer = null;
-var controlsHandleDimTimer = null;
-var controlsLastMoveAt = 0;
-var controlsShelfSuppressUntil = 0;
-var cursorHideTimer = null;
-var CURSOR_HIDE_DELAY = 2500;
-var fxPanelPinned = false;
-var playlistPanelPinned = readBooleanPreference(PLAYLIST_PANEL_PIN_STORE_KEY, false);
-var userCapsuleAutoHide = readBooleanPreference(USER_CAPSULE_AUTO_HIDE_STORE_KEY, false);
-var fxFabAutoHide = readBooleanPreference(FX_FAB_AUTO_HIDE_STORE_KEY, false);
-var fxFabAutoHideRevealArmed = true;
-var hotkeySettings = readHotkeySettings();
-var immersiveMode = false;
+window.presetTransition = { active:false, start:-10, duration:0.92, from:0, to:0 };
+window.controlsAutoHide = readBooleanPreference(CONTROLS_AUTO_HIDE_STORE_KEY, false);
+window.controlsHovering = false;
+window.controlsHideTimer = null;
+window.controlsHandleDimTimer = null;
+window.controlsLastMoveAt = 0;
+window.controlsShelfSuppressUntil = 0;
+window.cursorHideTimer = null;
+window.CURSOR_HIDE_DELAY = 2500;
+window.fxPanelPinned = false;
+window.playlistPanelPinned = readBooleanPreference(PLAYLIST_PANEL_PIN_STORE_KEY, false);
+window.userCapsuleAutoHide = readBooleanPreference(USER_CAPSULE_AUTO_HIDE_STORE_KEY, false);
+window.fxFabAutoHide = readBooleanPreference(FX_FAB_AUTO_HIDE_STORE_KEY, false);
+window.fxFabAutoHideRevealArmed = true;
+window.hotkeySettings = readHotkeySettings();
+window.immersiveMode = false;
 var immersiveState = {
   shelfMode: null,
   shelfPinnedOpen: false,
@@ -499,12 +553,12 @@ var immersiveState = {
 };
 
 // 鼠标 / 摄像头视差
-var pointerParallax = { x:0, y:0 };
-var pointerTarget = { x:0, y:0 };
-var headParallax = { x:0, y:0, active:false };
-var headNeutral = null;
+window.pointerParallax = { x:0, y:0 };
+window.pointerTarget = { x:0, y:0 };
+window.headParallax = { x:0, y:0, active:false };
+window.headNeutral = null;
 
-function pulseObjectValue(target, key, amount, duration) {
+window.pulseObjectValue = function(target, key, amount, duration) {
   if (!target) return;
   target[key] = Math.max(target[key] || 0, amount || 1);
   if (window.gsap) {
@@ -524,8 +578,8 @@ var desktopRuntimeState = {
   focused: true,
   fullscreen: false
 };
-var renderPowerState = { mode: '', width: 0, height: 0, pixelRatio: 0 };
-var backgroundCacheTrimTimer = 0;
+window.renderPowerState = { mode: '', width: 0, height: 0, pixelRatio: 0 };
+window.backgroundCacheTrimTimer = 0;
 var runtimePerfState = {
   lastCacheTrimAt: 0,
   cacheTrimCount: 0,
@@ -534,37 +588,37 @@ var runtimePerfState = {
   heapMB: 0,
   cacheCounts: {}
 };
-function isDeepBackgroundMode() {
+window.isDeepBackgroundMode = function() {
   if (isLiveBackgroundKeepMode()) return false;
   var ds = desktopRuntimeState || {};
   return !!(document.hidden || ds.minimized || ds.visible === false);
 }
-function currentPerformanceBackgroundMode() {
+window.currentPerformanceBackgroundMode = function() {
   return normalizePerformanceBackgroundMode((fx||{}).performanceBackground, (fx||{}).liveBackgroundKeep === true);
 }
-function isLiveBackgroundKeepMode() {
+window.isLiveBackgroundKeepMode = function() {
   return currentPerformanceBackgroundMode() === 'keep';
 }
-function isBackgroundReleaseMode() {
+window.isBackgroundReleaseMode = function() {
   return currentPerformanceBackgroundMode() === 'release';
 }
-function isHiddenForBackgroundOptimization() {
+window.isHiddenForBackgroundOptimization = function() {
   return !!(document.hidden && !isLiveBackgroundKeepMode());
 }
-function isVisibleBackgroundMode() {
+window.isVisibleBackgroundMode = function() {
   return false;
 }
-function updateRenderPowerClasses() {
+window.updateRenderPowerClasses = function() {
   document.body.classList.toggle('render-deep-sleep', isDeepBackgroundMode());
   document.body.classList.toggle('render-background-eco', isVisibleBackgroundMode());
 }
-function safeObjectKeys(obj) {
+window.safeObjectKeys = function(obj) {
   try { return obj ? Object.keys(obj) : []; } catch (e) { return []; }
 }
-function markProtectedKey(map, key) {
+window.markProtectedKey = function(map, key) {
   if (key) map[String(key)] = true;
 }
-function collectProtectedCoverUrls() {
+window.collectProtectedCoverUrls = function() {
   var keep = Object.create(null);
   function mark(url) { if (url) keep[String(url)] = true; }
   try {
@@ -594,7 +648,7 @@ function collectProtectedCoverUrls() {
   } catch (e) {}
   return keep;
 }
-function collectProtectedBeatMapKeys() {
+window.collectProtectedBeatMapKeys = function() {
   var keep = Object.create(null);
   try {
     if (typeof beatMapSongKey === 'function' && playQueue && playQueue.length) {
@@ -610,7 +664,7 @@ function collectProtectedBeatMapKeys() {
   } catch (e) {}
   return keep;
 }
-function collectProtectedCoverDepthIds() {
+window.collectProtectedCoverDepthIds = function() {
   var keep = Object.create(null);
   try {
     if (typeof coverDepthCacheId !== 'function') return keep;
@@ -630,7 +684,7 @@ function collectProtectedCoverDepthIds() {
   } catch (e) {}
   return keep;
 }
-function trimObjectCache(cache, keep, protectedKeys, skipRecord) {
+window.trimObjectCache = function(cache, keep, protectedKeys, skipRecord) {
   var keys = safeObjectKeys(cache);
   if (!cache || keys.length <= keep) return 0;
   var drop = keys.length - keep;
@@ -646,7 +700,7 @@ function trimObjectCache(cache, keep, protectedKeys, skipRecord) {
   }
   return dropped;
 }
-function trimCoverDepthCache(keep, protectedKeys) {
+window.trimCoverDepthCache = function(keep, protectedKeys) {
   if (!coverDepthCache || !coverDepthCacheKeys) return 0;
   var keys = coverDepthCacheKeys.filter(function(key){ return !!coverDepthCache[key]; });
   if (keys.length <= keep) {
@@ -669,7 +723,7 @@ function trimCoverDepthCache(keep, protectedKeys) {
   coverDepthCacheKeys = keys.filter(function(key){ return !!coverDepthCache[key]; });
   return dropped;
 }
-function collectRuntimePerfSnapshot(now) {
+window.collectRuntimePerfSnapshot = function(now) {
   now = now || performance.now();
   runtimePerfState.cacheCounts = {
     playlistCovers: safeObjectKeys(playlistCoverCache).length,
@@ -711,7 +765,7 @@ function collectRuntimePerfSnapshot(now) {
   };
 }
 window.__mineradioPerfSnapshot = collectRuntimePerfSnapshot;
-function trimRuntimeCaches(reason, aggressive) {
+window.trimRuntimeCaches = function(reason, aggressive) {
   var protectedCovers = collectProtectedCoverUrls();
   var protectedBeats = collectProtectedBeatMapKeys();
   var dropped = 0;
@@ -730,11 +784,11 @@ function trimRuntimeCaches(reason, aggressive) {
   collectRuntimePerfSnapshot(runtimePerfState.lastCacheTrimAt);
   return dropped;
 }
-function trimVisualCachesForBackground() {
+window.trimVisualCachesForBackground = function() {
   if (!isDeepBackgroundMode()) return;
   trimRuntimeCaches('deep-background', true);
 }
-function scheduleBackgroundCacheTrim() {
+window.scheduleBackgroundCacheTrim = function() {
   if (!isDeepBackgroundMode()) return;
   if (backgroundCacheTrimTimer) clearTimeout(backgroundCacheTrimTimer);
   backgroundCacheTrimTimer = setTimeout(function(){
@@ -742,7 +796,7 @@ function scheduleBackgroundCacheTrim() {
     trimVisualCachesForBackground();
   }, 900);
 }
-function maybeTrimRuntimeCaches(now) {
+window.maybeTrimRuntimeCaches = function(now) {
   now = now || performance.now();
   var deep = isDeepBackgroundMode();
   var gap = deep ? (isBackgroundReleaseMode() ? 3600 : 7000) : 45000;
@@ -750,7 +804,7 @@ function maybeTrimRuntimeCaches(now) {
   if (now - runtimePerfState.lastCacheTrimAt < gap) return;
   trimRuntimeCaches(deep ? (isBackgroundReleaseMode() ? 'release-frame' : 'deep-frame') : 'active-frame', deep);
 }
-function applyRendererPowerMode() {
+window.applyRendererPowerMode = function() {
   if (typeof renderer === 'undefined' || !renderer) return;
   var deep = isDeepBackgroundMode();
   var width = deep ? 4 : Math.max(1, innerWidth);
@@ -767,7 +821,7 @@ function applyRendererPowerMode() {
     scheduleBackgroundCacheTrim();
   }
 }
-function updateDesktopRuntimeState(state) {
+window.updateDesktopRuntimeState = function(state) {
   state = state || {};
   var wasFullscreen = desktopRuntimeState.fullscreen;
   var wasDeep = isDeepBackgroundMode();
@@ -782,7 +836,7 @@ function updateDesktopRuntimeState(state) {
   if (wasDeep && !isDeepBackgroundMode()) recoverVisualsAfterBackground('desktop-runtime-state');
   if (desktopRuntimeState.fullscreen !== wasFullscreen) scheduleMainRendererViewportRefresh('desktop-runtime-state');
 }
-function installRenderPowerHooks() {
+window.installRenderPowerHooks = function() {
   updateRenderPowerClasses();
   document.addEventListener('visibilitychange', function(){
     updateRenderPowerClasses();

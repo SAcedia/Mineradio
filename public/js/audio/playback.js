@@ -1,6 +1,6 @@
 //  播放队列
 // ============================================================
-function queueItemKey(song) {
+window.queueItemKey = function(song) {
   if (!song) return '';
   if (song.provider === 'qq' || song.source === 'qq' || song.type === 'qq') return 'qq:' + (song.mid || song.songmid || song.id || (song.name + '|' + song.artist));
   if (song.type === 'podcast' && song.programId) return 'podcast:' + song.programId;
@@ -8,7 +8,7 @@ function queueItemKey(song) {
   if (song.id != null && song.id !== '') return 'song:' + song.id;
   return String(song.name || '') + '|' + String(song.artist || '');
 }
-function queueSong(song, opts) {
+window.queueSong = function(song, opts) {
   opts = opts || {};
   if (!song) return -1;
   var cloned = cloneSong(song);
@@ -37,31 +37,31 @@ function queueSong(song, opts) {
   safeShelfRebuild('queue-song');
   return insertAt;
 }
-function queueSongNext(song) {
+window.queueSongNext = function(song) {
   return queueSong(song, { position: 'next' });
 }
-function queueSearchResult(i) {
+window.queueSearchResult = function(i) {
   var song = playlist[i]; if (!song) return;
   queueSongNext(song);
   showToast('已设为下一首: ' + song.name);
 }
-function queueDetailSongNext(song) {
+window.queueDetailSongNext = function(song) {
   if (!song || song.type === 'podcast-radio') return;
   queueSongNext(song);
   showToast('已设为下一首: ' + (song.name || ''));
 }
-function queueIndexNext(i) {
+window.queueIndexNext = function(i) {
   i = Number(i);
   if (!isFinite(i) || i < 0 || i >= playQueue.length) return;
   var song = playQueue[i];
   queueSongNext(song);
   showToast('已设为下一首: ' + (song && song.name ? song.name : ''));
 }
-function openQueueArtist(i) {
+window.openQueueArtist = function(i) {
   var song = playQueue && playQueue[i];
   if (song) openArtistDetailForSong(song);
 }
-function moveQueueIndexToTop(idx) {
+window.moveQueueIndexToTop = function(idx) {
   idx = Number(idx);
   if (!isFinite(idx) || idx < 0 || idx >= playQueue.length) return -1;
   if (idx === 0) return 0;
@@ -71,7 +71,7 @@ function moveQueueIndexToTop(idx) {
   else if (currentIdx >= 0 && currentIdx < idx) currentIdx += 1;
   return 0;
 }
-function playSearchResult(i) {
+window.playSearchResult = function(i) {
   var song = playlist[i]; if (!song) return;
   homeForcedOpen = false;
   homeSuppressed = false;
@@ -88,18 +88,18 @@ function playSearchResult(i) {
   $input.value = ''; $input.blur();
   playQueueAt(currentIdx);
 }
-var firstPlayDone = false;
+window.firstPlayDone = false;
 
-function playbackProviderLabel(song) {
+window.playbackProviderLabel = function(song) {
   var key = songProviderKey(song);
   if (key === 'youtube') return 'YouTube';
   return key === 'qq' ? 'QQ 音乐' : '网易云';
 }
-function playbackLoginProvider(song) {
+window.playbackLoginProvider = function(song) {
   var key = songProviderKey(song);
   return key === 'qq' ? 'qq' : 'netease';
 }
-function playbackRestrictionMessage(song, data) {
+window.playbackRestrictionMessage = function(song, data) {
   data = data || {};
   var restriction = data.restriction || {};
   var category = data.reason || restriction.category || '';
@@ -117,7 +117,7 @@ function playbackRestrictionMessage(song, data) {
   if (category === 'copyright_unavailable' || category === 'url_unavailable') return message + ' · 可以试试另一个平台版本';
   return message;
 }
-function qqPlaybackRetryQualities(requestedQuality, resolvedLevel) {
+window.qqPlaybackRetryQualities = function(requestedQuality, resolvedLevel) {
   requestedQuality = normalizePlaybackQuality(requestedQuality || playbackQuality);
   resolvedLevel = String(resolvedLevel || '').toLowerCase();
   var pool = [];
@@ -128,7 +128,7 @@ function qqPlaybackRetryQualities(requestedQuality, resolvedLevel) {
   }
   return pool.filter(function(q){ return q !== requestedQuality; });
 }
-async function retryQQPlaybackWithCompatibleQuality(song, idx, token, opts, data, requestedQuality) {
+window.retryQQPlaybackWithCompatibleQuality = async function(song, idx, token, opts, data, requestedQuality) {
   opts = opts || {};
   var tried = Array.isArray(opts.qqQualityTried) ? opts.qqQualityTried.slice() : [];
   [requestedQuality, data && data.level].forEach(function(q){
@@ -147,13 +147,13 @@ async function retryQQPlaybackWithCompatibleQuality(song, idx, token, opts, data
   }));
   return true;
 }
-var sourceFallbackNoticeTimer = null;
-function closeSourceFallbackNotice() {
+window.sourceFallbackNoticeTimer = null;
+window.closeSourceFallbackNotice = function() {
   var notice = document.getElementById('source-fallback-notice');
   if (sourceFallbackNoticeTimer) { clearTimeout(sourceFallbackNoticeTimer); sourceFallbackNoticeTimer = null; }
   if (notice) notice.classList.remove('show');
 }
-function showSourceFallbackNotice(title, body) {
+window.showSourceFallbackNotice = function(title, body) {
   var notice = document.getElementById('source-fallback-notice');
   var titleEl = document.getElementById('source-fallback-title');
   var bodyEl = document.getElementById('source-fallback-body');
@@ -164,12 +164,12 @@ function showSourceFallbackNotice(title, body) {
   if (sourceFallbackNoticeTimer) clearTimeout(sourceFallbackNoticeTimer);
   sourceFallbackNoticeTimer = setTimeout(closeSourceFallbackNotice, 5000);
 }
-function normalizeMatchText(text) {
+window.normalizeMatchText = function(text) {
   return String(text || '').toLowerCase()
     .replace(/[（(【\[].*?[）)】\]]/g, '')
     .replace(/[\s·・\-—_.,，。:：'"“”‘’/\\|]+/g, '');
 }
-function artistNameParts(song) {
+window.artistNameParts = function(song) {
   var parts = [];
   if (song && Array.isArray(song.artists)) {
     song.artists.forEach(function(a){ if (a && a.name) parts.push(a.name); });
@@ -181,7 +181,7 @@ function artistNameParts(song) {
   }
   return parts.map(normalizeMatchText).filter(Boolean);
 }
-function isSameTitleArtist(source, candidate) {
+window.isSameTitleArtist = function(source, candidate) {
   if (!source || !candidate) return false;
   if (normalizeMatchText(source.name || source.title) !== normalizeMatchText(candidate.name || candidate.title)) return false;
   var a = artistNameParts(source);
@@ -189,10 +189,10 @@ function isSameTitleArtist(source, candidate) {
   if (!a.length || !b.length) return false;
   return a.some(function(name){ return b.indexOf(name) >= 0; });
 }
-function alternatePlaybackProvider(song) {
+window.alternatePlaybackProvider = function(song) {
   return songProviderKey(song) === 'qq' ? 'netease' : 'qq';
 }
-async function searchAlternatePlatformSong(song) {
+window.searchAlternatePlatformSong = async function(song) {
   var target = alternatePlaybackProvider(song);
   var artist = artistNameParts(song)[0] || '';
   var query = [song.name || song.title || '', song.artist || artist].filter(Boolean).join(' ').trim();
@@ -207,10 +207,10 @@ async function searchAlternatePlatformSong(song) {
   }
   return null;
 }
-function markQueueItemPlaybackFailed(idx) {
+window.markQueueItemPlaybackFailed = function(idx) {
   if (playQueue[idx]) playQueue[idx]._lastPlaybackFailAt = Date.now();
 }
-function nextUnblockedQueueIndex(idx) {
+window.nextUnblockedQueueIndex = function(idx) {
   var now = Date.now();
   for (var step = 1; step < playQueue.length; step++) {
     var nextIdx = (idx + step) % playQueue.length;
@@ -219,7 +219,7 @@ function nextUnblockedQueueIndex(idx) {
   }
   return -1;
 }
-function skipFailedQueueItem(idx, token, message) {
+window.skipFailedQueueItem = function(idx, token, message) {
   hideLoading();
   if (token !== trackSwitchToken) return;
   markQueueItemPlaybackFailed(idx);
@@ -236,7 +236,7 @@ function skipFailedQueueItem(idx, token, message) {
   currentIdx = nextIdx;
   playQueueAt(nextIdx, { fallbackDepth: 0 });
 }
-async function tryAutoPlaybackFallback(song, data, idx, token, opts) {
+window.tryAutoPlaybackFallback = async function(song, data, idx, token, opts) {
   opts = opts || {};
   if (opts.fallbackDepth > 0) {
     skipFailedQueueItem(idx, token, '自动换源后的版本仍不可播，正在播放下一首。');
@@ -269,7 +269,7 @@ async function tryAutoPlaybackFallback(song, data, idx, token, opts) {
     return true;
   }
 }
-function handlePlaybackUnavailable(song, data) {
+window.handlePlaybackUnavailable = function(song, data) {
   hideLoading();
   forcePlaybackControlsInteractive();
   var provider = playbackLoginProvider(song);
@@ -285,7 +285,7 @@ function handlePlaybackUnavailable(song, data) {
   }
 }
 
-function pauseCurrentAudioForTrackSwitch() {
+window.pauseCurrentAudioForTrackSwitch = function() {
   playToggleBusy = false;
   if (!audio) return;
   try {
@@ -299,7 +299,7 @@ function pauseCurrentAudioForTrackSwitch() {
   syncPlaybackStateFromAudioEvent('track-switch');
 }
 
-function syncPlaybackStateFromAudioEvent(reason) {
+window.syncPlaybackStateFromAudioEvent = function(reason) {
   var isPlaying = !!(audio && audio.src && !audio.paused && !audio.ended);
   playing = isPlaying;
   setPlayIcon(isPlaying);
@@ -308,12 +308,12 @@ function syncPlaybackStateFromAudioEvent(reason) {
   forcePlaybackControlsInteractive();
 }
 
-function isPlaybackRecursionError(err) {
+window.isPlaybackRecursionError = function(err) {
   var msg = String((err && err.message) || err || '');
   return err instanceof RangeError || /maximum call stack size exceeded/i.test(msg);
 }
 
-function safePlaybackStep(label, fn) {
+window.safePlaybackStep = function(label, fn) {
   try {
     return fn();
   } catch (err) {
@@ -322,11 +322,11 @@ function safePlaybackStep(label, fn) {
   }
 }
 
-function playbackFailureToastText(err) {
+window.playbackFailureToastText = function(err) {
   if (isPlaybackRecursionError(err)) return '播放准备异常，已保持播放器可操作';
   return '播放失败: ' + (err && err.message ? err.message : err);
 }
-function scheduleAudioResumePosition(media, seconds, token) {
+window.scheduleAudioResumePosition = function(media, seconds, token) {
   seconds = Math.max(0, Number(seconds) || 0);
   if (!media || seconds < 0.35) return;
   var applied = false;
@@ -348,7 +348,7 @@ function scheduleAudioResumePosition(media, seconds, token) {
   applyResume();
 }
 
-async function playQueueAt(idx, opts) {
+window.playQueueAt = async function(idx, opts) {
   opts = opts || {};
   if (idx < 0 || idx >= playQueue.length) return;
   markRenderInteraction('track-switch', 1500);
@@ -637,7 +637,7 @@ async function playQueueAt(idx, opts) {
     showToast(playbackFailureToastText(setupErr));
   }
 }
-async function attemptAudioPlay(opts) {
+window.attemptAudioPlay = async function(opts) {
   opts = opts || {};
   try {
       if (!audio) return false;
@@ -669,11 +669,11 @@ async function attemptAudioPlay(opts) {
     return false;
   }
 }
-async function playAudio(opts) {
+window.playAudio = async function(opts) {
   opts = opts || {};
   return attemptAudioPlay({ manual: false, silent: !!opts.silent });
 }
-async function togglePlay() {
+window.togglePlay = async function() {
   if (playToggleBusy) return;
   playToggleBusy = true;
   try {
@@ -717,12 +717,12 @@ async function togglePlay() {
     playToggleBusy = false;
   }
 }
-function setPlayIcon(p) {
+window.setPlayIcon = function(p) {
   document.getElementById('play-icon').innerHTML = p
     ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
     : '<path d="M8 5v14l11-7z"/>';
 }
-function nextTrack() {
+window.nextTrack = function() {
   if (!playQueue.length) return;
   playToggleBusy = false;
   forcePlaybackControlsInteractive();
@@ -730,14 +730,14 @@ function nextTrack() {
   else currentIdx = (currentIdx + 1) % playQueue.length;
   Promise.resolve(playQueueAt(currentIdx)).finally(forcePlaybackControlsInteractive);
 }
-function prevTrack() {
+window.prevTrack = function() {
   if (!playQueue.length) return;
   playToggleBusy = false;
   forcePlaybackControlsInteractive();
   currentIdx = (currentIdx - 1 + playQueue.length) % playQueue.length;
   Promise.resolve(playQueueAt(currentIdx)).finally(forcePlaybackControlsInteractive);
 }
-function shuffleQueue() {
+window.shuffleQueue = function() {
   for (var i = playQueue.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
     var tmp = playQueue[i]; playQueue[i] = playQueue[j]; playQueue[j] = tmp;
@@ -746,7 +746,7 @@ function shuffleQueue() {
   showToast('队列已随机');
   safeShelfRebuild('shuffle-queue');
 }
-function clearQueue() {
+window.clearQueue = function() {
   playQueue = []; currentIdx = -1;
   safeRenderQueuePanel('clear-queue');
   safeShelfRebuild('clear-queue');
@@ -754,7 +754,7 @@ function clearQueue() {
   updateCustomLyricControls();
   updateEmptyHomeVisibility({ forceLoad: false });
 }
-function removeFromQueue(idx) {
+window.removeFromQueue = function(idx) {
   if (idx < 0 || idx >= playQueue.length) return;
   playQueue.splice(idx, 1);
   if (currentIdx >= playQueue.length) currentIdx = playQueue.length - 1;
@@ -764,11 +764,11 @@ function removeFromQueue(idx) {
   updateCustomLyricControls();
   updateEmptyHomeVisibility({ forceLoad: false });
 }
-function playModeLabel(mode) {
+window.playModeLabel = function(mode) {
   return { loop: '顺序循环', shuffle: '随机播放', single: '单曲循环' }[mode] || '顺序循环';
 }
 
-function playModeIconMarkup(mode) {
+window.playModeIconMarkup = function(mode) {
   if (mode === 'shuffle') {
     return '<path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/>';
   }
@@ -778,7 +778,7 @@ function playModeIconMarkup(mode) {
   return '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>';
 }
 
-function updatePlayModeButton(animate) {
+window.updatePlayModeButton = function(animate) {
   var label = playModeLabel(playMode);
   var chip = document.getElementById('play-mode-chip');
   var btn = document.getElementById('play-mode-btn');
@@ -811,7 +811,7 @@ function updatePlayModeButton(animate) {
   }
 }
 
-function cyclePlayMode() {
+window.cyclePlayMode = function() {
   var modes = ['loop', 'shuffle', 'single'];
   var idx = modes.indexOf(playMode);
   playMode = modes[(idx + 1) % modes.length];
@@ -820,13 +820,13 @@ function cyclePlayMode() {
 }
 updatePlayModeButton(false);
 
-var controlGlassState = { key: '', searchBoxKey: '', searchPillKey: '' };
-function normalizeControlGlassChromaticOffset(value) {
+window.controlGlassState = { key: '', searchBoxKey: '', searchPillKey: '' };
+window.normalizeControlGlassChromaticOffset = function(value) {
   var n = Number(value);
   if (!isFinite(n)) n = fxDefaults.controlGlassChromaticOffset;
   return clampRange(n, 0, 140);
 }
-function applyControlGlassChromaticOffset() {
+window.applyControlGlassChromaticOffset = function() {
   if (!fx) return;
   fx.controlGlassChromaticOffset = normalizeControlGlassChromaticOffset(fx.controlGlassChromaticOffset);
   var filter = document.getElementById('mineradio-control-glass-filter');
@@ -837,7 +837,7 @@ function applyControlGlassChromaticOffset() {
     node.setAttribute('dy', '0');
   });
 }
-function supportsControlGlassSvgFilter() {
+window.supportsControlGlassSvgFilter = function() {
   try {
     var ua = navigator.userAgent || '';
     if ((/Safari/.test(ua) && !/Chrome/.test(ua)) || /Firefox/.test(ua)) return false;
@@ -848,7 +848,7 @@ function supportsControlGlassSvgFilter() {
     return false;
   }
 }
-function generateControlGlassDisplacementMap(width, height, radius) {
+window.generateControlGlassDisplacementMap = function(width, height, radius) {
   width = Math.max(240, Math.round(width || 400));
   height = Math.max(48, Math.round(height || 92));
   radius = Math.max(12, Math.round(radius || 50));
@@ -868,7 +868,7 @@ function generateControlGlassDisplacementMap(width, height, radius) {
     '</svg>';
   return 'data:image/svg+xml,' + encodeURIComponent(svg);
 }
-function updateGlassDisplacementMapForElement(el, img, stateKey) {
+window.updateGlassDisplacementMapForElement = function(el, img, stateKey) {
   if (!el || !img) return;
   var rect = el.getBoundingClientRect();
   if (rect.width < 2 || rect.height < 2) return;
@@ -880,21 +880,21 @@ function updateGlassDisplacementMapForElement(el, img, stateKey) {
   img.setAttribute('href', href);
   try { img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', href); } catch (e) {}
 }
-function updateControlGlassDisplacementMap() {
+window.updateControlGlassDisplacementMap = function() {
   updateGlassDisplacementMapForElement(
     document.getElementById('bottom-bar'),
     document.getElementById('control-glass-map'),
     'key'
   );
 }
-function updateSearchBoxGlassDisplacementMap() {
+window.updateSearchBoxGlassDisplacementMap = function() {
   updateGlassDisplacementMapForElement(
     document.getElementById('search-box'),
     document.getElementById('search-box-glass-map'),
     'searchBoxKey'
   );
 }
-function updateSearchPillGlassDisplacementMap() {
+window.updateSearchPillGlassDisplacementMap = function() {
   var img = document.getElementById('search-pill-glass-map');
   if (!img) return;
   var nodes = Array.prototype.slice.call(document.querySelectorAll('.search-mode-tabs button,.search-history-chip'));
@@ -919,7 +919,7 @@ function updateSearchPillGlassDisplacementMap() {
   img.setAttribute('href', href);
   try { img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', href); } catch (e) {}
 }
-function initControlGlassSurface() {
+window.initControlGlassSurface = function() {
   if (supportsControlGlassSvgFilter()) document.documentElement.classList.add('control-glass-svg-ok');
   applyControlGlassChromaticOffset();
   updateControlGlassDisplacementMap();
@@ -954,7 +954,7 @@ function initControlGlassSurface() {
   });
 }
 
-function bindPlayerControlAnimations() {
+window.bindPlayerControlAnimations = function() {
   if (!window.gsap) return;
   document.querySelectorAll('#bottom-bar .ctrl-btn').forEach(function(btn){
     if (!btn || btn.dataset.controlAnimBound === '1') return;
@@ -1007,7 +1007,7 @@ function bindPlayerControlAnimations() {
   });
 }
 
-function clearPlayerControlFocusState(reason) {
+window.clearPlayerControlFocusState = function(reason) {
   try {
     document.querySelectorAll('#bottom-bar .ctrl-btn').forEach(function(btn){
       if (!btn) return;

@@ -1,8 +1,8 @@
 //  本地歌单（localStorage 存储）
 // ============================================================
-var LOCAL_PLAYLIST_STORAGE_KEY = 'mineradio-local-playlists-v1';
+window.LOCAL_PLAYLIST_STORAGE_KEY = 'mineradio-local-playlists-v1';
 
-function loadLocalPlaylists() {
+window.loadLocalPlaylists = function() {
   try {
     var raw = localStorage.getItem(LOCAL_PLAYLIST_STORAGE_KEY);
     if (raw) return JSON.parse(raw);
@@ -10,13 +10,13 @@ function loadLocalPlaylists() {
   return [];
 }
 
-function saveLocalPlaylists(playlists) {
+window.saveLocalPlaylists = function(playlists) {
   try {
     localStorage.setItem(LOCAL_PLAYLIST_STORAGE_KEY, JSON.stringify(playlists));
   } catch (e) {}
 }
 
-function createLocalPlaylist(name) {
+window.createLocalPlaylist = function(name) {
   if (name) {
     name = String(name).trim();
     if (!name) return;
@@ -53,7 +53,7 @@ function createLocalPlaylist(name) {
   }, 100);
 }
 
-function deleteLocalPlaylist(id) {
+window.deleteLocalPlaylist = function(id) {
   var mask = document.createElement('div');
   mask.className = 'modal-mask';
   mask.innerHTML = '<div class="modal collect-modal" style="padding:28px;text-align:left;max-width:360px">' +
@@ -66,7 +66,7 @@ function deleteLocalPlaylist(id) {
   document.body.appendChild(mask);
   openGsapModal(mask);
 }
-function deleteLocalPlaylistConfirm(id) {
+window.deleteLocalPlaylistConfirm = function(id) {
   var playlists = loadLocalPlaylists();
   playlists = playlists.filter(function(p){ return p.id !== id; });
   saveLocalPlaylists(playlists);
@@ -75,7 +75,7 @@ function deleteLocalPlaylistConfirm(id) {
   showToast('已删除本地歌单');
 }
 
-function addSongToLocalPlaylist(playlistId, song) {
+window.addSongToLocalPlaylist = function(playlistId, song) {
   if (!song || !song.id) return;
   var playlists = loadLocalPlaylists();
   var pl = playlists.find(function(p){ return p.id === playlistId; });
@@ -99,7 +99,7 @@ function addSongToLocalPlaylist(playlistId, song) {
   if (mask) closeGsapModal(mask);
 }
 
-function removeSongFromLocalPlaylist(playlistId, songIdx) {
+window.removeSongFromLocalPlaylist = function(playlistId, songIdx) {
   var playlists = loadLocalPlaylists();
   var pl = playlists.find(function(p){ return p.id === playlistId; });
   if (!pl) return;
@@ -109,7 +109,7 @@ function removeSongFromLocalPlaylist(playlistId, songIdx) {
 }
 
 // 从收藏到歌单的输入框创建歌单并直接添加当前歌曲
-function createLocalPlaylistFromPicker() {
+window.createLocalPlaylistFromPicker = function() {
   var inp = document.getElementById('local-collect-new-name');
   var name = inp ? inp.value.trim() : '';
   if (!name) return;
@@ -133,7 +133,7 @@ function createLocalPlaylistFromPicker() {
   showToast('已创建并添加到「' + name + '」');
 }
 
-function showAddToLocalPlaylistPicker(song) {
+window.showAddToLocalPlaylistPicker = function(song) {
   if (!song || !song.id) return;
   // 清除旧弹窗防止 ID 冲突
   var oldMask = document.getElementById('local-collect-mask');
@@ -193,7 +193,7 @@ function showAddToLocalPlaylistPicker(song) {
   }
 }
 
-function playLocalPlaylistSongs(songs, startIdx) {
+window.playLocalPlaylistSongs = function(songs, startIdx) {
   if (!songs || !songs.length) return;
   startIdx = startIdx || 0;
   activeRadioContext = null;
@@ -208,7 +208,7 @@ function playLocalPlaylistSongs(songs, startIdx) {
 }
 
 // 从 localStorage 收集所有已红心的 YT/SP 歌曲（含元数据）
-function getLocalLikedSongs() {
+window.getLocalLikedSongs = function() {
   var songs = [];
   try {
     for (var i = 0; i < localStorage.length; i++) {

@@ -1,6 +1,6 @@
 //  Collect / playlist helpers
 // ============================================================
-function openCollectModal(song) {
+window.openCollectModal = function(song) {
   if (!isCloudSong(song) && songProviderKey(song) !== 'youtube') {
     showToast(songProviderKey(song) === 'qq' ? 'QQ 音乐收藏到歌单待登录接口接入' : '本地文件暂不支持收藏到网易云歌单');
     return;
@@ -17,7 +17,8 @@ function openCollectModal(song) {
   openGsapModal(document.getElementById('collect-modal'));
   refreshUserPlaylists(true).then(function(){ renderCollectModal(); }).catch(function(){ renderCollectModal(); });
 }
-function openCollectModalForCurrent() { openCollectModal(currentCoverSong()); }
+window.openCollectModalForCurrent = function() {
+ openCollectModal(currentCoverSong()); }
 function collectSearchResult(i) { if (playlist[i]) openCollectModal(playlist[i]); }
 function collectQueueIndex(i) { if (playQueue[i]) openCollectModal(playQueue[i]); }
 function collectDetailSong(song) { openCollectModal(song); }

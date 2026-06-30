@@ -2,12 +2,12 @@
 //  platforms/youtube.js — YouTube API 封装
 // ============================================================
 
-function youtubeApi(path, params) {
+window.youtubeApi = function(path, params) {
   var qs = params ? '?' + (typeof params === 'string' ? params : new URLSearchParams(params).toString()) : '';
   return apiJson('/api/youtube' + path + qs);
 }
 
-function youtubeQs(names, args) {
+window.youtubeQs = function(names, args) {
   var parts = [];
   for (var i = 0; i < names.length; i++) {
     var key = names[i];

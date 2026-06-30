@@ -1,6 +1,6 @@
 //  粒子点纹理 (干净圆点, 无 glow)
 // ============================================================
-function makeDotTexture() {
+window.makeDotTexture = function() {
   var cv = document.createElement('canvas'); cv.width = cv.height = 64;
   var ctx = cv.getContext('2d');
   var g = ctx.createRadialGradient(32, 32, 0, 32, 32, 31);
@@ -14,24 +14,27 @@ function makeDotTexture() {
   tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
   return tex;
 }
-var dotTexture = makeDotTexture();
+window.dotTexture = makeDotTexture();
 
 // ============================================================
 //  主粒子系统
 //   - 5 个 preset, 每个预设走完全不同的 pos 计算
 //   - 共享: 封面色采样, 鼠标交互, 粒子大小限制
 // ============================================================
-var PLANE_SIZE = 4.8;
-var RIPPLE_MAX = 12;
+window.PLANE_SIZE = 4.8;
+window.RIPPLE_MAX = 12;
 
-var GRID_X = coverParticleGridForResolution((typeof fx !== 'undefined' && fx) ? fx.coverResolution : 1.55), GRID_Y = GRID_X;
-var PCOUNT = GRID_X * GRID_Y;
-var positions = null, uvs = null, aRand = null;
-var coverResolutionReloadTimer = null;
-var currentCoverSource = null;
-var coverPickerCanvas = null;
+window.GRID_X = coverParticleGridForResolution((typeof fx !== 'undefined' && fx) ? fx.coverResolution : 1.55);
+window.GRID_Y = GRID_X;
+window.PCOUNT = GRID_X * GRID_Y;
+window.positions = null;
+window.uvs = null;
+window.aRand = null;
+window.coverResolutionReloadTimer = null;
+window.currentCoverSource = null;
+window.coverPickerCanvas = null;
 
-function buildCoverParticleGeometry(grid) {
+window.buildCoverParticleGeometry = function(grid) {
   grid = coverParticleGridForResolution(grid / 118);
   var count = grid * grid;
   var nextGeo = new THREE.BufferGeometry();
@@ -61,9 +64,9 @@ function buildCoverParticleGeometry(grid) {
   return nextGeo;
 }
 
-var geo = buildCoverParticleGeometry(GRID_X);
+window.geo = buildCoverParticleGeometry(GRID_X);
 
-function applyCoverParticleResolution(value, opts) {
+window.applyCoverParticleResolution = function(value, opts) {
   opts = opts || {};
   fx.coverResolution = normalizeCoverResolution(value);
   var grid = coverParticleGridForResolution(fx.coverResolution);
@@ -80,7 +83,7 @@ function applyCoverParticleResolution(value, opts) {
   if (opts.reload !== false) scheduleCoverResolutionReload();
 }
 
-function scheduleCoverResolutionReload() {
+window.scheduleCoverResolutionReload = function() {
   if (!currentCoverSource || !currentCoverSource.src) return;
   if (coverResolutionReloadTimer) clearTimeout(coverResolutionReloadTimer);
   coverResolutionReloadTimer = setTimeout(function(){
@@ -95,14 +98,14 @@ function scheduleCoverResolutionReload() {
 }
 
 // 涟漪数据纹理 (1×N, RGBA: x, y, age, str)
-var rippleData = new Float32Array(RIPPLE_MAX * 4);
-var rippleTex  = new THREE.DataTexture(rippleData, 1, RIPPLE_MAX, THREE.RGBAFormat, THREE.FloatType);
+window.rippleData = new Float32Array(RIPPLE_MAX * 4);
+window.rippleTex = new THREE.DataTexture(rippleData, 1, RIPPLE_MAX, THREE.RGBAFormat, THREE.FloatType);
 rippleTex.magFilter = THREE.NearestFilter; rippleTex.minFilter = THREE.NearestFilter;
-var ripples = [];
+window.ripples = [];
 for (var ri = 0; ri < RIPPLE_MAX; ri++) ripples.push({ x:0, y:0, age:-10, str:0 });
 
 // 封面纹理 + 边缘/深度纹理
-var coverTex = new THREE.Texture();
+window.coverTex = new THREE.Texture();
 coverTex.minFilter = THREE.LinearFilter; coverTex.magFilter = THREE.LinearFilter;
 coverTex.wrapS = THREE.ClampToEdgeWrapping; coverTex.wrapT = THREE.ClampToEdgeWrapping;
 
@@ -120,7 +123,7 @@ coverEdgeTex.minFilter = THREE.LinearFilter; coverEdgeTex.magFilter = THREE.Line
 })();
 
 // 前一首封面纹理 (用于切歌渐变)
-var prevCoverTex = new THREE.Texture();
+window.prevCoverTex = new THREE.Texture();
 prevCoverTex.minFilter = THREE.LinearFilter; prevCoverTex.magFilter = THREE.LinearFilter;
 (function(){
   var c = document.createElement('canvas'); c.width = c.height = 4;
@@ -711,11 +714,11 @@ var bloomMaterial = new THREE.ShaderMaterial({
   uniforms: uniforms, vertexShader: bloomVs, fragmentShader: bloomFs,
   transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
 });
-var bloomParticles = new THREE.Points(geo, bloomMaterial);
+window.bloomParticles = new THREE.Points(geo, bloomMaterial);
 bloomParticles.frustumCulled = false;
 bloomParticles.renderOrder = 0;
 scene.add(bloomParticles);
-var particles = new THREE.Points(geo, material);
+window.particles = new THREE.Points(geo, material);
 particles.frustumCulled = false;
 particles.renderOrder = 1;
 scene.add(particles);
@@ -725,11 +728,14 @@ console.log('v7 shell loaded, JS pending');
 //  浮空粒子层 (独立 Points)
 //   v7.1: 速度大幅放慢, 改用 sin/cos 长周期漂移 (优雅而非乱飞)
 // ============================================================
-var FLOAT_COUNT = 1300;
-var floatGroup = null;
-var floatPositionsArr = null, floatBaseArr = null, floatPhaseArr = null, floatColorArr = null;
+window.FLOAT_COUNT = 1300;
+window.floatGroup = null;
+window.floatPositionsArr = null;
+window.floatBaseArr = null;
+window.floatPhaseArr = null;
+window.floatColorArr = null;
 
-function createFloatLayer() {
+window.createFloatLayer = function() {
   fx.floatLayer = false;
   uniforms.uFloatAlpha.value = 0;
   if (floatGroup) destroyFloatLayer();
@@ -834,7 +840,7 @@ function createFloatLayer() {
   floatGroup.frustumCulled = false;
   scene.add(floatGroup);
 }
-function destroyFloatLayer() {
+window.destroyFloatLayer = function() {
   if (!floatGroup) return;
   scene.remove(floatGroup);
   floatGroup.geometry.dispose(); floatGroup.material.dispose();
@@ -844,33 +850,33 @@ function destroyFloatLayer() {
 // ============================================================
 //  安魂 — 3D 粒子建模层
 // ============================================================
-var SKULL_PRESET_INDEX = 6;
-var SKULL_MODEL_BASE_ROTATION_X = -0.26;
-var SKULL_MODEL_BASE_ROTATION_Y = 0.00;
-var SKULL_MODEL_SCALE = 2.34;
-var SKULL_MODEL_BASE_POSITION = { x: 0, y: 0.22, z: 0.10 };
-var skullAmpPulse = 0;
-var skullBeatFlash = 0;
-var skullJawOpen = 0;
-var skullCameraBlend = 0;
-var skullWheelZoom = 0;
-var skullWheelZoomTarget = 0;
-var skullCameraTargetPos = new THREE.Vector3();
-var skullCameraTargetLook = new THREE.Vector3();
-var skullCameraBasePos = new THREE.Vector3();
-var skullCameraBaseLook = new THREE.Vector3();
-var skullCameraShelfPos = new THREE.Vector3();
-var skullCameraShelfLook = new THREE.Vector3();
-var skullCameraMixedLook = new THREE.Vector3();
-var skullShelfCameraMix = 0;
-var skullLyricMouthLocal = new THREE.Vector3(0.025, -0.72, 0.62);
-var skullLyricMouthTarget = new THREE.Vector3();
-var skullLyricMouthForward = new THREE.Vector3();
-var skullLyricMouthQuat = new THREE.Quaternion();
-var skullLyricReadableQuat = new THREE.Quaternion();
-var skullParticleGroup = null;
-var skullParticleOpacity = 0;
-var skullParticleAsset = { data: null, promise: null, failed: false };
+window.SKULL_PRESET_INDEX = 6;
+window.SKULL_MODEL_BASE_ROTATION_X = -0.26;
+window.SKULL_MODEL_BASE_ROTATION_Y = 0.00;
+window.SKULL_MODEL_SCALE = 2.34;
+window.SKULL_MODEL_BASE_POSITION = { x: 0, y: 0.22, z: 0.10 };
+window.skullAmpPulse = 0;
+window.skullBeatFlash = 0;
+window.skullJawOpen = 0;
+window.skullCameraBlend = 0;
+window.skullWheelZoom = 0;
+window.skullWheelZoomTarget = 0;
+window.skullCameraTargetPos = new THREE.Vector3();
+window.skullCameraTargetLook = new THREE.Vector3();
+window.skullCameraBasePos = new THREE.Vector3();
+window.skullCameraBaseLook = new THREE.Vector3();
+window.skullCameraShelfPos = new THREE.Vector3();
+window.skullCameraShelfLook = new THREE.Vector3();
+window.skullCameraMixedLook = new THREE.Vector3();
+window.skullShelfCameraMix = 0;
+window.skullLyricMouthLocal = new THREE.Vector3(0.025, -0.72, 0.62);
+window.skullLyricMouthTarget = new THREE.Vector3();
+window.skullLyricMouthForward = new THREE.Vector3();
+window.skullLyricMouthQuat = new THREE.Quaternion();
+window.skullLyricReadableQuat = new THREE.Quaternion();
+window.skullParticleGroup = null;
+window.skullParticleOpacity = 0;
+window.skullParticleAsset = { data: null, promise: null, failed: false };
 var skullBaseColors = {
   boneA: new THREE.Color('#b8ae98'),
   boneB: new THREE.Color('#fff4d8'),
@@ -892,7 +898,7 @@ var skullTintScratch = {
   light: new THREE.Color()
 };
 
-function effectiveSkullVisualTint() {
+window.effectiveSkullVisualTint = function() {
   var pal = stageLyrics && (stageLyrics.coverPalette || stageLyrics.palette) || {};
   var custom = fx && fx.visualTintMode === 'custom';
   var color = custom
@@ -903,7 +909,7 @@ function effectiveSkullVisualTint() {
   return { color: color, strength: strength, custom: custom };
 }
 
-function syncSkullParticleColors() {
+window.syncSkullParticleColors = function() {
   if (!skullParticleGroup || !skullParticleGroup.material || !skullParticleGroup.material.uniforms) return;
   var u = skullParticleGroup.material.uniforms;
   var tint = effectiveSkullVisualTint();
@@ -923,7 +929,7 @@ function syncSkullParticleColors() {
   if (u.uLight) u.uLight.value.copy(skullTintScratch.light);
 }
 
-function buildSkullParticleGeometryFromAsset(points) {
+window.buildSkullParticleGeometryFromAsset = function(points) {
   var count = Math.floor((points && points.length || 0) / 5);
   var geo = new THREE.BufferGeometry();
   var positions = new Float32Array(count * 3);
@@ -942,7 +948,7 @@ function buildSkullParticleGeometryFromAsset(points) {
   return geo;
 }
 
-function loadSkullParticleAsset() {
+window.loadSkullParticleAsset = function() {
   if (skullParticleAsset.data || skullParticleAsset.promise || skullParticleAsset.failed) return skullParticleAsset.promise || Promise.resolve(skullParticleAsset.data);
   if (typeof fetch !== 'function') {
     skullParticleAsset.failed = true;
@@ -968,12 +974,12 @@ function loadSkullParticleAsset() {
   return skullParticleAsset.promise;
 }
 
-function skullPushPoint(pos, seed, kind, x, y, z, k) {
+window.skullPushPoint = function(pos, seed, kind, x, y, z, k) {
   pos.push(x, y, z);
   seed.push(Math.random() * 1000);
   kind.push(k == null ? 0 : k);
 }
-function skullPushCurve(pos, seed, kind, count, fn, k, jitter) {
+window.skullPushCurve = function(pos, seed, kind, count, fn, k, jitter) {
   jitter = jitter == null ? 0.012 : jitter;
   for (var i = 0; i < count; i++) {
     var t = count > 1 ? i / (count - 1) : 0;
@@ -981,7 +987,7 @@ function skullPushCurve(pos, seed, kind, count, fn, k, jitter) {
     skullPushPoint(pos, seed, kind, p.x + (Math.random() - 0.5) * jitter, p.y + (Math.random() - 0.5) * jitter, p.z + (Math.random() - 0.5) * jitter, k);
   }
 }
-function createSkullParticleLayer() {
+window.createSkullParticleLayer = function() {
   if (skullParticleGroup) return skullParticleGroup;
   var asset = skullParticleAsset.data;
   if (!asset) return null;
@@ -1247,13 +1253,13 @@ function createSkullParticleLayer() {
   scene.add(skullParticleGroup);
   return skullParticleGroup;
 }
-function isSkullShelfCompositionActive() {
+window.isSkullShelfCompositionActive = function() {
   if (!(fx && fx.preset === SKULL_PRESET_INDEX)) return false;
   if (!shelfManager || !shelfManager.getMode || shelfManager.getMode() !== 'side') return false;
   if (shelfPinnedOpen || shelfVisibility > 0.18) return true;
   return !!(shelfManager.hasOpenContent && shelfManager.hasOpenContent());
 }
-function clearSkullPresetResidue() {
+window.clearSkullPresetResidue = function() {
   skullParticleOpacity = 0;
   skullAmpPulse = 0;
   skullBeatFlash = 0;
@@ -1267,7 +1273,7 @@ function clearSkullPresetResidue() {
     if (skullParticleGroup.material.uniforms.uSkullFlash) skullParticleGroup.material.uniforms.uSkullFlash.value = 0;
   }
 }
-function resetSkullPresetView(immediate, opts) {
+window.resetSkullPresetView = function(immediate, opts) {
   opts = opts || {};
   if (!(fx && fx.preset === SKULL_PRESET_INDEX)) return;
   skullWheelZoomTarget = 0;
@@ -1291,7 +1297,7 @@ function resetSkullPresetView(immediate, opts) {
     camera.updateProjectionMatrix();
   }
 }
-function skullBreathOffset(t, shelfComposition) {
+window.skullBreathOffset = function(t, shelfComposition) {
   var strength = shelfComposition ? 0.70 : 1.0;
   return {
     x: strength * (Math.sin(t * 0.33 + 1.7) * 0.028 + Math.sin(t * 0.61 + 0.4) * 0.010),
@@ -1299,7 +1305,7 @@ function skullBreathOffset(t, shelfComposition) {
     z: strength * (Math.sin(t * 0.24 + 2.6) * 0.026)
   };
 }
-function setSkullCameraTargetVectors(pos, look, portrait, shelfComposition, zoom) {
+window.setSkullCameraTargetVectors = function(pos, look, portrait, shelfComposition, zoom) {
   zoom = Number(zoom) || 0;
   if (shelfComposition) {
     pos.set(portrait ? -0.06 : 0.00, portrait ? -2.36 : -2.50, (portrait ? 4.88 : 4.96) + zoom * 0.78);
@@ -1309,7 +1315,7 @@ function setSkullCameraTargetVectors(pos, look, portrait, shelfComposition, zoom
   pos.set(0.00, portrait ? -2.38 : -2.52, (portrait ? 4.92 : 4.98) + zoom);
   look.set(0.00, portrait ? -0.28 : -0.20, 0.02);
 }
-function applySkullCameraPose(dt) {
+window.applySkullCameraPose = function(dt) {
   if (freeCamera && (freeCamera.active || freeCamera.locked || freeCamera.resetTween)) return;
   var active = fx && fx.preset === SKULL_PRESET_INDEX;
   skullCameraBlend += ((active ? 1 : 0) - skullCameraBlend) * Math.min(1, dt * (active ? 4.8 : 7.2));
@@ -1329,7 +1335,7 @@ function applySkullCameraPose(dt) {
   camera.lookAt(skullCameraMixedLook);
   camera.updateProjectionMatrix();
 }
-function updateSkullParticleLayer(dt) {
+window.updateSkullParticleLayer = function(dt) {
   var active = fx && fx.preset === SKULL_PRESET_INDEX;
   if (active && !skullParticleAsset.data && !skullParticleAsset.failed) {
     loadSkullParticleAsset();
@@ -1387,11 +1393,11 @@ function updateSkullParticleLayer(dt) {
 //   - 跟主粒子同步旋转 (在主循环里赋值)
 //   - 视角转到背面才能看到 — 不需要手动控制 visible
 // ============================================================
-var BACK_COVER_COUNT = 3000;
-var backCoverGroup = null;
-var backCoverColorArr = null;
+window.BACK_COVER_COUNT = 3000;
+window.backCoverGroup = null;
+window.backCoverColorArr = null;
 
-function createBackCoverLayer() {
+window.createBackCoverLayer = function() {
   if (backCoverGroup) return;
   var bg = new THREE.BufferGeometry();
   var bp = new Float32Array(BACK_COVER_COUNT * 3);
@@ -1467,14 +1473,14 @@ function createBackCoverLayer() {
   scene.add(backCoverGroup);
 }
 
-function destroyBackCoverLayer() {
+window.destroyBackCoverLayer = function() {
   if (!backCoverGroup) return;
   scene.remove(backCoverGroup);
   backCoverGroup.geometry.dispose(); backCoverGroup.material.dispose();
   backCoverGroup = null; backCoverColorArr = null;
 }
 
-function refreshBackCoverColorsFromCanvas(coverCanvas) {
+window.refreshBackCoverColorsFromCanvas = function(coverCanvas) {
   if (!backCoverGroup || !coverCanvas || !backCoverColorArr) return;
   var ctx = coverCanvas.getContext('2d');
   var img = ctx.getImageData(0, 0, coverCanvas.width, coverCanvas.height).data;
@@ -1492,10 +1498,10 @@ function refreshBackCoverColorsFromCanvas(coverCanvas) {
   }
   attr.aColor.needsUpdate = true;
 }
-function updateFloatLayer(dt) {
+window.updateFloatLayer = function(dt) {
   // 漂移已在 shader 中完成, JS 不需要每帧改 buffer
 }
-function refreshFloatColorsFromCover(coverCanvas) {
+window.refreshFloatColorsFromCover = function(coverCanvas) {
   if (!floatGroup || !coverCanvas) return;
   var ctx = coverCanvas.getContext('2d');
   var img = ctx.getImageData(0, 0, coverCanvas.width, coverCanvas.height).data;
@@ -1510,7 +1516,7 @@ function refreshFloatColorsFromCover(coverCanvas) {
   }
   floatGroup.geometry.attributes.aColor.needsUpdate = true;
 }
-function resetFloatColorsToIdle() {
+window.resetFloatColorsToIdle = function() {
   if (!floatGroup || !floatColorArr) return;
   for (var i = 0; i < FLOAT_COUNT; i++) {
     var white = 0.88 + (i % 17) / 17 * 0.12;
@@ -1525,13 +1531,13 @@ function resetFloatColorsToIdle() {
 // ============================================================
 //  涟漪触发系统 — 3×3 九宫格 + bass 上升沿
 // ============================================================
-var rippleIdx = 0;
-var lastRippleAt = 0;
-var lastBassRising = false;
-var BASS_THRESHOLD = 0.30;
-var RIPPLE_COOLDOWN = 0.32;
+window.rippleIdx = 0;
+window.lastRippleAt = 0;
+window.lastBassRising = false;
+window.BASS_THRESHOLD = 0.30;
+window.RIPPLE_COOLDOWN = 0.32;
 
-var regions = [];
+window.regions = [];
 for (var ry = 0; ry < 3; ry++) for (var rx = 0; rx < 3; rx++) {
   regions.push({
     x: (rx / 2 - 0.5) * PLANE_SIZE * 0.72,
@@ -1539,13 +1545,13 @@ for (var ry = 0; ry < 3; ry++) for (var rx = 0; rx < 3; rx++) {
   });
 }
 
-function triggerRipple(x, y, strength) {
+window.triggerRipple = function(x, y, strength) {
   var r = ripples[rippleIdx];
   r.x = x; r.y = y; r.age = 0; r.str = strength;
   rippleIdx = (rippleIdx + 1) % RIPPLE_MAX;
 }
 
-function updateRipples(dt) {
+window.updateRipples = function(dt) {
   var isBassHit = bass > BASS_THRESHOLD && !lastBassRising;
   lastBassRising = bass > BASS_THRESHOLD * 0.75;
   var now = uniforms.uTime.value;
@@ -1588,7 +1594,7 @@ function updateRipples(dt) {
 //  封面 + 边缘 + 启发式深度 处理 (CPU 端)
 //   生成 256×256 RGBA 纹理: R=depth G=edge B=fg-mask A=lum
 // ============================================================
-function coverDepthCacheId(raw) {
+window.coverDepthCacheId = function(raw) {
   var str = String(raw || '');
   if (!str) return '';
   var h = 2166136261;
@@ -1598,7 +1604,7 @@ function coverDepthCacheId(raw) {
   }
   return str.length + ':' + (h >>> 0).toString(36);
 }
-function getCoverDepthCache(raw) {
+window.getCoverDepthCache = function(raw) {
   var id = coverDepthCacheId(raw);
   if (!id || !coverDepthCache[id]) return null;
   coverDepthCache[id].at = Date.now();
@@ -1609,7 +1615,7 @@ function getCoverDepthCache(raw) {
   } else coverDepthCacheKeys.push(id);
   return coverDepthCache[id];
 }
-function setCoverDepthCache(raw, canvas, aiEnhanced) {
+window.setCoverDepthCache = function(raw, canvas, aiEnhanced) {
   var id = coverDepthCacheId(raw);
   if (!id || !canvas) return;
   var idx = coverDepthCacheKeys.indexOf(id);
@@ -1622,7 +1628,7 @@ function setCoverDepthCache(raw, canvas, aiEnhanced) {
   }
 }
 
-function buildEdgeAndDepth(srcCanvas) {
+window.buildEdgeAndDepth = function(srcCanvas) {
   var W = 256, H = 256, N = W * H;
   var normalized = document.createElement('canvas');
   normalized.width = W;
@@ -1704,7 +1710,7 @@ function buildEdgeAndDepth(srcCanvas) {
 }
 
 // AI 深度估计 (Xenova/depth-anything-small) - 异步加载, 失败回退
-async function ensureAIDepthPipeline() {
+window.ensureAIDepthPipeline = async function() {
   if (aiDepthReady && aiDepthPipeline) return aiDepthPipeline;
   if (aiDepthBusy) return null;
   aiDepthBusy = true;
@@ -1724,7 +1730,7 @@ async function ensureAIDepthPipeline() {
   }
 }
 
-function makeAIDepthInputCanvas(srcCanvas) {
+window.makeAIDepthInputCanvas = function(srcCanvas) {
   if (!srcCanvas) return srcCanvas;
   var size = 160;
   var cv = document.createElement('canvas');
@@ -1738,7 +1744,7 @@ function makeAIDepthInputCanvas(srcCanvas) {
   }
 }
 
-async function estimateAIDepth(srcCanvas, token) {
+window.estimateAIDepth = async function(srcCanvas, token) {
   if (!fx.aiDepth) return null;
   if (performance.now() < aiDepthFailUntil) return null;
   showAIDepthChip('后台增强封面深度…');
@@ -1767,7 +1773,7 @@ async function estimateAIDepth(srcCanvas, token) {
   }
 }
 
-function mergeAIDepthIntoEdgeTexture(heuristicCanvas, aiCanvas) {
+window.mergeAIDepthIntoEdgeTexture = function(heuristicCanvas, aiCanvas) {
   // 把 AI 深度 (灰度) 写入 R 通道, 保留启发式的 G/B/A
   var W = heuristicCanvas.width || 256, H = heuristicCanvas.height || 256;
   var hctx = heuristicCanvas.getContext('2d');
@@ -1806,7 +1812,7 @@ function mergeAIDepthIntoEdgeTexture(heuristicCanvas, aiCanvas) {
   return heuristicCanvas;
 }
 
-function queueAIDepthForCover(srcCanvas, edgeCanvas, token, opts, cacheSeed, force) {
+window.queueAIDepthForCover = function(srcCanvas, edgeCanvas, token, opts, cacheSeed, force) {
   opts = opts || {};
   if (!fx.aiDepth || !srcCanvas || !edgeCanvas) return;
   if (!force && isHiddenForBackgroundOptimization()) return;
@@ -1829,15 +1835,15 @@ function queueAIDepthForCover(srcCanvas, edgeCanvas, token, opts, cacheSeed, for
   }, force ? 240 : 1800, force ? 1200 : 3000);
 }
 
-function queueAIDepthForCurrentCover(force) {
+window.queueAIDepthForCurrentCover = function(force) {
   if (!coverTex || !coverTex.image || !coverEdgeTex || !coverEdgeTex.image) return;
   if (!uniforms.uHasCover.value || !uniforms.uHasDepth.value) return;
   queueAIDepthForCover(coverTex.image, coverEdgeTex.image, coverProcessToken, {}, '', !!force);
 }
 
 // 颜色渐变 tween (切歌时旧封面→新封面)
-var colorMixTween = null;
-function startColorMixTween(durationMs) {
+window.colorMixTween = null;
+window.startColorMixTween = function(durationMs) {
   if (colorMixTween) cancelAnimationFrame(colorMixTween.raf);
   durationMs = Math.max(1, durationMs || 1);
   var start = performance.now();
@@ -1853,10 +1859,10 @@ function startColorMixTween(durationMs) {
 }
 
 // 粒子整体透明度 tween (启动 fade-in)
-var alphaTween = null;
-var floatAlphaTween = null;
-var IDLE_PARTICLE_ALPHA = 0;
-function tweenParticleAlpha(from, to, durationMs) {
+window.alphaTween = null;
+window.floatAlphaTween = null;
+window.IDLE_PARTICLE_ALPHA = 0;
+window.tweenParticleAlpha = function(from, to, durationMs) {
   if (alphaTween) cancelAnimationFrame(alphaTween.raf);
   var start = performance.now();
   function step(now) {
@@ -1868,7 +1874,7 @@ function tweenParticleAlpha(from, to, durationMs) {
   }
   alphaTween = { raf: requestAnimationFrame(step) };
 }
-function tweenFloatAlpha(from, to, durationMs) {
+window.tweenFloatAlpha = function(from, to, durationMs) {
   if (floatAlphaTween) cancelAnimationFrame(floatAlphaTween.raf);
   var start = performance.now();
   function step(now) {
@@ -1880,7 +1886,7 @@ function tweenFloatAlpha(from, to, durationMs) {
   }
   floatAlphaTween = { raf: requestAnimationFrame(step) };
 }
-function revealIdleParticles(target, durationMs) {
+window.revealIdleParticles = function(target, durationMs) {
   if (!uniforms || !uniforms.uFloatAlpha) return;
   if (floatAlphaTween) { cancelAnimationFrame(floatAlphaTween.raf); floatAlphaTween = null; }
   uniforms.uFloatAlpha.value = 0;
@@ -1893,15 +1899,15 @@ function revealIdleParticles(target, durationMs) {
 }
 
 // 加载形态 tween (uLoading 0..1)
-var loadingTween = null;
-var loadingShownAt = 0;
-var loadingHideTimer = null;
-var coverDepthTween = null;
-function visualEase(t) {
+window.loadingTween = null;
+window.loadingShownAt = 0;
+window.loadingHideTimer = null;
+window.coverDepthTween = null;
+window.visualEase = function(t) {
   t = Math.max(0, Math.min(1, t));
   return t * t * (3 - 2 * t);
 }
-function tweenLoading(to, durationMs, onComplete) {
+window.tweenLoading = function(to, durationMs, onComplete) {
   if (loadingTween) cancelAnimationFrame(loadingTween.raf);
   durationMs = Math.max(1, durationMs || 1);
   if (isHiddenForBackgroundOptimization() || isDeepBackgroundMode()) {
@@ -1925,7 +1931,7 @@ function tweenLoading(to, durationMs, onComplete) {
   }
   loadingTween = { raf: requestAnimationFrame(step) };
 }
-function showLoading() {
+window.showLoading = function() {
   loadingShownAt = performance.now();
   if (loadingHideTimer) {
     clearTimeout(loadingHideTimer);
@@ -1934,7 +1940,7 @@ function showLoading() {
   var current = uniforms.uLoading.value || 0;
   tweenLoading(Math.max(current, 0.56), current > 0.04 ? 86 : 118);
 }
-function hideLoading() {
+window.hideLoading = function() {
   if (loadingHideTimer) clearTimeout(loadingHideTimer);
   if (isHiddenForBackgroundOptimization() || isDeepBackgroundMode()) {
     forceLoadingSettled('background-hide');
@@ -1956,7 +1962,7 @@ function hideLoading() {
     tweenLoading(0, current > 0.38 ? 126 : 96);
   }, wait);
 }
-function forceLoadingSettled(reason) {
+window.forceLoadingSettled = function(reason) {
   if (loadingHideTimer) {
     clearTimeout(loadingHideTimer);
     loadingHideTimer = null;
@@ -1969,7 +1975,7 @@ function forceLoadingSettled(reason) {
   loadingShownAt = 0;
   if (reason && window.__mineradioDebugLoading) console.log('[LoadingSettled]', reason);
 }
-function recoverVisualsAfterBackground(reason) {
+window.recoverVisualsAfterBackground = function(reason) {
   applyRendererPowerMode();
   if (typeof scheduleMainRendererViewportRefresh === 'function') scheduleMainRendererViewportRefresh(reason || 'restore');
   if (audio && audio.src && !audio.paused && ((uniforms.uLoading.value || 0) > 0.015 || loadingTween || loadingHideTimer)) {
@@ -1978,7 +1984,7 @@ function recoverVisualsAfterBackground(reason) {
   if (typeof markRenderInteraction === 'function') markRenderInteraction('restore', 1100);
 }
 
-function setCoverDepthState(depthTo, aiTo, durationMs) {
+window.setCoverDepthState = function(depthTo, aiTo, durationMs) {
   depthTo = Math.max(0, Math.min(1, Number(depthTo) || 0));
   aiTo = Math.max(0, Math.min(1, Number(aiTo) || 0));
   if (coverDepthTween) {
@@ -2009,12 +2015,12 @@ function setCoverDepthState(depthTo, aiTo, durationMs) {
   coverDepthTween = { raf: requestAnimationFrame(step) };
 }
 
-function coverApplyStillCurrent(opts) {
+window.coverApplyStillCurrent = function(opts) {
   opts = opts || {};
   return !opts.trackToken || opts.trackToken === trackSwitchToken;
 }
 
-function setControlCoverSrc(src) {
+window.setControlCoverSrc = function(src) {
   var cover = document.getElementById('control-cover');
   if (!cover) return;
   if (!src) {
@@ -2026,7 +2032,7 @@ function setControlCoverSrc(src) {
   cover.classList.remove('cover-empty');
 }
 
-function updateControlTrackInfo(song) {
+window.updateControlTrackInfo = function(song) {
   song = song || {};
   var title = document.getElementById('control-title');
   var artist = document.getElementById('control-artist');
@@ -2034,7 +2040,7 @@ function updateControlTrackInfo(song) {
   if (artist) artist.textContent = song.artist || '';
 }
 
-function applyCoverCanvas(cv, thumbSrc, opts) {
+window.applyCoverCanvas = function(cv, thumbSrc, opts) {
   opts = opts || {};
   if (!cv || !coverApplyStillCurrent(opts)) return;
   var token = ++coverProcessToken;

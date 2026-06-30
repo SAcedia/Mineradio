@@ -1,28 +1,28 @@
-var scene = new THREE.Scene();
+window.scene = new THREE.Scene();
 scene.background = null;
 var camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
-var RENDER_DPR_CAP = 1.35;
-var RENDER_PIXEL_BUDGET = 5200000;
-var RENDER_MIN_DPR = 0.72;
+window.RENDER_DPR_CAP = 1.35;
+window.RENDER_PIXEL_BUDGET = 5200000;
+window.RENDER_MIN_DPR = 0.72;
 // 0 = display vsync. Keep visible playback high-refresh capable instead of capping 120Hz+ screens to 60/72.
-var RENDER_VISIBLE_VSYNC = true;
-var RENDER_ACTIVE_FPS = 0;
-var RENDER_LARGE_FPS = 0;
-var RENDER_HUGE_FPS = 0;
-var RENDER_INTERACTION_FPS = 0;
-var RENDER_INTERACTION_LARGE_FPS = 0;
-var RENDER_INTERACTION_HUGE_FPS = 0;
-var RENDER_INTERACTION_HOLD_MS = 900;
-var renderInteractionBoostUntil = 0;
-var renderInteractionReason = '';
-function renderQualityProfile() {
+window.RENDER_VISIBLE_VSYNC = true;
+window.RENDER_ACTIVE_FPS = 0;
+window.RENDER_LARGE_FPS = 0;
+window.RENDER_HUGE_FPS = 0;
+window.RENDER_INTERACTION_FPS = 0;
+window.RENDER_INTERACTION_LARGE_FPS = 0;
+window.RENDER_INTERACTION_HUGE_FPS = 0;
+window.RENDER_INTERACTION_HOLD_MS = 900;
+window.renderInteractionBoostUntil = 0;
+window.renderInteractionReason = '';
+window.renderQualityProfile = function() {
   var quality = normalizePerformanceQuality(fx && fx.performanceQuality);
   if (quality === 'eco') return { cap: 0.95, min: 0.56, budget: 2400000 };
   if (quality === 'balanced') return { cap: 1.12, min: 0.66, budget: 3800000 };
   if (quality === 'ultra') return { cap: 1.75, min: 0.85, budget: 7800000 };
   return { cap: RENDER_DPR_CAP, min: RENDER_MIN_DPR, budget: RENDER_PIXEL_BUDGET };
 }
-function getRenderPixelRatio() {
+window.getRenderPixelRatio = function() {
   var device = window.devicePixelRatio || 1;
   if (isDeepBackgroundMode()) return Math.min(device, 0.30);
   var cssPixels = Math.max(1, innerWidth * innerHeight);
@@ -31,21 +31,21 @@ function getRenderPixelRatio() {
   var cap = Math.min(quality.cap, budgetCap);
   return Math.max(quality.min, Math.min(device, cap));
 }
-function getRenderPixelLoad() {
+window.getRenderPixelLoad = function() {
   var ratio = getRenderPixelRatio();
   return Math.max(1, innerWidth * innerHeight) * ratio * ratio;
 }
-function markRenderInteraction(reason, holdMs) {
+window.markRenderInteraction = function(reason, holdMs) {
   if (isDeepBackgroundMode()) return;
   var now = performance.now();
   renderInteractionBoostUntil = Math.max(renderInteractionBoostUntil, now + (holdMs || RENDER_INTERACTION_HOLD_MS));
   renderInteractionReason = reason || renderInteractionReason || 'interaction';
   if (typeof renderPerfState !== 'undefined' && renderPerfState) renderPerfState.lastRenderAt = 0;
 }
-function isRenderInteractionActive(now) {
+window.isRenderInteractionActive = function(now) {
   return (now || performance.now()) < renderInteractionBoostUntil;
 }
-function getRenderLoadTier() {
+window.getRenderLoadTier = function() {
   var cssPixels = Math.max(1, innerWidth * innerHeight);
   var renderPixels = (typeof getRenderPixelLoad === 'function') ? getRenderPixelLoad() : cssPixels;
   if (cssPixels >= 7200000 || renderPixels >= 5000000) return 2;
@@ -94,10 +94,10 @@ var orbit = {
   beatGlow: 0,
 };
 var ZERO_VEC = new THREE.Vector3(0,0,0);
-var BASE_FOV = 45;
-var camPunch = 0;
-var cinemaT = 0;
-function defaultFreeCameraState() {
+window.BASE_FOV = 45;
+window.camPunch = 0;
+window.cinemaT = 0;
+window.defaultFreeCameraState = function() {
   return {
     active: false,
     locked: false,
@@ -111,7 +111,7 @@ function defaultFreeCameraState() {
     resetTween: null
   };
 }
-function readFreeCameraState() {
+window.readFreeCameraState = function() {
   var state = defaultFreeCameraState();
   try {
     var raw = JSON.parse(localStorage.getItem(FREE_CAMERA_STORE_KEY) || '{}') || {};
@@ -131,17 +131,17 @@ function readFreeCameraState() {
   } catch (e) {}
   return state;
 }
-var freeCamera = readFreeCameraState();
-var FREE_CAMERA_MOVE = new THREE.Vector3();
-var FREE_CAMERA_TARGET_VEL = new THREE.Vector3();
-var FREE_CAMERA_SHAKE_DIR = new THREE.Vector3();
+window.freeCamera = readFreeCameraState();
+window.FREE_CAMERA_MOVE = new THREE.Vector3();
+window.FREE_CAMERA_TARGET_VEL = new THREE.Vector3();
+window.FREE_CAMERA_SHAKE_DIR = new THREE.Vector3();
 var FREE_CAMERA_EULER = new THREE.Euler(0, 0, 0, 'YXZ');
-var FREE_CAMERA_RESET_MAT = new THREE.Matrix4();
-var FREE_CAMERA_RESET_QUAT = new THREE.Quaternion();
+window.FREE_CAMERA_RESET_MAT = new THREE.Matrix4();
+window.FREE_CAMERA_RESET_QUAT = new THREE.Quaternion();
 var FREE_CAMERA_UP = new THREE.Vector3(0, 1, 0);
 var freeCameraPointer = { seen: false, x: 0, y: 0 };
-var freeCameraDeferredSaveTimer = 0;
-function saveFreeCameraState() {
+window.freeCameraDeferredSaveTimer = 0;
+window.saveFreeCameraState = function() {
   if (!freeCamera) return;
   try {
     localStorage.setItem(FREE_CAMERA_STORE_KEY, JSON.stringify({
@@ -155,21 +155,21 @@ function saveFreeCameraState() {
     }));
   } catch (e) {}
 }
-function scheduleFreeCameraStateSave(delay) {
+window.scheduleFreeCameraStateSave = function(delay) {
   if (freeCameraDeferredSaveTimer) return;
   freeCameraDeferredSaveTimer = setTimeout(function(){
     freeCameraDeferredSaveTimer = 0;
     saveFreeCameraState();
   }, delay || 720);
 }
-function easeOutCubic01(t) {
+window.easeOutCubic01 = function(t) {
   t = clamp01(t);
   return 1 - Math.pow(1 - t, 3);
 }
-function shortestAngleDelta(from, to) {
+window.shortestAngleDelta = function(from, to) {
   return Math.atan2(Math.sin(to - from), Math.cos(to - from));
 }
-function getDefaultFreeCameraResetPose() {
+window.getDefaultFreeCameraResetPose = function() {
   var pose = {
     position: new THREE.Vector3(0, 0, 6.6),
     yaw: 0,
@@ -190,7 +190,7 @@ function getDefaultFreeCameraResetPose() {
   }
   return pose;
 }
-function captureFreeCameraFromCurrent() {
+window.captureFreeCameraFromCurrent = function() {
   if (!freeCamera) freeCamera = defaultFreeCameraState();
   camera.updateMatrixWorld(true);
   freeCamera.position.copy(camera.position);
@@ -200,7 +200,7 @@ function captureFreeCameraFromCurrent() {
   freeCamera.roll = FREE_CAMERA_EULER.z;
   freeCamera.fov = clampRange(camera.fov || BASE_FOV, 26, 72);
 }
-function applyFreeCameraToCamera() {
+window.applyFreeCameraToCamera = function() {
   if (!freeCamera || !(freeCamera.active || freeCamera.locked)) return false;
   var cameraShake = clampRange(Number((typeof fx !== 'undefined' && fx) ? fx.cinemaShake : 0.5) || 0, 0, 1.8);
   camera.position.copy(freeCamera.position);
@@ -221,11 +221,11 @@ function applyFreeCameraToCamera() {
   camPunch *= 0.86;
   return true;
 }
-function updateFreeCameraHint() {
+window.updateFreeCameraHint = function() {
   var el = document.getElementById('free-camera-hint');
   if (el) el.classList.toggle('show', !!(freeCamera && freeCamera.active));
 }
-function resetFreeCameraToDefault() {
+window.resetFreeCameraToDefault = function() {
   if (!freeCamera) return;
   if (freeCameraDeferredSaveTimer) {
     clearTimeout(freeCameraDeferredSaveTimer);
@@ -259,7 +259,7 @@ function resetFreeCameraToDefault() {
   updateFreeCameraHint();
   showToast('自由镜头正在平滑回正');
 }
-function toggleFreeCamera() {
+window.toggleFreeCamera = function() {
   if (!freeCamera) freeCamera = defaultFreeCameraState();
   if (freeCamera.active) {
     freeCamera.active = false;
@@ -292,7 +292,7 @@ function toggleFreeCamera() {
   }
   showToast('自由镜头: WASD 移动 · 鼠标转向 · K 回正');
 }
-function updateFreeCamera(dt) {
+window.updateFreeCamera = function(dt) {
   if (!freeCamera) return;
   if (freeCamera.resetTween) {
     var tw = freeCamera.resetTween;
@@ -344,14 +344,14 @@ function updateFreeCamera(dt) {
   if (rollDir) freeCamera.roll = clampRange(freeCamera.roll + rollDir * dt * 0.9, -Math.PI, Math.PI);
   scheduleFreeCameraStateSave(720);
 }
-function flushPersistentVisualState() {
+window.flushPersistentVisualState = function() {
   try { saveLyricLayout(); } catch (e) {}
   try { saveFreeCameraState(); } catch (e) {}
 }
 window.addEventListener('beforeunload', flushPersistentVisualState);
 window.addEventListener('pagehide', flushPersistentVisualState);
 
-function resetBeatCameraSync(t) {
+window.resetBeatCameraSync = function(t) {
   beatCam.nextIdx = 0;
   beatCam.events.length = 0;
   beatCam.punch = 0;
@@ -373,13 +373,13 @@ function resetBeatCameraSync(t) {
   resetRealtimeBeatEngine();
 }
 
-function syncBeatCameraToTime(t) {
+window.syncBeatCameraToTime = function(t) {
   resetBeatCameraSync(t);
   if (!currentBeatMap) return;
   alignBeatCameraCursorToTime(t);
 }
 
-function alignBeatCameraCursorToTime(t) {
+window.alignBeatCameraCursorToTime = function(t) {
   if (!currentBeatMap) return;
   var beats = currentBeatMap.cameraBeats || currentBeatMap.beats || currentBeatMap.kicks || [];
   beatCam.nextIdx = 0;
@@ -390,12 +390,12 @@ function alignBeatCameraCursorToTime(t) {
   }
 }
 
-function easeBeatCamera(x) {
+window.easeBeatCamera = function(x) {
   x = Math.max(0, Math.min(1, x));
   return x * x * (3 - 2 * x);
 }
 
-function updateCinemaDynamics(rawEnergy, rawLow) {
+window.updateCinemaDynamics = function(rawEnergy, rawLow) {
   var e = clamp01(rawEnergy || 0);
   var l = clamp01(rawLow || 0);
   var isDj = djMode.active;
@@ -425,13 +425,13 @@ function updateCinemaDynamics(rawEnergy, rawLow) {
   cinemaDynamics.scale += (target - cinemaDynamics.scale) * (target > cinemaDynamics.scale ? (isDj ? 0.070 : 0.045) : (isDj ? 0.030 : 0.022));
 }
 
-function cameraDynamicsScale(extra) {
+window.cameraDynamicsScale = function(extra) {
   var isDj = djMode.active;
   var djBoost = isDj ? (1.06 + clamp01(djMode.sectionLow) * 0.16 + clamp01(rtBeat.tempoConfidence) * 0.08) : 1;
   return clampRange((cinemaDynamics.scale || 0.82) * (cinemaTrackProfile.scale || 1) * (extra == null ? 1 : extra) * djBoost, isDj ? 0.24 : 0.18, isDj ? 1.42 : 1.18);
 }
 
-function cinemaTrackNameHint(song) {
+window.cinemaTrackNameHint = function(song) {
   var label = ((song && song.name) || '') + ' ' + ((song && song.artist) || '');
   label = label.toLowerCase().replace(/\s+/g, '');
   if (/after17/.test(label)) return 0.46;
@@ -439,7 +439,7 @@ function cinemaTrackNameHint(song) {
   return 1.0;
 }
 
-function cinemaAnalysisProfileForSong(song) {
+window.cinemaAnalysisProfileForSong = function(song) {
   var title = String((song && (song.name || song.title)) || '').toLowerCase().replace(/\s+/g, '');
   var artist = String((song && song.artist) || '').toLowerCase().replace(/\s+/g, '');
   var label = title + ' ' + artist;
@@ -456,7 +456,7 @@ function cinemaAnalysisProfileForSong(song) {
   return { id: 'default', softGroove: false, phaseScan: false, localRefine: false, sparseCamera: false, introPattern: false };
 }
 
-function resetCinemaTrackProfile(song) {
+window.resetCinemaTrackProfile = function(song) {
   var isDj = isPodcastSong(song);
   cinemaTrackProfile.scale = isDj ? 1.08 : 1.0;
   cinemaTrackProfile.target = isDj ? 1.10 : 1.0;
@@ -470,7 +470,7 @@ function resetCinemaTrackProfile(song) {
   cinemaTrackProfile.density = 0;
 }
 
-function updateCinemaTrackProfile(sample) {
+window.updateCinemaTrackProfile = function(sample) {
   if (!sample) return;
   var p = cinemaTrackProfile;
   p.frames++;
@@ -498,7 +498,7 @@ function updateCinemaTrackProfile(sample) {
   p.scale += (target - p.scale) * (target > p.scale ? (djMode.active ? 0.045 : 0.030) : (djMode.active ? 0.030 : 0.045));
 }
 
-function applyCinemaProfileFromBeatMap(map) {
+window.applyCinemaProfileFromBeatMap = function(map) {
   if (!map || !map.duration) return;
   var events = (map.cameraBeats || map.beats || []).filter(function(b){ return b && typeof b !== 'number' && b.camera !== false; });
   if (!events.length) return;
@@ -519,7 +519,7 @@ function applyCinemaProfileFromBeatMap(map) {
   cinemaTrackProfile.scale += (target - cinemaTrackProfile.scale) * (target < cinemaTrackProfile.scale ? 0.55 : 0.22);
 }
 
-function resetRealtimeBeatEngine() {
+window.resetRealtimeBeatEngine = function() {
   rtBeat.subFast = rtBeat.subSlow = rtBeat.lowFast = rtBeat.lowSlow = 0;
   rtBeat.bodyFast = rtBeat.bodySlow = rtBeat.vocalFast = rtBeat.vocalSlow = rtBeat.snapFast = rtBeat.snapSlow = 0;
   rtBeat.prevSub = rtBeat.prevLow = rtBeat.prevBody = rtBeat.prevVocal = rtBeat.prevSnap = rtBeat.prevRms = 0;
@@ -545,7 +545,7 @@ function resetRealtimeBeatEngine() {
   rtBeat.stats.rejected = 0;
 }
 
-function resetAudioVisualState() {
+window.resetAudioVisualState = function() {
   bass = 0;
   mid = 0;
   treble = 0;
@@ -570,11 +570,11 @@ function resetAudioVisualState() {
   if (djMode.active) resetDjModeMeter();
 }
 
-function beatEventTime(ev) {
+window.beatEventTime = function(ev) {
   return typeof ev === 'number' ? ev : (ev && isFinite(ev.time) ? ev.time : Infinity);
 }
 
-function yieldToPaint() {
+window.yieldToPaint = function() {
   return new Promise(function(resolve) {
     if (isHiddenForBackgroundOptimization() || typeof requestAnimationFrame !== 'function') {
       setTimeout(resolve, 0);
@@ -584,7 +584,7 @@ function yieldToPaint() {
   });
 }
 
-function yieldToIdle(timeout) {
+window.yieldToIdle = function(timeout) {
   return new Promise(function(resolve) {
     if (isHiddenForBackgroundOptimization()) {
       setTimeout(resolve, Math.min(timeout || 80, 80));
@@ -598,7 +598,7 @@ function yieldToIdle(timeout) {
   });
 }
 
-function scheduleAnalysisTask(fn, timeout) {
+window.scheduleAnalysisTask = function(fn, timeout) {
   if (typeof fn !== 'function') return;
   if (isHiddenForBackgroundOptimization()) {
     setTimeout(fn, 0);
@@ -611,7 +611,7 @@ function scheduleAnalysisTask(fn, timeout) {
   }
 }
 
-function scheduleVisualApply(fn, delay, timeout) {
+window.scheduleVisualApply = function(fn, delay, timeout) {
   if (typeof fn !== 'function') return;
   setTimeout(function(){
     if (isHiddenForBackgroundOptimization() || typeof requestAnimationFrame !== 'function') {
@@ -624,7 +624,7 @@ function scheduleVisualApply(fn, delay, timeout) {
   }, delay || 0);
 }
 
-function scheduleUiWarmTask(fn, timeout) {
+window.scheduleUiWarmTask = function(fn, timeout) {
   if (typeof fn !== 'function') return;
   var run = function(){ requestAnimationFrame(fn); };
   if (isHiddenForBackgroundOptimization() || typeof requestAnimationFrame !== 'function') {
@@ -636,28 +636,28 @@ function scheduleUiWarmTask(fn, timeout) {
   }
 }
 
-function cancelBeatAnalysisTimer() {
+window.cancelBeatAnalysisTimer = function() {
   if (beatAnalysisTimer) {
     clearTimeout(beatAnalysisTimer);
     beatAnalysisTimer = null;
   }
 }
 
-function cancelBeatPrefetchTimer() {
+window.cancelBeatPrefetchTimer = function() {
   if (beatPrefetchTimer) {
     clearTimeout(beatPrefetchTimer);
     beatPrefetchTimer = null;
   }
 }
 
-function beatAnalysisYieldMs(options, currentMs, prefetchMs) {
+window.beatAnalysisYieldMs = function(options, currentMs, prefetchMs) {
   options = options || {};
   if (options.prefetch) return prefetchMs == null ? 620 : prefetchMs;
   if (options.background) return currentMs == null ? 120 : currentMs;
   return Math.min(currentMs == null ? 120 : currentMs, 160);
 }
 
-function beatBandRms(data, sampleRate, fftSize, hz0, hz1) {
+window.beatBandRms = function(data, sampleRate, fftSize, hz0, hz1) {
   var binHz = sampleRate / fftSize;
   var a = Math.max(1, Math.floor(hz0 / binHz));
   var b = Math.min(data.length - 1, Math.ceil(hz1 / binHz));
@@ -670,7 +670,7 @@ function beatBandRms(data, sampleRate, fftSize, hz0, hz1) {
   return count ? Math.sqrt(sum / count) : 0;
 }
 
-function processRealtimeBeatEngine(dt) {
+window.processRealtimeBeatEngine = function(dt) {
   if (!beatAnalyser || !audioCtx || !audio || audio.paused) return null;
   dt = Math.max(0.001, Math.min(0.080, dt || 0.016));
   var dj = djMode.active;
@@ -862,7 +862,7 @@ function processRealtimeBeatEngine(dt) {
   };
 }
 
-function mergeRealtimeBeatCamera(time, amp, tone) {
+window.mergeRealtimeBeatCamera = function(time, amp, tone) {
   var best = null;
   var bestDist = beatCam.realtimeMergeWindow;
   for (var i = 0; i < beatCam.events.length; i++) {
@@ -894,7 +894,7 @@ function mergeRealtimeBeatCamera(time, amp, tone) {
   return true;
 }
 
-function scheduleBeatCamera(beat, source) {
+window.scheduleBeatCamera = function(beat, source) {
   if (!fx.cinema) return;
   var time = typeof beat === 'number' ? beat : beat.time;
   if (!isFinite(time)) return;
@@ -1172,7 +1172,7 @@ function scheduleBeatCamera(beat, source) {
   if (beatCam.events.length > maxEvents) beatCam.events.splice(0, beatCam.events.length - maxEvents);
 }
 
-function updateBeatCamera(dt) {
+window.updateBeatCamera = function(dt) {
   var t = audio ? audio.currentTime : uniforms.uTime.value;
   if (!audio || audio.paused) {
     beatCam.punch *= Math.pow(0.08, dt);
@@ -1269,11 +1269,11 @@ function updateBeatCamera(dt) {
   beatCam.rollKick += (rollKick - beatCam.rollKick) * (Math.abs(rollKick) > Math.abs(beatCam.rollKick) ? (djEase ? 0.82 : 0.72) : (djEase ? 0.44 : 0.38));
 }
 
-function unlockCenteredView() {
+window.unlockCenteredView = function() {
   orbit.centerLocked = false;
 }
 
-function clearCenteredViewOffsets() {
+window.clearCenteredViewOffsets = function() {
   pointerTarget.x = 0;
   pointerTarget.y = 0;
   pointerParallax.x = 0;
@@ -1302,7 +1302,7 @@ function clearCenteredViewOffsets() {
   }
 }
 
-function updateCamera() {
+window.updateCamera = function() {
   if (applyFreeCameraToCamera()) return;
   if (orbit.recentering) {
     orbit.userTheta  += (orbit.baselineTheta - orbit.userTheta)  * 0.04;
@@ -1372,37 +1372,37 @@ function updateCamera() {
 
 // 焦点跟拍 (hover 0.5s 后镜头移到目标)
 var focusHover = { wantType: null, pendingTimer: null, exitTimer: null };
-function shouldUseWallpaperSafeShelfCamera() {
+window.shouldUseWallpaperSafeShelfCamera = function() {
   return !!(fx && Number(fx.preset) === 5);
 }
-function shouldUseSkullSafeShelfCamera() {
+window.shouldUseSkullSafeShelfCamera = function() {
   return !!(fx && Number(fx.preset) === SKULL_PRESET_INDEX);
 }
-function shouldUseWallpaperLyricCameraLock() {
+window.shouldUseWallpaperLyricCameraLock = function() {
   return !!(fx && Number(fx.preset) === 5 && fx.lyricCameraLock);
 }
-function requestStageLyricCameraSnap(frames) {
+window.requestStageLyricCameraSnap = function(frames) {
   if (typeof stageLyrics === 'undefined' || !stageLyrics) return;
   stageLyrics.snapCameraLockFrames = Math.max(stageLyrics.snapCameraLockFrames || 0, frames || 8);
 }
-function shouldDimWallpaperForShelf() {
+window.shouldDimWallpaperForShelf = function() {
   if (!shouldUseWallpaperSafeShelfCamera()) return false;
   if (!shelfManager || !shelfManager.getMode || shelfManager.getMode() !== 'side') return false;
   if (shelfPinnedOpen) return true;
   return !!(shelfManager.hasOpenContent && shelfManager.hasOpenContent());
 }
-function shouldOffsetLyricsForShelfDetail() {
+window.shouldOffsetLyricsForShelfDetail = function() {
   if (!shelfManager || !shelfManager.getMode || shelfManager.getMode() !== 'side') return false;
   return !!(shelfManager.hasOpenContent && shelfManager.hasOpenContent());
 }
-function shouldAvoidStageLyricsForShelf() {
+window.shouldAvoidStageLyricsForShelf = function() {
   if (!shelfManager || !shelfManager.getMode || shelfManager.getMode() !== 'side') return false;
   if (shelfAlwaysVisible()) return true;
   if (shelfPinnedOpen) return true;
   if (shelfManager.hasOpenContent && shelfManager.hasOpenContent()) return true;
   return !!(shelfVisibility > 0.24 || (shelfHoverCue && shelfHoverCue.value > 0.28));
 }
-function activateFocusZone(type) {
+window.activateFocusZone = function(type) {
   unlockCenteredView();
   orbit.focus.active = true;
   orbit.focus.type = type;
@@ -1452,7 +1452,7 @@ function activateFocusZone(type) {
     orbit.focus.lookAt.set(-1.2, 0, 0);
   }
 }
-function setFocusZone(type, immediate) {
+window.setFocusZone = function(type, immediate) {
   if (type && !shouldUseShelfDynamicCamera(type)) {
     if (/^shelf-/.test(String(orbit.focus.type || ''))) orbit.focus.active = false;
     type = null;
@@ -1485,10 +1485,10 @@ function setFocusZone(type, immediate) {
 // 电影镜头 v8: 振幅大幅减小, 节拍 punch 加冷却 + 强度门槛
 //   - cineTheta/Phi 是非常缓慢的低频漂移, 不再让人 motion sick
 //   - punch zoom 只在 真·强主拍 触发, 至少间隔 0.45s, 振幅 ×0.5
-var lastCamPunchAt = -10;
+window.lastCamPunchAt = -10;
 var CAM_PUNCH_MIN_INTERVAL = 0.45;     // 秒
 var CAM_PUNCH_BEAT_THRESHOLD = 0.55;   // 必须够强才触发
-function updateCinema(dt) {
+window.updateCinema = function(dt) {
   cinemaT += dt;
   updateBeatCamera(dt);
   if (!fx.cinema) {
@@ -1509,7 +1509,7 @@ function updateCinema(dt) {
 }
 updateCamera();
 
-function recenterCamera() {
+window.recenterCamera = function() {
   orbit.centerLocked = true;
   orbit.recentering = true;
   clearCenteredViewOffsets();
@@ -1533,11 +1533,11 @@ function recenterCamera() {
   showToast('视角回正');
 }
 
-function hasActivePlaybackControls() {
+window.hasActivePlaybackControls = function() {
   return !!(playing || (audio && !audio.paused) || (Array.isArray(playQueue) && currentIdx >= 0 && playQueue[currentIdx]));
 }
 
-function setControlsHidden(hidden) {
+window.setControlsHidden = function(hidden) {
   var bar = document.getElementById('bottom-bar');
   if (!bar) return;
   if (hidden && (controlsHovering || miniQueueOpen)) hidden = false;
@@ -1546,7 +1546,7 @@ function setControlsHidden(hidden) {
   updateControlsChromeState();
 }
 
-function isBottomControlsSuppressedForShelf() {
+window.isBottomControlsSuppressedForShelf = function() {
   var shelfContentOpen = false;
   try {
     shelfContentOpen = !!(typeof shelfManager !== 'undefined' && shelfManager && shelfManager.hasOpenContent && shelfManager.hasOpenContent());
@@ -1554,7 +1554,7 @@ function isBottomControlsSuppressedForShelf() {
   return !!(shelfPinnedOpen || shelfContentOpen || (controlsShelfSuppressUntil && performance.now() < controlsShelfSuppressUntil));
 }
 
-function suppressBottomControlsForShelf(duration) {
+window.suppressBottomControlsForShelf = function(duration) {
   controlsShelfSuppressUntil = performance.now() + (duration == null ? 900 : duration);
   controlsHovering = false;
   if (controlsHideTimer) {
@@ -1571,7 +1571,7 @@ function suppressBottomControlsForShelf(duration) {
   updateControlsChromeState();
 }
 
-function scheduleControlsHide(delay) {
+window.scheduleControlsHide = function(delay) {
   if (controlsHideTimer) clearTimeout(controlsHideTimer);
   if (!controlsAutoHide) return;
   controlsHideTimer = setTimeout(function(){
@@ -1580,7 +1580,7 @@ function scheduleControlsHide(delay) {
   }, delay == null ? 480 : delay);
 }
 
-function revealBottomControls(delay) {
+window.revealBottomControls = function(delay) {
   if (document.body.classList.contains('home-controls-locked')) return;
   var bar = document.getElementById('bottom-bar');
   if (isBottomControlsSuppressedForShelf()) return;
@@ -1590,7 +1590,7 @@ function revealBottomControls(delay) {
   if (controlsAutoHide) scheduleControlsHide(delay == null ? 520 : delay);
 }
 
-function updateControlsChromeState() {
+window.updateControlsChromeState = function() {
   var bar = document.getElementById('bottom-bar');
   var handle = document.getElementById('bottom-handle');
   var active = !!(bar && bar.classList.contains('visible') && !bar.classList.contains('soft-hidden'));
@@ -1598,7 +1598,7 @@ function updateControlsChromeState() {
   if (handle) handle.classList.toggle('active', active);
 }
 
-function wakeBottomHandle(duration) {
+window.wakeBottomHandle = function(duration) {
   document.body.classList.add('controls-handle-awake');
   if (controlsHandleDimTimer) clearTimeout(controlsHandleDimTimer);
   controlsHandleDimTimer = setTimeout(function(){
@@ -1607,7 +1607,7 @@ function wakeBottomHandle(duration) {
   }, duration == null ? 2000 : duration);
 }
 
-function forcePlaybackControlsInteractive() {
+window.forcePlaybackControlsInteractive = function() {
   if (!hasActivePlaybackControls()) return;
   try {
     document.body.classList.remove('home-controls-locked');
@@ -1632,14 +1632,14 @@ function forcePlaybackControlsInteractive() {
   }
 }
 
-function toggleBottomControlsFromHandle() {
+window.toggleBottomControlsFromHandle = function() {
   var bar = document.getElementById('bottom-bar');
   if (!bar || document.body.classList.contains('home-controls-locked')) return;
   if (isBottomControlsSuppressedForShelf()) return;
   revealBottomControls(900);
 }
 
-function updateControlsAutoHideFromPointer(x, y) {
+window.updateControlsAutoHideFromPointer = function(x, y) {
   if (document.body.classList.contains('home-controls-locked')) return;
   if (isBottomControlsSuppressedForShelf()) return;
   var bar = document.getElementById('bottom-bar');
@@ -1671,7 +1671,7 @@ function updateControlsAutoHideFromPointer(x, y) {
   else scheduleControlsHide(70);
 }
 
-function toggleControlsAutoHide() {
+window.toggleControlsAutoHide = function() {
   controlsAutoHide = !controlsAutoHide;
   saveBooleanPreference(CONTROLS_AUTO_HIDE_STORE_KEY, controlsAutoHide);
   var btn = document.getElementById('controls-hide-btn');
@@ -1686,7 +1686,7 @@ function toggleControlsAutoHide() {
   }
 }
 
-function applyControlsAutoHidePreference() {
+window.applyControlsAutoHidePreference = function() {
   var btn = document.getElementById('controls-hide-btn');
   if (btn) btn.classList.toggle('active', !!controlsAutoHide);
   if (!controlsAutoHide && controlsHideTimer) {
@@ -1724,22 +1724,22 @@ function applyControlsAutoHidePreference() {
   updateControlsChromeState();
 })();
 
-function isCursorAutoHideMode() {
+window.isCursorAutoHideMode = function() {
   return !document.hidden;
 }
 
-function clearCursorAutoHideTimer() {
+window.clearCursorAutoHideTimer = function() {
   if (cursorHideTimer) {
     clearTimeout(cursorHideTimer);
     cursorHideTimer = null;
   }
 }
 
-function setCursorHidden(hidden) {
+window.setCursorHidden = function(hidden) {
   document.body.classList.toggle('cursor-hidden', !!hidden && isCursorAutoHideMode());
 }
 
-function scheduleCursorHide(delay) {
+window.scheduleCursorHide = function(delay) {
   clearCursorAutoHideTimer();
   if (!isCursorAutoHideMode()) {
     setCursorHidden(false);
@@ -1751,7 +1751,7 @@ function scheduleCursorHide(delay) {
   }, delay == null ? CURSOR_HIDE_DELAY : delay);
 }
 
-function revealCursorForActivity() {
+window.revealCursorForActivity = function() {
   if (!isCursorAutoHideMode()) {
     clearCursorAutoHideTimer();
     setCursorHidden(false);
@@ -1761,7 +1761,7 @@ function revealCursorForActivity() {
   scheduleCursorHide(CURSOR_HIDE_DELAY);
 }
 
-function syncCursorAutoHideMode() {
+window.syncCursorAutoHideMode = function() {
   if (isCursorAutoHideMode()) revealCursorForActivity();
   else {
     clearCursorAutoHideTimer();
@@ -1779,28 +1779,28 @@ syncCursorAutoHideMode();
 //   v7.1: 用 userOrbit 替代 targetOrbit; 加 drag 距离判断
 // ============================================================
 var mouseWorld = new THREE.Vector3(-999, -999, 0);
-var mouseActive = false;
+window.mouseActive = false;
 var mouseDownAt = { x:0, y:0, t:0, hadDrag:false };
 var particlePointerSpin = { active:false, lastX:0, lastY:0, lastT:0 };
-var particlePointerRay = new THREE.Raycaster();
-var particlePointerNdc = new THREE.Vector2();
-var particlePointerPlane = new THREE.Plane();
-var particlePointerPlanePoint = new THREE.Vector3();
-var particlePointerPlaneNormal = new THREE.Vector3();
-var particlePointerWorldHit = new THREE.Vector3();
-var particlePointerLocalHit = new THREE.Vector3();
-var particlePointerQuat = new THREE.Quaternion();
+window.particlePointerRay = new THREE.Raycaster();
+window.particlePointerNdc = new THREE.Vector2();
+window.particlePointerPlane = new THREE.Plane();
+window.particlePointerPlanePoint = new THREE.Vector3();
+window.particlePointerPlaneNormal = new THREE.Vector3();
+window.particlePointerWorldHit = new THREE.Vector3();
+window.particlePointerLocalHit = new THREE.Vector3();
+window.particlePointerQuat = new THREE.Quaternion();
 var particlePointerFrame = { dirty:false, ndcX:0, ndcY:0 };
 var CLICK_THRESHOLD = 6;  // 像素, 拖动 > 6px 视为 drag
 var UI_HIT_SELECTOR = '#search-area,#top-right,#fullscreen-diy-zone,#fx-panel,#fx-fab,#fx-fab-hide-btn,#playlist-panel,#bottom-bar,#thumb-wrap,#empty-home,#visual-guide,#trial-banner,#source-fallback-notice,.modal-mask,#toast,#ai-depth-chip,#beat-chip,#drop-overlay';
 
-function isPointerOverUi(e) {
+window.isPointerOverUi = function(e) {
   if (!e) return false;
   var el = document.elementFromPoint(e.clientX, e.clientY);
   return !!(el && el.closest && el.closest(UI_HIT_SELECTOR));
 }
 
-function particleLocalPointFromNdc(ndcX, ndcY, out) {
+window.particleLocalPointFromNdc = function(ndcX, ndcY, out) {
   particlePointerNdc.set(ndcX, ndcY);
   particlePointerRay.setFromCamera(particlePointerNdc, camera);
   if (particles) {
@@ -1825,7 +1825,7 @@ function particleLocalPointFromNdc(ndcX, ndcY, out) {
   return false;
 }
 
-function queueParticlePointerFrame(clientX, clientY) {
+window.queueParticlePointerFrame = function(clientX, clientY) {
   var mx = (clientX / innerWidth) * 2 - 1;
   var my = -(clientY / innerHeight) * 2 + 1;
   pointerTarget.x = mx; pointerTarget.y = my;
@@ -1834,7 +1834,7 @@ function queueParticlePointerFrame(clientX, clientY) {
   particlePointerFrame.dirty = true;
 }
 
-function updateParticlePointerFrame() {
+window.updateParticlePointerFrame = function() {
   if (!particlePointerFrame.dirty) return;
   particlePointerFrame.dirty = false;
   if (particleLocalPointFromNdc(particlePointerFrame.ndcX, particlePointerFrame.ndcY, particlePointerLocalHit)) {
@@ -1847,7 +1847,7 @@ function updateParticlePointerFrame() {
   }
 }
 
-function beginParticlePointerDrag(e) {
+window.beginParticlePointerDrag = function(e) {
   if (e.button === 2) return;
   if (isPointerOverUi(e)) return;
   markRenderInteraction('canvas-drag', 1200);

@@ -1,14 +1,14 @@
 // ============================================================
 //  搜索
 // ============================================================
-var searchTimer = null;
-var searchRequestSeq = 0;
-var searchLastResultQuery = '';
-var SEARCH_HISTORY_STORE_KEY = 'mineradio-search-history';
-var $input = document.getElementById('search-input');
-var $results = document.getElementById('search-results');
-var $loading = document.getElementById('loading-overlay');
-function syncSearchAreaResultState() {
+window.searchTimer = null;
+window.searchRequestSeq = 0;
+window.searchLastResultQuery = '';
+window.SEARCH_HISTORY_STORE_KEY = 'mineradio-search-history';
+window.$input = document.getElementById('search-input');
+window.$results = document.getElementById('search-results');
+window.$loading = document.getElementById('loading-overlay');
+window.syncSearchAreaResultState = function() {
   var searchArea = document.getElementById('search-area');
   if (!searchArea || !$results) return;
   var hasVisibleResults = $results.classList.contains('show') && $results.children.length > 0;
@@ -18,13 +18,13 @@ function syncSearchAreaResultState() {
 if (window.MutationObserver && $results) {
   new MutationObserver(syncSearchAreaResultState).observe($results, { childList: true, attributes: true, attributeFilter: ['class'] });
 }
-function isMusicSearchMode(mode) {
+window.isMusicSearchMode = function(mode) {
   return mode !== 'podcast';
 }
-function searchResultKey(q, mode) {
+window.searchResultKey = function(q, mode) {
   return (mode || searchMode || 'song') + '|' + String(q || '').trim();
 }
-function clearSearchResults() {
+window.clearSearchResults = function() {
   searchRequestSeq++;
   searchLastResultQuery = '';
   playlist = [];
@@ -34,7 +34,7 @@ function clearSearchResults() {
   $results.innerHTML = '';
   $results.classList.remove('show');
 }
-function readSearchHistory() {
+window.readSearchHistory = function() {
   try {
     var raw = JSON.parse(localStorage.getItem(SEARCH_HISTORY_STORE_KEY) || '[]');
     return Array.isArray(raw) ? raw.map(function(v){ return String(v || '').trim(); }).filter(Boolean).slice(0, 10) : [];
@@ -42,17 +42,17 @@ function readSearchHistory() {
     return [];
   }
 }
-function writeSearchHistory(items) {
+window.writeSearchHistory = function(items) {
   try { localStorage.setItem(SEARCH_HISTORY_STORE_KEY, JSON.stringify((items || []).slice(0, 10))); } catch (e) {}
 }
-function rememberSearchQuery(q) {
+window.rememberSearchQuery = function(q) {
   q = String(q || '').trim();
   if (!q) return;
   var items = readSearchHistory().filter(function(item){ return item.toLowerCase() !== q.toLowerCase(); });
   items.unshift(q);
   writeSearchHistory(items);
 }
-function renderSearchHistory() {
+window.renderSearchHistory = function() {
   if (searchMode !== 'song' && searchMode !== 'netease' && searchMode !== 'qq' && searchMode !== 'youtube') return false;
   var items = readSearchHistory();
   if (!items.length) {
@@ -71,11 +71,11 @@ function renderSearchHistory() {
   requestAnimationFrame(updateSearchPillGlassDisplacementMap);
   return true;
 }
-function clearSearchHistory() {
+window.clearSearchHistory = function() {
   writeSearchHistory([]);
   renderSearchHistory();
 }
-function runSearchHistory(q) {
+window.runSearchHistory = function(q) {
   q = String(q || '').trim();
   if (!q) return;
   $input.value = q;
@@ -83,7 +83,7 @@ function runSearchHistory(q) {
   doSearch(q);
   $input.focus();
 }
-function updateSearchModeTabs() {
+window.updateSearchModeTabs = function() {
   var songBtn = document.getElementById('search-mode-song');
   var neteaseBtn = document.getElementById('search-mode-netease');
   var qqBtn = document.getElementById('search-mode-qq');
@@ -123,7 +123,7 @@ function updateSearchModeTabs() {
   requestAnimationFrame(updateSearchPillGlassDisplacementMap);
 }
 
-function setSearchMode(mode) {
+window.setSearchMode = function(mode) {
   mode = (mode === 'podcast' || mode === 'netease' || mode === 'qq' || mode === 'youtube') ? mode : 'song';
   if (searchMode === mode) return;
   searchMode = mode;
@@ -141,7 +141,7 @@ function setSearchMode(mode) {
     renderSearchHistory();
   }
 }
-function podcastMetaText(item) {
+window.podcastMetaText = function(item) {
   item = item || {};
   var bits = [];
   if (item.djName) bits.push(item.djName);
@@ -149,14 +149,14 @@ function podcastMetaText(item) {
   if (item.subCount) bits.push(Math.round(item.subCount / 1000) + 'k follows');
   return bits.join('  ·  ');
 }
-function formatProgramTime(sec) {
+window.formatProgramTime = function(sec) {
   sec = Math.max(0, Number(sec) || 0);
   var h = Math.floor(sec / 3600);
   var m = Math.floor((sec % 3600) / 60);
   var s = Math.floor(sec % 60);
   return h ? (h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')) : (m + ':' + String(s).padStart(2, '0'));
 }
-function programMetaText(item) {
+window.programMetaText = function(item) {
   item = item || {};
   var bits = [];
   if (item.radioName || item.artist) bits.push(item.radioName || item.artist);
@@ -164,12 +164,12 @@ function programMetaText(item) {
   if (item.duration) bits.push(formatProgramTime(Math.round(item.duration / 1000)));
   return bits.join('  ·  ');
 }
-function searchThumbHtml(src) {
+window.searchThumbHtml = function(src) {
   return src
     ? '<img src="' + coverUrlWithSize(src, 80) + '" alt="" loading="lazy" onerror="this.style.opacity=0.2">'
     : '<div style="width:40px;height:40px;border-radius:6px;background:rgba(255,255,255,0.06);flex-shrink:0"></div>';
 }
-function renderPodcastRadios(items, label) {
+window.renderPodcastRadios = function(items, label) {
   podcastResults = items || [];
   podcastPrograms = [];
   playlist = [];
@@ -193,7 +193,7 @@ function renderPodcastRadios(items, label) {
   $results.classList.add('show');
   if (window.gsap) animateListItems($results, '.search-result', { x: 0, y: 6, stagger: 0.012, duration: 0.18, limit: 18 });
 }
-async function loadPodcastHot() {
+window.loadPodcastHot = async function() {
   var requestSeq = ++searchRequestSeq;
   $results.innerHTML = '<div class="search-empty">Loading podcasts...</div>';
   $results.classList.add('show');
@@ -206,7 +206,7 @@ async function loadPodcastHot() {
     if (requestSeq === searchRequestSeq) $results.innerHTML = '<div class="search-empty">Podcast load failed</div>';
   }
 }
-async function doPodcastSearch(q) {
+window.doPodcastSearch = async function(q) {
   var requestSeq = ++searchRequestSeq;
   try {
     var data = await neteasePodcastSearch(q, 18);
@@ -216,7 +216,7 @@ async function doPodcastSearch(q) {
     console.error('Podcast search:', err);
   }
 }
-async function openPodcastPrograms(i) {
+window.openPodcastPrograms = async function(i) {
   var radio = podcastResults[i]; if (!radio) return;
   var requestSeq = ++searchRequestSeq;
   podcastCurrentRadio = radio;
@@ -234,7 +234,7 @@ async function openPodcastPrograms(i) {
     if (requestSeq === searchRequestSeq) $results.innerHTML = '<div class="search-empty">Episodes load failed</div>';
   }
 }
-function renderPodcastPrograms() {
+window.renderPodcastPrograms = function() {
   var radio = podcastCurrentRadio || {};
   if (!podcastPrograms.length) {
     $results.innerHTML = '<div class="podcast-result-head"><button class="podcast-back-btn" onclick="event.stopPropagation();renderPodcastRadios(podcastResults)">‹</button><div class="search-result-info"><div class="search-result-title">' + escHtml(radio.name || 'Podcast') + '</div><div class="search-result-meta">No playable episodes</div></div></div>';
@@ -262,12 +262,12 @@ function renderPodcastPrograms() {
   $results.classList.add('show');
   if (window.gsap) animateListItems($results, '.search-result', { x: 0, y: 6, stagger: 0.010, duration: 0.18, limit: 18 });
 }
-function queuePodcastProgram(i) {
+window.queuePodcastProgram = function(i) {
   var item = podcastPrograms[i]; if (!item) return;
   queueSongNext(item);
   showToast('已设为下一首: ' + item.name);
 }
-function playPodcastProgram(i) {
+window.playPodcastProgram = function(i) {
   var item = podcastPrograms[i]; if (!item) return;
   playSearchResult(i);
 }
@@ -293,7 +293,7 @@ $input.addEventListener('focus', function(){
   else if ($results.children.length > 0) $results.classList.add('show');
   else if (searchMode === 'podcast') loadPodcastHot();
 });
-var searchBoxEl = document.getElementById('search-box');
+window.searchBoxEl = document.getElementById('search-box');
 if (searchBoxEl) {
   searchBoxEl.addEventListener('click', function(){
     if ($input) $input.focus();
@@ -337,19 +337,19 @@ document.addEventListener('click', function(e){
 });
 updateSearchModeTabs();
 
-function songSourceTagHtml(song) {
+window.songSourceTagHtml = function(song) {
   var key = songProviderKey(song);
   var label = ({ netease: 'NE', qq: 'QQ', youtube: 'YT' })[key] || key.toUpperCase();
   return '<span class="tag-source ' + key + '">' + label + '</span>';
 }
-function searchResultMetaText(song) {
+window.searchResultMetaText = function(song) {
   var bits = [];
   if (song.artist) bits.push(song.artist);
   if (song.album) bits.push(song.album);
   if (songProviderKey(song) === 'qq' && !song.playable) bits.push('QQ 播放需会话/授权');
   return bits.join('  ·  ') || songSourceLabel(song);
 }
-function searchResultMetaHtml(song, index) {
+window.searchResultMetaHtml = function(song, index) {
   song = song || {};
   var artist = String(song.artist || '').trim();
   var bits = [];
@@ -359,21 +359,21 @@ function searchResultMetaHtml(song, index) {
   if (!artist) return escHtml(searchResultMetaText(song));
   return '<button class="search-artist-link" type="button" onclick="event.stopPropagation();openSearchResultArtist(' + index + ')">' + escHtml(artist) + '</button>' + tail;
 }
-function openSearchResultArtist(index) {
+window.openSearchResultArtist = function(index) {
   var song = playlist && playlist[index];
   if (!song) return;
   openArtistDetailForSong(song);
 }
-function searchIntentPrefersQQ(q) {
+window.searchIntentPrefersQQ = function(q) {
   q = String(q || '').toLowerCase();
   return /(^|\s)qq($|\s)|qq音乐|qq音樂|周杰伦|周杰倫|jay\s*chou|jay/.test(q);
 }
-function simpleSearchNorm(text) {
+window.simpleSearchNorm = function(text) {
   return String(text || '').toLowerCase()
     .replace(/[（(【\[].*?[）)】\]]/g, '')
     .replace(/[\s·・,，。.!！?？'"“”‘’|\-_/]+/g, '');
 }
-function searchMentionsKnownArtist(q, artist) {
+window.searchMentionsKnownArtist = function(q, artist) {
   var rawQ = String(q || '').toLowerCase();
   var rawArtist = String(artist || '').toLowerCase();
   if (!rawArtist) return false;
@@ -382,14 +382,14 @@ function searchMentionsKnownArtist(q, artist) {
   var na = simpleSearchNorm(artist);
   return !!(na && na.length >= 2 && nq.indexOf(na) >= 0);
 }
-function searchLooksLikeDerivative(text) {
+window.searchLooksLikeDerivative = function(text) {
   return /(翻唱|cover|伴奏|instrumental|remix|片段|demo|女声|男声|karaoke|完整版\s*cover|抖音版|dj版|合唱版|改编版|赵露思版|超燃|硬曲|剪辑|二创|tribute|made\s*famous\s*by)/i.test(String(text || ''));
 }
 var SEARCH_ORIGINAL_ARTIST_HINTS = [
   { titles: ['日落大道'], artists: ['梁博'] },
   { titles: ['beautyandabeat', 'beauty and a beat'], artists: ['justin bieber', 'nicki minaj'] }
 ];
-function canonicalOriginalArtistsForSearch(q, song) {
+window.canonicalOriginalArtistsForSearch = function(q, song) {
   var qNorm = simpleSearchNorm(q);
   var titleNorm = simpleSearchNorm(song && song.name);
   var joined = qNorm + ' ' + titleNorm;
@@ -408,7 +408,7 @@ function canonicalOriginalArtistsForSearch(q, song) {
   });
   return artists;
 }
-function songArtistMatchesAny(song, artists) {
+window.songArtistMatchesAny = function(song, artists) {
   var songArtist = simpleSearchNorm(song && song.artist);
   if (!songArtist || !artists || !artists.length) return false;
   return artists.some(function(artist){
@@ -416,14 +416,14 @@ function songArtistMatchesAny(song, artists) {
     return !!(na && (songArtist.indexOf(na) >= 0 || na.indexOf(songArtist) >= 0));
   });
 }
-function searchLooksLikeSameTitleCover(song, nq, name, album, raw, originalArtistMatch, sourceIndex) {
+window.searchLooksLikeSameTitleCover = function(song, nq, name, album, raw, originalArtistMatch, sourceIndex) {
   if (!song || !nq || !name || originalArtistMatch) return false;
   var sameTitle = name === nq || nq.indexOf(name) >= 0 || name.indexOf(nq) === 0;
   if (!sameTitle) return false;
   var selfTitledSingle = !!(album && (album === name || album === nq || album.indexOf(name) >= 0 || name.indexOf(album) >= 0));
   return selfTitledSingle || searchLooksLikeDerivative(raw) || (sourceIndex || 0) > 0;
 }
-function scoreSongSearchResult(song, q, sourceIndex) {
+window.scoreSongSearchResult = function(song, q, sourceIndex) {
   var nq = simpleSearchNorm(q);
   var name = simpleSearchNorm(song && song.name);
   var artist = simpleSearchNorm(song && song.artist);
@@ -457,7 +457,7 @@ function scoreSongSearchResult(song, q, sourceIndex) {
   score -= (sourceIndex || 0) * 0.75;
   return score;
 }
-function mergeSongSearchResults(neteaseSongs, qqSongs, limit, q, youtubeSongs) {
+window.mergeSongSearchResults = function(neteaseSongs, qqSongs, limit, q, youtubeSongs) {
   var out = [];
   var seen = {};
   function push(song, sourceIndex) {
@@ -474,7 +474,7 @@ function mergeSongSearchResults(neteaseSongs, qqSongs, limit, q, youtubeSongs) {
   out.sort(function(a, b){ return (b._searchScore || 0) - (a._searchScore || 0); });
   return out.slice(0, limit);
 }
-async function fetchMusicSearchResults(q, mode) {
+window.fetchMusicSearchResults = async function(q, mode) {
   if (mode === 'qq') {
     var qqOnly = await qqSearch(q, 12);
     return mergeSongSearchResults([], qqOnly.songs || [], 18, q);
@@ -505,7 +505,7 @@ async function fetchMusicSearchResults(q, mode) {
   }
   return mergeSongSearchResults(neteaseSongs, qqSongs, 18, q, youtubeSongs);
 }
-function renderSongSearchResults(songs) {
+window.renderSongSearchResults = function(songs) {
   playlist = songs || [];
   $results.innerHTML = playlist.map(function(s, i){
     var vipTag = (s.fee === 1) ? '<span class="tag-vip">VIP</span>' : '';
@@ -533,7 +533,7 @@ function renderSongSearchResults(songs) {
   if (window.gsap) animateListItems($results, '.search-result', { x: 0, y: 6, stagger: 0.012, duration: 0.18, limit: 18 });
 }
 
-async function doSearch(q, opts) {
+window.doSearch = async function(q, opts) {
   opts = opts || {};
   q = String(q || '').trim();
   if (!q) {
@@ -567,7 +567,7 @@ async function doSearch(q, opts) {
 
 //  播放列表面板
 // ============================================================
-function animateListItems(container, selector, opts) {
+window.animateListItems = function(container, selector, opts) {
   if (!container || !window.gsap) return;
   opts = opts || {};
   var items = Array.prototype.slice.call(container.querySelectorAll(selector));
@@ -590,7 +590,7 @@ function animateListItems(container, selector, opts) {
     overwrite: true
   });
 }
-function smoothScrollToItem(scroller, item, opts) {
+window.smoothScrollToItem = function(scroller, item, opts) {
   if (!scroller || !item) return;
   opts = opts || {};
   var target = item.offsetTop - Math.max(0, (scroller.clientHeight - item.offsetHeight) * (opts.align == null ? 0.42 : opts.align));
@@ -605,7 +605,7 @@ function smoothScrollToItem(scroller, item, opts) {
     scroller.scrollTop = target;
   }
 }
-function bindSmoothWheelScroll(scroller) {
+window.bindSmoothWheelScroll = function(scroller) {
   if (!scroller || scroller.__smoothWheelBound) return;
   scroller.__smoothWheelBound = true;
   var targetTop = scroller.scrollTop;
@@ -648,7 +648,7 @@ function bindSmoothWheelScroll(scroller) {
     if (!tween) targetTop = scroller.scrollTop;
   }, { passive: true });
 }
-function bindSmoothQueueScrolling() {
+window.bindSmoothQueueScrolling = function() {
   if (smoothWheelScrollBound) return;
   smoothWheelScrollBound = true;
   [
@@ -661,7 +661,7 @@ function bindSmoothQueueScrolling() {
     bindSmoothWheelScroll(document.getElementById(id));
   });
 }
-function animateVisiblePanelList(listEl, selector, scroller, activeSelector, opts) {
+window.animateVisiblePanelList = function(listEl, selector, scroller, activeSelector, opts) {
   if (!listEl) return;
   opts = opts || {};
   requestAnimationFrame(function(){
@@ -670,10 +670,10 @@ function animateVisiblePanelList(listEl, selector, scroller, activeSelector, opt
     if (active && scroller && opts.scrollActive !== false) smoothScrollToItem(scroller, active, { duration: 0.32 });
   });
 }
-function miniQueueSkeleton() {
+window.miniQueueSkeleton = function() {
   return '<div class="mini-queue-skeleton"></div><div class="mini-queue-skeleton"></div><div class="mini-queue-skeleton"></div>';
 }
-function togglePlaylistPanel(force) {
+window.togglePlaylistPanel = function(force) {
   var el = document.getElementById('playlist-panel');
   if (force === false) el.classList.remove('show');
   else if (force === true) el.classList.add('show');
@@ -690,7 +690,7 @@ function togglePlaylistPanel(force) {
     }, 180);
   }
 }
-function applyPlaylistPanelPinState(openPanel) {
+window.applyPlaylistPanelPinState = function(openPanel) {
   var panel = document.getElementById('playlist-panel');
   var btn = document.getElementById('playlist-pin-btn');
   if (panel) {
@@ -705,16 +705,16 @@ function applyPlaylistPanelPinState(openPanel) {
     btn.title = playlistPanelPinned ? '取消常开歌单' : '常开歌单';
   }
 }
-function setPlaylistPanelPinned(on, silent) {
+window.setPlaylistPanelPinned = function(on, silent) {
   playlistPanelPinned = !!on;
   saveBooleanPreference(PLAYLIST_PANEL_PIN_STORE_KEY, playlistPanelPinned);
   applyPlaylistPanelPinState(playlistPanelPinned);
   if (!silent) showToast(playlistPanelPinned ? '左侧歌单已常开' : '左侧歌单已恢复自动隐藏');
 }
-function togglePlaylistPanelPinned() {
+window.togglePlaylistPanelPinned = function() {
   setPlaylistPanelPinned(!playlistPanelPinned);
 }
-function scrollPlaylistPanelToCurrent() {
+window.scrollPlaylistPanelToCurrent = function() {
   var panel = document.getElementById('playlist-panel');
   var list = document.getElementById('queue-list');
   if (!panel || !list || queueViewTab !== 'queue') return;
@@ -725,7 +725,7 @@ function scrollPlaylistPanelToCurrent() {
     smoothScrollToItem(panel, list.querySelector('.queue-item.now'), { duration: 0.28, align: 0.34 });
   });
 }
-function switchPlaylistTab(tab) {
+window.switchPlaylistTab = function(tab) {
   tab = tab === 'podcasts' ? 'podcasts' : (tab === 'playlists' ? 'playlists' : 'queue');
   if (tab !== 'playlists') hideLocalPlaylistDetail();
   queueViewTab = tab;
@@ -742,7 +742,7 @@ function switchPlaylistTab(tab) {
   if (tab === 'playlists') { renderLocalPlaylistsIntoView(); animateVisiblePanelList(document.getElementById('pl-list'), '.pl-card', document.getElementById('playlist-panel')); }
   if (tab === 'podcasts') animateVisiblePanelList(document.getElementById('podcast-list'), '.pl-card', document.getElementById('playlist-panel'));
 }
-function setMiniQueueOpen(open) {
+window.setMiniQueueOpen = function(open) {
   miniQueueOpen = !!open;
   var pop = document.getElementById('mini-queue-popover');
   var btn = document.getElementById('mini-queue-btn');
@@ -757,21 +757,21 @@ function setMiniQueueOpen(open) {
     revealBottomControls(1300);
   }
 }
-function toggleMiniQueue(e) {
+window.toggleMiniQueue = function(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   setMiniQueueOpen(!miniQueueOpen);
 }
-function closeMiniQueue() {
+window.closeMiniQueue = function() {
   setMiniQueueOpen(false);
 }
-function openPlaylistPanelTab(tab, preserve) {
+window.openPlaylistPanelTab = function(tab, preserve) {
   tab = tab === 'podcasts' ? 'podcasts' : (tab === 'playlists' ? 'playlists' : 'queue');
   var panel = document.getElementById('playlist-panel');
   if (panel && panel.dataset && preserve !== false) panel.dataset.preserveTabOnOpen = '1';
   switchPlaylistTab(tab);
   setPeek(panel, true, 'pl');
 }
-function renderMiniQueuePanel(opts) {
+window.renderMiniQueuePanel = function(opts) {
   opts = opts || {};
   var $list = document.getElementById('mini-queue-list');
   var $count = document.getElementById('mini-queue-count');
@@ -804,7 +804,7 @@ document.addEventListener('click', function(e){
   if (miniQueueOpen && !(e.target && e.target.closest && e.target.closest('#bottom-bar'))) closeMiniQueue();
 });
 bindSmoothQueueScrolling();
-function renderQueuePanel(opts) {
+window.renderQueuePanel = function(opts) {
   opts = opts || {};
   var $ql = document.getElementById('queue-list');
   var seq = ++queueRenderSeq;
@@ -832,7 +832,7 @@ function renderQueuePanel(opts) {
   if (opts.animate && seq === queueRenderSeq) animateVisiblePanelList($ql, '.queue-item', document.getElementById('playlist-panel'), '.queue-item.now');
   renderMiniQueuePanel({ scrollCurrent: miniQueueOpen });
 }
-async function refreshUserPlaylists(force) {
+window.refreshUserPlaylists = async function(force) {
   if (!loginStatus.loggedIn && !qqLoginStatus.loggedIn) {
     resetPlaylistPanelRenderLimit();
     document.getElementById('pl-list').innerHTML = '<div style="text-align:center;padding:24px 0;color:rgba(255,255,255,.32);font-size:11.5px">登录后显示个人歌单</div>';

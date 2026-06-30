@@ -1,16 +1,18 @@
 //  空场待机引导
 // ============================================================
-var idleGuideCanvas = null;
-var idleGuideCtx = null;
-var idleGuideW = 0, idleGuideH = 0, idleGuideDpr = 1;
-var idleGuideParticles = [];
-var idleGuideTrails = [[], [], [], []];
-var idleGuideStartedAt = performance.now();
-var idleGuideVisible = false;
-var idleGuideLastFrameAt = performance.now();
-var idleGuideDelayTimer = null;
+window.idleGuideCanvas = null;
+window.idleGuideCtx = null;
+window.idleGuideW = 0;
+window.idleGuideH = 0;
+window.idleGuideDpr = 1;
+window.idleGuideParticles = [];
+window.idleGuideTrails = [[], [], [], []];
+window.idleGuideStartedAt = performance.now();
+window.idleGuideVisible = false;
+window.idleGuideLastFrameAt = performance.now();
+window.idleGuideDelayTimer = null;
 // Keep Wallpaper as the only startup idle background.
-var IDLE_GUIDE_BACKGROUND_ENABLED = false;
+window.IDLE_GUIDE_BACKGROUND_ENABLED = false;
 var idleGuideInteraction = {
   angle: 0,
   velocity: 0,
@@ -33,14 +35,14 @@ var idleGuideInteraction = {
   tiltX: 0,
   tiltY: 0
 };
-function setIdleGuideVisible(show, interactive) {
+window.setIdleGuideVisible = function(show, interactive) {
   document.body.classList.toggle('idle-guide-on', show);
   document.body.classList.toggle('idle-guide-interactive', !!interactive);
   if (!interactive) document.body.classList.remove('idle-guide-dragging');
   if (idleGuideVisible === show) return;
   idleGuideVisible = show;
 }
-function shouldShowIdleGuide() {
+window.shouldShowIdleGuide = function() {
   if (!IDLE_GUIDE_BACKGROUND_ENABLED) return false;
   if (document.body.classList.contains('splash-active')) return false;
   if (immersiveMode) return false;
@@ -50,7 +52,7 @@ function shouldShowIdleGuide() {
   if (uniforms && uniforms.uHasCover && uniforms.uHasCover.value > 0.5) return false;
   return true;
 }
-function shouldShowShelfHoverCue(value) {
+window.shouldShowShelfHoverCue = function(value) {
   if (document.body.classList.contains('splash-active')) return false;
   if (!shelfHoverCue.guide && document.querySelector('.modal-mask.show')) return false;
   if (!shelfHoverCue.guide) {
@@ -61,16 +63,16 @@ function shouldShowShelfHoverCue(value) {
   }
   return shelfHoverCue.guide || shelfHoverCue.target > 0 || (value || shelfHoverCue.value) > 0.015;
 }
-function shouldHandleIdleGuidePointer(e) {
+window.shouldHandleIdleGuidePointer = function(e) {
   if (!idleGuideCanvas || !shouldShowIdleGuide()) return false;
   if (isPointerOverUi(e)) return false;
   return true;
 }
-function clampIdleGuideSpin(v) {
+window.clampIdleGuideSpin = function(v) {
   if (!isFinite(v)) return 0;
   return Math.max(-4.8, Math.min(4.8, v));
 }
-function idleGuidePointerDown(e) {
+window.idleGuidePointerDown = function(e) {
   if (!shouldHandleIdleGuidePointer(e)) return;
   idleGuideInteraction.dragging = true;
   idleGuideInteraction.pointerActive = true;
@@ -81,7 +83,7 @@ function idleGuidePointerDown(e) {
   idleGuideInteraction.pointerY = e.clientY / Math.max(1, idleGuideH || innerHeight);
   document.body.classList.add('idle-guide-dragging');
 }
-function idleGuidePointerMove(e) {
+window.idleGuidePointerMove = function(e) {
   if (!idleGuideCanvas) return;
   var canReact = shouldHandleIdleGuidePointer(e) || idleGuideInteraction.dragging;
   idleGuideInteraction.pointerActive = canReact;
@@ -106,15 +108,15 @@ function idleGuidePointerMove(e) {
   idleGuideInteraction.lastY = e.clientY;
   idleGuideInteraction.lastT = now;
 }
-function idleGuidePointerUp() {
+window.idleGuidePointerUp = function() {
   if (!idleGuideInteraction.dragging) return;
   idleGuideInteraction.dragging = false;
   document.body.classList.remove('idle-guide-dragging');
 }
-function idleGuidePointerLeave() {
+window.idleGuidePointerLeave = function() {
   if (!idleGuideInteraction.dragging) idleGuideInteraction.pointerActive = false;
 }
-function idleGuideWheel(e) {
+window.idleGuideWheel = function(e) {
   if (!shouldHandleIdleGuidePointer(e)) return false;
   var guide = idleGuideInteraction;
   guide.pointerActive = true;
@@ -125,7 +127,7 @@ function idleGuideWheel(e) {
   guide.zoomPulse = Math.min(1, guide.zoomPulse + Math.min(0.28, Math.abs(e.deltaY) * 0.0014));
   return true;
 }
-function resizeIdleGuideCanvas() {
+window.resizeIdleGuideCanvas = function() {
   if (!idleGuideCanvas) return;
   idleGuideDpr = Math.min(window.devicePixelRatio || 1, 1.6);
   idleGuideW = window.innerWidth;
@@ -168,7 +170,7 @@ function resizeIdleGuideCanvas() {
     });
   }
 }
-function projectIdleGuidePoint(x, y, z, rot, cx, cy, depth) {
+window.projectIdleGuidePoint = function(x, y, z, rot, cx, cy, depth) {
   var x1 = x * rot.cy + z * rot.sy;
   var z1 = -x * rot.sy + z * rot.cy;
   var y1 = y * rot.cx - z1 * rot.sx;
@@ -182,10 +184,10 @@ function projectIdleGuidePoint(x, y, z, rot, cx, cy, depth) {
     scale: scale
   };
 }
-function resetIdleGuideTrails() {
+window.resetIdleGuideTrails = function() {
   idleGuideTrails = [[], [], [], []];
 }
-function pushIdleGuideTrail(index, pt, alpha, now) {
+window.pushIdleGuideTrail = function(index, pt, alpha, now) {
   var trail = idleGuideTrails[index];
   if (!trail) trail = idleGuideTrails[index] = [];
   var last = trail[trail.length - 1];
@@ -196,7 +198,7 @@ function pushIdleGuideTrail(index, pt, alpha, now) {
   }
   while (trail.length > 26) trail.shift();
 }
-function drawIdleGuideTrail(ctx, trail, now, alpha, energy) {
+window.drawIdleGuideTrail = function(ctx, trail, now, alpha, energy) {
   if (!trail || trail.length < 2) return;
   while (trail.length && now - trail[0].t > 680) trail.shift();
   if (trail.length < 2) return;
@@ -221,7 +223,7 @@ function drawIdleGuideTrail(ctx, trail, now, alpha, energy) {
   }
   ctx.restore();
 }
-function scheduleIdleGuideFrame(delay) {
+window.scheduleIdleGuideFrame = function(delay) {
   if (idleGuideDelayTimer) {
     clearTimeout(idleGuideDelayTimer);
     idleGuideDelayTimer = null;
@@ -235,7 +237,7 @@ function scheduleIdleGuideFrame(delay) {
     requestAnimationFrame(drawIdleGuideFrame);
   }
 }
-function drawIdleGuideFrame() {
+window.drawIdleGuideFrame = function() {
   if (!idleGuideCanvas || !idleGuideCtx) return;
   var ctx = idleGuideCtx;
   var nowFrame = performance.now();
@@ -411,7 +413,7 @@ function drawIdleGuideFrame() {
   ctx.globalCompositeOperation = 'source-over';
   scheduleIdleGuideFrame(0);
 }
-function idleRoundRect(ctx, x, y, w, h, r) {
+window.idleRoundRect = function(ctx, x, y, w, h, r) {
   if (ctx.roundRect) {
     ctx.roundRect(x, y, w, h, r);
     return;
@@ -428,7 +430,7 @@ function idleRoundRect(ctx, x, y, w, h, r) {
   ctx.lineTo(x, y + r);
   ctx.quadraticCurveTo(x, y, x + r, y);
 }
-function drawShelfGuideCue(ctx, t, strength) {
+window.drawShelfGuideCue = function(ctx, t, strength) {
   strength = Math.max(0, Math.min(1, strength == null ? shelfHoverCue.value : strength));
   if (strength <= 0.01) return;
   var r = shelfCueRect();
@@ -467,7 +469,7 @@ function drawShelfGuideCue(ctx, t, strength) {
   }
   ctx.restore();
 }
-function initIdleGuideCanvas() {
+window.initIdleGuideCanvas = function() {
   idleGuideCanvas = document.getElementById('idle-guide-canvas');
   if (!idleGuideCanvas) return;
   idleGuideCtx = idleGuideCanvas.getContext('2d');
@@ -481,8 +483,8 @@ function initIdleGuideCanvas() {
 // ============================================================
 //  toast
 // ============================================================
-var toastTimer = null;
-function showToast(msg) {
+window.toastTimer = null;
+window.showToast = function(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
@@ -566,16 +568,16 @@ var visualGuideStepsDiy = [
     body: '右侧的 3D 歌单架会在靠近时半透明浮现，点击卡片可打开歌单，点卡片里的播放按钮可直接播放整张歌单。'
   }
 ];
-function activeVisualGuideSteps() {
+window.activeVisualGuideSteps = function() {
   return diyPlayerMode ? visualGuideStepsDiy : visualGuideSteps;
 }
-function visualGuideWasSeen() {
+window.visualGuideWasSeen = function() {
   try { return localStorage.getItem(VISUAL_GUIDE_SEEN_STORE_KEY) === '1'; } catch (e) { return true; }
 }
-function markVisualGuideSeen() {
+window.markVisualGuideSeen = function() {
   try { localStorage.setItem(VISUAL_GUIDE_SEEN_STORE_KEY, '1'); } catch (e) {}
 }
-function maybeRunStartupVisualGuide(source) {
+window.maybeRunStartupVisualGuide = function(source) {
   if (visualGuideWasSeen() || visualGuideActive || immersiveMode || playing) return false;
   if (source !== 'manual' && !hasAnyPlatformLogin()) return false;
   setTimeout(function(){
@@ -583,7 +585,7 @@ function maybeRunStartupVisualGuide(source) {
   }, source === 'splash' ? 3600 : 1400);
   return true;
 }
-function startVisualGuide(opts) {
+window.startVisualGuide = function(opts) {
   opts = opts || {};
   if (document.body.classList.contains('splash-active')) {
     setTimeout(function(){ startVisualGuide(opts); }, 700);
@@ -615,7 +617,7 @@ function startVisualGuide(opts) {
   }
   showVisualGuideStep(0);
 }
-function prepareVisualGuideStep(step) {
+window.prepareVisualGuideStep = function(step) {
   var search = document.getElementById('search-area');
   var bottom = document.getElementById('bottom-bar');
   var fxPanel = document.getElementById('fx-panel');
@@ -631,12 +633,12 @@ function prepareVisualGuideStep(step) {
     revealBottomControls(1500);
   }
 }
-function scheduleVisualGuidePositioning() {
+window.scheduleVisualGuidePositioning = function() {
   requestAnimationFrame(positionVisualGuideStep);
   setTimeout(positionVisualGuideStep, 180);
   setTimeout(positionVisualGuideStep, 620);
 }
-function showVisualGuideStep(index) {
+window.showVisualGuideStep = function(index) {
   var steps = activeVisualGuideSteps();
   visualGuideStep = Math.max(0, Math.min(steps.length - 1, index));
   var step = steps[visualGuideStep];
@@ -655,7 +657,7 @@ function showVisualGuideStep(index) {
   if (next) next.textContent = visualGuideStep === steps.length - 1 ? '完成' : '下一步';
   scheduleVisualGuidePositioning();
 }
-function guideTargetRect(step) {
+window.guideTargetRect = function(step) {
   if (step && step.target === 'stage') {
     var stageW = Math.min(620, Math.max(260, innerWidth - 72));
     var stageH = Math.min(310, Math.max(178, innerHeight * 0.34));
@@ -709,7 +711,7 @@ function guideTargetRect(step) {
   }
   return { left: innerWidth * 0.5 - 120, top: innerHeight * 0.5 - 40, width: 240, height: 80, right: innerWidth * 0.5 + 120, bottom: innerHeight * 0.5 + 40 };
 }
-function positionVisualGuideStep() {
+window.positionVisualGuideStep = function() {
   if (!visualGuideActive) return;
   var guide = document.getElementById('visual-guide');
   var ring = document.getElementById('visual-guide-ring');
@@ -743,7 +745,7 @@ function positionVisualGuideStep() {
   card.style.left = cardLeft + 'px';
   card.style.top = cardTop + 'px';
 }
-function nextVisualGuideStep() {
+window.nextVisualGuideStep = function() {
   var steps = activeVisualGuideSteps();
   if (visualGuideStep >= steps.length - 1) {
     closeVisualGuide(true);
@@ -751,7 +753,7 @@ function nextVisualGuideStep() {
   }
   showVisualGuideStep(visualGuideStep + 1);
 }
-function closeVisualGuide(markSeen) {
+window.closeVisualGuide = function(markSeen) {
   var guide = document.getElementById('visual-guide');
   visualGuideActive = false;
   if (markSeen) markVisualGuideSeen();
@@ -771,7 +773,7 @@ function closeVisualGuide(markSeen) {
   if (playlistPanel && !visualGuideState.plWasPeek) setPeek(playlistPanel, false, 'pl');
   if (bottom && !visualGuideState.bottomWasVisible && !playing) bottom.classList.remove('visible', 'soft-hidden');
 }
-function handleVisualGuideSurfaceClick(e) {
+window.handleVisualGuideSurfaceClick = function(e) {
   if (!visualGuideActive) return;
   if (e && e.target && e.target.closest && e.target.closest('button')) return;
   if (e && e.preventDefault) e.preventDefault();
@@ -785,7 +787,7 @@ function handleVisualGuideSurfaceClick(e) {
 // ============================================================
 //  动态库加载
 // ============================================================
-function loadScriptOnce(src) {
+window.loadScriptOnce = function(src) {
   return new Promise(function(resolve, reject){
     var hit = document.querySelector('script[src="' + src + '"]');
     if (hit) { resolve(); return; }
@@ -803,7 +805,8 @@ function loadScriptOnce(src) {
 //   - 捏合 = 拖动旋转封面 (Y 反向修正)
 //   - 没有挥扫 / 没有手势切歌
 // ============================================================
-function startHeadTracking(){}     // stub: 兼容旧调用
+window.startHeadTracking = function() {
+}     // stub: 兼容旧调用
 function stopHeadTracking(){}      // stub
 
 var gestureVideo = null, gestureCamera = null, gestureHands = null;

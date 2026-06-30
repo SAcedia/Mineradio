@@ -1,6 +1,6 @@
 //  Discover / Home page helpers
 // ============================================================
-function setHomeArt(id, url, size) {
+window.setHomeArt = function(id, url, size) {
   var el = document.getElementById(id);
   if (!el) return;
   var src = url ? coverUrlWithSize(url, size || 260) : '';
@@ -8,13 +8,13 @@ function setHomeArt(id, url, size) {
   el.classList.toggle('has-cover', !!src);
   el.classList.toggle('home-skeleton', !src && homeDiscoverState.loading);
 }
-function compactHomeCount(n) {
+window.compactHomeCount = function(n) {
   n = Number(n) || 0;
   if (n >= 100000000) return (n / 100000000).toFixed(1).replace(/\.0$/, '') + '亿';
   if (n >= 10000) return Math.round(n / 10000) + '万';
   return n ? String(n) : '';
 }
-function listenSongSnapshot(song) {
+window.listenSongSnapshot = function(song) {
   song = song || {};
   return {
     key: queueItemKey(song),
@@ -31,7 +31,7 @@ function listenSongSnapshot(song) {
     duration: Number(song.duration) || 0,
   };
 }
-function beginListenSession(song, context) {
+window.beginListenSession = function(song, context) {
   if (!song) return;
   var snap = listenSongSnapshot(song);
   if (!snap.key) return;
@@ -47,7 +47,7 @@ function beginListenSession(song, context) {
     maxProgress: 0,
   };
 }
-function updateListenStatsTick(force) {
+window.updateListenStatsTick = function(force) {
   if (!audio || !audio.duration || audio.paused) return;
   var song = currentCoverSong();
   if (!song) return;
@@ -65,7 +65,7 @@ function updateListenStatsTick(force) {
   listenSession.lastAudioTime = audioTime;
   listenSession.maxProgress = Math.max(listenSession.maxProgress || 0, audio.duration ? audioTime / audio.duration : 0);
 }
-function finalizeListenSession(completed) {
+window.finalizeListenSession = function(completed) {
   if (!listenSession) return;
   updateListenStatsTick(true);
   var session = listenSession;
@@ -113,24 +113,24 @@ function finalizeListenSession(completed) {
   saveListenStatsState();
   if (emptyHomeActive) renderHomeDiscover();
 }
-function mostPlayedSong() {
+window.mostPlayedSong = function() {
   var list = Object.keys(listenStatsState.songs || {}).map(function(key){ return listenStatsState.songs[key]; });
   list.sort(function(a, b){ return (b.plays - a.plays) || (b.listenMs - a.listenMs) || (b.lastPlayedAt - a.lastPlayedAt); });
   return list[0] || null;
 }
-function topListenArtist() {
+window.topListenArtist = function() {
   var list = Object.keys(listenStatsState.artists || {}).map(function(key){ return listenStatsState.artists[key]; });
   list.sort(function(a, b){ return (b.plays - a.plays) || (b.listenMs - a.listenMs) || (b.lastPlayedAt - a.lastPlayedAt); });
   return list[0] || null;
 }
-function homeListenSummary() {
+window.homeListenSummary = function() {
   var recent = (listenStatsState && listenStatsState.history || [])[0] || null;
   var topSong = mostPlayedSong();
   var topArtist = topListenArtist();
   var totalPlays = Object.keys(listenStatsState.songs || {}).reduce(function(sum, key){ return sum + ((listenStatsState.songs[key] && listenStatsState.songs[key].plays) || 0); }, 0);
   return { recent: recent, topSong: topSong, topArtist: topArtist, totalPlays: totalPlays };
 }
-function fallbackHomeTiles() {
+window.fallbackHomeTiles = function() {
   return [
     { kind: 'login', title: '登录同步歌单', sub: '网易云 / QQ 音乐' },
     { kind: 'search', title: '搜索一首歌', sub: '原唱优先', query: '' },
@@ -139,12 +139,12 @@ function fallbackHomeTiles() {
     { kind: 'guide', title: '看看视觉舞台', sub: '粒子 / 歌词 / 封面' },
   ];
 }
-function homeTileCover(item) {
+window.homeTileCover = function(item) {
   if (!item) return '';
   if (item.kind === 'song' || item.kind === 'weatherSong') return songCoverSrc(item.song, 220);
   return item.cover ? coverUrlWithSize(item.cover, 220) : '';
 }
-function homeToneForItem(item, index) {
+window.homeToneForItem = function(item, index) {
   if (!item) return 'daily';
   if (item.kind === 'weatherSong') return 'daily';
   if (item.kind === 'recent') return 'search';
@@ -159,7 +159,7 @@ function homeToneForItem(item, index) {
   if (item.kind === 'search') return 'search';
   return ['daily', 'playlist', 'local', 'guide', 'search'][index % 5];
 }
-function renderHomeMosaic(items) {
+window.renderHomeMosaic = function(items) {
   var cells = document.querySelectorAll('#home-mosaic .home-mosaic-cell');
   if (!cells.length) return;
   var covers = [];
@@ -174,7 +174,7 @@ function renderHomeMosaic(items) {
     cells[i].classList.toggle('home-skeleton', !src && homeDiscoverState.loading);
   }
 }
-function renderHomeTiles() {
+window.renderHomeTiles = function() {
   var row = document.getElementById('home-tile-row');
   var title = document.getElementById('home-rail-title');
   var note = document.getElementById('home-rail-note');
@@ -227,7 +227,7 @@ function renderHomeTiles() {
   row._homeTiles = tiles;
   renderHomeMosaic(tiles);
 }
-function renderHomeDiscover() {
+window.renderHomeDiscover = function() {
   var sub = document.getElementById('home-subtitle');
   var loggedOutHome = !homeDiscoverState.loggedIn && !hasAnyPlatformLogin();
   var weather = homeWeatherRadioState.weather;
@@ -310,7 +310,7 @@ function renderHomeDiscover() {
   }
   renderHomeTiles();
 }
-async function loadHomeDiscover(force) {
+window.loadHomeDiscover = async function(force) {
   if (homeDiscoverState.loading) return;
   if (homeDiscoverState.loaded && !force) return;
   var token = ++homeDiscoverToken;
@@ -337,7 +337,7 @@ async function loadHomeDiscover(force) {
     }
   }
 }
-function homeWeatherRadioUrl(opts) {
+window.homeWeatherRadioUrl = function(opts) {
   opts = opts || {};
   var params = [];
   if (opts.lat != null && opts.lon != null) {
@@ -351,7 +351,7 @@ function homeWeatherRadioUrl(opts) {
   params.push('t=' + Date.now());
   return '/api/weather/radio?' + params.join('&');
 }
-async function loadHomeWeatherRadio(force, opts) {
+window.loadHomeWeatherRadio = async function(force, opts) {
   opts = opts || {};
   if (homeWeatherRadioState.loading && homeWeatherLoadPromise && opts.lat == null && opts.lon == null && !opts.city) {
     return homeWeatherLoadPromise;
@@ -395,7 +395,7 @@ async function loadHomeWeatherRadio(force, opts) {
     if (homeWeatherLoadPromise === loadPromise) homeWeatherLoadPromise = null;
   }
 }
-function scheduleHomeWeatherLoad(delay) {
+window.scheduleHomeWeatherLoad = function(delay) {
   if (homeWeatherLoadTimer) return;
   homeWeatherLoadTimer = setTimeout(function(){
     homeWeatherLoadTimer = null;
@@ -403,7 +403,7 @@ function scheduleHomeWeatherLoad(delay) {
     loadHomeWeatherRadio(false);
   }, delay || 760);
 }
-function weatherRadioContext() {
+window.weatherRadioContext = function() {
   var weather = homeWeatherRadioState.weather || {};
   var radio = homeWeatherRadioState.radio || {};
   return {
@@ -416,7 +416,7 @@ function weatherRadioContext() {
     mood: weather.mood && weather.mood.key || '',
   };
 }
-async function startWeatherRadio(opts) {
+window.startWeatherRadio = async function(opts) {
   opts = opts || {};
   if (weatherRadioStartBusy) return;
   weatherRadioStartBusy = true;
@@ -457,7 +457,7 @@ async function startWeatherRadio(opts) {
     weatherRadioStartBusy = false;
   }
 }
-var emptyHomeStartEl = document.getElementById('empty-home');
+window.emptyHomeStartEl = document.getElementById('empty-home');
 if (emptyHomeStartEl) {
   emptyHomeStartEl.addEventListener('click', function(e){
     var start = e.target && e.target.closest ? e.target.closest('[data-home-radio-start]') : null;
@@ -467,7 +467,7 @@ if (emptyHomeStartEl) {
     startWeatherRadio();
   }, true);
 }
-function locateWeatherRadio() {
+window.locateWeatherRadio = function() {
   var previousWeatherCity = homeWeatherRadioState.city || '上海';
   homeWeatherToken++;
   homeWeatherRadioState.loading = true;
@@ -510,7 +510,7 @@ function locateWeatherRadio() {
   // Desktop users need a stable city label; browser coordinates can be stale or cityless.
   useIpFallback();
 }
-function changeWeatherCity() {
+window.changeWeatherCity = function() {
   var city = window.prompt('输入城市名', homeWeatherRadioState.city || '上海');
   city = String(city || '').trim();
   if (!city) return;
@@ -519,7 +519,7 @@ function changeWeatherCity() {
   homeWeatherRadioState.loaded = false;
   loadHomeWeatherRadio(true, { city: city });
 }
-function shouldShowEmptyHomeCore(ignoreSplash) {
+window.shouldShowEmptyHomeCore = function(ignoreSplash) {
   if (!ignoreSplash && document.body.classList.contains('splash-active')) return false;
   if (immersiveMode) return false;
   if (homeForcedOpen) return true;
@@ -531,13 +531,13 @@ function shouldShowEmptyHomeCore(ignoreSplash) {
   if (playing) return false;
   return true;
 }
-function shouldShowEmptyHome() {
+window.shouldShowEmptyHome = function() {
   return shouldShowEmptyHomeCore(false);
 }
-function shouldShowEmptyHomeAfterSplash() {
+window.shouldShowEmptyHomeAfterSplash = function() {
   return shouldShowEmptyHomeCore(true);
 }
-function shouldForceEmptyHomeAfterSplash() {
+window.shouldForceEmptyHomeAfterSplash = function() {
   if (immersiveMode) return false;
   if (shelfPinnedOpen) return false;
   if (shelfManager && shelfManager.hasOpenContent && shelfManager.hasOpenContent()) return false;
@@ -546,21 +546,21 @@ function shouldForceEmptyHomeAfterSplash() {
   if (playing) return false;
   return true;
 }
-function shouldUseIdleWallpaperPreview(ignoreSplash) {
+window.shouldUseIdleWallpaperPreview = function(ignoreSplash) {
   if (!ignoreSplash && document.body.classList.contains('splash-active')) return false;
   if (immersiveMode || playing || (audio && !audio.paused)) return false;
   if (shelfPinnedOpen) return false;
   if (shelfManager && shelfManager.hasOpenContent && shelfManager.hasOpenContent()) return false;
   return true;
 }
-function setHomeControlsLocked(locked) {
+window.setHomeControlsLocked = function(locked) {
   document.body.classList.toggle('home-controls-locked', !!locked);
   var bottom = document.getElementById('bottom-bar');
   if (bottom && locked && !hasActivePlaybackControls()) bottom.classList.add('soft-hidden');
   if (bottom && !locked) bottom.classList.remove('soft-hidden');
   if (locked) closeMiniQueue();
 }
-function openHomePlayerConsole() {
+window.openHomePlayerConsole = function() {
   setHomeControlsLocked(false);
   var bar = document.getElementById('bottom-bar');
   if (bar) {
@@ -575,7 +575,7 @@ function openHomePlayerConsole() {
   if (controlsAutoHide) scheduleControlsHide(1800);
   showToast('播放器控制台已展开');
 }
-function ensureHomeWallpaperParticles(opts) {
+window.ensureHomeWallpaperParticles = function(opts) {
   opts = opts || {};
   if (uniforms && uniforms.uAlpha && opts.instant) {
     uniforms.uAlpha.value = 0.96;
@@ -585,13 +585,13 @@ function ensureHomeWallpaperParticles(opts) {
   if (uniforms && uniforms.uFloatAlpha) uniforms.uFloatAlpha.value = 0;
   if (floatGroup) destroyFloatLayer();
 }
-function activateHomeWallpaperPreview(opts) {
+window.activateHomeWallpaperPreview = function(opts) {
   opts = opts || {};
   document.body.classList.add('home-wallpaper-preview');
   ensureHomeWallpaperParticles(opts);
 }
-var homeWallpaperPrewarmStarted = false;
-function prewarmHomeWallpaperPreview() {
+window.homeWallpaperPrewarmStarted = false;
+window.prewarmHomeWallpaperPreview = function() {
   if (homeWallpaperPrewarmStarted) return;
   homeWallpaperPrewarmStarted = true;
   if (!shouldUseIdleWallpaperPreview(true)) return;
@@ -600,7 +600,7 @@ function prewarmHomeWallpaperPreview() {
     activateHomeWallpaperPreview({ skipTransition: true, instant: true });
   }, 900, 2600);
 }
-function deactivateHomeWallpaperPreview(playback) {
+window.deactivateHomeWallpaperPreview = function(playback) {
   document.body.classList.remove('home-wallpaper-preview');
   if (!homeVisualPresetActive) return;
   homeVisualPresetActive = false;
@@ -609,7 +609,7 @@ function deactivateHomeWallpaperPreview(playback) {
     setPreset(nextPreset, { silent: true, preserveCamera: false, skipTransition: false, noSave: true });
   }
 }
-function switchPlaybackVisualToEmily() {
+window.switchPlaybackVisualToEmily = function() {
   if (homeVisualPresetActive) {
     deactivateHomeWallpaperPreview(true);
     return;
@@ -623,7 +623,7 @@ function switchPlaybackVisualToEmily() {
     syncFxUniforms();
   }
 }
-function applyStartupStarfieldPreset() {
+window.applyStartupStarfieldPreset = function() {
   if (playing || currentIdx >= 0) return;
   startupVisualPreviewActive = true;
   if (typeof setPreset === 'function' && fx.preset !== 5) {
@@ -632,7 +632,7 @@ function applyStartupStarfieldPreset() {
     syncFxUniforms();
   }
 }
-function updateEmptyHomeVisibility(opts) {
+window.updateEmptyHomeVisibility = function(opts) {
   opts = opts || {};
   var show = shouldShowEmptyHome();
   emptyHomeActive = show;
@@ -660,7 +660,7 @@ function updateEmptyHomeVisibility(opts) {
   }
   return show;
 }
-function runHomeSearch(query, mode) {
+window.runHomeSearch = function(query, mode) {
   homeForcedOpen = false;
   homeSuppressed = false;
   setHomeControlsLocked(false);
@@ -678,11 +678,11 @@ function runHomeSearch(query, mode) {
   else if (searchMode === 'podcast') loadPodcastHot();
   else renderSearchHistory();
 }
-function skipLoginAndFocusSearch() {
+window.skipLoginAndFocusSearch = function() {
   closeLoginModal();
   setTimeout(function(){ runHomeSearch(''); }, 180);
 }
-function openHomeLocalImport() {
+window.openHomeLocalImport = function() {
   homeForcedOpen = false;
   homeSuppressed = false;
   setHomeControlsLocked(false);
@@ -690,17 +690,17 @@ function openHomeLocalImport() {
   var input = document.getElementById('file-input');
   if (input) input.click();
 }
-function openHomeProductGuide() {
+window.openHomeProductGuide = function() {
   closeLoginModal();
   setTimeout(function(){ startVisualGuide({ manual: true, source: 'home' }); }, 160);
 }
-async function waitForHomeDiscoverIdle(timeout) {
+window.waitForHomeDiscoverIdle = async function(timeout) {
   var started = Date.now();
   while (homeDiscoverState.loading && Date.now() - started < (timeout || 2200)) {
     await new Promise(function(resolve){ setTimeout(resolve, 80); });
   }
 }
-async function playHomeDaily() {
+window.playHomeDaily = async function() {
   homeForcedOpen = false;
   homeSuppressed = false;
   setHomeControlsLocked(false);
@@ -723,7 +723,7 @@ async function playHomeDaily() {
   forcePlaybackControlsInteractive();
   playQueueAt(0).catch(function(e){ console.warn('[HomeDailyPlay]', e); });
 }
-async function playHomePrivateRadio() {
+window.playHomePrivateRadio = async function() {
   homeForcedOpen = false;
   homeSuppressed = false;
   setHomeControlsLocked(false);
@@ -751,7 +751,7 @@ async function playHomePrivateRadio() {
   }
   openHomeLibrary();
 }
-function playHomeSong(index) {
+window.playHomeSong = function(index) {
   homeForcedOpen = false;
   homeSuppressed = false;
   setHomeControlsLocked(false);
@@ -768,7 +768,7 @@ function playHomeSong(index) {
   forcePlaybackControlsInteractive();
   playQueueAt(currentIdx).catch(function(e){ console.warn('[HomeSongPlay]', e); });
 }
-function openHomePlaylist(index) {
+window.openHomePlaylist = function(index) {
   homeForcedOpen = false;
   homeSuppressed = false;
   setHomeControlsLocked(false);
@@ -784,7 +784,7 @@ function openHomePlaylist(index) {
   }
   loadPlaylistIntoQueueById(item.id, true, item.name || '');
 }
-function openHomePodcast(index) {
+window.openHomePodcast = function(index) {
   homeForcedOpen = false;
   homeSuppressed = false;
   setHomeControlsLocked(false);
@@ -797,14 +797,14 @@ function openHomePodcast(index) {
   }
   loadPodcastRadioIntoQueue(item.id, true, item.name || '');
 }
-function openHomeThirdCard() {
+window.openHomeThirdCard = function() {
   if (!hasAnyPlatformLogin() && !homeDiscoverState.loggedIn) {
     openHomeLocalImport();
     return;
   }
   openHomePodcast(0);
 }
-function openHomeLibrary() {
+window.openHomeLibrary = function() {
   if (!hasAnyPlatformLogin() && !homeDiscoverState.loggedIn) {
     openHomeProductGuide();
     return;
@@ -814,7 +814,7 @@ function openHomeLibrary() {
   openPlaylistPanelTab('playlists', true);
   refreshUserPlaylists(true);
 }
-function goHome() {
+window.goHome = function() {
   if (homeForcedOpen || emptyHomeActive) {
     dismissHomePage({ toast: true });
     showToast('已关闭 Home');
@@ -834,7 +834,7 @@ function goHome() {
   updateEmptyHomeVisibility({ forceLoad: true });
   showToast('已回到 Home');
 }
-function dismissHomePage(opts) {
+window.dismissHomePage = function(opts) {
   opts = opts || {};
   homeForcedOpen = false;
   homeSuppressed = true;
@@ -843,12 +843,12 @@ function dismissHomePage(opts) {
   setPeek(document.getElementById('search-area'), false, 'search');
   if (typeof setFocusZone === 'function') setFocusZone(null, true);
 }
-function isPointInsideRectWithPad(x, y, rect, pad) {
+window.isPointInsideRectWithPad = function(x, y, rect, pad) {
   if (!rect || rect.width <= 0 || rect.height <= 0) return false;
   pad = Number(pad) || 0;
   return x >= rect.left - pad && x <= rect.right + pad && y >= rect.top - pad && y <= rect.bottom + pad;
 }
-function isPointNearHomeContent(x, y) {
+window.isPointNearHomeContent = function(x, y) {
   var selectors = [
     '.home-card',
     '.home-tile',
@@ -862,7 +862,7 @@ function isPointNearHomeContent(x, y) {
   }
   return false;
 }
-function isHomeBlankDismissClick(e) {
+window.isHomeBlankDismissClick = function(e) {
   if (!emptyHomeActive || !e || e.defaultPrevented) return false;
   if (e.button != null && e.button !== 0) return false;
   if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return false;

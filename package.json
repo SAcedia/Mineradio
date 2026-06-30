@@ -8,6 +8,8 @@
   "private": true,
   "scripts": {
     "start": "electron .",
+    "dev": "vite",
+    "build:js": "vite build",
     "build:win": "electron-builder --win nsis",
     "build:win:dir": "electron-builder --win dir"
   },
@@ -95,6 +97,7 @@
   "devDependencies": {
     "electron": "^42.4.1",
     "electron-builder": "^26.15.3",
-    "rcedit": "^5.0.2"
+    "rcedit": "^5.0.2",
+    "vite": "^8.1.2"
   }
 }

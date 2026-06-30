@@ -3,13 +3,13 @@
 //  函数由配置表 neteaseAPIList 自动生成
 // ============================================================
 
-function neteaseApi(path, params) {
+window.neteaseApi = function(path, params) {
   var qs = params ? '?' + (typeof params === 'string' ? params : new URLSearchParams(params).toString()) : '';
   return apiJson('/api' + path + qs);
 }
 
 // 将参数名数组转为编码后的 query string
-function neteaseQs(names, args) {
+window.neteaseQs = function(names, args) {
   var parts = [];
   for (var i = 0; i < names.length; i++) {
     var key = names[i];

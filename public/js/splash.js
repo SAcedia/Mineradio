@@ -1,20 +1,26 @@
-var splashAnimating = true;
-var splashCanvas = null, splashCtx = null;
-var splashGl = null, splashGlProgram = null, splashGlBuffer = null, splashGlUniforms = null;
-var splashW = 0, splashH = 0;
-var splashDust = [];
-var splashStreaks = [];
-var splashShards = [];
-var splashPixelRatio = 1;
-var splashStartedAt = performance.now();
-var splashSoundPlayed = false;
-var splashAudioCtx = null;
-var splashSoundFallbackArmed = false;
-var splashTimer = null;
-var reduceSplashMotion = false;
-var splashReadyToEnter = false;
+window.splashAnimating = true;
+window.splashCanvas = null;
+window.splashCtx = null;
+window.splashGl = null;
+window.splashGlProgram = null;
+window.splashGlBuffer = null;
+window.splashGlUniforms = null;
+window.splashW = 0;
+window.splashH = 0;
+window.splashDust = [];
+window.splashStreaks = [];
+window.splashShards = [];
+window.splashPixelRatio = 1;
+window.splashStartedAt = performance.now();
+window.splashSoundPlayed = false;
+window.splashAudioCtx = null;
+window.splashSoundFallbackArmed = false;
+window.splashTimer = null;
+window.reduceSplashMotion = false;
+window.splashReadyToEnter = false;
 
-function splashClamp01(v) { return Math.max(0, Math.min(1, v)); }
+window.splashClamp01 = function(v) {
+ return Math.max(0, Math.min(1, v)); }
 function splashSmoothstep(edge0, edge1, x) {
   var t = splashClamp01((x - edge0) / Math.max(0.0001, edge1 - edge0));
   return t * t * (3 - 2 * t);

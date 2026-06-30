@@ -5,15 +5,15 @@
 //   - stage:  弧形排列, 居中, 有倒影, 当前卡片"呼吸+光环"
 //             卡片间粒子穿梭, 切歌时飞出动画
 // ============================================================
-var shelfPinnedOpen = false;
-var shelfManager = null;
-var shelfOpenAnimAt = -10;
-var shelfHoverCue = { target: 0, value: 0, x: 0, y: 0, lastAt: 0, enteredAt: 0, zoneActive: false, guide: false };
+window.shelfPinnedOpen = false;
+window.shelfManager = null;
+window.shelfOpenAnimAt = -10;
+window.shelfHoverCue = { target: 0, value: 0, x: 0, y: 0, lastAt: 0, enteredAt: 0, zoneActive: false, guide: false };
 var shelfVisibility = 0;  // 0..1, 侧栏自动隐藏的整体透明度系数
-function isPortraitShelfViewport() {
+window.isPortraitShelfViewport = function() {
   return innerHeight > innerWidth * 1.08;
 }
-function shelfLayoutProfile() {
+window.shelfLayoutProfile = function() {
   var portrait = isPortraitShelfViewport();
   var narrow = !portrait && innerWidth < 980;
   var skullShelf = shouldUseSkullSafeShelfCamera();
@@ -50,42 +50,42 @@ function shelfLayoutProfile() {
     }
   };
 }
-function shelfHotZoneWidth() {
+window.shelfHotZoneWidth = function() {
   var ratio = isPortraitShelfViewport() ? 0.26 : 0.18;
   return Math.min(isPortraitShelfViewport() ? 280 : 360, Math.max(148, innerWidth * ratio));
 }
-function shelfPreviewUseZoneWidth() {
+window.shelfPreviewUseZoneWidth = function() {
   return Math.min(820, Math.max(shelfHotZoneWidth(), innerWidth * 0.56));
 }
-function shelfWheelZoneWidth() {
+window.shelfWheelZoneWidth = function() {
   var portrait = isPortraitShelfViewport();
   var ratioWidth = innerWidth * (portrait ? 0.24 : 0.18);
   return Math.min(portrait ? 280 : 360, Math.max(shelfHotZoneWidth(), ratioWidth));
 }
-function isShelfClickZone(e) {
+window.isShelfClickZone = function(e) {
   var edge = shelfPinnedOpen ? Math.min(390, Math.max(210, innerWidth * 0.22)) : shelfHotZoneWidth();
   return e.clientX > innerWidth - edge && e.clientY > 130 && e.clientY < innerHeight - 150;
 }
-function isShelfPreviewUseZone(e) {
+window.isShelfPreviewUseZone = function(e) {
   var edge = shelfPreviewUseZoneWidth();
   return e.clientX > innerWidth - edge && e.clientY > 96 && e.clientY < innerHeight - 96;
 }
-function isShelfWheelZone(e) {
+window.isShelfWheelZone = function(e) {
   var edge = shelfWheelZoneWidth();
   return e.clientX > innerWidth - edge && e.clientY > 116 && e.clientY < innerHeight - 116;
 }
-function canUseSideShelfWithoutPinnedOpen() {
+window.canUseSideShelfWithoutPinnedOpen = function() {
   return !!shelfAlwaysVisible();
 }
-function shelfPreviewIsVisible() {
+window.shelfPreviewIsVisible = function() {
   return shelfHoverCue.guide || shelfHoverCue.zoneActive || shelfHoverCue.target > 0 || shelfHoverCue.value > 0.10 || shelfVisibility > 0.12;
 }
-function shelfAutoHiddenInputReady() {
+window.shelfAutoHiddenInputReady = function() {
   if (shelfPinnedOpen || shelfAlwaysVisible()) return true;
   if (shelfManager && shelfManager.hasOpenContent && shelfManager.hasOpenContent()) return true;
   return !!(shelfHoverCue.guide || shelfHoverCue.zoneActive || shelfHoverCue.value > 0.18 || shelfVisibility > 0.16);
 }
-function canShowShelfHoverCueAt(e) {
+window.canShowShelfHoverCueAt = function(e) {
   if (!e) return false;
   if (!shelfHoverCue.guide) return false;
   if (document.body.classList.contains('splash-active')) return false;
@@ -97,17 +97,17 @@ function canShowShelfHoverCueAt(e) {
   if (isShelfClickZone(e)) return true;
   return shelfPreviewIsVisible() && isShelfPreviewUseZone(e);
 }
-function shelfCueRect() {
+window.shelfCueRect = function() {
   var w = shelfHotZoneWidth();
   var top = Math.max(136, innerHeight * 0.22);
   var h = Math.min(390, innerHeight - top - 142);
   return { left: innerWidth - w, top: top, width: w, height: h, right: innerWidth, bottom: top + h };
 }
-function shelfCueCenter() {
+window.shelfCueCenter = function() {
   var r = shelfCueRect();
   return { x: r.left + r.width * 0.58, y: r.top + r.height * 0.50 };
 }
-function setShelfGuideCueActive(on) {
+window.setShelfGuideCueActive = function(on) {
   shelfHoverCue.guide = !!on;
   if (on) {
     var c = shelfCueCenter();
@@ -120,7 +120,7 @@ function setShelfGuideCueActive(on) {
     shelfHoverCue.target = 0;
   }
 }
-function updateShelfHoverCueFromPointer(e) {
+window.updateShelfHoverCueFromPointer = function(e) {
   if (!e) {
     if (!shelfHoverCue.guide) shelfHoverCue.target = 0;
     shelfHoverCue.zoneActive = false;
@@ -142,7 +142,7 @@ function updateShelfHoverCueFromPointer(e) {
   shelfHoverCue.y = e.clientY;
   shelfHoverCue.lastAt = performance.now();
 }
-function tickShelfHoverCue(dt) {
+window.tickShelfHoverCue = function(dt) {
   if (!shelfHoverCue.guide && shelfHoverCue.zoneActive) {
     var heldPointer = { clientX: shelfHoverCue.x, clientY: shelfHoverCue.y };
     if (canShowShelfHoverCueAt(heldPointer)) {
@@ -160,7 +160,7 @@ function tickShelfHoverCue(dt) {
   if (shelfHoverCue.value < 0.006 && !target) shelfHoverCue.value = 0;
   return shelfHoverCue.value;
 }
-function setShelfPinnedOpen(open, immediate) {
+window.setShelfPinnedOpen = function(open, immediate) {
   var nextOpen = !!open;
   if (nextOpen && typeof suppressBottomControlsForShelf === 'function') suppressBottomControlsForShelf(980);
   if (nextOpen && !shelfPinnedOpen) {
@@ -179,7 +179,7 @@ function setShelfPinnedOpen(open, immediate) {
   if (shelfManager && shelfManager.hasOpenContent && shelfManager.hasOpenContent()) return;
   if (typeof setFocusZone === 'function') setFocusZone(shelfPinnedOpen ? 'shelf-side' : null, immediate);
 }
-function clearShelfPreviewOnPointerExit() {
+window.clearShelfPreviewOnPointerExit = function() {
   if (!shelfManager || !shelfManager.getMode || shelfManager.getMode() !== 'side') return;
   var hasContent = shelfManager.hasOpenContent && shelfManager.hasOpenContent();
   updateShelfHoverCueFromPointer(null);
@@ -194,7 +194,7 @@ function clearShelfPreviewOnPointerExit() {
   shelfVisibility = 0;
   if (typeof setFocusZone === 'function') setFocusZone(null, true);
 }
-function suppressShelfPreviewForPlaybackSwitch() {
+window.suppressShelfPreviewForPlaybackSwitch = function() {
   if (!shelfManager || !shelfManager.getMode || shelfManager.getMode() !== 'side') return;
   if (shelfPinnedOpen || (shelfManager.hasOpenContent && shelfManager.hasOpenContent())) return;
   updateShelfHoverCueFromPointer(null);
@@ -208,7 +208,7 @@ function suppressShelfPreviewForPlaybackSwitch() {
   if (shelfManager && shelfManager.clearSelected) shelfManager.clearSelected();
   if (typeof setFocusZone === 'function') setFocusZone(null, true);
 }
-function makeShelfManager() {
+window.makeShelfManager = function() {
   var group = null;
   var cards = [];          // [{canvas, ctx, texture, mesh, item, index, slot}]
   var allItems = [];
@@ -1124,7 +1124,7 @@ void main(){ vec4 t = texture2D(uDotTex, gl_PointCoord); if (t.a < 0.02) discard
   };
 }
 shelfManager = makeShelfManager();
-function safeShelfRebuild(reason, asyncCards) {
+window.safeShelfRebuild = function(reason, asyncCards) {
   if (!shelfManager || typeof shelfManager.rebuild !== 'function') return false;
   try {
     shelfManager.rebuild(asyncCards);
@@ -1134,8 +1134,8 @@ function safeShelfRebuild(reason, asyncCards) {
     return false;
   }
 }
-var deferredShelfRebuild = { raf: 0, reason: '', asyncCards: true, token: 0 };
-function scheduleShelfRebuild(reason, asyncCards) {
+window.deferredShelfRebuild = { raf: 0, reason: '', asyncCards: true, token: 0 };
+window.scheduleShelfRebuild = function(reason, asyncCards) {
   deferredShelfRebuild.reason = reason || deferredShelfRebuild.reason || 'deferred';
   deferredShelfRebuild.asyncCards = asyncCards !== false;
   deferredShelfRebuild.token += 1;
@@ -1149,7 +1149,7 @@ function scheduleShelfRebuild(reason, asyncCards) {
     }, 260);
   });
 }
-function safeShelfCloseContent(reason) {
+window.safeShelfCloseContent = function(reason) {
   if (!shelfManager || typeof shelfManager.closeContent !== 'function') return false;
   try {
     shelfManager.closeContent();
@@ -1159,12 +1159,12 @@ function safeShelfCloseContent(reason) {
     return false;
   }
 }
-function isPlaylistPanelVisibleForRender() {
+window.isPlaylistPanelVisibleForRender = function() {
   var panel = document.getElementById('playlist-panel');
   var panelOpen = panel && (panel.classList.contains('show') || panel.classList.contains('peek') || panel.classList.contains('pinned'));
   return !!(panelOpen || miniQueueOpen);
 }
-function safeRenderQueuePanel(reason, opts) {
+window.safeRenderQueuePanel = function(reason, opts) {
   opts = opts || {};
   if (!isPlaylistPanelVisibleForRender() && opts.deferWhenHidden !== false) {
     queuePanelDirty = true;
@@ -1179,11 +1179,11 @@ function safeRenderQueuePanel(reason, opts) {
     return false;
   }
 }
-function flushDeferredQueuePanel(reason) {
+window.flushDeferredQueuePanel = function(reason) {
   if (!queuePanelDirty) return;
   safeRenderQueuePanel(reason || 'flush-deferred-queue', { animate: false, scrollCurrent: miniQueueOpen, deferWhenHidden: false });
 }
-function safeSwitchPlaylistTab(tab, reason) {
+window.safeSwitchPlaylistTab = function(tab, reason) {
   try {
     switchPlaylistTab(tab);
     return true;
@@ -1201,7 +1201,7 @@ document.addEventListener('mouseout', function(e) {
 // ============================================================
 //  二级内容框 (歌单内的歌曲列表) — 同样 PSP 风格滚动
 // ============================================================
-function makeContentListManager() {
+window.makeContentListManager = function() {
   var group = null;
   var rows = [];           // 每行一张卡 (歌曲)
   var panel = null;
@@ -2019,13 +2019,13 @@ function makeContentListManager() {
     }
 }
 
-function compactCount(n) {
+window.compactCount = function(n) {
   n = Number(n) || 0;
   if (n >= 100000000) return (n / 100000000).toFixed(1) + '亿';
   if (n >= 10000) return (n / 10000).toFixed(1) + '万';
   return String(n);
 }
-function drawCanvasHeart(ctx, cx, cy, size, color) {
+window.drawCanvasHeart = function(ctx, cx, cy, size, color) {
   var s = (size || 20) / 28;
   ctx.save();
   ctx.translate(cx, cy);
@@ -2043,7 +2043,7 @@ function drawCanvasHeart(ctx, cx, cy, size, color) {
   ctx.fill();
   ctx.restore();
 }
-function requestPlaylistCover(url, cb) {
+window.requestPlaylistCover = function(url, cb) {
   if (!url) { if (cb) cb(null); return; }
   var rec = playlistCoverCache[url];
   if (rec && rec.loaded) { if (cb) setTimeout(function(){ cb(rec.img); }, 0); return; }
@@ -2075,18 +2075,18 @@ function requestPlaylistCover(url, cb) {
 //   - 点击两侧卡: 滚到那张
 //   - ESC: 关闭内容框
 // ============================================================
-function raycasterFromPointerEvent(e) {
+window.raycasterFromPointerEvent = function(e) {
   var mx = (e.clientX / innerWidth) * 2 - 1;
   var my = -(e.clientY / innerHeight) * 2 + 1;
   var rc = new THREE.Raycaster();
   rc.setFromCamera(new THREE.Vector2(mx, my), camera);
   return rc;
 }
-function pointerCardHit(rc, e, screenPad) {
+window.pointerCardHit = function(rc, e, screenPad) {
   if (!shelfManager) return null;
   return shelfManager.raycastCards(rc) || (shelfManager.pickCardAtScreen && shelfManager.pickCardAtScreen(e.clientX, e.clientY, screenPad));
 }
-function isSideShelfFocusHit(e) {
+window.isSideShelfFocusHit = function(e) {
   if (!e || !shelfManager || !shelfManager.getMode || shelfManager.getMode() !== 'side') return false;
   if (shelfPinnedOpen) return true;
   if (shelfAlwaysVisible()) return !!pointerCardHit(raycasterFromPointerEvent(e), e, 18);
@@ -2094,7 +2094,7 @@ function isSideShelfFocusHit(e) {
   if (shelfVisibility > 0.34 && (isShelfClickZone(e) || isShelfPreviewUseZone(e))) return true;
   return !!(shelfPreviewIsVisible() && pointerCardHit(raycasterFromPointerEvent(e), e, 24));
 }
-function updateShelfCardHoverSelection(e) {
+window.updateShelfCardHoverSelection = function(e) {
   if (!shelfManager || !shelfManager.clearSelected || !shelfManager.setSelected) return;
   if (!e || document.body.classList.contains('splash-active') || isPointerOverUi(e)) {
     shelfManager.clearSelected();
@@ -2134,7 +2134,7 @@ function updateShelfCardHoverSelection(e) {
   if (hit && hit.card) shelfManager.setSelected(hit.card.index);
   else shelfManager.clearSelected();
 }
-function isShelfPlaylistPlayHit(hit) {
+window.isShelfPlaylistPlayHit = function(hit) {
   if (!hit || !hit.card || !hit.uv || !hit.card.item || hit.card.item.type !== 'playlist') return false;
   return hit.uv.x >= 0.49 && hit.uv.x <= 0.72 && hit.uv.y >= 0.13 && hit.uv.y <= 0.42;
 }
@@ -2244,7 +2244,7 @@ renderer.domElement.addEventListener('contextmenu', function(e){
 //   side 模式: 常驻不再用半屏预览区接管滚轮
 //   stage 模式: 鼠标 y > 60% 屏幕高
 //   shift + wheel: 强制滚卡片
-var wheelOverShelf = false;
+window.wheelOverShelf = false;
 renderer.domElement.addEventListener('wheel', function(e){
   if (isPointerOverUi(e)) return;
   if (!shelfManager || shelfManager.getMode() === 'off') return;
@@ -2283,10 +2283,10 @@ renderer.domElement.addEventListener('wheel', function(e){
 }, { passive: false, capture: true });
 
 // 键盘 / 全局事件
-function isFreeCameraControlCode(code) {
+window.isFreeCameraControlCode = function(code) {
   return /^(KeyW|KeyA|KeyS|KeyD|KeyQ|KeyE|Space|ShiftLeft|ShiftRight|ControlLeft|ControlRight)$/.test(code);
 }
-function consumeFreeCameraKeyEvent(e, isDown) {
+window.consumeFreeCameraKeyEvent = function(e, isDown) {
   if (isTypingTarget(e.target)) return false;
   if (isDown && e.code === 'KeyR') {
     e.preventDefault();

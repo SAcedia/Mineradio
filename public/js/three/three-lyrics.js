@@ -31,23 +31,23 @@ var stageLyrics = {
   lockFitScale: 1,
   snapCameraLockFrames: 0,
 };
-var lyricSunColor = new THREE.Color(0xffe6a4);
-var lyricSunHotColor = new THREE.Color(0xfff4cc);
-var lyricCameraDir = new THREE.Vector3();
-var lyricCameraRight = new THREE.Vector3();
-var lyricCameraUp = new THREE.Vector3();
-var lyricCameraTarget = new THREE.Vector3();
-var lyricLayoutBase = new THREE.Vector3();
-var lyricLayoutTarget = new THREE.Vector3();
-var lyricCoverWorldPos = new THREE.Vector3();
-var lyricCoverWorldQuat = new THREE.Quaternion();
-var lyricBaseEuler = new THREE.Euler(0, 0, 0, 'YXZ');
-var lyricTiltEuler = new THREE.Euler(0, 0, 0, 'YXZ');
-var lyricBaseQuat = new THREE.Quaternion();
-var lyricTiltQuat = new THREE.Quaternion();
-var lyricTargetQuat = new THREE.Quaternion();
-var LYRIC_CAMERA_LOCK_MAX_SCALE = 0.80;
-function setStageLyricViewBasisFromCameraOrQuaternion(fallbackQuat) {
+window.lyricSunColor = new THREE.Color(0xffe6a4);
+window.lyricSunHotColor = new THREE.Color(0xfff4cc);
+window.lyricCameraDir = new THREE.Vector3();
+window.lyricCameraRight = new THREE.Vector3();
+window.lyricCameraUp = new THREE.Vector3();
+window.lyricCameraTarget = new THREE.Vector3();
+window.lyricLayoutBase = new THREE.Vector3();
+window.lyricLayoutTarget = new THREE.Vector3();
+window.lyricCoverWorldPos = new THREE.Vector3();
+window.lyricCoverWorldQuat = new THREE.Quaternion();
+window.lyricBaseEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+window.lyricTiltEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+window.lyricBaseQuat = new THREE.Quaternion();
+window.lyricTiltQuat = new THREE.Quaternion();
+window.lyricTargetQuat = new THREE.Quaternion();
+window.LYRIC_CAMERA_LOCK_MAX_SCALE = 0.80;
+window.setStageLyricViewBasisFromCameraOrQuaternion = function(fallbackQuat) {
   if (fallbackQuat) {
     lyricCameraDir.set(0, 0, 1).applyQuaternion(fallbackQuat);
     lyricCameraRight.set(1, 0, 0).applyQuaternion(fallbackQuat);
@@ -65,18 +65,18 @@ function setStageLyricViewBasisFromCameraOrQuaternion(fallbackQuat) {
   lyricCameraRight.normalize();
   lyricCameraUp.normalize();
 }
-function applyStageLyricLayoutOffset(target, x, y, z) {
+window.applyStageLyricLayoutOffset = function(target, x, y, z) {
   return target
     .addScaledVector(lyricCameraRight, x || 0)
     .addScaledVector(lyricCameraUp, y || 0)
     .addScaledVector(lyricCameraDir, z || 0);
 }
-function stageLyricTargetQuaternion(baseQuat, tiltX, tiltY) {
+window.stageLyricTargetQuaternion = function(baseQuat, tiltX, tiltY) {
   lyricTiltEuler.set((tiltX || 0) * Math.PI / 180, (tiltY || 0) * Math.PI / 180, 0, 'YXZ');
   lyricTiltQuat.setFromEuler(lyricTiltEuler);
   return lyricTargetQuat.copy(baseQuat || lyricBaseQuat).multiply(lyricTiltQuat);
 }
-function getStageLyricLockBounds() {
+window.getStageLyricLockBounds = function() {
   var maxW = 0, maxH = 0;
   function take(mesh) {
     if (!mesh || !mesh.userData || !mesh.userData.lyric) return;
@@ -89,7 +89,7 @@ function getStageLyricLockBounds() {
   for (var i = 0; i < stageLyrics.outgoing.length; i++) take(stageLyrics.outgoing[i]);
   return { w: maxW || 5.4, h: maxH || 0.78 };
 }
-function lyricCameraLockFit(layoutScale, layoutX, layoutY, distance) {
+window.lyricCameraLockFit = function(layoutScale, layoutX, layoutY, distance) {
   if (!camera || !camera.isPerspectiveCamera) return 1;
   layoutScale = Math.max(0.1, layoutScale || 1);
   var fov = (camera.fov || 45) * Math.PI / 180;
@@ -107,15 +107,15 @@ function lyricCameraLockFit(layoutScale, layoutX, layoutY, distance) {
   return clampRange(Math.min(viewportFit, lockScaleCap), skullSafe ? 0.36 : 0.42, 1);
 }
 // 兼容旧变量名以便其它代码不破坏
-var lyricsParticles = null;
-var lyricsGeo = null;
+window.lyricsParticles = null;
+window.lyricsGeo = null;
 
 // 三个 attribute: 源位置(随机扩散态), 目标位置(组成字), color, brightness
-var lyricsAttrTargetA = null;
-var lyricsAttrTargetB = null;
-var lyricsAttrSeed = null;
+window.lyricsAttrTargetA = null;
+window.lyricsAttrTargetB = null;
+window.lyricsAttrSeed = null;
 
-function createLyricsParticles() {
+window.createLyricsParticles = function() {
   if (stageLyrics.group) {
     ensureLyricStarRiver();
     return;
@@ -126,7 +126,7 @@ function createLyricsParticles() {
   ensureLyricStarRiver();
 }
 
-function ensureLyricStarRiver() {
+window.ensureLyricStarRiver = function() {
   if (!stageLyrics.group || stageLyrics.starRiver) return stageLyrics.starRiver;
   var count = 420;
   var geo = new THREE.BufferGeometry();
@@ -211,7 +211,7 @@ function ensureLyricStarRiver() {
   return points;
 }
 
-function updateLyricStarRiver(dt) {
+window.updateLyricStarRiver = function(dt) {
   var river = ensureLyricStarRiver();
   if (!river || !river.material || !river.material.uniforms) return;
   if (fx && fx.preset === SKULL_PRESET_INDEX) {
@@ -241,7 +241,7 @@ function updateLyricStarRiver(dt) {
   river.rotation.z = Math.sin(t * 0.22) * 0.012;
 }
 
-function disposeLyricMesh(mesh) {
+window.disposeLyricMesh = function(mesh) {
   if (!mesh) return;
   if (mesh.parent) mesh.parent.remove(mesh);
   mesh.traverse(function(obj){
@@ -258,7 +258,7 @@ function disposeLyricMesh(mesh) {
   });
 }
 
-function rgbToHsl(r, g, b) {
+window.rgbToHsl = function(r, g, b) {
   r /= 255; g /= 255; b /= 255;
   var max = Math.max(r, g, b), min = Math.min(r, g, b);
   var h = 0, s = 0, l = (max + min) / 2;
@@ -272,7 +272,7 @@ function rgbToHsl(r, g, b) {
   }
   return { h:h, s:s, l:l };
 }
-function hslToRgb(h, s, l) {
+window.hslToRgb = function(h, s, l) {
   function hue2rgb(p, q, t) {
     if (t < 0) t += 1;
     if (t > 1) t -= 1;
@@ -292,39 +292,39 @@ function hslToRgb(h, s, l) {
   }
   return { r:Math.round(r * 255), g:Math.round(g * 255), b:Math.round(b * 255) };
 }
-function rgbCss(c, a) {
+window.rgbCss = function(c, a) {
   if (a == null) return 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
   return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + a + ')';
 }
-function normalizeCoverResolution(v) {
+window.normalizeCoverResolution = function(v) {
   return clampRange(Number(v) || 1, 0.75, 1.55);
 }
-function normalizePerformanceBackgroundMode(v, liveKeepFallback) {
+window.normalizePerformanceBackgroundMode = function(v, liveKeepFallback) {
   var value = String(v || '');
   if (value === 'keep' || liveKeepFallback === true) return 'keep';
   if (value === 'release') return 'release';
   return 'auto';
 }
-function normalizePerformanceQuality(v) {
+window.normalizePerformanceQuality = function(v) {
   var value = String(v || '');
   return /^(eco|balanced|high|ultra)$/.test(value) ? value : fxDefaults.performanceQuality;
 }
-function coverParticleGridForResolution(v) {
+window.coverParticleGridForResolution = function(v) {
   var grid = Math.round(118 * normalizeCoverResolution(v));
   grid = Math.max(88, Math.min(183, grid));
   return grid % 2 ? grid : grid + 1;
 }
-function coverParticleCountLabel(v) {
+window.coverParticleCountLabel = function(v) {
   var grid = coverParticleGridForResolution(v);
   return grid + 'x' + grid;
 }
-function coverTextureSizeForResolution(v) {
+window.coverTextureSizeForResolution = function(v) {
   v = normalizeCoverResolution(v);
   if (v >= 1.32) return 512;
   if (v >= 1.10) return 384;
   return 256;
 }
-function readSavedLyricLayout() {
+window.readSavedLyricLayout = function() {
   try {
     var savedLayoutRaw = localStorage.getItem(LYRIC_LAYOUT_STORE_KEY);
     var raw = savedLayoutRaw ? (JSON.parse(savedLayoutRaw) || {}) : packagedDefaultLyricLayoutRaw();
@@ -428,7 +428,7 @@ function readSavedLyricLayout() {
     return {};
   }
 }
-function saveLyricLayout() {
+window.saveLyricLayout = function() {
   try {
     var presetForSave = startupVisualPreviewActive && !playing && currentIdx < 0
       ? playbackVisualPreset
@@ -516,7 +516,7 @@ function saveLyricLayout() {
     }));
   } catch (e) {}
 }
-function normalizeHexColor(value, fallback) {
+window.normalizeHexColor = function(value, fallback) {
   var hex = String(value || '').trim();
   if (/^#[0-9a-f]{3}$/i.test(hex)) {
     hex = '#' + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2) + hex.charAt(3) + hex.charAt(3);
@@ -524,7 +524,7 @@ function normalizeHexColor(value, fallback) {
   fallback = /^#[0-9a-f]{6}$/i.test(String(fallback || '')) ? String(fallback).toLowerCase() : '#a9b8c8';
   return /^#[0-9a-f]{6}$/i.test(hex) ? hex.toLowerCase() : fallback;
 }
-function normalizeDesktopLyricsFps(value) {
+window.normalizeDesktopLyricsFps = function(value) {
   var n = Number(value);
   if (!isFinite(n) || n <= 0) return 0;
   if (n <= 26) return 24;
@@ -532,13 +532,13 @@ function normalizeDesktopLyricsFps(value) {
   if (n <= 90) return 60;
   return 120;
 }
-function normalizeShelfCameraMode(value) {
+window.normalizeShelfCameraMode = function(value) {
   return String(value || '') === 'static' ? 'static' : 'dynamic';
 }
-function shelfDefaultAngleForCameraMode(mode) {
+window.shelfDefaultAngleForCameraMode = function(mode) {
   return normalizeShelfCameraMode(mode) === 'static' ? -15 : 0;
 }
-function applyShelfCameraDefaultAngle(force) {
+window.applyShelfCameraDefaultAngle = function(force) {
   if (!fx) return;
   fx.shelfCameraMode = normalizeShelfCameraMode(fx.shelfCameraMode || fxDefaults.shelfCameraMode);
   if (force || fx.shelfAngleYManual !== true) {
@@ -548,15 +548,15 @@ function applyShelfCameraDefaultAngle(force) {
     fx.shelfAngleY = Math.round(clampRange(Number(fx.shelfAngleY) || 0, -30, 30));
   }
 }
-function normalizeShelfPresence(value) {
+window.normalizeShelfPresence = function(value) {
   return String(value || '') === 'always' ? 'always' : 'auto';
 }
-function normalizedShelfNumber(key, fallback, min, max) {
+window.normalizedShelfNumber = function(key, fallback, min, max) {
   var value = fx && fx[key] != null ? Number(fx[key]) : fallback;
   if (!isFinite(value)) value = fallback;
   return clampRange(value, min, max);
 }
-function shelfSettings() {
+window.shelfSettings = function() {
   var angleDeg = fx && fx.shelfAngleYManual === true
     ? normalizedShelfNumber('shelfAngleY', shelfDefaultAngleForCameraMode(fx.shelfCameraMode), -30, 30)
     : shelfDefaultAngleForCameraMode(fx && fx.shelfCameraMode);
@@ -571,32 +571,32 @@ function shelfSettings() {
     accent: normalizeHexColor((fx && fx.shelfAccentColor) || fxDefaults.shelfAccentColor, fxDefaults.shelfAccentColor)
   };
 }
-function shelfAlwaysVisible() {
+window.shelfAlwaysVisible = function() {
   return !!(fx && normalizeShelfPresence(fx.shelfPresence) === 'always');
 }
-function shouldUseShelfDynamicCamera(type) {
+window.shouldUseShelfDynamicCamera = function(type) {
   if (!/^shelf-/.test(String(type || ''))) return true;
   return !(fx && normalizeShelfCameraMode(fx.shelfCameraMode) === 'static');
 }
-function shelfAccentHex() {
+window.shelfAccentHex = function() {
   return normalizeHexColor((fx && fx.shelfAccentColor) || fxDefaults.shelfAccentColor, fxDefaults.shelfAccentColor);
 }
-function shelfAccentRgba(alpha, fallback) {
+window.shelfAccentRgba = function(alpha, fallback) {
   var rgb = hexToRgb(shelfAccentHex());
   if (!rgb) return fallback || 'rgba(244,210,138,' + alpha + ')';
   return 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + alpha + ')';
 }
-function rgbToHexColor(r, g, b) {
+window.rgbToHexColor = function(r, g, b) {
   function part(v) {
     return Math.max(0, Math.min(255, Math.round(v || 0))).toString(16).padStart(2, '0');
   }
   return '#' + part(r) + part(g) + part(b);
 }
-function normalizeLyricFontKey(value) {
+window.normalizeLyricFontKey = function(value) {
   value = String(value || 'sans');
   return /^(sans|hei|song|bold-song|stone-song|kai-song|serif-en|gothic|editorial|humanist|round|mono|display)$/.test(value) ? value : 'sans';
 }
-function lyricFontStackForKey(key) {
+window.lyricFontStackForKey = function(key) {
   key = normalizeLyricFontKey(key);
   if (key === 'hei') return '"Noto Sans SC","Microsoft YaHei",SimHei,"PingFang SC",sans-serif';
   if (key === 'song') return '"Noto Serif SC","Source Han Serif SC",SimSun,"Songti SC",serif';
@@ -612,20 +612,20 @@ function lyricFontStackForKey(key) {
   if (key === 'display') return '"Alibaba PuHuiTi","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif';
   return 'Inter,"Noto Sans SC","PingFang SC","Microsoft YaHei",Arial,sans-serif';
 }
-function lyricFontWeightValue() {
+window.lyricFontWeightValue = function() {
   if (normalizeLyricFontKey(fx && fx.lyricFont) === 'stone-song') return 900;
   return Math.round(clampRange(Number(fx && fx.lyricWeight) || 900, 500, 900) / 50) * 50;
 }
-function lyricFontCss(fontSize) {
+window.lyricFontCss = function(fontSize) {
   return lyricFontWeightValue() + ' ' + fontSize + 'px ' + lyricFontStackForKey(fx && fx.lyricFont);
 }
-function lyricLetterSpacingPx(fontSize) {
+window.lyricLetterSpacingPx = function(fontSize) {
   return clampRange(Number(fx && fx.lyricLetterSpacing) || 0, -0.04, 0.18) * Math.max(1, fontSize || 1);
 }
-function lyricLineHeightFactor() {
+window.lyricLineHeightFactor = function() {
   return clampRange(Number(fx && fx.lyricLineHeight) || 1, 0.86, 1.35);
 }
-function measureTextWithLetterSpacing(ctx, text, spacing) {
+window.measureTextWithLetterSpacing = function(ctx, text, spacing) {
   text = String(text || '');
   spacing = Number(spacing) || 0;
   if (!spacing || text.length < 2) return ctx.measureText(text).width;
@@ -637,10 +637,10 @@ function measureTextWithLetterSpacing(ctx, text, spacing) {
   }
   return Math.max(1, w);
 }
-function lyricMeasureText(ctx, text, fontSize) {
+window.lyricMeasureText = function(ctx, text, fontSize) {
   return measureTextWithLetterSpacing(ctx, text, lyricLetterSpacingPx(fontSize));
 }
-function drawTextWithLetterSpacing(ctx, text, x, y, spacing, stroke) {
+window.drawTextWithLetterSpacing = function(ctx, text, x, y, spacing, stroke) {
   text = String(text || '');
   spacing = Number(spacing) || 0;
   if (!spacing || text.length < 2) {
@@ -663,13 +663,13 @@ function drawTextWithLetterSpacing(ctx, text, x, y, spacing, stroke) {
   }
   ctx.textAlign = align;
 }
-function lyricFillText(ctx, text, x, y, fontSize) {
+window.lyricFillText = function(ctx, text, x, y, fontSize) {
   drawTextWithLetterSpacing(ctx, text, x, y, lyricLetterSpacingPx(fontSize), false);
 }
-function lyricStrokeText(ctx, text, x, y, fontSize) {
+window.lyricStrokeText = function(ctx, text, x, y, fontSize) {
   drawTextWithLetterSpacing(ctx, text, x, y, lyricLetterSpacingPx(fontSize), true);
 }
-function applyStonePrintTexture(ctx, W, H, fontSize) {
+window.applyStonePrintTexture = function(ctx, W, H, fontSize) {
   if (normalizeLyricFontKey(fx && fx.lyricFont) !== 'stone-song') return;
   var size = clampRange(fontSize || 128, 42, 180);
   var bandTop = H * 0.10;
@@ -738,7 +738,7 @@ function applyStonePrintTexture(ctx, W, H, fontSize) {
   }
   ctx.restore();
 }
-function hexToRgb(hex) {
+window.hexToRgb = function(hex) {
   hex = normalizeHexColor(hex).slice(1);
   return {
     r: parseInt(hex.slice(0, 2), 16),
@@ -746,14 +746,14 @@ function hexToRgb(hex) {
     b: parseInt(hex.slice(4, 6), 16)
   };
 }
-function normalizeCustomBackgroundImage(value) {
+window.normalizeCustomBackgroundImage = function(value) {
   var src = String(value || '').trim();
   if (!src) return '';
   if (/^data:image\/(png|jpe?g|webp);base64,/i.test(src)) return src;
   if (/^https?:\/\//i.test(src)) return src;
   return '';
 }
-function normalizeCustomBackgroundMedia(value) {
+window.normalizeCustomBackgroundMedia = function(value) {
   if (!value) return null;
   if (typeof value === 'string') {
     var img = normalizeCustomBackgroundImage(value);
@@ -782,16 +782,16 @@ function normalizeCustomBackgroundMedia(value) {
   }
   return null;
 }
-function customBackgroundMediaLabel(media) {
+window.customBackgroundMediaLabel = function(media) {
   media = normalizeCustomBackgroundMedia(media);
   if (!media) return '未设置';
   return media.type === 'video' ? '视频已设置' : '图片已设置';
 }
-var CUSTOM_BG_DB_NAME = 'mineradio-custom-background-v1';
-var CUSTOM_BG_STORE = 'media';
-var customBgObjectUrl = '';
-var customBgApplyToken = 0;
-function openCustomBackgroundDb() {
+window.CUSTOM_BG_DB_NAME = 'mineradio-custom-background-v1';
+window.CUSTOM_BG_STORE = 'media';
+window.customBgObjectUrl = '';
+window.customBgApplyToken = 0;
+window.openCustomBackgroundDb = function() {
   return new Promise(function(resolve, reject){
     if (!window.indexedDB) { reject(new Error('indexedDB unavailable')); return; }
     var req = indexedDB.open(CUSTOM_BG_DB_NAME, 1);
@@ -803,7 +803,7 @@ function openCustomBackgroundDb() {
     req.onerror = function(){ reject(req.error || new Error('indexedDB open failed')); };
   });
 }
-async function putCustomBackgroundBlob(id, blob, meta) {
+window.putCustomBackgroundBlob = async function(id, blob, meta) {
   var db = await openCustomBackgroundDb();
   return new Promise(function(resolve, reject){
     var tx = db.transaction(CUSTOM_BG_STORE, 'readwrite');
@@ -812,7 +812,7 @@ async function putCustomBackgroundBlob(id, blob, meta) {
     tx.onerror = function(){ db.close(); reject(tx.error || new Error('indexedDB put failed')); };
   });
 }
-async function getCustomBackgroundBlob(id) {
+window.getCustomBackgroundBlob = async function(id) {
   var db = await openCustomBackgroundDb();
   return new Promise(function(resolve, reject){
     var tx = db.transaction(CUSTOM_BG_STORE, 'readonly');
@@ -822,7 +822,7 @@ async function getCustomBackgroundBlob(id) {
     tx.oncomplete = function(){ db.close(); };
   });
 }
-var colorLabState = { picker: null, id: '', h: 0, s: 1, v: 1, dragging: false };
+window.colorLabState = { picker: null, id: '', h: 0, s: 1, v: 1, dragging: false };
 var COLOR_LAB_PRESETS = [
   { name: '极黑', color: '#000000' },
   { name: '极白', color: '#ffffff' },
@@ -833,7 +833,7 @@ var COLOR_LAB_PRESETS = [
   { name: '午夜紫', color: '#2b164f' },
   { name: '银雾', color: '#d9dde2' }
 ];
-function rgbToHsv(r, g, b) {
+window.rgbToHsv = function(r, g, b) {
   r /= 255; g /= 255; b /= 255;
   var max = Math.max(r, g, b), min = Math.min(r, g, b);
   var d = max - min, h = 0;
@@ -844,7 +844,7 @@ function rgbToHsv(r, g, b) {
   }
   return { h: h, s: max === 0 ? 0 : d / max, v: max };
 }
-function hsvToHex(h, s, v) {
+window.hsvToHex = function(h, s, v) {
   h = ((h % 1) + 1) % 1; s = clampRange(s, 0, 1); v = clampRange(v, 0, 1);
   var i = Math.floor(h * 6), f = h * 6 - i;
   var p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
@@ -859,7 +859,7 @@ function hsvToHex(h, s, v) {
   }
   return rgbToHexColor(r * 255, g * 255, b * 255);
 }
-function applyColorLabValue(hex, silent) {
+window.applyColorLabValue = function(hex, silent) {
   hex = normalizeHexColor(hex || '#000000', '#000000');
   var id = colorLabState.id;
   if (id === 'ui-accent-picker') setUiAccentColor(hex, true);
@@ -874,7 +874,7 @@ function applyColorLabValue(hex, silent) {
   else if (id === 'lyric-glow-picker') setLyricGlowCustom(hex, true);
   if (!silent) showToast('颜色: ' + hex.toUpperCase());
 }
-function syncColorLabUi(hex) {
+window.syncColorLabUi = function(hex) {
   hex = normalizeHexColor(hex || '#000000', '#000000');
   var rgb = hexToRgb(hex);
   var hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
@@ -896,13 +896,13 @@ function syncColorLabUi(hex) {
   if (hexInput) hexInput.value = hex.toUpperCase();
   if (preview) preview.style.setProperty('--lab-color', hex);
 }
-function closeColorLab() {
+window.closeColorLab = function() {
   var pop = document.getElementById('color-lab-pop');
   if (pop) pop.classList.remove('show');
   colorLabState.picker = null;
   colorLabState.id = '';
 }
-function placeFxFloatingPanel(pop, anchor, opts) {
+window.placeFxFloatingPanel = function(pop, anchor, opts) {
   if (!pop || !anchor || !anchor.getBoundingClientRect) return;
   opts = opts || {};
   var gap = opts.gap == null ? 12 : opts.gap;
@@ -931,7 +931,7 @@ function placeFxFloatingPanel(pop, anchor, opts) {
   pop.style.top = Math.round(top) + 'px';
   pop.style.transform = 'none';
 }
-function openColorLabForPicker(picker) {
+window.openColorLabForPicker = function(picker) {
   var pop = document.getElementById('color-lab-pop');
   if (!picker || !pop) return;
   if (pop.classList.contains('show') && colorLabState.picker === picker) {
@@ -953,7 +953,7 @@ function openColorLabForPicker(picker) {
   pop.classList.add('show');
   placeFxFloatingPanel(pop, label || picker, { gap: 12, pad: 14 });
 }
-function updateColorLabFromSv(e) {
+window.updateColorLabFromSv = function(e) {
   var sv = document.getElementById('color-lab-sv');
   if (!sv) return;
   var rect = sv.getBoundingClientRect();
@@ -963,7 +963,7 @@ function updateColorLabFromSv(e) {
   syncColorLabUi(hex);
   applyColorLabValue(hex, true);
 }
-function bindColorLabPicker(picker) {
+window.bindColorLabPicker = function(picker) {
   if (!picker || picker._colorLabBound) return;
   picker._colorLabBound = true;
   picker.setAttribute('aria-haspopup', 'dialog');
@@ -988,13 +988,13 @@ function bindColorLabPicker(picker) {
     if (e.key === 'Enter' || e.key === ' ') openFromPickerEvent(e);
   });
 }
-function liftFxFloatingPopups() {
+window.liftFxFloatingPopups = function() {
   ['cover-color-pop', 'color-lab-pop', 'cover-color-loupe'].forEach(function(id){
     var el = document.getElementById(id);
     if (el && el.parentElement !== document.body) document.body.appendChild(el);
   });
 }
-function bindColorLabRows() {
+window.bindColorLabRows = function() {
   document.querySelectorAll('.lyric-color-row').forEach(function(row){
     if (!row || row._colorLabRowBound || row.classList.contains('linked')) return;
     var picker = row.querySelector('.lyric-color-picker');
@@ -1010,7 +1010,7 @@ function bindColorLabRows() {
     });
   });
 }
-function repositionFxFloatingPanels() {
+window.repositionFxFloatingPanels = function() {
   var colorPop = document.getElementById('color-lab-pop');
   if (colorPop && colorPop.classList.contains('show') && colorLabState.picker) {
     placeFxFloatingPanel(colorPop, colorLabState.picker.closest('.lyric-color-row') || colorLabState.picker, { gap: 12, pad: 14 });
@@ -1024,19 +1024,19 @@ window.addEventListener('resize', function(){
   if (window.requestAnimationFrame) requestAnimationFrame(repositionFxFloatingPanels);
   else repositionFxFloatingPanels();
 });
-function uiAccentHex(fallback) {
+window.uiAccentHex = function(fallback) {
   return normalizeHexColor((fx && fx.uiAccentColor) || fallback || '#00f5d4', fallback || '#00f5d4');
 }
-function uiAccentRgba(alpha, fallback) {
+window.uiAccentRgba = function(alpha, fallback) {
   var c = hexToRgb(uiAccentHex(fallback));
   return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (alpha == null ? 1 : alpha) + ')';
 }
-function readableInkForHex(hex) {
+window.readableInkForHex = function(hex) {
   var c = hexToRgb(hex || '#00f5d4');
   var lum = (c.r * 0.299 + c.g * 0.587 + c.b * 0.114) / 255;
   return lum > 0.54 ? '#06100f' : '#f8fbff';
 }
-function lyricPaletteFromHex(hex) {
+window.lyricPaletteFromHex = function(hex) {
   var c = hexToRgb(hex);
   var hsl = rgbToHsl(c.r, c.g, c.b);
   var neutral = hsl.s < 0.035;
@@ -1058,7 +1058,7 @@ function lyricPaletteFromHex(hex) {
     glow: rgbCss(primary, 0.26),
   };
 }
-function silverBlueLyricPalette() {
+window.silverBlueLyricPalette = function() {
   return {
     primary: '#d8f1ff',
     secondary: '#9db8cf',
@@ -1067,34 +1067,34 @@ function silverBlueLyricPalette() {
     glow: 'rgba(138,190,255,0.26)',
   };
 }
-function setLyricSparkOpacity(data, value) {
+window.setLyricSparkOpacity = function(data, value) {
   if (!data || !data.sparkMat) return;
   value = clampRange(Number(value) || 0, 0, 1);
   if (data.sparkMat.uniforms && data.sparkMat.uniforms.uOpacity) data.sparkMat.uniforms.uOpacity.value = value;
   else data.sparkMat.opacity = value;
 }
-function getLyricSparkOpacity(data) {
+window.getLyricSparkOpacity = function(data) {
   if (!data || !data.sparkMat) return 0;
   if (data.sparkMat.uniforms && data.sparkMat.uniforms.uOpacity) return Number(data.sparkMat.uniforms.uOpacity.value) || 0;
   return Number(data.sparkMat.opacity) || 0;
 }
-function setLyricSparkSize(data, value) {
+window.setLyricSparkSize = function(data, value) {
   if (!data || !data.sparkMat) return;
   value = Math.max(0.002, Number(value) || 0.035);
   if (data.sparkMat.uniforms && data.sparkMat.uniforms.uSize) data.sparkMat.uniforms.uSize.value = value;
   else data.sparkMat.size = value;
 }
-function getLyricSparkSize(data) {
+window.getLyricSparkSize = function(data) {
   if (!data || !data.sparkMat) return 0.035;
   if (data.sparkMat.uniforms && data.sparkMat.uniforms.uSize) return Number(data.sparkMat.uniforms.uSize.value) || 0.035;
   return Number(data.sparkMat.size) || 0.035;
 }
-function setLyricSparkColor(data, color) {
+window.setLyricSparkColor = function(data, color) {
   if (!data || !data.sparkMat) return;
   if (data.sparkMat.uniforms && data.sparkMat.uniforms.uColor) data.sparkMat.uniforms.uColor.value.copy(color);
   else if (data.sparkMat.color) data.sparkMat.color.copy(color);
 }
-function applyLyricPaletteToMesh(mesh) {
+window.applyLyricPaletteToMesh = function(mesh) {
   if (!mesh || !mesh.userData || !mesh.userData.lyric) return;
   var pal = stageLyrics.palette || {};
   var data = mesh.userData.lyric;
@@ -1112,7 +1112,7 @@ function applyLyricPaletteToMesh(mesh) {
   if (data.sparkMat) setLyricSparkColor(data, lyricThreeColor(pal.highlight || pal.secondary || pal.primary, '#fff0b8', 0.46));
   if (data.sunMat) data.sunMat.color.copy(lyricThreeColor(pal.highlight || pal.secondary || pal.primary, '#fff0b8', 0.50));
 }
-function effectiveLyricPalette(pal) {
+window.effectiveLyricPalette = function(pal) {
   var src = pal || stageLyrics.coverPalette || stageLyrics.palette || {};
   var out = {
     primary: src.primary || '#d6f8ff',
@@ -1137,7 +1137,7 @@ function effectiveLyricPalette(pal) {
   if (!out.glowColor) out.glowColor = out.secondary;
   return out;
 }
-function setStageLyricPalette(pal) {
+window.setStageLyricPalette = function(pal) {
   stageLyrics.palette = effectiveLyricPalette(pal);
   lyricSunColor.copy(lyricThreeColor(stageLyrics.palette.glowColor || stageLyrics.palette.secondary || stageLyrics.palette.primary, '#ffe6a4', 0.44));
   lyricSunHotColor.copy(lyricThreeColor(stageLyrics.palette.highlight || stageLyrics.palette.primary, '#fff4cc', 0.54));
@@ -1145,7 +1145,7 @@ function setStageLyricPalette(pal) {
   stageLyrics.outgoing.forEach(applyLyricPaletteToMesh);
   syncSkullParticleColors();
 }
-function lyricTextPaletteFromHsl(hsl, avgL, chroma) {
+window.lyricTextPaletteFromHsl = function(hsl, avgL, chroma) {
   if (avgL < 0.16 || chroma < 0.08) {
     return silverBlueLyricPalette();
   }
@@ -1172,7 +1172,7 @@ function lyricTextPaletteFromHsl(hsl, avgL, chroma) {
     glow: rgbCss(c1, lightText ? 0.24 : 0.14),
   };
 }
-function updateLyricPaletteFromCover(coverCanvas) {
+window.updateLyricPaletteFromCover = function(coverCanvas) {
   if (!coverCanvas) return;
   try {
     var ctx = coverCanvas.getContext('2d');
@@ -1202,7 +1202,7 @@ function updateLyricPaletteFromCover(coverCanvas) {
   } catch (e) {}
 }
 
-function wrapLyricText(ctx, text, maxWidth, maxLines, fontSize) {
+window.wrapLyricText = function(ctx, text, maxWidth, maxLines, fontSize) {
   text = String(text || '').trim();
   var useWords = /\s/.test(text) && /[A-Za-z0-9]/.test(text);
   var units = useWords ? text.split(/(\s+)/).filter(Boolean) : text.split('');
@@ -1225,7 +1225,7 @@ function wrapLyricText(ctx, text, maxWidth, maxLines, fontSize) {
   return lines.length ? lines : [''];
 }
 
-function cssColorToThreeColor(css, fallback) {
+window.cssColorToThreeColor = function(css, fallback) {
   var c = new THREE.Color(fallback || '#d6f8ff');
   var value = String(css || fallback || '#d6f8ff').trim();
   try {
@@ -1248,7 +1248,7 @@ function cssColorToThreeColor(css, fallback) {
   }
   return c;
 }
-function lyricThreeColor(css, fallback, minLum) {
+window.lyricThreeColor = function(css, fallback, minLum) {
   var c = cssColorToThreeColor(css, fallback || '#d6f8ff');
   var lum = c.r * 0.299 + c.g * 0.587 + c.b * 0.114;
   var floor = minLum == null ? 0.34 : minLum;
@@ -1261,9 +1261,9 @@ function lyricThreeColor(css, fallback, minLum) {
   return c;
 }
 
-var STAGE_LYRIC_MAX_LINES = 1;
+window.STAGE_LYRIC_MAX_LINES = 1;
 
-function makeLyricMask(text) {
+window.makeLyricMask = function(text) {
   var canvas = document.createElement('canvas');
   var W = 2048, H = 384;
   canvas.width = W; canvas.height = H;
@@ -1315,7 +1315,7 @@ function makeLyricMask(text) {
   return { texture:tex, width:W, height:H, textWidth:width, textHeight:blockH, fontSize:fontSize, lineHeight:lineHeight, lineCount:lines.length, lines:lines, fitScaleX:fitScaleX, textMin:(W / 2 - width / 2) / W, textMax:(W / 2 + width / 2) / W };
 }
 
-function makeLyricReadabilityTexture(mask) {
+window.makeLyricReadabilityTexture = function(mask) {
   var canvas = document.createElement('canvas');
   var W = mask && mask.width || 2048;
   var H = mask && mask.height || 384;
@@ -1390,7 +1390,7 @@ function makeLyricReadabilityTexture(mask) {
   return tex;
 }
 
-function makeLyricGlowTexture(text, fontSize, textWidth, lines, lineHeight, fitScaleX) {
+window.makeLyricGlowTexture = function(text, fontSize, textWidth, lines, lineHeight, fitScaleX) {
   text = String(text || '').replace(/\s+/g, ' ').trim();
   var drawLines = Array.isArray(lines) && lines.length ? lines : [text];
   var canvas = document.createElement('canvas');
@@ -1496,8 +1496,8 @@ function makeLyricGlowTexture(text, fontSize, textWidth, lines, lineHeight, fitS
   return tex;
 }
 
-var lyricSunBloomTexture = null;
-function getLyricSunBloomTexture() {
+window.lyricSunBloomTexture = null;
+window.getLyricSunBloomTexture = function() {
   if (lyricSunBloomTexture) return lyricSunBloomTexture;
   var canvas = document.createElement('canvas');
   canvas.width = 1024; canvas.height = 512;
@@ -1559,7 +1559,7 @@ function getLyricSunBloomTexture() {
   return lyricSunBloomTexture;
 }
 
-function makeLyricShaderMaterial(mask, pal) {
+window.makeLyricShaderMaterial = function(mask, pal) {
   return new THREE.ShaderMaterial({
     uniforms: {
       uMap: { value: mask.texture },
@@ -1603,7 +1603,7 @@ function makeLyricShaderMaterial(mask, pal) {
   });
 }
 
-function buildLyricMesh(text) {
+window.buildLyricMesh = function(text) {
   text = String(text || '').replace(/\s+/g, ' ').trim();
   var mask = makeLyricMask(text);
   var pal = stageLyrics.palette;
@@ -1732,7 +1732,7 @@ function buildLyricMesh(text) {
   return group;
 }
 
-function updateLyricMeshProgress(mesh, progress) {
+window.updateLyricMeshProgress = function(mesh, progress) {
   if (!mesh || !mesh.userData || !mesh.userData.lyric) return;
   progress = Math.max(0, Math.min(1, progress || 0));
   var d = mesh.userData.lyric;
@@ -1740,7 +1740,7 @@ function updateLyricMeshProgress(mesh, progress) {
   mesh.userData.lastLyricProgress = progress;
 }
 
-function showStageLine(text, redrawOnly) {
+window.showStageLine = function(text, redrawOnly) {
   createLyricsParticles();
   if (!stageLyrics.group) return;
   if (!text) { clearStageLyrics(); return; }
@@ -1758,7 +1758,7 @@ function showStageLine(text, redrawOnly) {
   stageLyrics.current = mesh;
 }
 
-function refreshCurrentLyricStyle() {
+window.refreshCurrentLyricStyle = function() {
   if (!stageLyrics || !stageLyrics.currentText || !stageLyrics.current) return;
   var progress = stageLyrics.current.userData ? (stageLyrics.current.userData.lastLyricProgress || 0) : 0;
   showStageLine(stageLyrics.currentText, true);
@@ -1766,7 +1766,7 @@ function refreshCurrentLyricStyle() {
   if (stageLyrics.current && stageLyrics.current.userData) stageLyrics.current.userData.age = 0.48;
 }
 
-function clearStageLyrics() {
+window.clearStageLyrics = function() {
   disposeLyricMesh(stageLyrics.current);
   stageLyrics.current = null;
   stageLyrics.currentIdx = -1;
@@ -1774,7 +1774,7 @@ function clearStageLyrics() {
   while (stageLyrics.outgoing.length) disposeLyricMesh(stageLyrics.outgoing.pop());
 }
 
-function updateStageLyrics3D(dt) {
+window.updateStageLyrics3D = function(dt) {
   if (!stageLyrics.group) return;
   if (!fx.particleLyrics && !stageLyrics.current && (!stageLyrics.outgoing || !stageLyrics.outgoing.length)) return;
   if (!isFinite(stageLyrics.highBloom)) stageLyrics.highBloom = 0;
@@ -2065,7 +2065,7 @@ function updateStageLyrics3D(dt) {
   }
 }
 
-function getLyricLineProgress(line, nextLine, now) {
+window.getLyricLineProgress = function(line, nextLine, now) {
   if (!line) return 0;
   now += line.words && line.words.length ? 0.030 : 0.020;
   if (line.words && line.words.length && line.charCount > 0) {
@@ -2089,7 +2089,7 @@ function getLyricLineProgress(line, nextLine, now) {
   return prog * prog * (3 - 2 * prog);
 }
 
-function tickLyricsParticles() {
+window.tickLyricsParticles = function() {
   if (!fx.particleLyrics) {
     if (stageLyrics.current || stageLyrics.currentText || (stageLyrics.outgoing && stageLyrics.outgoing.length)) clearStageLyrics();
     return;
@@ -2140,7 +2140,7 @@ function tickLyricsParticles() {
   }
 }
 
-function disposeLyricsParticles() {
+window.disposeLyricsParticles = function() {
   clearStageLyrics();
   if (stageLyrics.starRiver) {
     if (stageLyrics.starRiver.parent) stageLyrics.starRiver.parent.remove(stageLyrics.starRiver);

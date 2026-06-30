@@ -1,8 +1,15 @@
 // shared.js — cross-file utilities, constants, and dependencies
 // Loads FIRST (after vendors, before all module JS)
 
-var audio = null, audioCtx = null, source = null, analyser = null, beatAnalyser = null, gainNode = null, audioReady = false;
-function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+window.audio = null;
+window.audioCtx = null;
+window.source = null;
+window.analyser = null;
+window.beatAnalyser = null;
+window.gainNode = null;
+window.audioReady = false;
+window.clamp01 = function(v) {
+ return Math.max(0, Math.min(1, v)); }
 function clampRange(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
 function songProviderKey(song) {

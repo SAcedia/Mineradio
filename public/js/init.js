@@ -1,4 +1,4 @@
-var prevTime = performance.now();
+window.prevTime = performance.now();
 var renderPerfState = {
   mode: 'vsync',
   fps: 0,
@@ -9,11 +9,11 @@ var renderPerfState = {
   lastSampleAt: performance.now()
 };
 window.__mineradioPerf = renderPerfState;
-var splashWarmRenderLast = 0;
-function isMainSceneCoveredBySplash() {
+window.splashWarmRenderLast = 0;
+window.isMainSceneCoveredBySplash = function() {
   return document.body.classList.contains('splash-active') && !document.body.classList.contains('splash-revealing');
 }
-function getAdaptiveRenderFps() {
+window.getAdaptiveRenderFps = function() {
   if (isDeepBackgroundMode()) return 1;
   if (RENDER_VISIBLE_VSYNC) return 0;
   var tier = (typeof getRenderLoadTier === 'function') ? getRenderLoadTier() : 0;
@@ -26,7 +26,7 @@ function getAdaptiveRenderFps() {
   if (tier >= 1) return RENDER_LARGE_FPS;
   return RENDER_ACTIVE_FPS;
 }
-function shouldSkipAdaptiveRenderFrame(now) {
+window.shouldSkipAdaptiveRenderFrame = function(now) {
   var fps = getAdaptiveRenderFps();
   renderPerfState.mode = fps ? (fps + 'fps') : 'vsync';
   if (!fps) {
@@ -41,7 +41,7 @@ function shouldSkipAdaptiveRenderFrame(now) {
   renderPerfState.lastRenderAt = now;
   return false;
 }
-function sampleRenderPerf(now, dt) {
+window.sampleRenderPerf = function(now, dt) {
   renderPerfState.frames += 1;
   if (dt > 0.034) renderPerfState.longFrames += 1;
   if (now - renderPerfState.lastSampleAt >= 1000) {
@@ -51,7 +51,7 @@ function sampleRenderPerf(now, dt) {
   }
   maybeTrimRuntimeCaches(now);
 }
-function animate() {
+window.animate = function() {
   requestAnimationFrame(animate);
   var now = performance.now();
   if (shouldSkipAdaptiveRenderFrame(now)) return;

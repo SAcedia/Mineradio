@@ -1,23 +1,23 @@
 //  登录系统
 // ============================================================
-function onUserBtnClick() {
+window.onUserBtnClick = function() {
   if (hasAnyPlatformLogin()) showUserModal();
   else showLoginModal();
 }
-function platformMeta(provider) {
+window.platformMeta = function(provider) {
   if (provider === 'qq') return { key: 'qq', short: 'QQ', label: 'QQ 音乐', app: 'QQ 音乐 App', dot: 'qq' };
   if (provider === 'youtube') return { key: 'youtube', short: 'YT', label: 'YouTube', app: 'YouTube', dot: 'youtube' };
   return { key: 'netease', short: 'NE', label: '网易云音乐', app: '网易云音乐 App', dot: 'netease' };
 }
-function platformStatus(provider) {
+window.platformStatus = function(provider) {
   if (provider === 'qq') return qqLoginStatus;
   return loginStatus;
 }
-function providerVipType(provider, status) {
+window.providerVipType = function(provider, status) {
   status = status || platformStatus(provider) || {};
   return Number(status.vipType || status.vip_type || status.vip || status.isVip || status.is_vip || 0) || 0;
 }
-function providerVipLevel(provider, status) {
+window.providerVipLevel = function(provider, status) {
   status = status || platformStatus(provider) || {};
   var raw = String(status.vipLevel || status.vip_level || '').toLowerCase();
   if (raw === 'svip' || raw === 'vip' || raw === 'none') return raw;
@@ -29,13 +29,13 @@ function providerVipLevel(provider, status) {
   }
   return vip > 0 ? 'vip' : 'none';
 }
-function hasProviderVip(provider, status) {
+window.hasProviderVip = function(provider, status) {
   return providerVipLevel(provider, status) !== 'none';
 }
-function hasProviderSvip(provider, status) {
+window.hasProviderSvip = function(provider, status) {
   return provider === 'netease' && providerVipLevel(provider, status) === 'svip';
 }
-function providerVipBadge(provider, status, idAttr) {
+window.providerVipBadge = function(provider, status, idAttr) {
   if (!hasProviderVip(provider, status)) return '';
   var id = idAttr ? ' id="' + idAttr + '"' : '';
   var cls = 'top-account-vip' + (provider === 'qq' ? ' qq' : '');
@@ -43,20 +43,20 @@ function providerVipBadge(provider, status, idAttr) {
   var label = provider === 'qq' ? 'QQ VIP' : (level === 'svip' ? 'SVIP' : 'VIP');
   return '<span' + id + ' class="' + cls + '">' + label + '</span>';
 }
-function hasPlatformLogin(provider) {
+window.hasPlatformLogin = function(provider) {
   var st = platformStatus(provider);
   return !!(st && st.loggedIn);
 }
-function hasAnyPlatformLogin() {
+window.hasAnyPlatformLogin = function() {
   return hasPlatformLogin('netease') || hasPlatformLogin('qq');
 }
-function firstLoggedProvider() {
+window.firstLoggedProvider = function() {
   if (hasPlatformLogin(activeAccountProvider)) return activeAccountProvider;
   if (hasPlatformLogin('netease')) return 'netease';
   if (hasPlatformLogin('qq')) return 'qq';
   return 'netease';
 }
-function providerAvatarSrc(provider, status) {
+window.providerAvatarSrc = function(provider, status) {
   status = status || platformStatus(provider) || {};
   if (status.avatar) return avatarSrc(status.avatar);
   var meta = platformMeta(provider);
@@ -65,7 +65,7 @@ function providerAvatarSrc(provider, status) {
   var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><rect width="96" height="96" rx="48" fill="' + bg + '"/><circle cx="48" cy="48" r="34" fill="' + fill + '" opacity=".16"/><text x="48" y="56" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="' + fill + '">' + meta.short + '</text></svg>';
   return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
 }
-function renderTopAccountPill(provider) {
+window.renderTopAccountPill = function(provider) {
   var st = platformStatus(provider);
   if (!st || !st.loggedIn) return '';
   var meta = platformMeta(provider);
@@ -77,7 +77,7 @@ function renderTopAccountPill(provider) {
     vipTag +
   '</span>';
 }
-async function refreshLoginStatus(force) {
+window.refreshLoginStatus = async function(force) {
   try {
     var info = await neteaseLoginStatus();
     loginStatusChecked = true;
@@ -107,7 +107,7 @@ async function refreshLoginStatus(force) {
     return null;
   }
 }
-function normalizeQQLoginStatus(info) {
+window.normalizeQQLoginStatus = function(info) {
   var fallback = { provider: 'qq', loggedIn: false, preview: false, nickname: 'QQ 音乐', userId: '', avatar: '', vipType: 0, stale: false, playbackKeyReady: false };
   if (!info || !info.loggedIn) return Object.assign({}, fallback, info || {}, {
     provider: 'qq',
@@ -129,7 +129,7 @@ function normalizeQQLoginStatus(info) {
     stale: !!info.stale || !!(info.profileUnavailable && !(info.nickname && info.avatar))
   });
 }
-async function refreshQQLoginStatus() {
+window.refreshQQLoginStatus = async function() {
   try {
     var info = await qqLoginStatus();
     var prevLogged = !!qqLoginStatus.loggedIn;
@@ -158,13 +158,13 @@ async function refreshQQLoginStatus() {
     return qqLoginStatus;
   }
 }
-function startQQLoginStatusAutoRefresh() {
+window.startQQLoginStatusAutoRefresh = function() {
   if (qqLoginAutoRefreshTimer) clearInterval(qqLoginAutoRefreshTimer);
   qqLoginAutoRefreshTimer = setInterval(function(){
     refreshQQLoginStatus().catch(function(e){ console.warn('QQ login auto refresh failed:', e); });
   }, 45000);
 }
-function renderUserBtn() {
+window.renderUserBtn = function() {
   var btn = document.getElementById('user-btn');
   if (!btn) return;
   btn.classList.remove('multi-account');
@@ -192,7 +192,7 @@ function renderUserBtn() {
   }
   updatePlaybackQualityUi();
 }
-async function showLoginModal(opts) {
+window.showLoginModal = async function(opts) {
   opts = opts || {};
   if (opts.provider) loginProvider = opts.provider === 'qq' ? 'qq' : 'netease';
   var modal = document.getElementById('login-modal');
@@ -200,16 +200,16 @@ async function showLoginModal(opts) {
   updateLoginProviderUi();
   await refreshQr();
 }
-function closeLoginModal() {
+window.closeLoginModal = function() {
   stopQrPoll();
   closeGsapModal(document.getElementById('login-modal'));
 }
-function setLoginProvider(provider, silent) {
+window.setLoginProvider = function(provider, silent) {
   loginProvider = provider === 'qq' ? 'qq' : 'netease';
   updateLoginProviderUi();
   if (!silent && document.getElementById('login-modal').classList.contains('show')) refreshQr();
 }
-function updateLoginProviderUi() {
+window.updateLoginProviderUi = function() {
   var meta = platformMeta(loginProvider);
   var isQQ = loginProvider === 'qq';
   var title = document.getElementById('login-modal-title');
@@ -272,7 +272,7 @@ function updateLoginProviderUi() {
       refreshBtn.onclick = canOpenNeteaseWeb ? openNeteaseWebLogin : refreshQr;
     }
 }
-async function refreshQr() {
+window.refreshQr = async function() {
   stopQrPoll();
   updateLoginProviderUi();
   if (loginProvider === 'qq') {
@@ -312,7 +312,8 @@ async function refreshQr() {
     document.getElementById('qr-status').className = 'fail';
   }
 }
-function startQrPoll() { if (qrPollTimer) clearInterval(qrPollTimer); qrPollTimer = setInterval(checkQr, 2000); }
+window.startQrPoll = function() {
+ if (qrPollTimer) clearInterval(qrPollTimer); qrPollTimer = setInterval(checkQr, 2000); }
 function stopQrPoll() { if (qrPollTimer) { clearInterval(qrPollTimer); qrPollTimer = null; } }
 function toggleQQCookiePanel() {
   qqManualCookieOpen = !qqManualCookieOpen;
