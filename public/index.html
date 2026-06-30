@@ -1138,16 +1138,15 @@
 
   <div id="mini-source-bar">
     <span class="mini-bar-label">源</span>
-    <button class="mini-bar-btn" data-src="auto" onclick="setLyricSource('auto')">自动</button>
     <button class="mini-bar-btn" data-src="lrclib" onclick="setLyricSource('lrclib')">LRC</button>
     <button class="mini-bar-btn" data-src="music-kit" onclick="setLyricSource('music-kit')">YT</button>
     <button class="mini-bar-btn" data-src="netease" onclick="setLyricSource('netease')">NE</button>
     <button class="mini-bar-btn" data-src="yt-captions" onclick="setLyricSource('yt-captions')">CC</button>
     <span class="mini-bar-sep"></span>
-    <span class="mini-bar-label">速</span>
-    <button class="mini-bar-btn" onclick="changePlaybackSpeed(-0.5)">−</button>
-    <span class="mini-bar-speed" id="mini-speed-display">1x</span>
-    <button class="mini-bar-btn" onclick="changePlaybackSpeed(+0.5)">+</button>
+    <span class="mini-bar-label">偏</span>
+    <button class="mini-bar-btn" onclick="adjustLyricOffset(-0.25)">−</button>
+    <span class="mini-bar-speed" id="mini-speed-display">0.0s</span>
+    <button class="mini-bar-btn" onclick="adjustLyricOffset(+0.25)">+</button>
   </div>
 
   <script src="js/shared.js?v=13"></script>

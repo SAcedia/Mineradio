@@ -281,32 +281,35 @@ function toggleLyricsPanel(force) {
 function updateLyricsHighlight() { /* v8: 由 tickLyricsParticles 接管 */ }
 
 function setLyricSource(source) {
-  var idx = _lyricSources.indexOf(source);
-  if (idx < 0 && source !== 'auto') return;
-  _lyricSourceIdx = source === 'auto' ? 0 : idx;
+  if (source === 'auto') {
+    _lyricSourceIdx = 0;
+  } else {
+    var idx = _lyricSources.indexOf(source);
+    if (idx < 0) return;
+    _lyricSourceIdx = idx;
+  }
+  var curSrc = _lyricSources[_lyricSourceIdx];
   var btn = document.getElementById('lyric-source-btn');
-  if (btn) btn.textContent = '源·' + (source === 'auto' ? '自动' : (_lyricSourceLabels[source] || source));
+  if (btn) btn.textContent = '源·' + (_lyricSourceLabels[curSrc] || curSrc);
   updateMiniSourceButtons();
   var cur = currentCoverSong();
   if (cur) {
-    var src = source === 'auto' ? '' : source;
-    fetchLyric(cur, trackSwitchToken, src);
+    fetchLyric(cur, trackSwitchToken, curSrc);
   }
   showToast('歌词源: ' + (source === 'auto' ? '自动' : (_lyricSourceLabels[source] || source)));
 }
-function changePlaybackSpeed(delta) {
-  if (!window.audio) { showToast('无音频播放'); return; }
-  var rate = (window.audio.playbackRate || 1) + delta;
-  rate = Math.max(0.5, Math.min(3, rate));
-  rate = Math.round(rate * 100) / 100;
-  window.audio.playbackRate = rate;
+function adjustLyricOffset(delta) {
+  if (typeof _lyricOffset === 'undefined') _lyricOffset = 0;
+  _lyricOffset = Math.max(-30, Math.min(30, _lyricOffset + delta));
+  _lyricOffset = Math.round(_lyricOffset * 100) / 100;
+  showLyricOffsetToast();
   var disp = document.getElementById('mini-speed-display');
-  if (disp) disp.textContent = rate + 'x';
+  if (disp) disp.textContent = (_lyricOffset > 0 ? '+' : '') + _lyricOffset.toFixed(1) + 's';
 }
 function updateMiniSourceButtons() {
   var bar = document.getElementById('mini-source-bar');
   if (!bar) return;
-  var curSrc = _lyricSourceIdx === 0 ? 'auto' : _lyricSources[_lyricSourceIdx];
+  var curSrc = _lyricSources[_lyricSourceIdx];
   var btns = bar.querySelectorAll('.mini-bar-btn');
   for (var i = 0; i < btns.length; i++) {
     var b = btns[i];
