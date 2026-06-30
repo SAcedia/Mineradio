@@ -165,6 +165,16 @@ var userFxArchives = readUserFxArchives();
 if (!hadStoredUserFxArchives) { userFxArchives = [createPackagedDefaultUserFxArchiveSlot()]; saveUserFxArchives(); }
 renderUserFxArchives();
 var userFxArchiveEditing = -1;
+function formatUserArchiveTime(ts) {
+  ts = Number(ts) || 0;
+  if (!ts) return '空槽位';
+  var diff = Date.now() - ts;
+  if (diff < 60000) return '刚刚保存';
+  if (diff < 3600000) return Math.max(1, Math.round(diff / 60000)) + ' 分钟前';
+  var d = new Date(ts);
+  function pad(v) { return String(v).padStart(2, '0'); }
+  return pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
 function userFxArchiveAt(index) {
   index = Number(index);
   if (!isFinite(index)) return null;
