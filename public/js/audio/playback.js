@@ -384,6 +384,7 @@ async function playQueueAt(idx, opts) {
   currentLocalSong = null;
   safePlaybackStep('cover-button', updateCustomCoverButton);
   safePlaybackStep('like-buttons', function(){ updateLikeButtons(song); });
+  safePlaybackStep('mini-source-bar', function(){ if (typeof updateMiniSourceBar === 'function') updateMiniSourceBar(); });
   safePlaybackStep('like-status', function(){ syncLikeStatusForSong(song); });
   safePlaybackStep('quality-ui', updatePlaybackQualityUi);
   safePlaybackStep('cinema-track-profile', function(){ resetCinemaTrackProfile(song); });

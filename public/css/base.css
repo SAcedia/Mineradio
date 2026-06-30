@@ -1831,3 +1831,12 @@ html.control-glass-svg-ok #visual-guide-btn:hover{
 #playlist-detail-panel.show{right:24px;opacity:1;pointer-events:auto}
 #playlist-detail-panel::-webkit-scrollbar{width:3px}
 #playlist-detail-panel::-webkit-scrollbar-thumb{background:rgba(var(--fc-accent-rgb),.20);border-radius:3px}
+
+#mini-source-bar{position:fixed;z-index:19;right:24px;bottom:100px;display:none;align-items:center;gap:5px;padding:5px 10px;border-radius:14px;background:rgba(12,12,18,0.35);border:1px solid rgba(255,255,255,.055);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);font-size:10px;transition:opacity .25s}
+#mini-source-bar.show{display:flex}
+.mini-bar-label{color:rgba(255,255,255,.35);font-size:8px;margin:0 2px}
+.mini-bar-sep{width:1px;height:16px;background:rgba(255,255,255,.08);margin:0 4px}
+.mini-bar-btn{height:22px;min-width:26px;padding:0 6px;border:0;border-radius:8px;background:rgba(255,255,255,.045);color:rgba(255,255,255,.55);font-family:inherit;font-size:9.5px;font-weight:700;cursor:pointer;transition:background .18s,color .18s}
+.mini-bar-btn:hover{background:rgba(255,255,255,.10);color:#fff}
+.mini-bar-btn.active{background:rgba(var(--fc-accent-rgb),.12);color:#fff}
+.mini-bar-speed{color:rgba(255,255,255,.62);font-size:10px;font-weight:700;min-width:22px;text-align:center}

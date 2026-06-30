@@ -50,6 +50,75 @@ function normalizeUserFxArchiveName(name, index) {
   if (!name) name = defaultUserFxArchiveName(index);
   return name.slice(0, 28);
 }
+function archiveNumber(raw, key, fallback, min, max) {
+  var value = raw && raw[key] != null ? Number(raw[key]) : fallback;
+  if (!isFinite(value)) value = fallback;
+  return clampRange(value, min, max);
+}
+function archiveMode(raw, key, pattern, fallback) {
+  var value = String(raw && raw[key] != null ? raw[key] : fallback);
+  return pattern.test(value) ? value : fallback;
+}
+function normalizeFxArchiveSnapshot(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  var savedPreset = clampRange(Number(raw.preset) || 0, 0, presetMeta.length - 1);
+  if (savedPreset === 3 && raw.visualPresetSchema !== VISUAL_PRESET_SCHEMA) savedPreset = 5;
+  return {
+    visualPresetSchema: VISUAL_PRESET_SCHEMA, preset: savedPreset,
+    intensity: archiveNumber(raw,'intensity',fxDefaults.intensity,0.2,1.6),
+    cinemaShake: archiveNumber(raw,'cinemaShake',fxDefaults.cinemaShake,0,1.8),
+    depth: archiveNumber(raw,'depth',fxDefaults.depth,0.2,1.8),
+    coverResolution: normalizeCoverResolution(raw.coverResolution),
+    point: archiveNumber(raw,'point',fxDefaults.point,0.5,2.2),
+    speed: archiveNumber(raw,'speed',fxDefaults.speed,0.2,2.5),
+    twist: archiveNumber(raw,'twist',fxDefaults.twist,0,0.6),
+    color: archiveNumber(raw,'color',fxDefaults.color,0.5,2.0),
+    scatter: archiveNumber(raw,'scatter',fxDefaults.scatter,0,0.5),
+    bgFade: archiveNumber(raw,'bgFade',fxDefaults.bgFade,0,1.2),
+    bloomStrength: archiveNumber(raw,'bloomStrength',fxDefaults.bloomStrength,0,1.6),
+    lyricGlowStrength: archiveNumber(raw,'lyricGlowStrength',fxDefaults.lyricGlowStrength,0,0.85),
+    lyricScale: archiveNumber(raw,'lyricScale',fxDefaults.lyricScale,0.35,1.65),
+    lyricOffsetX: archiveNumber(raw,'lyricOffsetX',fxDefaults.lyricOffsetX,-2.0,2.0),
+    lyricOffsetY: archiveNumber(raw,'lyricOffsetY',fxDefaults.lyricOffsetY,-1.2,1.35),
+    lyricOffsetZ: archiveNumber(raw,'lyricOffsetZ',fxDefaults.lyricOffsetZ,-1.6,1.6),
+    lyricTiltX: archiveNumber(raw,'lyricTiltX',fxDefaults.lyricTiltX,-42,42),
+    lyricTiltY: archiveNumber(raw,'lyricTiltY',fxDefaults.lyricTiltY,-42,42),
+    shelf: archiveMode(raw,'shelf',/^(off|side|stage)$/,fxDefaults.shelf),
+    shelfCameraMode: archiveMode(raw,'shelfCameraMode',/^(dynamic|static)$/,fxDefaults.shelfCameraMode),
+    shelfPresence: archiveMode(raw,'shelfPresence',/^(auto|always)$/,fxDefaults.shelfPresence),
+    shelfSize: archiveNumber(raw,'shelfSize',fxDefaults.shelfSize,0.65,1.45),
+    shelfOffsetX: archiveNumber(raw,'shelfOffsetX',fxDefaults.shelfOffsetX,-1.2,1.2),
+    shelfOffsetY: archiveNumber(raw,'shelfOffsetY',fxDefaults.shelfOffsetY,-0.9,0.9),
+    shelfOffsetZ: archiveNumber(raw,'shelfOffsetZ',fxDefaults.shelfOffsetZ,-0.9,0.9),
+    shelfAngleY: archiveNumber(raw,'shelfAngleY',fxDefaults.shelfAngleY,-30,30),
+    shelfAngleYManual: raw.shelfAngleYManual === true,
+    shelfOpacity: archiveNumber(raw,'shelfOpacity',fxDefaults.shelfOpacity,0.25,1),
+    shelfBgOpacity: archiveNumber(raw,'shelfBgOpacity',fxDefaults.shelfBgOpacity,0.25,0.98),
+    shelfAccentColor: normalizeHexColor(raw.shelfAccentColor || fxDefaults.shelfAccentColor, fxDefaults.shelfAccentColor),
+    cam: archiveMode(raw,'cam',/^(off|gesture)$/,fxDefaults.cam)
+  };
+}
+function readUserFxArchives() {
+  var raw = [];
+  try { raw = JSON.parse(localStorage.getItem(USER_FX_ARCHIVE_STORE_KEY) || '[]') || []; } catch(e) { raw = []; }
+  if (!Array.isArray(raw)) raw = [];
+  return raw.map(function(slot, index){
+    slot = slot && typeof slot === 'object' ? slot : {};
+    var snapshot = normalizeFxArchiveSnapshot(slot.snapshot);
+    return { name: normalizeUserFxArchiveName(slot.name, index), createdAt: Number(slot.createdAt) || (snapshot ? (Number(slot.savedAt) || Date.now()) : 0), savedAt: snapshot ? (Number(slot.savedAt) || Date.now()) : 0, snapshot: snapshot };
+  }).filter(function(slot){ return !!(slot.snapshot || slot.savedAt || slot.createdAt); });
+}
+function hasStoredUserFxArchives() {
+  try { return localStorage.getItem(USER_FX_ARCHIVE_STORE_KEY) != null; } catch(e) { return true; }
+}
+function createPackagedDefaultUserFxArchiveSlot() {
+  return { name: normalizeUserFxArchiveName(PACKAGED_DEFAULT_USER_FX_ARCHIVE_NAME, 0), createdAt: PACKAGED_DEFAULT_USER_FX_ARCHIVE_EXPORTED_AT, savedAt: PACKAGED_DEFAULT_USER_FX_ARCHIVE_SAVED_AT, snapshot: normalizeFxArchiveSnapshot(clonePackagedDefaultFxSnapshot()) };
+}
+var hadStoredUserFxArchives = hasStoredUserFxArchives();
+var userFxArchives = readUserFxArchives();
+if (!hadStoredUserFxArchives) { userFxArchives = [createPackagedDefaultUserFxArchiveSlot()]; saveUserFxArchives(); }
+renderUserFxArchives();
+var userFxArchiveEditing = -1;
 function userFxArchiveAt(index) {
   index = Number(index);
   if (!isFinite(index)) return null;

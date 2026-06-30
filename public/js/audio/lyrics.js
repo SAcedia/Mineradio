@@ -280,4 +280,50 @@ function toggleLyricsPanel(force) {
 }
 function updateLyricsHighlight() { /* v8: 由 tickLyricsParticles 接管 */ }
 
+function setLyricSource(source) {
+  var idx = _lyricSources.indexOf(source);
+  if (idx < 0 && source !== 'auto') return;
+  _lyricSourceIdx = source === 'auto' ? 0 : idx;
+  var btn = document.getElementById('lyric-source-btn');
+  if (btn) btn.textContent = '源·' + (source === 'auto' ? '自动' : (_lyricSourceLabels[source] || source));
+  updateMiniSourceButtons();
+  var cur = currentCoverSong();
+  if (cur) {
+    var src = source === 'auto' ? '' : source;
+    fetchLyric(cur, trackSwitchToken, src);
+  }
+  showToast('歌词源: ' + (source === 'auto' ? '自动' : (_lyricSourceLabels[source] || source)));
+}
+function changePlaybackSpeed(delta) {
+  var audio = document.querySelector('audio');
+  if (!audio) { showToast('无音频播放'); return; }
+  var rate = (audio.playbackRate || 1) + delta;
+  rate = Math.max(0.25, Math.min(3, rate));
+  rate = Math.round(rate * 100) / 100;
+  audio.playbackRate = rate;
+  var disp = document.getElementById('mini-speed-display');
+  if (disp) disp.textContent = rate + 'x';
+}
+function updateMiniSourceBar() {
+  var bar = document.getElementById('mini-source-bar');
+  if (!bar) return;
+  var song = currentCoverSong();
+  var provider = song ? songProviderKey(song) : '';
+  bar.classList.toggle('show', provider === 'youtube' || provider === 'local' || !provider);
+  updateMiniSourceButtons();
+}
+function updateMiniSourceButtons() {
+  var bar = document.getElementById('mini-source-bar');
+  if (!bar) return;
+  var curSrc = _lyricSources[_lyricSourceIdx];
+  var isAuto = _lyricSourceIdx === 0;
+  var btns = bar.querySelectorAll('.mini-bar-btn');
+  for (var i = 0; i < btns.length; i++) {
+    var b = btns[i];
+    var src = b.textContent === '自动' ? 'auto' : (b.textContent === '−' || b.textContent === '+' ? null : b.getAttribute('data-src') || (b.onclick && String(b.onclick).match(/'([^']+)'/)?.[1]));
+    if (src === 'auto') b.classList.toggle('active', isAuto);
+    else if (src === curSrc) b.classList.toggle('active', !isAuto);
+  }
+}
+
 // ============================================================
