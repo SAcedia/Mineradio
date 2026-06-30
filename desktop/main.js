@@ -3,6 +3,7 @@ const net = require('net');
 const path = require('path');
 const fs = require('fs');
 const { execFile, spawn } = require('child_process');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 let mainWindow = null;
 let localServer = null;
@@ -1423,7 +1424,12 @@ async function createWindow() {
     setTimeout(() => applyWindowedBounds(mainWindow), 50);
   });
 
-  await mainWindow.loadURL(`http://127.0.0.1:${port}`);
+  await mainWindow.loadURL(`http://127.0.0.1:${port}`).catch(async (err) => {
+    console.warn('[MainWindow] First load attempt failed:', err.message);
+    // 等一秒重试
+    await new Promise(r => setTimeout(r, 1000));
+    await mainWindow.loadURL(`http://127.0.0.1:${port}`);
+  });
 }
 
 app.setName(APP_NAME);
