@@ -1,4 +1,3 @@
-var audio = null, audioCtx = null, source = null, analyser = null, beatAnalyser = null, gainNode = null, audioReady = false;
 var uiSfxCtx = null, lastShelfSelectSfxAt = 0;
 var FFT_SIZE = 2048;
 var frequencyData = new Uint8Array(FFT_SIZE / 2);
@@ -44,9 +43,7 @@ var currentLocalSong = null;
 var lyricSourceMode = 'original';
 var originalLyricsState = { lines: [], hasNativeKaraoke: false, timingSource: 'none' };
 var _lyricOffset = 0; // 歌词时间轴手动偏移（秒），Alt+[ 减 / Alt+] 增 / 按钮调节
-var _audioUrlCache = {}; // 音频 URL 缓存，key = provider:id
 var _prefetchToken = 0;
-var _prefetchAudioEls = {}; // 预加载 audio 元素
 var localBeatAnalysis = { song:null, audioUrl:'', mode:'mr', active:false, token:0 };
 var likedSongMap = {}, likeBusyMap = {}, likeStatusToken = 0;
 var collectTargetSong = null, collectBusy = false;
@@ -148,32 +145,6 @@ var updatePreviewState = {
     '单实例与快捷方式修复'
   ]
 };
-function readSavedVolume() {
-  try {
-    var v = parseFloat(localStorage.getItem('apex-player-volume'));
-    return isFinite(v) ? Math.max(0, Math.min(1, v)) : 1.0;
-  } catch (e) {
-    return 1.0;
-  }
-}
-function readDiyModePreference() {
-  try { return localStorage.getItem(DIY_MODE_STORE_KEY) === '1'; } catch (e) { return false; }
-}
-function saveDiyModePreference(on) {
-  try { localStorage.setItem(DIY_MODE_STORE_KEY, on ? '1' : '0'); } catch (e) {}
-}
-function readBooleanPreference(key, fallback) {
-  try {
-    var raw = localStorage.getItem(key);
-    if (raw == null) return !!fallback;
-    return raw === '1';
-  } catch (e) {
-    return !!fallback;
-  }
-}
-function saveBooleanPreference(key, on) {
-  try { localStorage.setItem(key, on ? '1' : '0'); } catch (e) {}
-}
 function applyUserCapsuleAutoHideState() {
   document.body.classList.toggle('user-capsule-auto-hide', !!userCapsuleAutoHide);
   var btn = document.getElementById('user-capsule-hide-btn');
@@ -489,168 +460,6 @@ function maybeAnnounceDjMode() {
 }
 
 // fx 状态: 预设 + 主滑块 + 开关 + 三态
-var fxDefaults = {
-  preset: 0,            // 0=emily cover, 1=tunnel, 2=orbit, 3=void, 4=vinyl, 5=wallpaper, 6=skull
-  intensity: 0.85,
-  cinemaShake: 0.5,
-  depth: 1.0,
-  coverResolution: 1.55,
-  point: 1.0, speed: 1.0, twist: 0.0, color: 1.10, scatter: 0.0, bgFade: 0.20,
-  bloomStrength: 0.62,
-  lyricGlowStrength: 0.28,
-  lyricScale: 1.0,
-  lyricOffsetX: 0,
-  lyricOffsetY: 0,
-  lyricOffsetZ: 0,
-  lyricTiltX: 0,
-  lyricTiltY: 0,
-  lyricColorMode: 'auto',
-  lyricColor: '#a9b8c8',
-  lyricHighlightMode: 'auto',
-  lyricHighlightColor: '#fac900',
-  lyricGlowLinked: true,
-  lyricGlowColor: '#008aff',
-  lyricFont: 'hei',
-  lyricLetterSpacing: 0,
-  lyricLineHeight: 1.0,
-  lyricWeight: 900,
-  visualTintMode: 'auto',
-  visualTintColor: '#9db8cf',
-  uiAccentColor: '#ffffff',
-  homeAccentColor: '#ffffff',
-  homeIconColor: '#ffffff',
-  visualIconColor: '#ffffff',
-  backgroundColorMode: 'cover',
-  backgroundColor: '#000000',
-  backgroundOpacity: 1,
-  controlGlassChromaticOffset: 90,
-  backgroundColorCustom: false,
-  backgroundImage: '',
-  backgroundMedia: null,
-  desktopLyrics: false,
-  desktopLyricsSize: 1.0,
-  desktopLyricsOpacity: 0.92,
-  desktopLyricsY: 0.76,
-  desktopLyricsClickThrough: false,
-  desktopLyricsCinema: true,
-  desktopLyricsHighlight: false,
-  desktopLyricsFps: 60,
-  wallpaperMode: false,
-  wallpaperOpacity: 1,
-  floatLayer: false, cinema: true, edge: false, aiDepth: false, bloom: false, lyricGlow: true,
-  lyricGlowBeat: true,
-  lyricGlowParticles: false,
-  lyricCameraLock: false,
-  particleLyrics: true,    // v7.2: 粒子歌词
-  backCover: false,        // 旧的封面背面粒子层关闭；浮空粒子层会跟随封面翻转
-  shelf: 'side',
-  shelfCameraMode: 'static',
-  shelfPresence: 'always',
-  shelfShowPodcasts: false,
-  shelfMergeCollections: false,
-  shelfSize: 1,
-  shelfOffsetX: 0,
-  shelfOffsetY: 0,
-  shelfOffsetZ: 0,
-  shelfAngleY: -15,
-  shelfAngleYManual: false,
-  shelfOpacity: 1,
-  shelfBgOpacity: 0.90,
-  shelfAccentColor: '#ffffff',
-  performanceBackground: 'auto',
-  performanceQuality: 'high',
-  liveBackgroundKeep: false,
-  cam: 'off',
-};
-var PACKAGED_DEFAULT_USER_FX_ARCHIVE_NAME = '默认测试';
-var PACKAGED_DEFAULT_USER_FX_ARCHIVE_EXPORTED_AT = 1782276031784;
-var PACKAGED_DEFAULT_USER_FX_ARCHIVE_SAVED_AT = 1782273019045;
-var PACKAGED_DEFAULT_FX_SNAPSHOT = Object.freeze({
-  visualPresetSchema: VISUAL_PRESET_SCHEMA,
-  preset: 0,
-  intensity: 0.85,
-  cinemaShake: 0.5,
-  depth: 1,
-  coverResolution: 1.55,
-  point: 1,
-  speed: 1,
-  twist: 0,
-  color: 1.1,
-  scatter: 0,
-  bgFade: 0.2,
-  bloomStrength: 0.62,
-  lyricGlowStrength: 0.28,
-  lyricScale: 1,
-  lyricOffsetX: 0,
-  lyricOffsetY: 0,
-  lyricOffsetZ: 0,
-  lyricTiltX: 0,
-  lyricTiltY: 0,
-  lyricCameraLock: false,
-  lyricColorMode: 'auto',
-  lyricColor: '#a9b8c8',
-  lyricHighlightMode: 'auto',
-  lyricHighlightColor: '#fac900',
-  lyricGlowLinked: true,
-  lyricGlowColor: '#008aff',
-  lyricFont: 'hei',
-  lyricLetterSpacing: 0,
-  lyricLineHeight: 1,
-  lyricWeight: 900,
-  visualTintMode: 'auto',
-  visualTintColor: '#9db8cf',
-  uiAccentColor: '#ffffff',
-  homeAccentColor: '#ffffff',
-  homeIconColor: '#ffffff',
-  visualIconColor: '#ffffff',
-  backgroundColorMode: 'cover',
-  backgroundColor: '#000000',
-  backgroundOpacity: 1,
-  controlGlassChromaticOffset: 90,
-  backgroundColorCustom: false,
-  floatLayer: false,
-  cinema: true,
-  edge: false,
-  aiDepth: false,
-  bloom: false,
-  lyricGlow: true,
-  lyricGlowBeat: true,
-  lyricGlowParticles: false,
-  desktopLyrics: false,
-  desktopLyricsSize: 1,
-  desktopLyricsOpacity: 0.92,
-  desktopLyricsY: 0.76,
-  desktopLyricsClickThrough: false,
-  desktopLyricsCinema: true,
-  desktopLyricsHighlight: false,
-  desktopLyricsFps: 60,
-  performanceBackground: 'auto',
-  performanceQuality: 'high',
-  liveBackgroundKeep: false,
-  particleLyrics: true,
-  backCover: false,
-  shelf: 'side',
-  shelfCameraMode: 'static',
-  shelfPresence: 'always',
-  shelfShowPodcasts: false,
-  shelfMergeCollections: false,
-  shelfSize: 1,
-  shelfOffsetX: 0,
-  shelfOffsetY: 0,
-  shelfOffsetZ: 0,
-  shelfAngleY: -15,
-  shelfAngleYManual: false,
-  shelfOpacity: 1,
-  shelfBgOpacity: 0.9,
-  shelfAccentColor: '#ffffff',
-  cam: 'off'
-});
-function clonePackagedDefaultFxSnapshot() {
-  return Object.assign({}, PACKAGED_DEFAULT_FX_SNAPSHOT);
-}
-function packagedDefaultLyricLayoutRaw() {
-  return Object.assign({ desktopLyricsSchema: 'desktop-lyrics-v3' }, clonePackagedDefaultFxSnapshot());
-}
 var DEVELOPMENT_LOCKED_FX = {
   wallpaperMode: true
 };
@@ -660,17 +469,6 @@ function isDevelopmentLockedFx(key) {
 function normalizeDevelopmentLockedFxState() {
   if (!fx) return;
   fx.wallpaperMode = false;
-}
-function readSavedPlaybackVisualPreset() {
-  try {
-    var raw = JSON.parse(localStorage.getItem(LYRIC_LAYOUT_STORE_KEY) || '{}') || {};
-    if (!Object.prototype.hasOwnProperty.call(raw, 'preset')) return fxDefaults.preset;
-    var savedPreset = clampRange(Number(raw.preset) || 0, 0, 6);
-    if (savedPreset === 3 && raw.visualPresetSchema !== VISUAL_PRESET_SCHEMA) savedPreset = 5;
-    return savedPreset;
-  } catch (e) {
-    return fxDefaults.preset;
-  }
 }
 var playbackVisualPreset = readSavedPlaybackVisualPreset();
 var startupVisualPreviewActive = false;
