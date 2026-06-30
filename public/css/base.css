@@ -1840,3 +1840,4 @@ html.control-glass-svg-ok #visual-guide-btn:hover{
 .mini-bar-btn:hover{background:rgba(255,255,255,.10);color:#fff}
 .mini-bar-btn.active{background:rgba(var(--fc-accent-rgb),.12);color:#fff}
 .mini-bar-speed{color:rgba(255,255,255,.62);font-size:10px;font-weight:700;min-width:22px;text-align:center}
+#mini-source-bar{bottom:110px}

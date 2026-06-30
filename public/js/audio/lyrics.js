@@ -303,8 +303,17 @@ function adjustLyricOffset(delta) {
   _lyricOffset = Math.max(-30, Math.min(30, _lyricOffset + delta));
   _lyricOffset = Math.round(_lyricOffset * 100) / 100;
   showLyricOffsetToast();
-  var disp = document.getElementById('mini-speed-display');
+  var disp = document.getElementById('mini-offset-display');
   if (disp) disp.textContent = (_lyricOffset > 0 ? '+' : '') + _lyricOffset.toFixed(1) + 's';
+}
+function adjustPlaybackSpeed(delta) {
+  if (!window.audio) return;
+  var rate = (window.audio.playbackRate || 1) + delta;
+  rate = Math.max(0.25, Math.min(3, rate));
+  rate = Math.round(rate * 100) / 100;
+  window.audio.playbackRate = rate;
+  var disp = document.getElementById('mini-speed-display');
+  if (disp) disp.textContent = rate + 'x';
 }
 function updateMiniSourceButtons() {
   var bar = document.getElementById('mini-source-bar');
