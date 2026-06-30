@@ -203,24 +203,6 @@ async function loadPodcastHot() {
     if (requestSeq === searchRequestSeq) $results.innerHTML = '<div class="search-empty">Podcast load failed</div>';
   }
 }
-async function loadYouTubeTrending() {
-  var requestSeq = ++searchRequestSeq;
-  $results.innerHTML = '<div class="search-empty">Loading YouTube trending...</div>';
-  $results.classList.add('show');
-  try {
-    var data = await youtubeTrending();
-    if (requestSeq !== searchRequestSeq || searchMode !== 'youtube') return;
-    if (data && data.songs && data.songs.length) {
-      playlist = data.songs;
-      renderSearchResults(data.songs, 'YouTube Trending');
-    } else {
-      $results.innerHTML = '<div class="search-empty">No trending content</div>';
-    }
-  } catch (err) {
-    console.error('YouTube trending:', err);
-    if (requestSeq === searchRequestSeq) $results.innerHTML = '<div class="search-empty">YouTube load failed</div>';
-  }
-}
 async function doPodcastSearch(q) {
   var requestSeq = ++searchRequestSeq;
   try {

@@ -278,6 +278,7 @@ function songDurationLabel(song) {
 function songSourceLabel(song) {
   if (!song) return '未知';
   if (song.provider === 'qq' || song.source === 'qq' || song.type === 'qq') return 'QQ 音乐';
+  if (song.provider === 'youtube' || song.source === 'youtube' || song.type === 'youtube') return 'YouTube';
   if (song.type === 'local') return '本地上传';
   if (song.type === 'podcast' || song.source === 'podcast') return '网易云播客';
   return '网易云音乐';
@@ -532,9 +533,11 @@ function openArtistDetailForSong(song) {
   }
 }
 function resolveArtistSongForDetail(song, artist) {
-  var provider = songProviderKey(song) === 'qq' ? 'qq' : 'netease';
+  var provider = songProviderKey(song) === 'qq' ? 'qq' : (songProviderKey(song) === 'youtube' ? 'youtube' : 'netease');
   var url = provider === 'qq'
     ? '/api/qq/search?keywords=' + encodeURIComponent(artist) + '&limit=8'
+    : provider === 'youtube'
+    ? '/api/youtube/search?keywords=' + encodeURIComponent(artist) + '&limit=10'
     : '/api/search?keywords=' + encodeURIComponent(artist) + '&limit=10';
   return apiJson(url).then(function(r){
     var songs = (r && r.songs) || [];
