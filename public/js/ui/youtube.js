@@ -25,7 +25,6 @@ function toggleSearchSource(provider) {
     var btn = document.getElementById(id);
     if (btn) {
       btn.classList.toggle('active', next);
-      if (id.indexOf('login-') === 0) btn.textContent = next ? (provider === 'youtube' ? 'YouTube' : '已开启') : '已关闭';
     }
   });
   if (!next && searchMode === provider) setSearchMode('song');
@@ -36,10 +35,7 @@ function initSearchSourceToggles() {
     var btn1 = document.getElementById('toggle-' + provider + '-btn');
     if (btn1) btn1.classList.toggle('active', on);
     var btn2 = document.getElementById('login-' + provider + '-toggle');
-    if (btn2) {
-      btn2.classList.toggle('active', on);
-      btn2.textContent = on ? (provider === 'youtube' ? 'YouTube' : '已开启') : '已关闭';
-    }
+    if (btn2) btn2.classList.toggle('active', on);
   });
 }
 initSearchSourceToggles();

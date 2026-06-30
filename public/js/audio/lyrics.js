@@ -309,6 +309,7 @@ function _saveSongPref(song) {
     var pref = {};
     if (_lyricOffset && _lyricOffset !== 0) pref.lyricOffset = _lyricOffset;
     if (window.audio && window.audio.playbackRate && window.audio.playbackRate !== 1) pref.speed = window.audio.playbackRate;
+    if (_lyricSourceIdx > 0) pref.lyricSource = _lyricSources[_lyricSourceIdx];
     if (Object.keys(pref).length) localStorage.setItem(key, JSON.stringify(pref));
     else localStorage.removeItem(key);
   } catch(e) {}
@@ -325,6 +326,11 @@ function _loadSongPref(song) {
     }
     if (pref.speed && isFinite(pref.speed) && window.audio) {
       window.audio.playbackRate = Math.max(0.25, Math.min(3, Number(pref.speed)));
+    }
+    if (pref.lyricSource) {
+      var idx = _lyricSources.indexOf(pref.lyricSource);
+      if (idx >= 0) _lyricSourceIdx = idx;
+      updateMiniSourceButtons();
     }
     updateLyricOffsetVisibility();
     var od = document.getElementById('mini-offset-display');
