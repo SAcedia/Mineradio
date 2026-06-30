@@ -271,7 +271,6 @@ function updateLoginProviderUi() {
       refreshBtn.textContent = canOpenNeteaseWeb ? (neteaseWebLoginBusy ? '等待扫码…' : '网页登录') : '刷新二维码';
       refreshBtn.onclick = canOpenNeteaseWeb ? openNeteaseWebLogin : refreshQr;
     }
-  }
 }
 async function refreshQr() {
   stopQrPoll();
