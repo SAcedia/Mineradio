@@ -277,6 +277,22 @@ function makeShelfManager() {
           items.push({ type:'podcastCollection', title: pc.title, sub:(pc.count || 0) + ' items', cover: pc.cover || '', tag:'我的播客', podcastKey: pc.key, itemType: pc.itemType });
         });
       }
+      try {
+        var localPls = typeof loadLocalPlaylists === 'function' ? loadLocalPlaylists() : [];
+        if (localPls.length) {
+          localPls.forEach(function(pl){
+            var cover = (pl.songs && pl.songs.length && pl.songs[0].cover) ? pl.songs[0].cover : '';
+            items.push({ type:'localPlaylist', title: pl.name, sub:'本地 · ' + (pl.songs ? pl.songs.length : 0) + ' 首',
+              cover: cover, tag: '本地歌单', playlistId: pl.id, provider: 'local' });
+          });
+        }
+        var likedSongs = typeof getLocalLikedSongs === 'function' ? getLocalLikedSongs() : [];
+        if (likedSongs.length) {
+          var firstCover = (likedSongs[0] && likedSongs[0].cover) || '';
+          items.push({ type:'localLiked', title: '我喜欢的音乐', sub:'本地红心 · ' + likedSongs.length + ' 首',
+            cover: firstCover, tag: '本地红心', likedSongs: likedSongs });
+        }
+      } catch(e) {}
       if (items.length) return items;
     }
     if (playQueue.length) {
