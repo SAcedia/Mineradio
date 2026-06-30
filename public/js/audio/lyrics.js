@@ -298,6 +298,41 @@ function setLyricSource(source) {
   }
   showToast('歌词源: ' + (source === 'auto' ? '自动' : (_lyricSourceLabels[source] || source)));
 }
+function _songPrefKey(song) {
+  if (!song || !song.id) return '';
+  return 'mineradio-song-pref:' + songProviderKey(song) + ':' + song.id;
+}
+function _saveSongPref(song) {
+  var key = _songPrefKey(song);
+  if (!key) return;
+  try {
+    var pref = {};
+    if (_lyricOffset && _lyricOffset !== 0) pref.lyricOffset = _lyricOffset;
+    if (window.audio && window.audio.playbackRate && window.audio.playbackRate !== 1) pref.speed = window.audio.playbackRate;
+    if (Object.keys(pref).length) localStorage.setItem(key, JSON.stringify(pref));
+    else localStorage.removeItem(key);
+  } catch(e) {}
+}
+function _loadSongPref(song) {
+  var key = _songPrefKey(song);
+  if (!key) return;
+  try {
+    var raw = localStorage.getItem(key);
+    if (!raw) return;
+    var pref = JSON.parse(raw);
+    if (pref.lyricOffset && isFinite(pref.lyricOffset)) {
+      _lyricOffset = Math.max(-30, Math.min(30, Number(pref.lyricOffset)));
+    }
+    if (pref.speed && isFinite(pref.speed) && window.audio) {
+      window.audio.playbackRate = Math.max(0.25, Math.min(3, Number(pref.speed)));
+    }
+    updateLyricOffsetVisibility();
+    var od = document.getElementById('mini-offset-display');
+    if (od) od.textContent = (_lyricOffset > 0 ? '+' : '') + _lyricOffset.toFixed(1) + 's';
+    var sd = document.getElementById('mini-speed-display');
+    if (sd && window.audio) sd.textContent = window.audio.playbackRate + 'x';
+  } catch(e) {}
+}
 function adjustLyricOffset(delta) {
   if (typeof _lyricOffset === 'undefined') _lyricOffset = 0;
   _lyricOffset = Math.max(-30, Math.min(30, _lyricOffset + delta));
@@ -305,6 +340,8 @@ function adjustLyricOffset(delta) {
   showLyricOffsetToast();
   var disp = document.getElementById('mini-offset-display');
   if (disp) disp.textContent = (_lyricOffset > 0 ? '+' : '') + _lyricOffset.toFixed(1) + 's';
+  var song = currentCoverSong();
+  if (song) _saveSongPref(song);
 }
 function adjustPlaybackSpeed(delta) {
   if (!window.audio) return;
@@ -314,6 +351,8 @@ function adjustPlaybackSpeed(delta) {
   window.audio.playbackRate = rate;
   var disp = document.getElementById('mini-speed-display');
   if (disp) disp.textContent = rate + 'x';
+  var song = currentCoverSong();
+  if (song) _saveSongPref(song);
 }
 function updateMiniSourceButtons() {
   var bar = document.getElementById('mini-source-bar');

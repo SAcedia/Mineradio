@@ -403,7 +403,7 @@ async function playQueueAt(idx, opts) {
     applyPreferredLyricsForCurrent(true);
   });
 
-  safePlaybackStep('lyric-offset-vis', function(){ updateLyricOffsetVisibility(); _loadLyricOffset(); });
+  safePlaybackStep('lyric-offset-vis', function(){ updateLyricOffsetVisibility(); _loadLyricOffset(); if (typeof _loadSongPref === 'function') _loadSongPref(song); });
   markPlayPhase('cover-load');
   safePlaybackStep('cover-load', function(){
     var customCover = getCustomCoverForSong(song);
