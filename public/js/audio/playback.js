@@ -680,7 +680,7 @@ async function togglePlay() {
     forcePlaybackControlsInteractive();
     if ((!audio || !audio.src) && playQueue.length && currentIdx >= 0) {
       var cur = playQueue[currentIdx];
-      if (cur && cur._playbackFailed) {
+      if (cur && cur._lastPlaybackFailAt) {
         var next = nextUnblockedQueueIndex(currentIdx);
         if (next >= 0 && next < playQueue.length) {
           currentIdx = next;

@@ -238,6 +238,11 @@ function updateLoginProviderUi() {
     }
   }
   if (shell) {
+    shell.style.display = '';
+    shell.classList.toggle('web-login-preview', isQQ || canOpenNeteaseWeb);
+    shell.classList.toggle('qq-preview', isQQ);
+    shell.classList.toggle('netease-preview', !isQQ && canOpenNeteaseWeb);
+  }
   if (qqPanel) qqPanel.classList.toggle('show', isQQ && qqManualCookieOpen);
   if (qqCookieToggle) {
     qqCookieToggle.classList.toggle('show', isQQ);
@@ -253,6 +258,13 @@ function updateLoginProviderUi() {
       : (neteaseWebLoginBusy ? '等待扫码确认' : '打开官方登录窗口');
   }
   if (st) {
+    if (isQQ) {
+      st.className = 'preview';
+      st.textContent = qqLoginStatus.loggedIn ? ('已保存 QQ 音乐会话 · ' + (qqLoginStatus.nickname || '')) : '点击"扫码登录"打开 QQ 音乐官方窗口';
+    } else {
+      st.className = '';
+      st.textContent = canOpenNeteaseWeb ? '点击"网页登录"打开网易云官方窗口' : '正在生成二维码…';
+    }
   }
   if (refreshBtn) {
       refreshBtn.disabled = !!neteaseWebLoginBusy;
