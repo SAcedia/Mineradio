@@ -679,6 +679,14 @@ async function togglePlay() {
   try {
     forcePlaybackControlsInteractive();
     if ((!audio || !audio.src) && playQueue.length && currentIdx >= 0) {
+      var cur = playQueue[currentIdx];
+      if (cur && cur._playbackFailed) {
+        var next = nextUnblockedQueueIndex(currentIdx);
+        if (next >= 0 && next < playQueue.length) {
+          currentIdx = next;
+          showSourceFallbackNotice('跳过无法播放的歌曲', '正在播放下一首可用歌曲。');
+        }
+      }
       await playQueueAt(currentIdx, { manual: true });
       return;
     }

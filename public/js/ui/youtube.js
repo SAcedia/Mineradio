@@ -20,8 +20,13 @@ function toggleSearchSource(provider) {
   var on = searchSourceEnabled(provider);
   var next = !on;
   try { localStorage.setItem('mineradio-source-' + provider, next ? '1' : '0'); } catch(e) {}
-  var btn = document.getElementById('toggle-' + provider + '-btn');
-  if (btn) btn.classList.toggle('active', next);
+  ['toggle-' + provider + '-btn', 'login-' + provider + '-toggle'].forEach(function(id){
+    var btn = document.getElementById(id);
+    if (btn) {
+      btn.classList.toggle('active', next);
+      if (id.indexOf('login-') === 0) btn.textContent = next ? '已开启' : '已关闭';
+    }
+  });
   if (!next && searchMode === provider) setSearchMode('song');
 }
 function initSearchSourceToggles() {
