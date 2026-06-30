@@ -10,15 +10,16 @@ window.gainNode = null;
 window.audioReady = false;
 window.clamp01 = function(v) {
  return Math.max(0, Math.min(1, v)); }
-function clampRange(v, min, max) { return Math.max(min, Math.min(max, v)); }
+window.clampRange = function(v, min, max) {
+ return Math.max(min, Math.min(max, v)); }
 
-function songProviderKey(song) {
+window.songProviderKey = function(song) {
   if (song && (song.provider === 'qq' || song.source === 'qq' || song.type === 'qq')) return 'qq';
   if (song && (song.provider === 'youtube' || song.source === 'youtube' || song.type === 'youtube')) return 'youtube';
   return 'netease';
 }
 
-function openGsapModal(mask) {
+window.openGsapModal = function(mask) {
   if (!mask) return;
   var panel = mask.querySelector('.modal');
   mask.classList.add('show');
@@ -42,7 +43,7 @@ function openGsapModal(mask) {
     mask.style.opacity = '1';
   }
 }
-function closeGsapModal(mask, afterClose) {
+window.closeGsapModal = function(mask, afterClose) {
   if (!mask || !mask.classList.contains('show')) {
     if (afterClose) afterClose();
     return;
@@ -71,7 +72,7 @@ function closeGsapModal(mask, afterClose) {
     finish();
   }
 }
-function bindModalBackdropClose() {
+window.bindModalBackdropClose = function() {
   [
     ['track-detail-modal', closeTrackDetailModal],
     ['login-modal', closeLoginModal],
@@ -89,24 +90,24 @@ function bindModalBackdropClose() {
   });
 }
 
-var CUSTOM_COVER_STORE_KEY = 'mineradio-custom-covers';
-var CUSTOM_LYRIC_STORE_KEY = 'mineradio-custom-lyrics-v1';
-var CUSTOM_LYRIC_PREF_STORE_KEY = 'mineradio-custom-lyric-prefs-v1';
-var LYRIC_LAYOUT_STORE_KEY = 'mineradio-lyric-layout-v1';
-var VISUAL_PRESET_SCHEMA = 'skull-preset-v2';
-var PLAYBACK_QUALITY_STORE_KEY = 'mineradio-playback-quality-v1';
-var UPLOAD_TIP_STORE_KEY = 'mineradio-upload-tip-seen';
-var DIY_MODE_STORE_KEY = 'mineradio-diy-player-mode-v1';
-var PLAYLIST_PANEL_PIN_STORE_KEY = 'mineradio-playlist-panel-pinned-v1';
-var USER_CAPSULE_AUTO_HIDE_STORE_KEY = 'mineradio-user-capsule-auto-hide-v1';
-var FX_FAB_AUTO_HIDE_STORE_KEY = 'mineradio-fx-fab-auto-hide-v1';
-var CONTROLS_AUTO_HIDE_STORE_KEY = 'mineradio-controls-auto-hide-v1';
-var FREE_CAMERA_STORE_KEY = 'mineradio-free-camera-v1';
-var HOTKEY_SETTINGS_STORE_KEY = 'mineradio-hotkey-settings-v1';
-var VISUAL_GUIDE_SEEN_STORE_KEY = 'mineradio-visual-guide-seen-v2';
-var LOCAL_BEATMAP_STORE_KEY = 'mineradio-local-beatmaps-v1';
-var LOCAL_BEAT_PREF_STORE_KEY = 'mineradio-local-beatmap-prefs-v1';
-var LOCAL_BEAT_COMBOS = ['', 'downbeat', 'push', 'drop', 'rebound', 'accent'];
+window.CUSTOM_COVER_STORE_KEY = 'mineradio-custom-covers';
+window.CUSTOM_LYRIC_STORE_KEY = 'mineradio-custom-lyrics-v1';
+window.CUSTOM_LYRIC_PREF_STORE_KEY = 'mineradio-custom-lyric-prefs-v1';
+window.LYRIC_LAYOUT_STORE_KEY = 'mineradio-lyric-layout-v1';
+window.VISUAL_PRESET_SCHEMA = 'skull-preset-v2';
+window.PLAYBACK_QUALITY_STORE_KEY = 'mineradio-playback-quality-v1';
+window.UPLOAD_TIP_STORE_KEY = 'mineradio-upload-tip-seen';
+window.DIY_MODE_STORE_KEY = 'mineradio-diy-player-mode-v1';
+window.PLAYLIST_PANEL_PIN_STORE_KEY = 'mineradio-playlist-panel-pinned-v1';
+window.USER_CAPSULE_AUTO_HIDE_STORE_KEY = 'mineradio-user-capsule-auto-hide-v1';
+window.FX_FAB_AUTO_HIDE_STORE_KEY = 'mineradio-fx-fab-auto-hide-v1';
+window.CONTROLS_AUTO_HIDE_STORE_KEY = 'mineradio-controls-auto-hide-v1';
+window.FREE_CAMERA_STORE_KEY = 'mineradio-free-camera-v1';
+window.HOTKEY_SETTINGS_STORE_KEY = 'mineradio-hotkey-settings-v1';
+window.VISUAL_GUIDE_SEEN_STORE_KEY = 'mineradio-visual-guide-seen-v2';
+window.LOCAL_BEATMAP_STORE_KEY = 'mineradio-local-beatmaps-v1';
+window.LOCAL_BEAT_PREF_STORE_KEY = 'mineradio-local-beatmap-prefs-v1';
+window.LOCAL_BEAT_COMBOS = ['', 'downbeat', 'push', 'drop', 'rebound', 'accent'];
 var HOTKEY_ACTIONS = [
   { key:'togglePlay', label:'播放 / 暂停', category:'播放', local:'Space', global:'Ctrl+Alt+Space' },
   { key:'prevTrack', label:'上一首', category:'播放', local:'ArrowLeft', global:'Ctrl+Alt+ArrowLeft' },
@@ -116,7 +117,7 @@ var HOTKEY_ACTIONS = [
   { key:'toggleFullscreen', label:'全屏', category:'窗口', local:'KeyF', global:'Ctrl+Alt+KeyF' },
   { key:'toggleDesktopLyrics', label:'桌面歌词', category:'歌词', local:'Alt+KeyL', global:'Ctrl+Alt+KeyL' }
 ];
-function getHotkeyDefaults() {
+window.getHotkeyDefaults = function() {
   var defaults = { local: {}, global: {} };
   HOTKEY_ACTIONS.forEach(function(action){
     defaults.local[action.key] = action.local || '';
@@ -124,7 +125,7 @@ function getHotkeyDefaults() {
   });
   return defaults;
 }
-function readHotkeySettings() {
+window.readHotkeySettings = function() {
   var defaults = getHotkeyDefaults();
   try {
     var raw = JSON.parse(localStorage.getItem(HOTKEY_SETTINGS_STORE_KEY) || '{}') || {};
@@ -136,24 +137,24 @@ function readHotkeySettings() {
     return defaults;
   }
 }
-var shelfPinnedOpen = false;
-var playlistPanelLazyBound = false;
-var hotkeyCaptureState = null;
-var hotkeyGlobalStatus = {};
-function readDiyModePreference() {
+window.shelfPinnedOpen = false;
+window.playlistPanelLazyBound = false;
+window.hotkeyCaptureState = null;
+window.hotkeyGlobalStatus = {};
+window.readDiyModePreference = function() {
   try { return localStorage.getItem(DIY_MODE_STORE_KEY) === '1'; } catch (e) { return false; }
 }
-function readBooleanPreference(key, fallback) {
+window.readBooleanPreference = function(key, fallback) {
   try { var v = localStorage.getItem(key); return v == null ? !!fallback : (v === 'true' || v === '1'); } catch (e) { return !!fallback; }
 }
-var diyPlayerMode = readDiyModePreference();
+window.diyPlayerMode = readDiyModePreference();
 var customCoverMap = null;      // initialized by api-helper.js on load
 var customLyricMap = null;      // initialized by api-helper.js on load
 var customLyricPrefs = null;    // initialized by api-helper.js on load
 
-var _audioUrlCache = {};
-var _prefetchAudioEls = {};
-function _cacheKeyForSong(song) {
+window._audioUrlCache = {};
+window._prefetchAudioEls = {};
+window._cacheKeyForSong = function(song) {
   var provider = songProviderKey(song);
   return provider + ':' + (song.id || song.mid || song.songmid || (song.name + '|' + song.artist));
 }
@@ -231,9 +232,9 @@ var fxDefaults = {
   liveBackgroundKeep: false,
   cam: 'off',
 };
-var PACKAGED_DEFAULT_USER_FX_ARCHIVE_NAME = '默认测试';
-var PACKAGED_DEFAULT_USER_FX_ARCHIVE_EXPORTED_AT = 1782276031784;
-var PACKAGED_DEFAULT_USER_FX_ARCHIVE_SAVED_AT = 1782273019045;
+window.PACKAGED_DEFAULT_USER_FX_ARCHIVE_NAME = '默认测试';
+window.PACKAGED_DEFAULT_USER_FX_ARCHIVE_EXPORTED_AT = 1782276031784;
+window.PACKAGED_DEFAULT_USER_FX_ARCHIVE_SAVED_AT = 1782273019045;
 var PACKAGED_DEFAULT_FX_SNAPSHOT = Object.freeze({
   visualPresetSchema: VISUAL_PRESET_SCHEMA,
   preset: 0,
@@ -314,10 +315,10 @@ var PACKAGED_DEFAULT_FX_SNAPSHOT = Object.freeze({
   shelfAccentColor: '#ffffff',
   cam: 'off'
 });
-function clonePackagedDefaultFxSnapshot() {
+window.clonePackagedDefaultFxSnapshot = function() {
   return Object.assign({}, PACKAGED_DEFAULT_FX_SNAPSHOT);
 }
-function packagedDefaultLyricLayoutRaw() {
+window.packagedDefaultLyricLayoutRaw = function() {
   return Object.assign({ desktopLyricsSchema: 'desktop-lyrics-v3' }, clonePackagedDefaultFxSnapshot());
 }
 

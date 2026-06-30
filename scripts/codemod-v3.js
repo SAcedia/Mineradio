@@ -44,7 +44,7 @@ function processFile(filePath) {
 
     if (match) {
       const name = match[1];
-      const params = match[2];
+      const params = match[2].trim();
       const isAsync = !!asyncFn;
       const prefix = isAsync ? `window.${name} = async function(${params}) {` : `window.${name} = function(${params}) {`;
 

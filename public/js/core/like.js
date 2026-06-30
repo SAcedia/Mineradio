@@ -146,6 +146,9 @@ window.toggleLikeSong = async function(song) {
 }
 window.toggleLikeCurrent = function() {
  toggleLikeSong(currentCoverSong()); }
-function toggleLikeSearchResult(i) { if (playlist[i]) toggleLikeSong(playlist[i]); }
-function toggleLikeQueueIndex(i) { if (playQueue[i]) toggleLikeSong(playQueue[i]); }
-function toggleLikeDetailSong(song) { toggleLikeSong(song); }
+window.toggleLikeSearchResult = function(i) {
+ if (playlist[i]) toggleLikeSong(playlist[i]); }
+window.toggleLikeQueueIndex = function(i) {
+ if (playQueue[i]) toggleLikeSong(playQueue[i]); }
+window.toggleLikeDetailSong = function(song) {
+ toggleLikeSong(song); }

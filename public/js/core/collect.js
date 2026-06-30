@@ -19,17 +19,20 @@ window.openCollectModal = function(song) {
 }
 window.openCollectModalForCurrent = function() {
  openCollectModal(currentCoverSong()); }
-function collectSearchResult(i) { if (playlist[i]) openCollectModal(playlist[i]); }
-function collectQueueIndex(i) { if (playQueue[i]) openCollectModal(playQueue[i]); }
-function collectDetailSong(song) { openCollectModal(song); }
-function closeCollectModal() {
+window.collectSearchResult = function(i) {
+ if (playlist[i]) openCollectModal(playlist[i]); }
+window.collectQueueIndex = function(i) {
+ if (playQueue[i]) openCollectModal(playQueue[i]); }
+window.collectDetailSong = function(song) {
+ openCollectModal(song); }
+window.closeCollectModal = function() {
   closeGsapModal(document.getElementById('collect-modal'), function(){
     collectTargetSong = null;
     var input = document.getElementById('collect-new-name');
     if (input) input.value = '';
   });
 }
-function renderCollectModal() {
+window.renderCollectModal = function() {
   var current = document.getElementById('collect-current');
   var list = document.getElementById('collect-list');
   if (!current || !list) return;
@@ -59,14 +62,14 @@ function renderCollectModal() {
   }).join('');
   if (window.gsap) animateListItems(list, '.collect-item', { x: 0, y: 6, stagger: 0.012, duration: 0.18, limit: 18 });
 }
-function setCollectBusyPid(pid, busy) {
+window.setCollectBusyPid = function(pid, busy) {
   var list = document.getElementById('collect-list');
   if (!list) return;
   list.querySelectorAll('.collect-item').forEach(function(item){
     item.classList.toggle('busy', !!busy && item.getAttribute('data-collect-pid') === String(pid));
   });
 }
-async function createPlaylistFromCollect() {
+window.createPlaylistFromCollect = async function() {
   if (!ensureLoggedInForAction()) return;
   var input = document.getElementById('collect-new-name');
   var name = input ? input.value.trim() : '';
@@ -85,14 +88,14 @@ async function createPlaylistFromCollect() {
     showToast('创建歌单失败');
   }
 }
-function collectResultMessage(r) {
+window.collectResultMessage = function(r) {
   if (!r) return '收藏失败';
   var msg = r.error || r.message || r.msg || '';
   if (msg === 'LOGIN_REQUIRED') return '登录后可同步到网易云';
   if (/exist|重复|已存在|already/i.test(String(msg))) return '歌曲已在歌单中';
   return msg ? ('收藏失败: ' + msg) : '收藏失败';
 }
-async function verifySongInPlaylist(pid, songId) {
+window.verifySongInPlaylist = async function(pid, songId) {
   songId = String(songId || '');
   if (!pid || !songId) return false;
   for (var attempt = 0; attempt < 3; attempt++) {
@@ -111,7 +114,7 @@ async function verifySongInPlaylist(pid, songId) {
   }
   return false;
 }
-async function addCollectTargetToPlaylist(pid) {
+window.addCollectTargetToPlaylist = async function(pid) {
   if (collectBusy || !collectTargetSong || !pid) return;
   collectBusy = true;
   setCollectBusyPid(pid, true);

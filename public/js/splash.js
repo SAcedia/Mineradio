@@ -21,16 +21,16 @@ window.splashReadyToEnter = false;
 
 window.splashClamp01 = function(v) {
  return Math.max(0, Math.min(1, v)); }
-function splashSmoothstep(edge0, edge1, x) {
+window.splashSmoothstep = function(edge0, edge1, x) {
   var t = splashClamp01((x - edge0) / Math.max(0.0001, edge1 - edge0));
   return t * t * (3 - 2 * t);
 }
-function splashEaseOutCubic(t) {
+window.splashEaseOutCubic = function(t) {
   t = splashClamp01(t);
   return 1 - Math.pow(1 - t, 3);
 }
 
-function initMineradioSplashWebgl(canvas) {
+window.initMineradioSplashWebgl = function(canvas) {
   var gl = null;
   try {
     gl = canvas.getContext('webgl', {
@@ -202,7 +202,7 @@ function initMineradioSplashWebgl(canvas) {
   return true;
 }
 
-function drawMineradioSplashWebgl(elapsed) {
+window.drawMineradioSplashWebgl = function(elapsed) {
   var gl = splashGl;
   if (!gl || !splashGlProgram || !splashGlUniforms) return;
   gl.viewport(0, 0, splashCanvas.width, splashCanvas.height);
@@ -286,7 +286,7 @@ function drawMineradioSplashWebgl(elapsed) {
   drawMineradioSplash();
 })();
 
-function drawMineradioSplash() {
+window.drawMineradioSplash = function() {
   if (!splashAnimating || (!splashCtx && !splashGl)) return;
   requestAnimationFrame(drawMineradioSplash);
   var elapsed = (performance.now() - splashStartedAt) / 1000;
@@ -447,7 +447,7 @@ function drawMineradioSplash() {
   splashCtx.restore();
 }
 
-function playMineradioIntroSound() {
+window.playMineradioIntroSound = function() {
   if (splashSoundPlayed) return;
   try {
     var AudioContextCtor = window.AudioContext || window.webkitAudioContext;
@@ -525,7 +525,7 @@ function playMineradioIntroSound() {
     softTone('sine', 1760, 1040, 3.64, 0.46, 0.010);
   } catch (e) {}
 }
-function armSplashSoundFallback() {
+window.armSplashSoundFallback = function() {
   if (splashSoundFallbackArmed) return;
   splashSoundFallbackArmed = true;
   function unlock() {
@@ -537,7 +537,7 @@ function armSplashSoundFallback() {
   document.addEventListener('keydown', unlock, true);
 }
 
-function dismissSplash() {
+window.dismissSplash = function() {
   var s = document.getElementById('splash');
   if (!s || s.classList.contains('hide') || s.classList.contains('exiting')) return;
   markAppPerf('splash-dismiss');
@@ -584,7 +584,7 @@ function dismissSplash() {
   }, 1180);
 }
 
-function markSplashReadyToEnter() {
+window.markSplashReadyToEnter = function() {
   var s = document.getElementById('splash');
   if (!s || s.classList.contains('hide') || s.classList.contains('exiting')) return;
   markAppPerf('splash-ready');
@@ -630,10 +630,10 @@ var desktopOverlayPushState = {
   lastLyricsBeatKey: '',
   lastWallpaperKey: ''
 };
-function getDesktopWindowApi() {
+window.getDesktopWindowApi = function() {
   return window.desktopWindow && window.desktopWindow.isDesktop ? window.desktopWindow : null;
 }
-function currentDesktopSongMeta() {
+window.currentDesktopSongMeta = function() {
   var song = playQueue && currentIdx >= 0 ? playQueue[currentIdx] : null;
   song = song || currentLyricSong && currentLyricSong() || {};
   return {
@@ -642,10 +642,10 @@ function currentDesktopSongMeta() {
     cover: (typeof songCoverSrc === 'function' && song) ? (songCoverSrc(song, 360) || song.cover || '') : (song.cover || '')
   };
 }
-function normalizeDesktopLyricText(text) {
+window.normalizeDesktopLyricText = function(text) {
   return String(text || '').replace(/\s+/g, ' ').trim();
 }
-function currentDesktopLyricSnapshot() {
+window.currentDesktopLyricSnapshot = function() {
   var t = audio && isFinite(audio.currentTime) ? Number(audio.currentTime) : 0;
   var lines = Array.isArray(lyricsLines) ? lyricsLines : [];
   if (playing && audio && lines.length) {
@@ -685,14 +685,14 @@ function currentDesktopLyricSnapshot() {
   }
   return { text: normalizeDesktopLyricText(currentDesktopSongMeta().title || 'Mineradio'), progress: 0, progressSpan: 4.8 };
 }
-function desktopOverlayColorValue(value, fallback) {
+window.desktopOverlayColorValue = function(value, fallback) {
   var raw = String(value || '').trim();
   fallback = String(fallback || '#d6f8ff').trim();
   if (/^#[0-9a-f]{3}$/i.test(raw) || /^#[0-9a-f]{6}$/i.test(raw)) return normalizeHexColor(raw, fallback);
   if (/^rgba?\(/i.test(raw) || /^hsla?\(/i.test(raw)) return raw;
   return normalizeHexColor(raw, fallback);
 }
-function desktopOverlayColors() {
+window.desktopOverlayColors = function() {
   var pal = stageLyrics && stageLyrics.palette || {};
   return {
     primary: desktopOverlayColorValue(pal.primary || fx.lyricColor || '#d6f8ff', '#d6f8ff'),
@@ -701,7 +701,7 @@ function desktopOverlayColors() {
     glow: desktopOverlayColorValue(pal.glowColor || pal.secondary || pal.primary || fx.lyricGlowColor || '#9cffdf', '#9cffdf')
   };
 }
-function desktopLyricsMotionPayload() {
+window.desktopLyricsMotionPayload = function() {
   return {
     lyricGlow: !!fx.lyricGlow,
     lyricGlowBeat: !!fx.lyricGlowBeat,
@@ -712,7 +712,7 @@ function desktopLyricsMotionPayload() {
     bass: isFinite(bass) ? clampRange(bass, 0, 1.2) : 0
   };
 }
-function desktopLyricsPlaybackPayload() {
+window.desktopLyricsPlaybackPayload = function() {
   var time = audio && isFinite(audio.currentTime) ? Number(audio.currentTime) : 0;
   var duration = audio && isFinite(audio.duration) ? Number(audio.duration) : 0;
   var rate = audio && isFinite(audio.playbackRate) && audio.playbackRate > 0 ? Number(audio.playbackRate) : 1;
@@ -722,14 +722,14 @@ function desktopLyricsPlaybackPayload() {
     rate: clampRange(rate, 0.25, 4)
   };
 }
-function desktopLyricsActiveBeatMap() {
+window.desktopLyricsActiveBeatMap = function() {
   var useDj = !!(djMode && djMode.active && currentDjBeatMap);
   return {
     source: useDj ? 'dj' : 'mr',
     map: useDj ? currentDjBeatMap : currentBeatMap
   };
 }
-function desktopLyricsBeatMapPayload(force) {
+window.desktopLyricsBeatMapPayload = function(force) {
   var selected = desktopLyricsActiveBeatMap();
   var map = selected && selected.map;
   var source = selected && selected.source || 'mr';
@@ -746,17 +746,17 @@ function desktopLyricsBeatMapPayload(force) {
   if (shouldSendMap) payload.beatMap = map ? packLocalBeatMap(map) : null;
   return payload;
 }
-function notifyDesktopLyricsBeatMapReady() {
+window.notifyDesktopLyricsBeatMapReady = function() {
   try {
     if (fx && fx.desktopLyrics) pushDesktopLyricsState(true);
   } catch (e) {}
 }
-function desktopLyricsPushInterval() {
+window.desktopLyricsPushInterval = function() {
   var fps = normalizeDesktopLyricsFps(fx && fx.desktopLyricsFps);
   if (!fps) return 8;
   return Math.max(8, Math.min(42, 1000 / fps));
 }
-function desktopLyricsPayload(forceBeatMap) {
+window.desktopLyricsPayload = function(forceBeatMap) {
   var meta = currentDesktopSongMeta();
   var lyric = currentDesktopLyricSnapshot();
   var beatPayload = desktopLyricsBeatMapPayload(!!forceBeatMap);
@@ -790,7 +790,7 @@ function desktopLyricsPayload(forceBeatMap) {
   if (Object.prototype.hasOwnProperty.call(beatPayload, 'beatMap')) payload.beatMap = beatPayload.beatMap;
   return payload;
 }
-function wallpaperPayload() {
+window.wallpaperPayload = function() {
   var meta = currentDesktopSongMeta();
   return {
     enabled: !!fx.wallpaperMode && !isDevelopmentLockedFx('wallpaperMode'),
@@ -803,7 +803,7 @@ function wallpaperPayload() {
     colors: desktopOverlayColors()
   };
 }
-function pushDesktopLyricsState(force) {
+window.pushDesktopLyricsState = function(force) {
   var api = getDesktopWindowApi();
   if (!api || typeof api.updateDesktopLyrics !== 'function') return;
   var now = performance.now();
@@ -817,7 +817,7 @@ function pushDesktopLyricsState(force) {
   desktopOverlayPushState.lastLyricsKey = key;
   api.updateDesktopLyrics(payload).catch(function(e){ console.warn('desktop lyrics update failed:', e); });
 }
-function applyDesktopLyricsState(force) {
+window.applyDesktopLyricsState = function(force) {
   var api = getDesktopWindowApi();
   if (!api) return;
   normalizeDevelopmentLockedFxState();
@@ -827,7 +827,7 @@ function applyDesktopLyricsState(force) {
   }
   pushDesktopLyricsState(!!force);
 }
-function pushWallpaperState(force) {
+window.pushWallpaperState = function(force) {
   var api = getDesktopWindowApi();
   if (!api || typeof api.updateWallpaperMode !== 'function') return;
   var now = performance.now();
@@ -839,7 +839,7 @@ function pushWallpaperState(force) {
   desktopOverlayPushState.lastWallpaperKey = key;
   api.updateWallpaperMode(payload).catch(function(e){ console.warn('wallpaper update failed:', e); });
 }
-function applyWallpaperModeState(force) {
+window.applyWallpaperModeState = function(force) {
   var api = getDesktopWindowApi();
   if (!api) return;
   normalizeDevelopmentLockedFxState();
@@ -849,7 +849,7 @@ function applyWallpaperModeState(force) {
   }
   pushWallpaperState(!!force);
 }
-function syncDesktopOverlayState() {
+window.syncDesktopOverlayState = function() {
   if (fx.desktopLyrics) pushDesktopLyricsState(false);
   if (fx.wallpaperMode) pushWallpaperState(false);
 }
@@ -858,11 +858,11 @@ setInterval(function(){
 }, 320);
 
 // 全屏
-var desktopFullscreenActive = false;
-var documentFullscreenActive = false;
-var desktopWindowState = {};
+window.desktopFullscreenActive = false;
+window.documentFullscreenActive = false;
+window.desktopWindowState = {};
 
-function toggleFullscreen() {
+window.toggleFullscreen = function() {
   var api = window.desktopWindow;
   if (api && api.isDesktop && typeof api.toggleFullscreen === 'function') {
     if (document.fullscreenElement && document.exitFullscreen) {
@@ -1009,7 +1009,7 @@ if (fx.floatLayer) createFloatLayer();
 if (fx.particleLyrics) createLyricsParticles();
 if (fx.backCover) createBackCoverLayer();
 initIdleGuideCanvas();
-var startupLoginStatusPromise = Promise.all([refreshLoginStatus(), refreshQQLoginStatus()]);
+window.startupLoginStatusPromise = Promise.all([refreshLoginStatus(), refreshQQLoginStatus()]);
 startQQLoginStatusAutoRefresh();
 if (startupLoginStatusPromise && startupLoginStatusPromise.then) {
   startupLoginStatusPromise.then(function(){
@@ -1023,7 +1023,7 @@ if (startupLoginStatusPromise && startupLoginStatusPromise.then) {
     else if (!homeShown) maybeRunStartupLoginGuide('status');
   });
 }
-var collectNameInput = document.getElementById('collect-new-name');
+window.collectNameInput = document.getElementById('collect-new-name');
 if (collectNameInput) {
   collectNameInput.addEventListener('keydown', function(e){
     if (e.key === 'Enter') {
@@ -1032,7 +1032,7 @@ if (collectNameInput) {
     }
   });
 }
-var customLyricInput = document.getElementById('custom-lyric-input');
+window.customLyricInput = document.getElementById('custom-lyric-input');
 if (customLyricInput) {
   customLyricInput.addEventListener('keydown', function(e){
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {

@@ -281,7 +281,7 @@ window.toggleLyricsPanel = function(force) {
 window.updateLyricsHighlight = function() {
  /* v8: 由 tickLyricsParticles 接管 */ }
 
-function setLyricSource(source) {
+window.setLyricSource = function(source) {
   if (source === 'auto') {
     _lyricSourceIdx = 0;
   } else {
@@ -299,11 +299,11 @@ function setLyricSource(source) {
   }
   showToast('歌词源: ' + (source === 'auto' ? '自动' : (_lyricSourceLabels[source] || source)));
 }
-function _songPrefKey(song) {
+window._songPrefKey = function(song) {
   if (!song || !song.id) return '';
   return 'mineradio-song-pref:' + songProviderKey(song) + ':' + song.id;
 }
-function _saveSongPref(song) {
+window._saveSongPref = function(song) {
   var key = _songPrefKey(song);
   if (!key) return;
   try {
@@ -315,7 +315,7 @@ function _saveSongPref(song) {
     else localStorage.removeItem(key);
   } catch(e) {}
 }
-function _loadSongPref(song) {
+window._loadSongPref = function(song) {
   var key = _songPrefKey(song);
   if (!key) return;
   try {
@@ -340,7 +340,7 @@ function _loadSongPref(song) {
     if (sd && window.audio) sd.textContent = window.audio.playbackRate + 'x';
   } catch(e) {}
 }
-function adjustLyricOffset(delta) {
+window.adjustLyricOffset = function(delta) {
   if (typeof _lyricOffset === 'undefined') _lyricOffset = 0;
   _lyricOffset = Math.max(-30, Math.min(30, _lyricOffset + delta));
   _lyricOffset = Math.round(_lyricOffset * 100) / 100;
@@ -350,7 +350,7 @@ function adjustLyricOffset(delta) {
   var song = currentCoverSong();
   if (song) _saveSongPref(song);
 }
-function adjustPlaybackSpeed(delta) {
+window.adjustPlaybackSpeed = function(delta) {
   if (!window.audio) return;
   var rate = (window.audio.playbackRate || 1) + delta;
   rate = Math.max(0.25, Math.min(3, rate));
@@ -361,7 +361,7 @@ function adjustPlaybackSpeed(delta) {
   var song = currentCoverSong();
   if (song) _saveSongPref(song);
 }
-function updateMiniSourceButtons() {
+window.updateMiniSourceButtons = function() {
   var bar = document.getElementById('mini-source-bar');
   if (!bar) return;
   var curSrc = _lyricSources[_lyricSourceIdx];
@@ -373,7 +373,7 @@ function updateMiniSourceButtons() {
     b.classList.toggle('active', ds === curSrc);
   }
 }
-function updateMiniSourceBar() {
+window.updateMiniSourceBar = function() {
   var bar = document.getElementById('mini-source-bar');
   if (!bar) return;
   var song = currentCoverSong();

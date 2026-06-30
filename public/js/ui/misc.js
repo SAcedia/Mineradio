@@ -807,32 +807,35 @@ window.loadScriptOnce = function(src) {
 // ============================================================
 window.startHeadTracking = function() {
 }     // stub: 兼容旧调用
-function stopHeadTracking(){}      // stub
+window.stopHeadTracking = function() {
+}      // stub
 
-var gestureVideo = null, gestureCamera = null, gestureHands = null;
-var gestureActive = false;
+window.gestureVideo = null;
+window.gestureCamera = null;
+window.gestureHands = null;
+window.gestureActive = false;
 // 21 个关键点的平滑缓存 (EMA): [{x,y}, ...]
-var handLmSmooth = null;
-var handLmLastSeen = 0;
+window.handLmSmooth = null;
+window.handLmLastSeen = 0;
 // 捏合状态
-var pinchState = { active:false, lastX:0, lastY:0, lastT:0 };
+window.pinchState = { active:false, lastX:0, lastY:0, lastT:0 };
 // 物理旋转: 给 particles 一个角速度, 每帧衰减
-var particleSpin = { vx: 0, vy: 0, damping: 0.90 };
+window.particleSpin = { vx: 0, vy: 0, damping: 0.90 };
 // 手势驱动的总旋转 (累计角度), 输出到 particles
-var gestureRotation = { x: 0, y: 0 };
-var gestureGrip = { value: 0, target: 0, openness: 1, lastState: 'open', pulse: 0 };
-var PARTICLE_POINTER_SPIN_X = 0.0032;
-var PARTICLE_POINTER_SPIN_Y = 0.0034;
-var PARTICLE_HAND_SPIN_X = 4.15;
-var PARTICLE_HAND_SPIN_Y = 4.30;
-var PARTICLE_SPIN_MAX = 6.2;
+window.gestureRotation = { x: 0, y: 0 };
+window.gestureGrip = { value: 0, target: 0, openness: 1, lastState: 'open', pulse: 0 };
+window.PARTICLE_POINTER_SPIN_X = 0.0032;
+window.PARTICLE_POINTER_SPIN_Y = 0.0034;
+window.PARTICLE_HAND_SPIN_X = 4.15;
+window.PARTICLE_HAND_SPIN_Y = 4.30;
+window.PARTICLE_SPIN_MAX = 6.2;
 
-function clampParticleSpinVelocity(v) {
+window.clampParticleSpinVelocity = function(v) {
   if (!isFinite(v)) return 0;
   return Math.max(-PARTICLE_SPIN_MAX, Math.min(PARTICLE_SPIN_MAX, v));
 }
 
-function applyParticleSpinDrag(dx, dy, dt) {
+window.applyParticleSpinDrag = function(dx, dy, dt) {
   var rx = dy * PARTICLE_POINTER_SPIN_X;
   var ry = dx * PARTICLE_POINTER_SPIN_Y;
   gestureRotation.x += rx;
@@ -843,7 +846,7 @@ function applyParticleSpinDrag(dx, dy, dt) {
   }
 }
 
-function resetParticleRotationTarget(syncVisual) {
+window.resetParticleRotationTarget = function(syncVisual) {
   gestureRotation.x = 0;
   gestureRotation.y = 0;
   particleSpin.vx = 0;
@@ -856,7 +859,7 @@ function resetParticleRotationTarget(syncVisual) {
   }
 }
 
-function rebaseParticleRotationAxis(axis) {
+window.rebaseParticleRotationAxis = function(axis) {
   var limit = Math.PI * 10;
   if (Math.abs(gestureRotation[axis]) < limit) return;
   var offset = Math.round(gestureRotation[axis] / (Math.PI * 2)) * Math.PI * 2;
@@ -869,16 +872,17 @@ function rebaseParticleRotationAxis(axis) {
   if (stageLyrics.group) stageLyrics.group.rotation[axis] -= offset;
 }
 
-function rebaseParticleRotationIfNeeded() {
+window.rebaseParticleRotationIfNeeded = function() {
   rebaseParticleRotationAxis('x');
   rebaseParticleRotationAxis('y');
 }
 // 手骨架 canvas
-var handCanvas = null, handCanvasCtx = null;
+window.handCanvas = null;
+window.handCanvasCtx = null;
 // 平滑系数 (越小越平滑, 但反应越慢)
-var HAND_SMOOTH_ALPHA = 0.35;
+window.HAND_SMOOTH_ALPHA = 0.35;
 
-async function startGestureControl() {
+window.startGestureControl = async function() {
   if (gestureActive) return;
   showToast('正在加载手势识别…');
   try {
@@ -915,7 +919,7 @@ async function startGestureControl() {
   }
 }
 
-function stopGestureControl() {
+window.stopGestureControl = function() {
   if (!gestureActive) return;
   try { if (gestureCamera && gestureCamera.stop) gestureCamera.stop(); } catch(e){}
   try { if (gestureVideo && gestureVideo.srcObject) gestureVideo.srcObject.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
@@ -936,7 +940,7 @@ function stopGestureControl() {
   }
 }
 
-function resizeHandCanvas() {
+window.resizeHandCanvas = function() {
   if (!handCanvas) return;
   var dpr = Math.min(devicePixelRatio || 1, 2);
   handCanvas.width = innerWidth * dpr;
@@ -947,7 +951,7 @@ function resizeHandCanvas() {
 }
 window.addEventListener('resize', resizeHandCanvas);
 
-function onHandLost() {
+window.onHandLost = function() {
   // 平滑淡出, 不立即清零 — 给一点缓冲
   if (pinchState.active) pinchState.active = false;
   gestureGrip.target = 0;
@@ -961,7 +965,7 @@ function onHandLost() {
 }
 
 // 把单帧 21 个 landmark 平滑到 handLmSmooth, 镜像 X (摄像头是反的)
-function smoothLandmarks(lm) {
+window.smoothLandmarks = function(lm) {
   if (!handLmSmooth) {
     handLmSmooth = lm.map(function(p){ return { x: 1 - p.x, y: p.y, z: p.z || 0 }; });
     return handLmSmooth;
@@ -977,13 +981,13 @@ function smoothLandmarks(lm) {
 }
 
 // 手掌中心 ≈ wrist(0) 和 mcp 平均 (5,9,13,17 是各指根)
-function palmCenter(lm) {
+window.palmCenter = function(lm) {
   var px = (lm[0].x + lm[5].x + lm[9].x + lm[13].x + lm[17].x) / 5;
   var py = (lm[0].y + lm[5].y + lm[9].y + lm[13].y + lm[17].y) / 5;
   return { x: px, y: py };
 }
 
-function handOpenness(lm, palm) {
+window.handOpenness = function(lm, palm) {
   var span = Math.hypot(lm[5].x - lm[17].x, lm[5].y - lm[17].y);
   span = Math.max(0.055, span);
   var tips = [8, 12, 16, 20];
@@ -993,7 +997,7 @@ function handOpenness(lm, palm) {
   return clampRange((avg / span - 0.62) / 0.78, 0, 1);
 }
 
-function processHandFrame(rawLm) {
+window.processHandFrame = function(rawLm) {
   handLmLastSeen = performance.now();
   var lm = smoothLandmarks(rawLm);
 
@@ -1081,7 +1085,7 @@ var HAND_BONES = [
   [0,17],[17,18],[18,19],[19,20], // 小指
   [5,9],[9,13],[13,17],           // 掌横连
 ];
-function drawHandSkeleton(lm, isPinch, openness, isFist) {
+window.drawHandSkeleton = function(lm, isPinch, openness, isFist) {
   if (!handCanvasCtx) return;
   var ctx = handCanvasCtx;
   ctx.clearRect(0, 0, innerWidth, innerHeight);
@@ -1163,7 +1167,7 @@ function drawHandSkeleton(lm, isPinch, openness, isFist) {
 }
 
 // 每帧调用 — 应用惯性旋转 + handActive 衰减
-function tickGestureRotation(dt) {
+window.tickGestureRotation = function(dt) {
   if (Math.abs(particleSpin.vx) > 0.0001 || Math.abs(particleSpin.vy) > 0.0001) {
     var rx = particleSpin.vx * dt;
     var ry = particleSpin.vy * dt;
@@ -1186,7 +1190,7 @@ function tickGestureRotation(dt) {
   }
 }
 
-function showGestureHUD(label, progress, detail) {
+window.showGestureHUD = function(label, progress, detail) {
   var hud = document.getElementById('gesture-hud');
   if (!hud) return;
   document.getElementById('gesture-label').textContent = label || '待命';
@@ -1195,14 +1199,16 @@ function showGestureHUD(label, progress, detail) {
   if (fill) fill.style.width = Math.max(0, Math.min(100, (progress || 0) * 100)) + '%';
   hud.classList.add('show');
 }
-function showGestureCursor(){}  // stub: 兼容旧调用
-function hideGestureCursor(){}  // stub: 兼容旧调用
+window.showGestureCursor = function() {
+}  // stub: 兼容旧调用
+window.hideGestureCursor = function() {
+}  // stub: 兼容旧调用
 
 
 // ============================================================
 //  Resize / 快捷键
 // ============================================================
-function refreshMainRendererViewport(reason) {
+window.refreshMainRendererViewport = function(reason) {
   if (typeof camera !== 'undefined' && camera) {
     camera.aspect = Math.max(1, innerWidth) / Math.max(1, innerHeight);
     camera.updateProjectionMatrix();
@@ -1212,7 +1218,7 @@ function refreshMainRendererViewport(reason) {
     requestStageLyricCameraSnap(reason === 'resize' ? 4 : 10);
   }
 }
-function scheduleMainRendererViewportRefresh(reason) {
+window.scheduleMainRendererViewportRefresh = function(reason) {
   refreshMainRendererViewport(reason || 'sync');
   [48, 140, 320].forEach(function(delay){
     setTimeout(function(){ refreshMainRendererViewport(reason || 'sync'); }, delay);
@@ -1290,9 +1296,9 @@ document.addEventListener('keydown', function(e){
 //   - 歌单 (左侧): x < 48 进入, x > 380 离开
 //   - 进入立即显示, 离开延迟 500ms (统一)
 // ============================================================
-var PEEK_HIDE_DELAY = 170;
-var peekTimers = { search:null, fx:null, pl:null };
-function setPeek(el, on, key) {
+window.PEEK_HIDE_DELAY = 170;
+window.peekTimers = { search:null, fx:null, pl:null };
+window.setPeek = function(el, on, key) {
   if (!el) return;
   if (immersiveMode && on && (key === 'search' || key === 'fx')) return;
   if (on && !diyPlayerMode && key === 'fx') return;
@@ -1335,13 +1341,13 @@ function setPeek(el, on, key) {
     }, PEEK_HIDE_DELAY);
   }
 }
-function uploadTipWasSeen() {
+window.uploadTipWasSeen = function() {
   try { return localStorage.getItem(UPLOAD_TIP_STORE_KEY) === '1'; } catch (e) { return true; }
 }
-function markUploadTipSeen() {
+window.markUploadTipSeen = function() {
   try { localStorage.setItem(UPLOAD_TIP_STORE_KEY, '1'); } catch (e) {}
 }
-function closeUploadTip(manual) {
+window.closeUploadTip = function(manual) {
   var tip = document.getElementById('upload-tip');
   if (uploadTipTimer) { clearTimeout(uploadTipTimer); uploadTipTimer = null; }
   if (manual) markUploadTipSeen();
@@ -1364,7 +1370,7 @@ function closeUploadTip(manual) {
     tip.classList.remove('show');
   }
 }
-function maybeShowUploadTipOnce() {
+window.maybeShowUploadTipOnce = function() {
   if (!diyPlayerMode) return;
   if (uploadTipWasSeen()) return;
   if (immersiveMode) {
@@ -1412,26 +1418,26 @@ function maybeShowUploadTipOnce() {
     setPeek(area, false, 'search');
   }, 6800);
 }
-var secondaryPlaylistEdgeGuard = { enteredAt:0, timer:null, x:0, y:0, H:0 };
-var SECONDARY_PLAYLIST_EDGE_MIN_X = 36;
-var SECONDARY_PLAYLIST_EDGE_MAX_X = 96;
-var SECONDARY_PLAYLIST_EDGE_DWELL_MS = 220;
-var SECONDARY_PLAYLIST_SEAM_CLOSE_X = 28;
-function isSecondaryLeftDisplaySeamGuardActive() {
+window.secondaryPlaylistEdgeGuard = { enteredAt:0, timer:null, x:0, y:0, H:0 };
+window.SECONDARY_PLAYLIST_EDGE_MIN_X = 36;
+window.SECONDARY_PLAYLIST_EDGE_MAX_X = 96;
+window.SECONDARY_PLAYLIST_EDGE_DWELL_MS = 220;
+window.SECONDARY_PLAYLIST_SEAM_CLOSE_X = 28;
+window.isSecondaryLeftDisplaySeamGuardActive = function() {
   var state = (typeof desktopWindowState !== 'undefined' && desktopWindowState) ? desktopWindowState : {};
   return !!(window.desktopWindow && window.desktopWindow.isDesktop && state.isPrimaryDisplay === false && state.hasDisplayOnLeft);
 }
-function resetSecondaryPlaylistEdgeGuard() {
+window.resetSecondaryPlaylistEdgeGuard = function() {
   if (secondaryPlaylistEdgeGuard.timer) {
     clearTimeout(secondaryPlaylistEdgeGuard.timer);
     secondaryPlaylistEdgeGuard.timer = null;
   }
   secondaryPlaylistEdgeGuard.enteredAt = 0;
 }
-function isSecondaryPlaylistSafeBandPoint(ex, ey, H) {
+window.isSecondaryPlaylistSafeBandPoint = function(ex, ey, H) {
   return ey > 132 && ey < H - 132 && ex >= SECONDARY_PLAYLIST_EDGE_MIN_X && ex < SECONDARY_PLAYLIST_EDGE_MAX_X;
 }
-function armSecondaryPlaylistEdgeDwell() {
+window.armSecondaryPlaylistEdgeDwell = function() {
   if (secondaryPlaylistEdgeGuard.timer) return;
   secondaryPlaylistEdgeGuard.timer = setTimeout(function(){
     secondaryPlaylistEdgeGuard.timer = null;
@@ -1441,7 +1447,7 @@ function armSecondaryPlaylistEdgeDwell() {
     if (panel) setPeek(panel, true, 'pl');
   }, SECONDARY_PLAYLIST_EDGE_DWELL_MS);
 }
-function isPlaylistEdgeTrigger(ex, ey, H) {
+window.isPlaylistEdgeTrigger = function(ex, ey, H) {
   var inVerticalBand = ey > 132 && ey < H - 132;
   if (!inVerticalBand) {
     resetSecondaryPlaylistEdgeGuard();
@@ -1463,13 +1469,13 @@ function isPlaylistEdgeTrigger(ex, ey, H) {
   armSecondaryPlaylistEdgeDwell();
   return now - secondaryPlaylistEdgeGuard.enteredAt >= SECONDARY_PLAYLIST_EDGE_DWELL_MS;
 }
-function playlistPanelExitPadding() {
+window.playlistPanelExitPadding = function() {
   return isSecondaryLeftDisplaySeamGuardActive() ? 34 : 72;
 }
-function playlistPanelFocusPadding() {
+window.playlistPanelFocusPadding = function() {
   return isSecondaryLeftDisplaySeamGuardActive() ? 28 : 52;
 }
-function shouldClosePlaylistPanelFromPointer(ppOn, ex, ppRect) {
+window.shouldClosePlaylistPanelFromPointer = function(ppOn, ex, ppRect) {
   if (!ppOn) return false;
   if (isSecondaryLeftDisplaySeamGuardActive() && ex < SECONDARY_PLAYLIST_SEAM_CLOSE_X) return true;
   // 详情面板显示时，鼠标在其区域内不关闭主面板
@@ -1480,7 +1486,7 @@ function shouldClosePlaylistPanelFromPointer(ppOn, ex, ppRect) {
   }
   return ex > ppRect.right + playlistPanelExitPadding();
 }
-function isPlaylistPanelFocusActive(inTrigger, inPanel, pp, ex, ppRect) {
+window.isPlaylistPanelFocusActive = function(inTrigger, inPanel, pp, ex, ppRect) {
   if (isSecondaryLeftDisplaySeamGuardActive() && ex < SECONDARY_PLAYLIST_SEAM_CLOSE_X) return false;
   return inTrigger || inPanel || (pp && pp.classList.contains('peek') && ex < ppRect.right + playlistPanelFocusPadding());
 }

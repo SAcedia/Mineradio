@@ -1,6 +1,6 @@
 window.scene = new THREE.Scene();
 scene.background = null;
-var camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
+window.camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
 window.RENDER_DPR_CAP = 1.35;
 window.RENDER_PIXEL_BUDGET = 5200000;
 window.RENDER_MIN_DPR = 0.72;
@@ -52,7 +52,7 @@ window.getRenderLoadTier = function() {
   if (cssPixels >= 3200000 || renderPixels >= 3600000) return 1;
   return 0;
 }
-var renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
+window.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
 renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(getRenderPixelRatio());
 renderer.setSize(innerWidth, innerHeight);
@@ -93,7 +93,7 @@ var orbit = {
   glowFollowRoll: 0,
   beatGlow: 0,
 };
-var ZERO_VEC = new THREE.Vector3(0,0,0);
+window.ZERO_VEC = new THREE.Vector3(0,0,0);
 window.BASE_FOV = 45;
 window.camPunch = 0;
 window.cinemaT = 0;
@@ -135,11 +135,11 @@ window.freeCamera = readFreeCameraState();
 window.FREE_CAMERA_MOVE = new THREE.Vector3();
 window.FREE_CAMERA_TARGET_VEL = new THREE.Vector3();
 window.FREE_CAMERA_SHAKE_DIR = new THREE.Vector3();
-var FREE_CAMERA_EULER = new THREE.Euler(0, 0, 0, 'YXZ');
+window.FREE_CAMERA_EULER = new THREE.Euler(0, 0, 0, 'YXZ');
 window.FREE_CAMERA_RESET_MAT = new THREE.Matrix4();
 window.FREE_CAMERA_RESET_QUAT = new THREE.Quaternion();
-var FREE_CAMERA_UP = new THREE.Vector3(0, 1, 0);
-var freeCameraPointer = { seen: false, x: 0, y: 0 };
+window.FREE_CAMERA_UP = new THREE.Vector3(0, 1, 0);
+window.freeCameraPointer = { seen: false, x: 0, y: 0 };
 window.freeCameraDeferredSaveTimer = 0;
 window.saveFreeCameraState = function() {
   if (!freeCamera) return;
@@ -1371,7 +1371,7 @@ window.updateCamera = function() {
 }
 
 // 焦点跟拍 (hover 0.5s 后镜头移到目标)
-var focusHover = { wantType: null, pendingTimer: null, exitTimer: null };
+window.focusHover = { wantType: null, pendingTimer: null, exitTimer: null };
 window.shouldUseWallpaperSafeShelfCamera = function() {
   return !!(fx && Number(fx.preset) === 5);
 }
@@ -1778,10 +1778,10 @@ syncCursorAutoHideMode();
 //  指针 / 拖拽控制
 //   v7.1: 用 userOrbit 替代 targetOrbit; 加 drag 距离判断
 // ============================================================
-var mouseWorld = new THREE.Vector3(-999, -999, 0);
+window.mouseWorld = new THREE.Vector3(-999, -999, 0);
 window.mouseActive = false;
-var mouseDownAt = { x:0, y:0, t:0, hadDrag:false };
-var particlePointerSpin = { active:false, lastX:0, lastY:0, lastT:0 };
+window.mouseDownAt = { x:0, y:0, t:0, hadDrag:false };
+window.particlePointerSpin = { active:false, lastX:0, lastY:0, lastT:0 };
 window.particlePointerRay = new THREE.Raycaster();
 window.particlePointerNdc = new THREE.Vector2();
 window.particlePointerPlane = new THREE.Plane();
@@ -1790,17 +1790,17 @@ window.particlePointerPlaneNormal = new THREE.Vector3();
 window.particlePointerWorldHit = new THREE.Vector3();
 window.particlePointerLocalHit = new THREE.Vector3();
 window.particlePointerQuat = new THREE.Quaternion();
-var particlePointerFrame = { dirty:false, ndcX:0, ndcY:0 };
-var CLICK_THRESHOLD = 6;  // 像素, 拖动 > 6px 视为 drag
-var UI_HIT_SELECTOR = '#search-area,#top-right,#fullscreen-diy-zone,#fx-panel,#fx-fab,#fx-fab-hide-btn,#playlist-panel,#bottom-bar,#thumb-wrap,#empty-home,#visual-guide,#trial-banner,#source-fallback-notice,.modal-mask,#toast,#ai-depth-chip,#beat-chip,#drop-overlay';
+window.particlePointerFrame = { dirty:false, ndcX:0, ndcY:0 };
+window.CLICK_THRESHOLD = 6;
+window.UI_HIT_SELECTOR = '#search-area,#top-right,#fullscreen-diy-zone,#fx-panel,#fx-fab,#fx-fab-hide-btn,#playlist-panel,#bottom-bar,#thumb-wrap,#empty-home,#visual-guide,#trial-banner,#source-fallback-notice,.modal-mask,#toast,#ai-depth-chip,#beat-chip,#drop-overlay';
 
-window.isPointerOverUi = function(e) {
+function isPointerOverUi(e) {
   if (!e) return false;
   var el = document.elementFromPoint(e.clientX, e.clientY);
   return !!(el && el.closest && el.closest(UI_HIT_SELECTOR));
 }
 
-window.particleLocalPointFromNdc = function(ndcX, ndcY, out) {
+function particleLocalPointFromNdc(ndcX, ndcY, out) {
   particlePointerNdc.set(ndcX, ndcY);
   particlePointerRay.setFromCamera(particlePointerNdc, camera);
   if (particles) {
@@ -1825,7 +1825,7 @@ window.particleLocalPointFromNdc = function(ndcX, ndcY, out) {
   return false;
 }
 
-window.queueParticlePointerFrame = function(clientX, clientY) {
+function queueParticlePointerFrame(clientX, clientY) {
   var mx = (clientX / innerWidth) * 2 - 1;
   var my = -(clientY / innerHeight) * 2 + 1;
   pointerTarget.x = mx; pointerTarget.y = my;
@@ -1834,7 +1834,7 @@ window.queueParticlePointerFrame = function(clientX, clientY) {
   particlePointerFrame.dirty = true;
 }
 
-window.updateParticlePointerFrame = function() {
+function updateParticlePointerFrame() {
   if (!particlePointerFrame.dirty) return;
   particlePointerFrame.dirty = false;
   if (particleLocalPointFromNdc(particlePointerFrame.ndcX, particlePointerFrame.ndcY, particlePointerLocalHit)) {
@@ -1847,7 +1847,7 @@ window.updateParticlePointerFrame = function() {
   }
 }
 
-window.beginParticlePointerDrag = function(e) {
+function beginParticlePointerDrag(e) {
   if (e.button === 2) return;
   if (isPointerOverUi(e)) return;
   markRenderInteraction('canvas-drag', 1200);

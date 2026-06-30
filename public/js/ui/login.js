@@ -314,16 +314,17 @@ window.refreshQr = async function() {
 }
 window.startQrPoll = function() {
  if (qrPollTimer) clearInterval(qrPollTimer); qrPollTimer = setInterval(checkQr, 2000); }
-function stopQrPoll() { if (qrPollTimer) { clearInterval(qrPollTimer); qrPollTimer = null; } }
-function toggleQQCookiePanel() {
+window.stopQrPoll = function() {
+ if (qrPollTimer) { clearInterval(qrPollTimer); qrPollTimer = null; } }
+window.toggleQQCookiePanel = function() {
   qqManualCookieOpen = !qqManualCookieOpen;
   updateLoginProviderUi();
 }
-function openProviderWebLogin() {
+window.openProviderWebLogin = function() {
   if (loginProvider === 'qq') return openQQWebLogin();
   return openNeteaseWebLogin();
 }
-async function openNeteaseWebLogin() {
+window.openNeteaseWebLogin = async function() {
   if (neteaseWebLoginBusy) return;
   var statusEl = document.getElementById('qr-status');
   var api = window.desktopWindow;
@@ -368,7 +369,7 @@ async function openNeteaseWebLogin() {
     }
   }
 }
-async function openQQWebLogin() {
+window.openQQWebLogin = async function() {
   if (qqWebLoginBusy) return;
   var statusEl = document.getElementById('qr-status');
   var api = window.desktopWindow;
@@ -416,7 +417,7 @@ async function openQQWebLogin() {
     }
   }
 }
-async function submitQQCookieLogin() {
+window.submitQQCookieLogin = async function() {
   if (qqCookieBusy) return;
   var input = document.getElementById('qq-cookie-input');
   var statusEl = document.getElementById('qr-status');
@@ -454,7 +455,7 @@ async function submitQQCookieLogin() {
     if (saveBtn) saveBtn.classList.remove('busy');
   }
 }
-async function checkQr() {
+window.checkQr = async function() {
   if (!qrKey) return;
   try {
     var r = await neteaseLoginQrCheck(qrKey);
@@ -484,7 +485,7 @@ async function checkQr() {
     }
   } catch (e) { console.warn(e); }
 }
-function updateUserModalUi() {
+window.updateUserModalUi = function() {
   activeAccountProvider = firstLoggedProvider();
   var st = platformStatus(activeAccountProvider);
   var meta = platformMeta(activeAccountProvider);
@@ -528,13 +529,14 @@ function updateUserModalUi() {
     ? '右上角已切换为多平台并排展示。'
     : '可切换右上角展示的平台；“我两个都要”会并排放多个登录状态。';
 }
-function showUserModal() {
+window.showUserModal = function() {
   if (!hasAnyPlatformLogin()) return showLoginModal();
   updateUserModalUi();
   openGsapModal(document.getElementById('user-modal'));
 }
-function closeUserModal() { closeGsapModal(document.getElementById('user-modal')); }
-function setActiveAccountProvider(provider) {
+window.closeUserModal = function() {
+ closeGsapModal(document.getElementById('user-modal')); }
+window.setActiveAccountProvider = function(provider) {
   provider = provider === 'qq' ? 'qq' : 'netease';
   if (!hasPlatformLogin(provider)) {
     openProviderLogin(provider);
@@ -545,7 +547,7 @@ function setActiveAccountProvider(provider) {
   renderUserBtn();
   updateUserModalUi();
 }
-function enableDualAccountView() {
+window.enableDualAccountView = function() {
   if (!hasPlatformLogin('netease') && !hasPlatformLogin('qq')) {
     openProviderLogin('netease');
     return;
@@ -563,16 +565,16 @@ function enableDualAccountView() {
   updateUserModalUi();
   showToast('已启用双平台账号展示');
 }
-function requestDualLoginMode() {
+window.requestDualLoginMode = function() {
   enableDualAccountView();
 }
-function openProviderLogin(provider) {
+window.openProviderLogin = function(provider) {
   provider = provider === 'qq' ? 'qq' : 'netease';
   closeUserModal();
   loginProvider = provider;
   showLoginModal({ provider: provider });
 }
-async function logoutActiveAccount() {
+window.logoutActiveAccount = async function() {
   if (activeAccountProvider === 'qq') {
     try { await qqLogout(); } catch (e) {}
     try {
@@ -593,7 +595,7 @@ async function logoutActiveAccount() {
   }
   doLogout();
 }
-async function doLogout() {
+window.doLogout = async function() {
   await apiJson('/api/logout');
   try {
     if (window.desktopWindow && typeof window.desktopWindow.clearNeteaseMusicLogin === 'function') {
@@ -615,10 +617,10 @@ async function doLogout() {
   closeUserModal();
   showToast('已退出登录');
 }
-var startupLoginGuideShown = false;
-var loginGuideAnimating = false;
-var loginGuideRaf = null;
-function runLoginGuideParticles(done) {
+window.startupLoginGuideShown = false;
+window.loginGuideAnimating = false;
+window.loginGuideRaf = null;
+window.runLoginGuideParticles = function(done) {
   var canvas = document.getElementById('login-guide-canvas');
   if (!canvas || reduceSplashMotion) {
     if (done) setTimeout(done, 120);
@@ -720,7 +722,7 @@ function runLoginGuideParticles(done) {
   }
   loginGuideRaf = requestAnimationFrame(draw);
 }
-function maybeRunStartupLoginGuide(source) {
+window.maybeRunStartupLoginGuide = function(source) {
   if (startupLoginGuideShown || loginGuideAnimating) return;
   if (visualGuideActive) return;
   if (document.body.classList.contains('splash-active')) return;

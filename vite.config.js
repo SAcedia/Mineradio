@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite'
 import path from 'path'
+import { injectWindowGlobals } from './vite-plugin-window-globals.js'
 
 export default defineConfig({
+  plugins: [injectWindowGlobals()],
   // Root = public/ where index.html lives
   root: 'public',
 
