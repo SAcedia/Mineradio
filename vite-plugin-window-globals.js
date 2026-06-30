@@ -191,9 +191,17 @@ export function injectWindowGlobals() {
     transform(code, id) {
       if (!id.includes('/js/') || !id.endsWith('.js')) return null;
       
+      // Filter out globals that are DEFINED in this file (via window.name = ...)
+      const definedHere = new Set();
+      const defRe = /window\.(\w+)\s*=\s*(?:function|async|class|[{\[('"0-9])/g;
+      let m;
+      while ((m = defRe.exec(code)) !== null) {
+        definedHere.add(m[1]);
+      }
+
       const usedGlobals = KNOWN_GLOBALS.filter(name => {
-        // Check if this name is referenced in the code (as a bare identifier)
-        const re = new RegExp('(?<!\\.)\\b' + name + '\\b(?!\\s*[:=])');
+        if (definedHere.has(name)) return false;
+        const re = new RegExp('(?<!window\\.)(?<!\\.)\\b' + name + '\\b(?!\\s*[:=])');
         return re.test(code);
       });
 
