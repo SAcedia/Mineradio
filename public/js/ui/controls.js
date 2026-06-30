@@ -106,8 +106,11 @@ function updateSearchModeTabs() {
   }
   var ytBtn = document.getElementById('search-mode-youtube');
   if (ytBtn) {
+    var ytEnabled = typeof searchSourceEnabled === 'function' ? searchSourceEnabled('youtube') : true;
+    ytBtn.style.display = ytEnabled ? '' : 'none';
     ytBtn.classList.toggle('active', searchMode === 'youtube');
     ytBtn.setAttribute('aria-selected', searchMode === 'youtube' ? 'true' : 'false');
+    if (!ytEnabled && searchMode === 'youtube') setSearchMode('song');
   }
   if ($input) {
     var ph = '搜索歌曲、歌手...';

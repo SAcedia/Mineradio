@@ -13,8 +13,9 @@ function loginYouTube() {
 function searchSourceEnabled(provider) {
   try {
     var v = localStorage.getItem('mineradio-source-' + provider);
+    if (provider === 'youtube') return v === '1'; // YouTube defaults OFF
     return v !== '0';
-  } catch(e) { return true; }
+  } catch(e) { return provider !== 'youtube'; }
 }
 function toggleSearchSource(provider) {
   var on = searchSourceEnabled(provider);

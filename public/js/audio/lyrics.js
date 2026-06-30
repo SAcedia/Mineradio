@@ -315,5 +315,13 @@ function updateMiniSourceButtons() {
     b.classList.toggle('active', ds === curSrc);
   }
 }
+function updateMiniSourceBar() {
+  var bar = document.getElementById('mini-source-bar');
+  if (!bar) return;
+  var song = currentCoverSong();
+  var provider = song ? songProviderKey(song) : '';
+  bar.classList.toggle('show', provider === 'youtube' || provider === 'local' || (!provider && song));
+  updateMiniSourceButtons();
+}
 
 // ============================================================

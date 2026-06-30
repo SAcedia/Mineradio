@@ -83,6 +83,11 @@ function savePlaybackQualityPreference() {
 function updatePlaybackQualityUi() {
   var label = document.getElementById('quality-btn-label');
   var btn = document.getElementById('quality-btn');
+  var wrap = document.getElementById('quality-control');
+  var song = currentCoverSong();
+  var isYT = song && songProviderKey(song) === 'youtube';
+  if (wrap) wrap.style.display = isYT ? 'none' : '';
+  if (isYT) return;
   var canUseSvip = hasProviderSvip('netease', loginStatus);
   var displayQuality = playbackQuality === 'jymaster' && !canUseSvip ? 'hires' : playbackQuality;
   if (label) label.textContent = playbackQualityShortLabel(displayQuality);
