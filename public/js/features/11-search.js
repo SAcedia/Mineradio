@@ -4,6 +4,9 @@
 // ============================================================
 //  搜索
 // ============================================================
+window.Mineradio.bus.on('like:toggle', function(data) {
+  refreshSearchResultActionStates();
+});
 var searchTimer = null;
 var searchRequestSeq = 0;
 var searchLastResultQuery = '';
@@ -201,7 +204,7 @@ async function loadPodcastHot() {
   $results.innerHTML = '<div class="search-empty">Loading podcasts...</div>';
   $results.classList.add('show');
   try {
-    var data = await neteasePodcastHot(18);
+    var data = await Mineradio.platforms.netease.podcastHot(18);
     if (requestSeq !== searchRequestSeq || searchMode !== 'podcast') return;
     renderPodcastRadios(data.podcasts || [], 'Hot podcasts');
   } catch (err) {
@@ -212,7 +215,7 @@ async function loadPodcastHot() {
 async function doPodcastSearch(q) {
   var requestSeq = ++searchRequestSeq;
   try {
-    var data = await neteasePodcastSearch(q, 18);
+    var data = await Mineradio.platforms.netease.podcastSearch(q, 18);
     if (requestSeq !== searchRequestSeq || searchMode !== 'podcast' || $input.value.trim() !== q) return;
     renderPodcastRadios(data.podcasts || [], 'Search results');
   } catch (err) {
@@ -226,7 +229,7 @@ async function openPodcastPrograms(i) {
   $results.innerHTML = '<div class="search-empty">Loading episodes...</div>';
   $results.classList.add('show');
   try {
-    var data = await neteasePodcastPrograms(radio.id, 36);
+    var data = await Mineradio.platforms.netease.podcastPrograms(radio.id, 36);
     if (requestSeq !== searchRequestSeq || searchMode !== 'podcast') return;
     podcastCurrentRadio = Object.assign({}, radio, data.radio || {});
     podcastPrograms = data.programs || [];
@@ -479,25 +482,25 @@ function mergeSongSearchResults(neteaseSongs, qqSongs, limit, q, youtubeSongs) {
 }
 async function fetchMusicSearchResults(q, mode) {
   if (mode === 'qq') {
-    var qqOnly = await qqSearch(q, 12);
+    var qqOnly = await Mineradio.platforms.qq.search(q, 12);
     return mergeSongSearchResults([], qqOnly.songs || [], 18, q);
   }
   if (mode === 'netease') {
-    var neOnly = await neteaseSearch(q, 18);
+    var neOnly = await Mineradio.platforms.netease.search(q, 18);
     return mergeSongSearchResults(neOnly.songs || [], [], 18, q);
   }
   if (mode === 'youtube') {
     if (!searchSourceEnabled('youtube')) { showToast('YouTube 已关闭'); return []; }
-    var ytOnly = await youtubeSearch(q, 18);
+    var ytOnly = await Mineradio.platforms.youtube.search(q, 18);
     return mergeSongSearchResults([], [], 18, q, ytOnly.songs || []);
   }
   // 'song' (all) mode: parallel search across all platforms
   var promises = [
-    neteaseSearch(q, 10),
-    qqSearch(q, 8)
+    Mineradio.platforms.netease.search(q, 10),
+    Mineradio.platforms.qq.search(q, 8)
   ];
   if (searchSourceEnabled('youtube')) {
-    promises.push(youtubeSearch(q, 8));
+    promises.push(Mineradio.platforms.youtube.search(q, 8));
   }
   var result = await Promise.allSettled(promises);
   var neteaseSongs = result[0].status === 'fulfilled' ? ((result[0].value && result[0].value.songs) || []) : [];

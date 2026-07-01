@@ -71,7 +71,7 @@ async function createPlaylistFromCollect() {
   var name = input ? input.value.trim() : '';
   if (!name) { showToast('先输入歌单名称'); return; }
   try {
-    var r = await neteasePlaylistCreate(name);
+    var r = await Mineradio.platforms.netease.playlistCreate(name);
     if (r && r.error) throw new Error(r.error);
     if (input) input.value = '';
     showToast('歌单已创建');
@@ -99,7 +99,7 @@ async function verifySongInPlaylist(pid, songId) {
       await new Promise(function(resolve){ setTimeout(resolve, attempt === 1 ? 360 : 820); });
     }
     try {
-      var detail = await neteasePlaylistTracks(pid);
+      var detail = await Mineradio.platforms.netease.playlistTracks(pid);
       var tracks = (detail && detail.tracks) || [];
       for (var i = 0; i < tracks.length; i++) {
         if (String(tracks[i].id) === songId) return true;

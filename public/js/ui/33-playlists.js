@@ -1,5 +1,8 @@
 //  本地歌单（localStorage 存储）
 // ============================================================
+window.Mineradio.bus.on('login:statechange', function(data) {
+  if (data.loggedIn) refreshUserPlaylists();
+});
 var LOCAL_PLAYLIST_STORAGE_KEY = 'mineradio-local-playlists-v1';
 
 function loadLocalPlaylists() {
@@ -440,8 +443,8 @@ async function openPlaylistPanelDetail(provider, pid, title) {
   scrollPlaylistPanelDetailIntoView(key);
   try {
     var r = provider === 'qq'
-      ? await qqPlaylistTracks(pid)
-      : await neteasePlaylistTracks(pid);
+      ? await Mineradio.platforms.qq.playlistTracks(pid)
+      : await Mineradio.platforms.netease.playlistTracks(pid);
     if (playlistPanelDetailState.token !== token) return;
     playlistPanelDetailState.loading = false;
     playlistPanelDetailState.tracks = (r && r.tracks || []).map(cloneSong);
@@ -679,7 +682,7 @@ async function openMyPodcastCollection(key, title) {
   if (!key) return;
   showLoading();
   try {
-    var r = await neteasePodcastMyItems(key, 36);
+    var r = await Mineradio.platforms.netease.podcastMyItems(key, 36);
     if (r && r.loggedIn === false) { showLoginModal(); return; }
     var items = r.items || [];
     myPodcastItems[key] = items;
@@ -711,7 +714,7 @@ async function loadPodcastRadioIntoQueue(id, autoplay, title) {
   if (!id) return;
   showLoading();
   try {
-    var r = await neteasePodcastPrograms(id, 36);
+    var r = await Mineradio.platforms.netease.podcastPrograms(id, 36);
     if (r.error) { showToast('播客加载失败: ' + r.error); return; }
     if (!r.programs || !r.programs.length) { showToast('播客暂无可播放节目'); return; }
     playQueue = r.programs.map(cloneSong);
@@ -739,8 +742,8 @@ async function loadPlaylistIntoQueueById(id, autoplay, title) {
   var r = null;
   try {
     r = qqPlaylistId
-      ? await qqPlaylistTracks(qqPlaylistId)
-      : await neteasePlaylistTracks(id);
+      ? await Mineradio.platforms.qq.playlistTracks(qqPlaylistId)
+      : await Mineradio.platforms.netease.playlistTracks(id);
   } catch (e) {
     console.warn('[PlaylistLoadApi]', id, e);
     showToast('歌单加载失败');
@@ -1029,7 +1032,7 @@ function setUpdatePreviewVisible(visible) {
 
 async function checkLatestUpdate() {
   try {
-    var data = await neteaseUpdateLatest();
+    var data = await Mineradio.platforms.netease.updateLatest();
     applyLatestUpdateInfo(data);
   } catch (e) {
     updatePreviewState.preview = true;

@@ -65,6 +65,9 @@ var neteaseOverrides = {
 };
 
 // 自动生成函数
+window.Mineradio.platforms = window.Mineradio.platforms || {};
+window.Mineradio.platforms.netease = {};
+
 for (var i = 0; i < neteaseAPIList.length; i++) {
   (function(entry) {
     var fnName = 'netease' + entry.name;
@@ -76,6 +79,7 @@ for (var i = 0; i < neteaseAPIList.length; i++) {
         return neteaseApi(entry.path, neteaseQs(entry.params, args));
       };
     }
-    window[fnName] = fn;
+    var key = entry.name.charAt(0).toLowerCase() + entry.name.slice(1);
+    window.Mineradio.platforms.netease[key] = fn;
   })(neteaseAPIList[i]);
 }

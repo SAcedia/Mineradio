@@ -1,5 +1,8 @@
 //  登录系统
 // ============================================================
+window.Mineradio.bus.on('player:statechange', function(data) {
+  // login.js already updates UI directly — future hook
+});
 function onUserBtnClick() {
   if (hasAnyPlatformLogin()) showUserModal();
   else showLoginModal();
@@ -79,7 +82,7 @@ function renderTopAccountPill(provider) {
 }
 async function refreshLoginStatus(force) {
   try {
-    var info = await neteaseLoginStatus();
+    var info = await Mineradio.platforms.netease.loginStatus();
     loginStatusChecked = true;
     loginStatusCheckFailed = false;
     loginStatus = info || { loggedIn: false };
@@ -131,7 +134,7 @@ function normalizeQQLoginStatus(info) {
 }
 async function refreshQQLoginStatus() {
   try {
-    var info = await qqLoginStatus();
+    var info = await Mineradio.platforms.qq.loginStatus();
     var prevLogged = !!qqLoginStatus.loggedIn;
     qqLoginStatus = normalizeQQLoginStatus(info);
     if (!qqLoginStatus.loggedIn) {
@@ -299,10 +302,10 @@ async function refreshQr() {
     return;
   }
   try {
-    var k = await neteaseLoginQrKey();
+    var k = await Mineradio.platforms.netease.loginQrKey();
     if (!k.key) throw new Error('获取 key 失败');
     qrKey = k.key;
-    var q = await neteaseLoginQrCreate(qrKey);
+    var q = await Mineradio.platforms.netease.loginQrCreate(qrKey);
     if (!q.img) throw new Error('生成二维码失败');
     document.getElementById('qr-img').src = q.img;
     document.getElementById('qr-status').textContent = '请使用网易云音乐 App 扫码';
@@ -349,6 +352,7 @@ async function openNeteaseWebLogin() {
     loginStatus = info;
     activeAccountProvider = 'netease';
     renderUserBtn();
+    window.Mineradio.bus.emit('login:statechange', { loggedIn: true });
     refreshUserPlaylists(true);
     loadHomeDiscover(true);
     if (statusEl) { statusEl.textContent = '网易云会话已保存'; statusEl.className = 'scan'; }
@@ -397,6 +401,7 @@ async function openQQWebLogin() {
     activeAccountProvider = 'qq';
     qqManualCookieOpen = false;
     renderUserBtn();
+    window.Mineradio.bus.emit('login:statechange', { loggedIn: true });
     refreshUserPlaylists(true);
     var qqPlaybackReady = !!info.playbackKeyReady && !result.partial;
     if (statusEl) { statusEl.textContent = qqPlaybackReady ? 'QQ 音乐会话已保存' : 'QQ 账号已同步，播放授权不完整，部分歌曲会自动换源'; statusEl.className = 'scan'; }
@@ -439,6 +444,7 @@ async function submitQQCookieLogin() {
     activeAccountProvider = 'qq';
     if (input) input.value = '';
     renderUserBtn();
+    window.Mineradio.bus.emit('login:statechange', { loggedIn: true });
     refreshUserPlaylists(true);
     var manualQQPlaybackReady = !!info.playbackKeyReady;
     if (statusEl) { statusEl.textContent = manualQQPlaybackReady ? 'QQ 音乐会话已保存' : 'QQ 账号已同步，播放授权不完整，部分歌曲会自动换源'; statusEl.className = 'scan'; }
@@ -456,7 +462,7 @@ async function submitQQCookieLogin() {
 async function checkQr() {
   if (!qrKey) return;
   try {
-    var r = await neteaseLoginQrCheck(qrKey);
+    var r = await Mineradio.platforms.netease.loginQrCheck(qrKey);
     var $st = document.getElementById('qr-status');
     if (r.code === 800) { $st.textContent = '二维码已过期, 请刷新'; $st.className = 'fail'; stopQrPoll(); }
     else if (r.code === 801) { $st.textContent = '请在 App 中扫码'; $st.className = ''; }
@@ -573,7 +579,7 @@ function openProviderLogin(provider) {
 }
 async function logoutActiveAccount() {
   if (activeAccountProvider === 'qq') {
-    try { await qqLogout(); } catch (e) {}
+    try { await Mineradio.platforms.qq.logout(); } catch (e) {}
     try {
       if (window.desktopWindow && typeof window.desktopWindow.clearQQMusicLogin === 'function') {
         await window.desktopWindow.clearQQMusicLogin();
@@ -613,6 +619,7 @@ async function doLogout() {
   safeShelfRebuild('logout');
   closeUserModal();
   showToast('已退出登录');
+  window.Mineradio.bus.emit('login:statechange', { loggedIn: false });
 }
 var startupLoginGuideShown = false;
 var loginGuideAnimating = false;

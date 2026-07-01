@@ -35,6 +35,7 @@ function queueSong(song, opts) {
   }
   safeRenderQueuePanel('queue-song');
   safeShelfRebuild('queue-song');
+  window.Mineradio.bus.emit('queue:change', { action: 'queue-song' });
   return insertAt;
 }
 function queueSongNext(song) {
@@ -372,6 +373,7 @@ async function playQueueAt(idx, opts) {
   markPlayPhase('track-setup');
   var song = safePlaybackStep('hydrate-song', function(){ return hydrateCustomCover(playQueue[idx]); }) || playQueue[idx];
   playQueue[idx] = song;
+  window.Mineradio.bus.emit('player:trackchange', { song: song, token: token });
   var playbackContext = opts.context || (song && song.radioContext) || null;
   activeRadioContext = playbackContext || null;
   safeRenderQueuePanel('play-queue-at-switch', { scrollCurrent: miniQueueOpen });
@@ -445,11 +447,11 @@ async function playQueueAt(idx, opts) {
       }
     } else {
       if (isYouTubePlayback) {
-        data = await youtubeSongUrl(song.id, requestedQuality);
+        data = await Mineradio.platforms.youtube.songUrl(song.id, requestedQuality);
       } else if (isQQPlayback) {
-        data = await qqSongUrl(song, requestedQuality);
+        data = await Mineradio.platforms.qq.songUrl(song, requestedQuality);
       } else {
-        data = await neteaseSongUrl(song.id, requestedQuality);
+        data = await Mineradio.platforms.netease.songUrl(song.id, requestedQuality);
       }
     }
     if (token !== trackSwitchToken) return;
@@ -574,7 +576,7 @@ async function playQueueAt(idx, opts) {
         console.log('YT 播放失败，尝试清除过期缓存并重新获取 URL');
         delete _audioUrlCache[cacheKey];
         try {
-          var freshData = await youtubeSongUrl(song.id);
+          var freshData = await Mineradio.platforms.youtube.songUrl(song.id);
           if (freshData && freshData.url && token === trackSwitchToken) {
             var freshProxyUrl = '/api/audio?url=' + encodeURIComponent(freshData.url);
             audio.src = freshProxyUrl;
@@ -658,6 +660,7 @@ async function attemptAudioPlay(opts) {
     else restorePlaybackGain();
     forcePlaybackControlsInteractive();
     hideLoading();
+    window.Mineradio.bus.emit('player:statechange', { playing: true });
     return true;
   } catch (err) {
     console.warn('Audio play blocked:', err && (err.message || err));
@@ -700,6 +703,7 @@ async function togglePlay() {
       await fadeOutAndPauseAudio();
       playing = false;
       setPlayIcon(false);
+      window.Mineradio.bus.emit('player:statechange', { playing: false });
       hideLoading();
       safePlaybackStep('listen-stats-pause', function(){ updateListenStatsTick(true); });
       forcePlaybackControlsInteractive();
@@ -745,11 +749,13 @@ function shuffleQueue() {
   currentIdx = 0; safeRenderQueuePanel('shuffle-queue');
   showToast('队列已随机');
   safeShelfRebuild('shuffle-queue');
+  window.Mineradio.bus.emit('queue:change', { action: 'shuffle' });
 }
 function clearQueue() {
   playQueue = []; currentIdx = -1;
   safeRenderQueuePanel('clear-queue');
   safeShelfRebuild('clear-queue');
+  window.Mineradio.bus.emit('queue:change', { action: 'clear' });
   updateCustomCoverButton();
   updateCustomLyricControls();
   updateEmptyHomeVisibility({ forceLoad: false });
@@ -760,6 +766,7 @@ function removeFromQueue(idx) {
   if (currentIdx >= playQueue.length) currentIdx = playQueue.length - 1;
   safeRenderQueuePanel('remove-queue-item');
   safeShelfRebuild('remove-queue-item');
+  window.Mineradio.bus.emit('queue:change', { action: 'remove' });
   updateCustomCoverButton();
   updateCustomLyricControls();
   updateEmptyHomeVisibility({ forceLoad: false });

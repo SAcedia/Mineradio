@@ -1,6 +1,9 @@
 'use strict';
 // ============================================================
 //  3D 歌单架 — 双模式 (off / side / stage)
+window.Mineradio.bus.on('queue:change', function(data) {
+  safeShelfRebuild();
+});
 //   - side:   现版本精修, 右侧 5 张卡微角度堆叠
 //   - stage:  弧形排列, 居中, 有倒影, 当前卡片"呼吸+光环"
 //             卡片间粒子穿梭, 切歌时飞出动画
@@ -1695,10 +1698,10 @@ function makeContentListManager() {
       var r = null;
       try {
         r = podcastCollectionKey
-          ? await neteasePodcastMyItems(podcastCollectionKey, 36)
+          ? await Mineradio.platforms.netease.podcastMyItems(podcastCollectionKey, 36)
           : (qqPlaylistId
-            ? await qqPlaylistTracks(qqPlaylistId)
-            : await neteasePlaylistTracks(playlistId));
+            ? await Mineradio.platforms.qq.playlistTracks(qqPlaylistId)
+            : await Mineradio.platforms.netease.playlistTracks(playlistId));
       } catch (e) {
         if (!open || token !== requestToken) return;
         console.warn('[ShelfContentLoadApi]', playlistId, e);

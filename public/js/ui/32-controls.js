@@ -1,6 +1,16 @@
 // 32-controls.js — Queue rendering, playlist panel, transport controls
 // Extracted from ui/controls.js (control portion, lines 570-878)
 
+window.Mineradio.bus.on('login:statechange', function(data) {
+  // controls.js already updates search source directly
+});
+window.Mineradio.bus.on('queue:change', function(data) {
+  safeRenderQueuePanel();
+});
+window.Mineradio.bus.on('like:toggle', function(data) {
+  safeRenderQueuePanel();
+});
+
 function animateListItems(container, selector, opts) {
   if (!container || !window.gsap) return;
   opts = opts || {};
@@ -292,9 +302,9 @@ async function refreshUserPlaylists(force) {
   if ($pod) $pod.innerHTML = miniQueueSkeleton();
   try {
     var result = await Promise.all([
-      loginStatus.loggedIn ? neteaseUserPlaylists() : Promise.resolve({ playlists: [] }),
-      loginStatus.loggedIn ? neteasePodcastMy() : Promise.resolve({ collections: [], loggedIn: false }),
-      qqLoginStatus.loggedIn ? qqUserPlaylists() : Promise.resolve({ playlists: [] }),
+      loginStatus.loggedIn ? Mineradio.platforms.netease.userPlaylists() : Promise.resolve({ playlists: [] }),
+      loginStatus.loggedIn ? Mineradio.platforms.netease.podcastMy() : Promise.resolve({ collections: [], loggedIn: false }),
+      qqLoginStatus.loggedIn ? Mineradio.platforms.qq.userPlaylists() : Promise.resolve({ playlists: [] }),
       Promise.resolve({ playlists: [] })
     ]);
     var neteaseLists = (result[0].playlists || []).map(function(pl){ pl.provider = 'netease'; pl.source = 'netease'; return pl; });

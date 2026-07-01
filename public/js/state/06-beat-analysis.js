@@ -289,7 +289,7 @@ function updateBeatDiskCacheStatus(data) {
 async function ensureBeatDiskCacheStatus() {
   if (beatDiskCacheStatus.checked) return beatDiskCacheStatus;
   try {
-    updateBeatDiskCacheStatus(await neteaseBeatmapCacheStatus());
+    updateBeatDiskCacheStatus(await Mineradio.platforms.netease.beatmapCacheStatus());
   } catch (e) {
     updateBeatDiskCacheStatus({ enabled:false, mode:'memory-only', reason:'STATUS_FAILED' });
   }
@@ -303,7 +303,7 @@ async function readBeatDiskCache(key) {
   var st = await ensureBeatDiskCacheStatus();
   if (!st.enabled) return null;
   try {
-    var r = await neteaseBeatmapCacheGet(key);
+    var r = await Mineradio.platforms.netease.beatmapCacheGet(key);
     if (r && r.enabled === false) updateBeatDiskCacheStatus(r);
     if (!r || !r.hit) return null;
     // 负面缓存: 分析失败的歌曲标记
@@ -415,8 +415,8 @@ async function fetchBeatPrefetchAudioUrl(song) {
   if (isQQ && qqPlaybackQualityCeiling && (requestedQuality === 'jymaster' || requestedQuality === 'hires' || requestedQuality === 'lossless')) requestedQuality = qqPlaybackQualityCeiling;
   var qualityParam = '&quality=' + encodeURIComponent(requestedQuality);
     var data = isQQ
-    ? await qqSongUrl(song, requestedQuality)
-    : await neteaseSongUrl(song.id, requestedQuality);
+    ? await Mineradio.platforms.qq.songUrl(song, requestedQuality)
+    : await Mineradio.platforms.netease.songUrl(song.id, requestedQuality);
   if (!data || !data.url || data.trial) return null;
   return '/api/audio?url=' + encodeURIComponent(data.url);
 }

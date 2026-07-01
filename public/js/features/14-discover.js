@@ -318,7 +318,7 @@ async function loadHomeDiscover(force) {
   homeDiscoverState.error = '';
   renderHomeDiscover();
   try {
-    var data = await neteaseDiscoverHome();
+    var data = await Mineradio.platforms.netease.discoverHome();
     if (token !== homeDiscoverToken) return;
     homeDiscoverState.loggedIn = !!(data && data.loggedIn);
     homeDiscoverState.mode = data && data.mode || (homeDiscoverState.loggedIn ? 'member' : 'starter');
@@ -482,7 +482,7 @@ function locateWeatherRadio() {
   function useIpFallback() {
     if (locationSettled || ipFallbackStarted) return;
     ipFallbackStarted = true;
-    neteaseWeatherIpLocation().then(function(data){
+    Mineradio.platforms.netease.weatherIpLocation().then(function(data){
       var loc = data && data.location;
       if (!loc || !isFinite(Number(loc.latitude)) || !isFinite(Number(loc.longitude))) throw new Error(data && data.error || 'IP_LOCATION_FAILED');
       if (locationSettled) return;

@@ -57,7 +57,7 @@ function syncLikeStatusForSongs(songs) {
   var ids = songs.filter(isCloudSong).map(function(s){ return String(s.id); });
   if (!ids.length) return;
   var token = ++likeStatusToken;
-  neteaseLikeCheck(ids).then(function(r){
+  Mineradio.platforms.netease.likeCheck(ids).then(function(r){
     if (token < likeStatusToken - 3 || !r || !r.liked) return;
     Object.keys(r.liked).forEach(function(id){ likedSongMap[String(id)] = !!r.liked[id]; });
     safeRenderQueuePanel('like-status-sync', { scrollCurrent: miniQueueOpen });
@@ -102,6 +102,7 @@ async function toggleLikeSong(song) {
     var next = !likedSongMap[id];
     likeBusyMap[id] = true;
     likedSongMap[id] = next;
+    window.Mineradio.bus.emit('like:toggle', { song: song, liked: next, phase: 'optimistic' });
     try {
       if (next) {
         localStorage.setItem(key, JSON.stringify({ liked: true, name: song.name, artist: song.artist, cover: song.cover, savedAt: Date.now() }));
@@ -110,6 +111,7 @@ async function toggleLikeSong(song) {
       }
     } catch(e) {}
     likeBusyMap[id] = false;
+    window.Mineradio.bus.emit('like:toggle', { song: song, liked: next, phase: 'final' });
     updateLikeButtons(song);
     safeRenderQueuePanel('like-toggle-optimistic', { scrollCurrent: miniQueueOpen });
     refreshSearchResultActionStates();
@@ -127,10 +129,11 @@ async function toggleLikeSong(song) {
   likeBusyMap[id] = true;
   likedSongMap[id] = next;
   updateLikeButtons(song);
+  window.Mineradio.bus.emit('like:toggle', { song: song, liked: next, phase: 'optimistic' });
   safeRenderQueuePanel('like-toggle-optimistic', { scrollCurrent: miniQueueOpen });
   refreshSearchResultActionStates();
   try {
-    var r = await neteaseLike(id, String(next));
+    var r = await Mineradio.platforms.netease.like(id, String(next));
     if (r && r.error) throw new Error(r.error);
     likedSongMap[id] = next;
     showToast(next ? '已加入红心喜欢' : '已取消红心');
@@ -142,6 +145,7 @@ async function toggleLikeSong(song) {
     updateLikeButtons(song);
     safeRenderQueuePanel('like-toggle-final', { scrollCurrent: miniQueueOpen });
     refreshSearchResultActionStates();
+    window.Mineradio.bus.emit('like:toggle', { song: song, liked: next, phase: 'final' });
   }
 }
 function toggleLikeCurrent() { toggleLikeSong(currentCoverSong()); }

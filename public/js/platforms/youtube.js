@@ -28,6 +28,9 @@ var youtubeAPIList = [
   { name: 'Like',        path: '/like',       params: ['id','like'] },
 ];
 
+window.Mineradio.platforms = window.Mineradio.platforms || {};
+window.Mineradio.platforms.youtube = {};
+
 for (var i = 0; i < youtubeAPIList.length; i++) {
   (function(entry) {
     var fnName = 'youtube' + entry.name;
@@ -39,6 +42,7 @@ for (var i = 0; i < youtubeAPIList.length; i++) {
         return youtubeApi(entry.path, youtubeQs(entry.params, args));
       };
     }
-    window[fnName] = fn;
+    var key = entry.name.charAt(0).toLowerCase() + entry.name.slice(1);
+    window.Mineradio.platforms.youtube[key] = fn;
   })(youtubeAPIList[i]);
 }

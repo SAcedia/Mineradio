@@ -1,6 +1,10 @@
 // ============================================================
 //  歌词
 // ============================================================
+window.Mineradio.bus.on('player:trackchange', function(data) {
+  // lyrics already handles song changes directly — this is a future hook
+  // Currently lyrics loadSongLyrics is called directly from playback.js
+});
 async function fetchLyric(songOrId, token, preferSource) {
   try {
     // 没有指定 source 时（正常切歌），重置为默认源

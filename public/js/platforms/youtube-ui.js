@@ -44,7 +44,7 @@ async function loadYouTubeTrending() {
   $results.innerHTML = '<div class="search-empty">Loading YouTube trending...</div>';
   $results.classList.add('show');
   try {
-    var data = await youtubeTrending();
+    var data = await Mineradio.platforms.youtube.trending();
     if (requestSeq !== searchRequestSeq || searchMode !== 'youtube') return;
     if (data && data.songs && data.songs.length) {
       playlist = data.songs;

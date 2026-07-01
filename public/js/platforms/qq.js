@@ -27,6 +27,9 @@ var qqAPIList = [
   { name: 'UserPlaylists', path: '/user/playlists', params: [] },
 ];
 
+window.Mineradio.platforms = window.Mineradio.platforms || {};
+window.Mineradio.platforms.qq = {};
+
 for (var i = 0; i < qqAPIList.length; i++) {
   (function(entry) {
     var fnName = 'qq' + entry.name;
@@ -38,6 +41,7 @@ for (var i = 0; i < qqAPIList.length; i++) {
         return qqApi(entry.path, qqQs(entry.params, args));
       };
     }
-    window[fnName] = fn;
+    var key = entry.name.charAt(0).toLowerCase() + entry.name.slice(1);
+    window.Mineradio.platforms.qq[key] = fn;
   })(qqAPIList[i]);
 }

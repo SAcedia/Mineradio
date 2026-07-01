@@ -1,5 +1,8 @@
 //  Cover helpers
 // ============================================================
+window.Mineradio.bus.on('player:trackchange', function(data) {
+  // cover already handles song changes directly — future hook
+});
 function readCustomCoverMap() {
   try {
     var raw = localStorage.getItem(CUSTOM_COVER_STORE_KEY);
