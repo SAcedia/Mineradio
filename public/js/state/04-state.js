@@ -669,3 +669,5 @@ window.updateFullscreenDiyPeekFromPointer = function(x, y) {
   var active = x >= hitLeft && x <= hitRight && y >= hitTop && y <= hitBottom;
   document.body.classList.toggle('fullscreen-diy-peek', active);
 };
+
+window.customBgApplyToken = 0;
