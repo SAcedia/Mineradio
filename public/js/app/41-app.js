@@ -308,5 +308,24 @@ window.animate = function() {
   window.renderer.render(window.scene, window.camera);
 }
 bindPlaylistPanelLazyRender();
+
+window.bindModalBackdropClose = function() {
+  [
+    ["track-detail-modal", closeTrackDetailModal],
+    ["login-modal", closeLoginModal],
+    ["user-modal", closeUserModal],
+    ["custom-lyric-modal", closeCustomLyricModal],
+    ["update-modal", closeUpdatePanel]
+  ].forEach(function(pair){
+    var mask = document.getElementById(pair[0]);
+    var close = pair[1];
+    if (!mask || !close || mask.__backdropCloseBound) return;
+    mask.__backdropCloseBound = true;
+    mask.addEventListener("click", function(e){
+      if (e.target === mask) close();
+    });
+  });
+};
+
 window.bindModalBackdropClose();
 animate();

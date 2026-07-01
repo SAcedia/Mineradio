@@ -525,3 +525,19 @@ window.getRenderPixelRatio = function() {
   return device;
 };
 
+
+window.updateDesktopRuntimeState = function(state) {
+  if (typeof window.desktopRuntimeState === 'undefined') window.desktopRuntimeState = {};
+  if (state) Object.assign(window.desktopRuntimeState, state);
+  if (typeof window.updateRenderPowerClasses === 'function') window.updateRenderPowerClasses();
+  if (typeof window.applyRendererPowerMode === 'function') window.applyRendererPowerMode();
+};
+
+window.updateUserCapsuleAutoHideFromPointer = function(x, y) {
+  if (!userCapsuleAutoHide || immersiveMode) {
+    document.body.classList.remove('user-capsule-peek');
+    return;
+  }
+  var nearTopRight = x > innerWidth - 112 && y < 126;
+  document.body.classList.toggle('user-capsule-peek', nearTopRight);
+};

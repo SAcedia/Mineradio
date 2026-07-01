@@ -1954,3 +1954,10 @@ window.renderer.domElement.addEventListener('dblclick', function(e){
   }
   recenterCamera();
 });
+
+window.liftFxFloatingPopups = function() {
+  ['cover-color-pop', 'color-lab-pop', 'cover-color-loupe'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el && el.parentElement !== document.body) document.body.appendChild(el);
+  });
+};
