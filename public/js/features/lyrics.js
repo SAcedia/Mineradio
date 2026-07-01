@@ -292,19 +292,18 @@ function updateLyricsHighlight() { /* v8: 由 tickLyricsParticles 接管 */ }
 
 function setLyricSource(source) {
   if (source === 'auto') {
-    _lyricSourceIdx = 0;
+    _lyricSourceIdx = -1;
   } else {
     var idx = _lyricSources.indexOf(source);
     if (idx < 0) return;
     _lyricSourceIdx = idx;
   }
-  var curSrc = _lyricSources[_lyricSourceIdx];
   var btn = document.getElementById('lyric-source-btn');
-  if (btn) btn.textContent = '源·' + (_lyricSourceLabels[curSrc] || curSrc);
+  if (btn) btn.textContent = _lyricSourceIdx < 0 ? '词' : '源·' + (_lyricSourceLabels[source] || source);
   updateMiniSourceButtons();
   var cur = currentCoverSong();
   if (cur) {
-    fetchLyric(cur, trackSwitchToken, curSrc);
+    fetchLyric(cur, trackSwitchToken, _lyricSourceIdx < 0 ? null : source);
   }
   showToast('歌词源: ' + (source === 'auto' ? '自动' : (_lyricSourceLabels[source] || source)));
 }
