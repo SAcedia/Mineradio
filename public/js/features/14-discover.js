@@ -16,7 +16,7 @@ window.compactHomeCount = function(n) {
   return n ? String(n) : '';
 }
 window.mostPlayedSong = function() {
-  var list = Object.keys(window.listenStatsState.songs || {}).map(function(key){ return window.listenStatsState.songs[key]; });
+  var list = Object.keys((window.listenStatsState || {}).songs || {}).map(function(key){ return window.listenStatsState.songs[key]; });
   list.sort(function(a, b){ return (b.plays - a.plays) || (b.listenMs - a.listenMs) || (b.lastPlayedAt - a.lastPlayedAt); });
   return list[0] || null;
 }
@@ -29,7 +29,7 @@ window.homeListenSummary = function() {
   var recent = (window.listenStatsState && window.listenStatsState.history || [])[0] || null;
   var topSong = window.mostPlayedSong();
   var topArtist = window.topListenArtist();
-  var totalPlays = Object.keys(window.listenStatsState.songs || {}).reduce(function(sum, key){ return sum + ((window.listenStatsState.songs[key] && window.listenStatsState.songs[key].plays) || 0); }, 0);
+  var totalPlays = Object.keys((window.listenStatsState || {}).songs || {}).reduce(function(sum, key){ return sum + ((window.listenStatsState.songs[key] && window.listenStatsState.songs[key].plays) || 0); }, 0);
   return { recent: recent, topSong: topSong, topArtist: topArtist, totalPlays: totalPlays };
 }
 window.fallbackHomeTiles = function() {

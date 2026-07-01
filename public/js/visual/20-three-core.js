@@ -2185,3 +2185,7 @@ window.shouldUseShelfDynamicCamera = function(type) {
   if (window.fx.shelfDynamicDetail !== false && type === 'shelf-detail') return true;
   return false;
 };
+
+window.shelfAlwaysVisible = function() {
+  return !!(window.fx && window.normalizeShelfPresence(window.fx.shelfPresence) === 'always');
+};

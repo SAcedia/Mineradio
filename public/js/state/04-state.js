@@ -673,3 +673,21 @@ window.updateFullscreenDiyPeekFromPointer = function(x, y) {
 window.customBgApplyToken = 0;
 
 window.customBgObjectUrl = null;
+
+window.trimRuntimeCaches = function(reason, aggressive) {
+  var protectedCovers = typeof window.collectProtectedCoverUrls === 'function' ? window.collectProtectedCoverUrls() : [];
+  var protectedBeats = typeof window.collectProtectedBeatMapKeys === 'function' ? window.collectProtectedBeatMapKeys() : [];
+  var dropped = 0;
+  if (typeof window.trimObjectCache === 'function') dropped += window.trimObjectCache(window.playlistCoverCache, aggressive ? 72 : 180, protectedCovers, function(rec){ return rec && rec.loading; });
+  if (typeof window.trimCoverDepthCache === 'function') dropped += window.trimCoverDepthCache(aggressive ? 4 : 10, typeof window.collectProtectedCoverDepthIds === 'function' ? window.collectProtectedCoverDepthIds() : []);
+  if (typeof window.trimObjectCache === 'function') dropped += window.trimObjectCache(window.beatMapCache, aggressive ? 12 : 36, protectedBeats);
+  if (typeof window.trimObjectCache === 'function') dropped += window.trimObjectCache(window.djBeatMapCache, aggressive ? 4 : 12, protectedBeats);
+  if (aggressive && typeof window.renderer !== 'undefined' && window.renderer && window.renderer.renderLists && window.renderer.renderLists.dispose) {
+    try { window.renderer.renderLists.dispose(); } catch (e) {}
+  }
+  window.runtimePerfState.lastCacheTrimAt = performance.now();
+  window.runtimePerfState.cacheTrimCount += 1;
+  window.runtimePerfState.lastCacheTrimReason = reason || (aggressive ? 'deep' : 'active');
+  if (typeof window.collectRuntimePerfSnapshot === 'function') window.collectRuntimePerfSnapshot(window.runtimePerfState.lastCacheTrimAt);
+  return dropped;
+};

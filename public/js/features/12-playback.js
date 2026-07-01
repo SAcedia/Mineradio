@@ -497,3 +497,38 @@ window.forcePlaybackControlsInteractive = function() {
     console.warn('[PlaybackControlsRestore]', e);
   }
 }
+
+window.normalizeControlGlassChromaticOffset = function(value) {
+  return Math.max(0, Math.min(40, Number(value) || 0));
+};
+
+window.applyControlGlassChromaticOffset = function() {
+  if (!window.fx) return;
+  window.fx.controlGlassChromaticOffset = window.normalizeControlGlassChromaticOffset(window.fx.controlGlassChromaticOffset);
+  var filter = document.getElementById('mineradio-control-glass-filter');
+  if (!filter) return;
+  var dx = String(-Math.round(window.fx.controlGlassChromaticOffset));
+  filter.querySelectorAll('feOffset').forEach(function(node){
+    node.setAttribute('dx', dx);
+    node.setAttribute('dy', '0');
+  });
+};
+
+window.pauseCurrentAudioForTrackSwitch = function() {
+  window.playToggleBusy = false;
+  if (!window.audio) return;
+  try {
+    window.audioFadeSerial++;
+    if (typeof window.clearAudioFadeTimers === 'function') window.clearAudioFadeTimers();
+    window.audio.onended = null;
+    window.audio.pause();
+  } catch (e) {}
+  window.playing = false;
+  if (typeof window.setPlayIcon === 'function') window.setPlayIcon(false);
+  if (typeof window.syncPlaybackStateFromAudioEvent === 'function') window.syncPlaybackStateFromAudioEvent('track-switch');
+};
+
+window.isPlaybackRecursionError = function(err) {
+  var msg = String((err && err.message) || err || '');
+  return err instanceof RangeError || /maximum call stack size exceeded/i.test(msg);
+};
