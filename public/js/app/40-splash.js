@@ -220,12 +220,19 @@ function drawMineradioSplashWebgl(elapsed) {
   window._splashTiming.iifeStart = performance.now();
   splashCanvas = document.getElementById('splash-canvas');
   if (!splashCanvas) return;
-  if (!reduceSplashMotion && initMineradioSplashWebgl(splashCanvas)) {
-    splashCtx = null;
-  } else {
-    splashCtx = splashCanvas.getContext('2d');
-  }
-  function resize() {
+
+  // Defer WebGL/2D init so browser renders CSS background animations first
+  setTimeout(function deferredSplashInit() {
+    if (!splashAnimating) return;
+    window._splashTiming.deferredStart = performance.now();
+
+    if (!reduceSplashMotion && initMineradioSplashWebgl(splashCanvas)) {
+      splashCtx = null;
+    } else {
+      splashCtx = splashCanvas.getContext('2d');
+    }
+
+    function resize() {
     splashPixelRatio = Math.min(1.6, Math.max(1, window.devicePixelRatio || 1));
     splashW = window.innerWidth;
     splashH = window.innerHeight;
