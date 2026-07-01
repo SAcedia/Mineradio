@@ -328,11 +328,12 @@ function renderLocalPlaylistsIntoView() {
   if (playAll) playAll.addEventListener('click', function(){
     if (localDetailSongs.length) playLocalPlaylistSongs(localDetailSongs, 0);
   });
-  // 点击歌曲行
+  // 点击歌曲行 — 使用 pointerdown 避免首点被拦截
   var list = document.getElementById('detail-panel-list');
-  if (list) list.addEventListener('click', function(e){
+  if (list) list.addEventListener('pointerdown', function(e){
     var row = e.target && e.target.closest ? e.target.closest('[data-song-idx]') : null;
     if (!row) return;
+    e.preventDefault();
     var idx = Number(row.getAttribute('data-song-idx'));
     if (localDetailSongs.length) playLocalPlaylistSongs(localDetailSongs, Math.min(idx, localDetailSongs.length - 1));
   });
