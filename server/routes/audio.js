@@ -76,7 +76,7 @@ const routes = [
           'Access-Control-Allow-Origin': '*',
           'Accept-Ranges': 'bytes',
         };
-        const cl = up.headers.get('content-length'); if (cl) out['Content-Length'] = cl;
+        // 不转发 Content-Length：YouTube 等上游返回的长度与实际流可能不一致导致 ERR_CONTENT_LENGTH_MISMATCH
         const cr = up.headers.get('content-range'); if (cr) out['Content-Range'] = cr;
         res.writeHead(up.status, out);
         const reader = up.body.getReader();
