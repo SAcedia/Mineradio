@@ -474,9 +474,13 @@ function normalizeDevelopmentLockedFxState() {
 }
 var playbackVisualPreset = readSavedPlaybackVisualPreset();
 var startupVisualPreviewActive = false;
-var fx = Object.assign({}, fxDefaults, readSavedLyricLayout());
+var fx = Object.assign({}, fxDefaults, {});
 normalizeDevelopmentLockedFxState();
 var presetTransition = { active:false, start:-10, duration:0.92, from:0, to:0 };
+// fx layout 由 23-lyrics-3d.js 加载后通过 Event Bus 补入
+if (window.Mineradio && window.Mineradio.bus) {
+  window.Mineradio.bus.on('fx:lyric-layout', function(layout) { Object.assign(fx, layout); });
+}
 var controlsAutoHide = readBooleanPreference(CONTROLS_AUTO_HIDE_STORE_KEY, false);
 var controlsHovering = false;
 var controlsHideTimer = null;

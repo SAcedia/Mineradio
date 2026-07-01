@@ -428,6 +428,9 @@ function readSavedLyricLayout() {
     return {};
   }
 }
+if (window.Mineradio && window.Mineradio.bus) {
+  window.Mineradio.bus.emit('fx:lyric-layout', readSavedLyricLayout());
+}
 function saveLyricLayout() {
   try {
     var presetForSave = startupVisualPreviewActive && !playing && currentIdx < 0
