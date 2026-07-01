@@ -3191,3 +3191,30 @@ window.commitCoverCrop = function() {
   closeCoverCropModal();
 }
 
+
+window.attemptAudioPlay = async function(opts) {
+  opts = opts || {};
+  try {
+    if (!window.audio) return false;
+    if (!window.audioReady) initAudio();
+    if (opts.fade !== false) preparePlaybackFadeIn();
+    if (opts.manual) {
+      var manualPlay = window.audio.play();
+      await resumeAudioAnalysis();
+      await manualPlay;
+    } else {
+      await resumeAudioAnalysis();
+      await window.audio.play();
+    }
+    await resumeAudioAnalysis();
+    switchPlaybackVisualToEmily();
+    window.playing = true; setPlayIcon(true);
+    if (opts.fade !== false) startPlaybackFadeIn();
+    else restorePlaybackGain();
+    if (typeof window.forcePlaybackControlsInteractive === 'function') window.forcePlaybackControlsInteractive();
+    return true;
+  } catch(e) {
+    console.warn('attemptAudioPlay failed:', e.message);
+    return false;
+  }
+};

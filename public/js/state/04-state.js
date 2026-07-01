@@ -594,3 +594,23 @@ window.markAppPerf = function(name) {
     if (appPerfMarks.length <= 16) console.debug('[MineradioPerf]', name, Math.round(value) + 'ms');
   } catch (e) {}
 };
+
+window.isDevelopmentLockedFx = function(key) {
+  return !!window.DEVELOPMENT_LOCKED_FX && !!window.DEVELOPMENT_LOCKED_FX[key];
+};
+
+window.normalizeDevelopmentLockedFxState = function() {
+  if (!window.fx) return;
+  window.fx.wallpaperMode = false;
+};
+
+window.currentLyricSong = function() {
+  if (window.currentIdx >= 0 && window.playQueue && window.playQueue[window.currentIdx]) return window.playQueue[window.currentIdx];
+  return window.currentLocalSong || null;
+};
+
+window.avatarSrc = function(url) {
+  if (!url) return '';
+  if (typeof window.coverProxySrc === 'function') return window.coverProxySrc(url, true);
+  return url;
+};
