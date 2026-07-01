@@ -779,7 +779,7 @@ window.handleVisualGuideSurfaceClick = function(e) {
   if (e && e.preventDefault) e.preventDefault();
   nextVisualGuideStep();
 }
-(function bindVisualGuideSurfaceClick(){
+;(function bindVisualGuideSurfaceClick(){
   var guide = document.getElementById('visual-guide');
   if (guide) guide.addEventListener('click', handleVisualGuideSurfaceClick);
 })();

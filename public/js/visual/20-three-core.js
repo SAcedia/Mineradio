@@ -1695,8 +1695,7 @@ window.applyControlsAutoHidePreference = function() {
   }
   setControlsHidden(false);
 }
-
-(function initControlsAutoHide() {
+;(function initControlsAutoHide() {
   var bar = document.getElementById('bottom-bar');
   var handle = document.getElementById('bottom-handle');
   if (!bar) return;

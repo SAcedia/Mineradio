@@ -309,12 +309,12 @@ window.renderLocalPlaylistsIntoView = function() {
       '<button class="card-del-btn" onclick="event.stopPropagation();window.deleteLocalPlaylist(\'' + pl.id + '\')" style="flex-shrink:0;width:26px;height:26px;border:0;border-radius:6px;background:rgba(255,60,60,.15);color:#ff6a6a;font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>' +
     '</div>';
   });
-  html += '<button type="button" class="window.fx-mini-btn ghost" onclick="window.createLocalPlaylist()" style="width:100%;height:32px;margin-top:2px;font-size:11px">+ 新建本地歌单</button>';
+  html += '<button type="button" class="fx-mini-btn ghost" onclick="window.createLocalPlaylist()" style="width:100%;height:32px;margin-top:2px;font-size:11px">+ 新建本地歌单</button>';
   $sec.innerHTML = html;
 }
 
 // 详情面板事件绑定
-(function(){
+;(function(){
   var panel = document.getElementById('window.playlist-detail-panel');
   if (!panel) return;
   // 关闭
@@ -336,7 +336,7 @@ window.renderLocalPlaylistsIntoView = function() {
 })();
 
 // 点击本地歌单卡片 → 打开详情面板
-(function(){
+;(function(){
   var sec = document.getElementById('local-pl-section');
   if (!sec) return;
   sec.addEventListener('click', function(e){
@@ -381,14 +381,14 @@ window.playlistPanelDetailHtml = function(pl, provider) {
       }).join('');
   if (!loading && !rows) rows = '<div style="text-align:center;padding:14px 0;color:rgba(255,255,255,.30);font-size:11.5px">歌单暂无可播放歌曲</div>';
   if (!loading && tracks.length > renderLimit) {
-    rows += '<button type="button" class="window.fx-mini-btn ghost pl-detail-load-more" data-pl-detail-load-more="1">加载更多 ' + renderLimit + '/' + tracks.length + '</button>';
+    rows += '<button type="button" class="fx-mini-btn ghost pl-detail-load-more" data-pl-detail-load-more="1">加载更多 ' + renderLimit + '/' + tracks.length + '</button>';
   } else if (!loading && tracks.length > PLAYLIST_DETAIL_INITIAL_RENDER) {
     rows += '<div class="pl-detail-progress">已显示全部 ' + tracks.length + ' 首</div>';
   }
   return '<div class="pl-inline-detail" data-pl-detail="' + window.escHtml(key) + '">' +
     '<div class="pl-detail-sticky">' +
       '<div class="pl-detail-head">' + img + '<div style="flex:1;min-width:0"><div class="pl-detail-title">' + window.escHtml(pl.name || '歌单详情') + '</div><div class="pl-detail-sub">' + window.escHtml((pl.trackCount || tracks.length || 0) + ' 首 · ' + (pl.creator || (provider === 'qq' ? 'QQ 音乐' : '网易云音乐'))) + '</div></div><div class="pl-detail-count">' + (loading ? '载入中' : (renderLimit + '/' + tracks.length)) + '</div></div>' +
-      '<div class="pl-detail-actions"><button class="pl-detail-play" type="button" data-pl-detail-play="' + window.escHtml(key) + '"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>播放歌单</button><button class="window.fx-mini-btn ghost pl-detail-top-btn" type="button" data-pl-detail-top="1">回到顶部</button></div>' +
+      '<div class="pl-detail-actions"><button class="pl-detail-play" type="button" data-pl-detail-play="' + window.escHtml(key) + '"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>播放歌单</button><button class="fx-mini-btn ghost pl-detail-top-btn" type="button" data-pl-detail-top="1">回到顶部</button></div>' +
     '</div>' +
     '<div class="pl-detail-list">' + rows + '</div>' +
   '</div>';
@@ -563,7 +563,7 @@ window.renderUserPlaylistsList = function(opts) {
     return '<div class="pl-section-label">' + group.label + '</div>' + items.map(playlistCardHtml).join('');
   }).join('') || '<div style="text-align:center;padding:24px 0;color:rgba(255,255,255,.32);font-size:11.5px">未找到歌单</div>';
   if (window.userPlaylists.length > renderedCount) {
-    $pl.insertAdjacentHTML('beforeend', '<button type="button" class="window.fx-mini-btn ghost pl-load-more" data-pl-load-more="1">加载更多 ' + renderedCount + '/' + window.userPlaylists.length + '</button>');
+    $pl.insertAdjacentHTML('beforeend', '<button type="button" class="fx-mini-btn ghost pl-load-more" data-pl-load-more="1">加载更多 ' + renderedCount + '/' + window.userPlaylists.length + '</button>');
   }
   if (opts.animate && seq === playlistRenderSeq) animateVisiblePanelList($pl, '.pl-card', document.getElementById('window.playlist-panel'));
 }
@@ -660,11 +660,11 @@ window.renderMyPodcastRadioItems = function(key, title, items) {
   var $pod = document.getElementById('podcast-list');
   if (!$pod) return;
   if (!items.length) {
-    $pod.innerHTML = '<div class="podcast-inline-head"><div class="pl-section-label">' + window.escHtml(title || '我的播客') + '</div><button class="window.fx-mini-btn ghost" data-podcast-back="1" style="height:24px;padding:0 9px;font-size:10.5px">返回</button></div>' +
+    $pod.innerHTML = '<div class="podcast-inline-head"><div class="pl-section-label">' + window.escHtml(title || '我的播客') + '</div><button class="fx-mini-btn ghost" data-podcast-back="1" style="height:24px;padding:0 9px;font-size:10.5px">返回</button></div>' +
       '<div style="text-align:center;padding:14px 0;color:rgba(255,255,255,.28);font-size:11.5px">暂无内容</div>';
     return;
   }
-  $pod.innerHTML = '<div class="podcast-inline-head"><div class="pl-section-label">' + window.escHtml(title || '我的播客') + '</div><button class="window.fx-mini-btn ghost" data-podcast-back="1" style="height:24px;padding:0 9px;font-size:10.5px">返回</button></div>' +
+  $pod.innerHTML = '<div class="podcast-inline-head"><div class="pl-section-label">' + window.escHtml(title || '我的播客') + '</div><button class="fx-mini-btn ghost" data-podcast-back="1" style="height:24px;padding:0 9px;font-size:10.5px">返回</button></div>' +
     items.map(function(r){
       var thumb = r.cover ? window.coverUrlWithSize(r.cover, 88) : '';
       var imgTag = thumb ? '<img src="' + thumb + '" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0.2">' : '<div style="width:44px;height:44px;border-radius:8px;background:rgba(0,245,212,.07);flex-shrink:0"></div>';

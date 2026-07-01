@@ -496,3 +496,32 @@ var runtimePerfState = {
 // Functions extracted from visual/23-lyrics-3d.js to EARLIER layer
 // These are utility/config functions needed by state/04-state.js and infra/03-api.js
 
+
+// Render power hooks (was in state.js but not extracted)
+window.installRenderPowerHooks = function() {
+  window.updateDesktopRuntimeState({ mode: 'shelf', panel: 'playlists' });
+  window.addEventListener('resize', function(){ applyRendererPowerMode(); });
+  if (typeof window.scheduleShelfRebuild === 'function') window.scheduleShelfRebuild('install-power', 200);
+};
+window.applyRendererPowerMode = function() {
+  if (typeof window.renderer === 'undefined' || !window.renderer) return;
+  var deep = window.isDeepBackgroundMode();
+  var width = deep ? 4 : Math.max(1, innerWidth);
+  var height = deep ? 4 : Math.max(1, innerHeight);
+  var pixelRatio = deep ? 0.08 : Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  var mode = deep ? 'sleep' : 'active';
+  var rs = window.renderPowerState || {};
+  if (rs.mode === mode && rs.width === width && rs.height === height && Math.abs(rs.pixelRatio - pixelRatio) < 0.001) return;
+  window.renderPowerState = { mode: mode, width: width, height: height, pixelRatio: pixelRatio };
+  window.renderer.setPixelRatio(pixelRatio);
+  window.renderer.setSize(width, height, false);
+  if (typeof window.uniforms !== 'undefined' && window.uniforms && window.uniforms.uPixel) window.uniforms.uPixel.value = window.renderer.getPixelRatio();
+  if (deep) { if (window.renderer.domElement) { window.renderer.domElement.style.opacity = '0'; } }
+  else { if (window.renderer.domElement) { window.renderer.domElement.style.opacity = ''; } }
+};
+window.getRenderPixelRatio = function() {
+  var device = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  if (window.isDeepBackgroundMode()) return Math.min(device, 0.30);
+  return device;
+};
+

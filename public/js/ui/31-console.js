@@ -163,7 +163,6 @@ window.createPackagedDefaultUserFxArchiveSlot = function() {
 window.hadStoredUserFxArchives = hasStoredUserFxArchives();
 window.userFxArchives = readUserFxArchives();
 if (!hadStoredUserFxArchives) { userFxArchives = [createPackagedDefaultUserFxArchiveSlot()]; saveUserFxArchives(); }
-renderUserFxArchives();
 window.userFxArchiveEditing = -1;
 window.formatUserArchiveTime = function(ts) {
   ts = Number(ts) || 0;
@@ -188,8 +187,8 @@ window.renderUserFxArchives = function() {
     '<div class="user-archive-toolbar">' +
       '<div class="user-archive-note">空白新建，保存当前视觉参数；支持拖拽 JSON 导入，也可以导出为文件备份。</div>' +
       '<div class="user-archive-tools">' +
-        '<button class="window.fx-mini-btn ghost" type="button" onclick="createUserFxArchive()">新建</button>' +
-        '<button class="window.fx-mini-btn ghost" type="button" onclick="importUserFxArchiveFromDialog()">导入</button>' +
+        '<button class="fx-mini-btn ghost" type="button" onclick="createUserFxArchive()">新建</button>' +
+        '<button class="fx-mini-btn ghost" type="button" onclick="importUserFxArchiveFromDialog()">导入</button>' +
       '</div>' +
     '</div>';
   var cards = userFxArchives.map(function(slot, index){
@@ -225,6 +224,7 @@ window.renderUserFxArchives = function() {
     }, 0);
   }
 }
+renderUserFxArchives();
 window.createUserFxArchive = function() {
   var index = userFxArchives.length;
   userFxArchives.push({
@@ -1740,13 +1740,13 @@ window.ensureHotkeyModal = function() {
 }
 window.hotkeyStatusMarkup = function(scope, actionKey, binding, duplicate) {
   if (!binding) return '<span class="hotkey-status">未设置</span>';
-  if (duplicate && duplicate[binding] > 1) return '<span class="hotkey-status conflict"><span class="window.source-icon">!</span>Mineradio 内部重复</span>';
+  if (duplicate && duplicate[binding] > 1) return '<span class="hotkey-status conflict"><span class="source-icon">!</span>Mineradio 内部重复</span>';
   if (scope === 'local') return '<span class="hotkey-status ok">可用</span>';
   var status = window.hotkeyGlobalStatus[actionKey];
   if (!status) return '<span class="hotkey-status">待检测</span>';
   if (status.ok) return '<span class="hotkey-status ok">可用</span>';
   var source = status.conflict && status.conflict.sourceName || '系统 / 其他软件';
-  return '<span class="hotkey-status conflict"><span class="window.source-icon">!</span>' + window.escHtml(source) + '</span>';
+  return '<span class="hotkey-status conflict"><span class="source-icon">!</span>' + window.escHtml(source) + '</span>';
 }
 window.renderHotkeyScope = function(scope) {
   var wrap = document.getElementById(scope === 'global' ? 'hotkey-global-section' : 'hotkey-local-section');

@@ -213,9 +213,7 @@ window.drawMineradioSplashWebgl = function(elapsed) {
   gl.uniform2f(splashGlUniforms.resolution, window.splashCanvas.width, window.splashCanvas.height);
   gl.uniform1f(splashGlUniforms.time, elapsed);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
-}
-
-(function initMineradioSplashCanvas() {
+};(function initMineradioSplashCanvas() {
   splashCanvas = document.getElementById('splash-canvas');
   if (!window.splashCanvas) return;
   if (!reduceSplashMotion && window.initMineradioSplashWebgl(window.splashCanvas)) {
@@ -888,9 +886,7 @@ window.toggleFullscreen = function() {
     document.exitFullscreen();
     scheduleMainRendererViewportRefresh('document-fullscreen-exit');
   }
-}
-
-(function initDesktopWindowShell(){
+};(function initDesktopWindowShell(){
   var api = window.desktopWindow;
   if (!api || !api.isDesktop) return;
 
