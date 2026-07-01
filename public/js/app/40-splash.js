@@ -1,5 +1,7 @@
 // 40-splash.js — Splash screen canvas animation
-// Extracted from splash.js (lines 1-619)
+
+window._splashTiming = window._splashTiming || {};
+window._splashTiming.scriptTop = performance.now();
 
 var splashAnimating = true;
 var splashCanvas = null, splashCtx = null;
@@ -28,6 +30,7 @@ function splashEaseOutCubic(t) {
 }
 
 function initMineradioSplashWebgl(canvas) {
+  window._splashTiming.webglStart = performance.now();
   var gl = null;
   try {
     gl = canvas.getContext('webgl', {
@@ -196,6 +199,7 @@ function initMineradioSplashWebgl(canvas) {
   };
   gl.disable(gl.DEPTH_TEST);
   gl.disable(gl.CULL_FACE);
+  window._splashTiming.webglReady = performance.now();
   return true;
 }
 
@@ -213,6 +217,7 @@ function drawMineradioSplashWebgl(elapsed) {
 }
 
 (function initMineradioSplashCanvas() {
+  window._splashTiming.iifeStart = performance.now();
   splashCanvas = document.getElementById('splash-canvas');
   if (!splashCanvas) return;
   if (!reduceSplashMotion && initMineradioSplashWebgl(splashCanvas)) {
@@ -283,7 +288,7 @@ function drawMineradioSplashWebgl(elapsed) {
   drawMineradioSplash();
 })();
 
-function drawMineradioSplash() {
+function drawMineradioSplash() { window._splashTiming.firstFrame = window._splashTiming.firstFrame || performance.now();
   if (!splashAnimating || (!splashCtx && !splashGl)) return;
   requestAnimationFrame(drawMineradioSplash);
   var elapsed = (performance.now() - splashStartedAt) / 1000;
