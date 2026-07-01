@@ -161,11 +161,24 @@ async function refreshQQLoginStatus() {
     return qqLoginStatus;
   }
 }
-function startQQLoginStatusAutoRefresh() {
-  if (qqLoginAutoRefreshTimer) clearInterval(qqLoginAutoRefreshTimer);
-  qqLoginAutoRefreshTimer = setInterval(function(){
+var _qqLoginAutoRefreshTimer = null;
+var _qqLoginAutoRefreshStopTimer = null;
+function _clearQQLoginPoll() {
+  if (_qqLoginAutoRefreshTimer) { clearInterval(_qqLoginAutoRefreshTimer); _qqLoginAutoRefreshTimer = null; }
+  if (_qqLoginAutoRefreshStopTimer) { clearTimeout(_qqLoginAutoRefreshStopTimer); _qqLoginAutoRefreshStopTimer = null; }
+}
+function _ensureQQLoginPolling() {
+  if (_qqLoginAutoRefreshStopTimer) { clearTimeout(_qqLoginAutoRefreshStopTimer); _qqLoginAutoRefreshStopTimer = null; }
+  if (_qqLoginAutoRefreshTimer) return;
+  _qqLoginAutoRefreshTimer = setInterval(function(){
     refreshQQLoginStatus().catch(function(e){ console.warn('QQ login auto refresh failed:', e); });
   }, 45000);
+}
+function _scheduleQQLoginPollStop() {
+  if (_qqLoginAutoRefreshStopTimer) clearTimeout(_qqLoginAutoRefreshStopTimer);
+  _qqLoginAutoRefreshStopTimer = setTimeout(function(){
+    _clearQQLoginPoll();
+  }, 120000);
 }
 function renderUserBtn() {
   var btn = document.getElementById('user-btn');
@@ -201,10 +214,12 @@ async function showLoginModal(opts) {
   var modal = document.getElementById('login-modal');
   openGsapModal(modal);
   updateLoginProviderUi();
+  _ensureQQLoginPolling();
   await refreshQr();
 }
 function closeLoginModal() {
   stopQrPoll();
+  _scheduleQQLoginPollStop();
   closeGsapModal(document.getElementById('login-modal'));
 }
 function setLoginProvider(provider, silent) {
@@ -760,7 +775,8 @@ Mineradio.login = {
   refreshLoginStatus: refreshLoginStatus,
   normalizeQQLoginStatus: normalizeQQLoginStatus,
   refreshQQLoginStatus: refreshQQLoginStatus,
-  startQQLoginStatusAutoRefresh: startQQLoginStatusAutoRefresh,
+  _ensureQQLoginPolling: _ensureQQLoginPolling,
+  _scheduleQQLoginPollStop: _scheduleQQLoginPollStop,
   renderUserBtn: renderUserBtn,
   showLoginModal: showLoginModal,
   closeLoginModal: closeLoginModal,

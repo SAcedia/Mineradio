@@ -295,6 +295,8 @@ function pauseCurrentAudioForTrackSwitch() {
     clearAudioFadeTimers();
     audio.onended = null;
     audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
   } catch (e) {}
   playing = false;
   setPlayIcon(false);

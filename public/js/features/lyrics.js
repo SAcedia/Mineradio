@@ -2,9 +2,9 @@
 //  歌词
 // ============================================================
 var _prefetchAudioEls = {}; // 预取音频元素缓存, 由 _prefetchAdjacent / playQueueAt 共享
-window.Mineradio.bus.on('player:trackchange', function(data) {
-  // lyrics already handles song changes directly — this is a future hook
-  // Currently lyrics loadSongLyrics is called directly from playback.js
+var _lyricFetchController = null;
+window.Mineradio.bus.on('player:trackchange', function() {
+  if (_lyricFetchController) { _lyricFetchController.abort(); _lyricFetchController = null; }
 });
 async function fetchLyric(songOrId, token, preferSource) {
   try {
@@ -44,7 +44,10 @@ async function fetchLyric(songOrId, token, preferSource) {
       }
     } catch (e) {}
     if (!r) {
-      r = await Mineradio.util.apiJson(endpoint);
+      if (_lyricFetchController) _lyricFetchController.abort();
+      _lyricFetchController = new AbortController();
+      r = await Mineradio.util.apiJson(endpoint, { signal: _lyricFetchController.signal });
+      _lyricFetchController = null;
       try { localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: r })); } catch (e) {}
     }
     if (token !== trackSwitchToken) return;
@@ -172,7 +175,7 @@ function _prefetchAdjacent(centerIdx) {
   var keys = Object.keys(_prefetchAudioEls);
   for (var k = 0; k < keys.length; k++) {
     var el = _prefetchAudioEls[keys[k]];
-    if (el) { el.pause(); el.src = ''; }
+    if (el) { el.pause(); el.removeAttribute('src'); el.load(); }
   }
   _prefetchAudioEls = {};
   var min = Math.max(0, centerIdx - 2);
