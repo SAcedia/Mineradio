@@ -2056,3 +2056,47 @@ window.repositionFxFloatingPanels = function() {
     window.placeFxFloatingPanel(coverPop, document.getElementById('visual-tint-auto-btn') || document.getElementById('visual-tint-picker') || coverPop, { gap: 12, pad: 14 });
   }
 };
+
+window.shelfAccentHex = function() {
+  return window.normalizeHexColor((window.fx && window.fx.shelfAccentColor) || window.fxDefaults.shelfAccentColor, window.fxDefaults.shelfAccentColor);
+};
+
+window.tickLyricsParticles = function() {
+  if (!window.fx || !window.fx.particleLyrics) {
+    if (window.stageLyrics && (window.stageLyrics.current || window.stageLyrics.currentText || (window.stageLyrics.outgoing && window.stageLyrics.outgoing.length))) window.clearStageLyrics();
+    return;
+  }
+  if (!window.playing || !window.audio || !window.lyricsLines || !window.lyricsLines.length) {
+    if (window.stageLyrics && window.stageLyrics.current) {
+      window.stageLyrics.current.userData.state = 'out';
+      window.stageLyrics.current.userData.age = 0;
+      window.stageLyrics.outgoing = window.stageLyrics.outgoing || [];
+      window.stageLyrics.outgoing.push(window.stageLyrics.current);
+      window.stageLyrics.current = null;
+      window.stageLyrics.currentIdx = -1;
+      window.stageLyrics.currentText = '';
+    }
+    return;
+  }
+  var t = window.audio.currentTime + (window._lyricOffset || 0);
+  var newIdx = -1;
+  for (var i = 0; i < window.lyricsLines.length; i++) {
+    if (window.lyricsLines[i].t <= t + 0.05) newIdx = i; else break;
+  }
+  if (newIdx < 0) {
+    if (window.stageLyrics && window.stageLyrics.clear) window.stageLyrics.clear();
+    return;
+  }
+  if (!window.stageLyrics) return;
+  if (window.stageLyrics.currentIdx !== newIdx || window.stageLyrics.currentText !== window.lyricsLines[newIdx].text) {
+    if (window.stageLyrics.current) {
+      window.stageLyrics.current.userData.state = 'out';
+      window.stageLyrics.current.userData.age = 0;
+      window.stageLyrics.outgoing = window.stageLyrics.outgoing || [];
+      window.stageLyrics.outgoing.push(window.stageLyrics.current);
+    }
+    window.stageLyrics.currentIdx = newIdx;
+    window.stageLyrics.currentText = window.lyricsLines[newIdx].text;
+    if (typeof window.showStageLine === 'function') window.showStageLine(window.lyricsLines[newIdx]);
+  }
+};

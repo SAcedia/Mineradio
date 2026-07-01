@@ -639,3 +639,33 @@ window.maybeTrimRuntimeCaches = function(now) {
   if (now - window.runtimePerfState.lastCacheTrimAt < gap) return;
   window.trimRuntimeCaches(deep ? (window.isBackgroundReleaseMode() ? 'release-frame' : 'deep-frame') : 'active-frame', deep);
 };
+
+window.currentPerformanceBackgroundMode = function() {
+  return window.normalizePerformanceBackgroundMode((window.fx||{}).performanceBackground, (window.fx||{}).liveBackgroundKeep === true);
+};
+
+window.isLiveBackgroundKeepMode = function() {
+  return window.currentPerformanceBackgroundMode() === 'keep';
+};
+
+window.isBackgroundReleaseMode = function() {
+  return window.currentPerformanceBackgroundMode() === 'release';
+};
+
+window.updateFullscreenDiyPeekFromPointer = function(x, y) {
+  var ds = window.desktopRuntimeState || {};
+  var isFullscreen = !!(ds.fullscreen || window.desktopFullscreenActive || document.fullscreenElement || document.body.classList.contains('desktop-fullscreen'));
+  if (!isFullscreen || window.immersiveMode || window.shouldSuppressFullscreenDiyPeek()) {
+    document.body.classList.remove('fullscreen-diy-peek');
+    return;
+  }
+  var rect = window.layoutFullscreenDiyZone();
+  var anchor = document.querySelector('#top-right .top-account-pill') || document.getElementById('user-btn') || document.getElementById('top-right');
+  var anchorRect = anchor ? anchor.getBoundingClientRect() : rect;
+  var hitLeft = Math.min(rect.left, anchorRect.left) - 26;
+  var hitRight = Math.max(rect.left + rect.width, anchorRect.right) + 26;
+  var hitTop = Math.min(rect.top, anchorRect.top) - 18;
+  var hitBottom = Math.max(rect.top + rect.height, anchorRect.bottom) + 16;
+  var active = x >= hitLeft && x <= hitRight && y >= hitTop && y <= hitBottom;
+  document.body.classList.toggle('fullscreen-diy-peek', active);
+};
