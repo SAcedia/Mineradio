@@ -1766,7 +1766,7 @@ window.syncCursorAutoHideMode = function() {
     clearCursorAutoHideTimer();
     setCursorHidden(false);
   }
-}
+};
 
 ['mousemove', 'pointermove', 'mousedown', 'wheel', 'touchstart'].forEach(function(type){
   window.addEventListener(type, revealCursorForActivity, { passive:true, capture:true });

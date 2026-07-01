@@ -213,7 +213,7 @@ window.renderUserFxArchives = function() {
   }).join('');
   var addCard = '<button class="user-archive-slot is-new" type="button" onclick="createUserFxArchive()"><strong>＋ 新建空白存档</strong><span class="user-archive-meta">可继续创建，不限制 4 个</span></button>';
   grid.innerHTML = toolbar + cards + addCard;
-  bindUserFxArchiveDrop();
+  if (typeof bindUserFxArchiveDrop === "function") bindUserFxArchiveDrop();
   if (userFxArchiveEditing >= 0) {
     setTimeout(function(){
       var input = document.getElementById('user-archive-input-' + userFxArchiveEditing);

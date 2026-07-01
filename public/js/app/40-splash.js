@@ -161,7 +161,7 @@ window.initMineradioSplashWebgl = function(canvas) {
 
   function compile(type, source) {
     var shader = gl.createShader(type);
-    gl.shaderSource(shader, window.source);
+    gl.shaderSource(shader, source);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
       console.warn('Splash shader compile failed:', gl.getShaderInfoLog(shader));
