@@ -532,3 +532,23 @@ window.isPlaybackRecursionError = function(err) {
   var msg = String((err && err.message) || err || '');
   return err instanceof RangeError || /maximum call stack size exceeded/i.test(msg);
 };
+
+function playbackFailureToastText(err) {
+  if (typeof window.isPlaybackRecursionError === 'function' && window.isPlaybackRecursionError(err)) return '播放准备异常，已保持播放器可操作';
+  return '播放失败: ' + (err && err.message ? err.message : err);
+}
+
+function switchPlaybackVisualToEmily() {
+  if (window.homeVisualPresetActive) {
+    if (typeof window.deactivateHomeWallpaperPreview === 'function') window.deactivateHomeWallpaperPreview(true);
+    return;
+  }
+  document.body.classList.remove('home-wallpaper-preview');
+  var targetPreset = typeof window.playbackVisualPreset === 'number' ? window.playbackVisualPreset : window.fxDefaults.preset;
+  window.startupVisualPreviewActive = false;
+  if (typeof window.setPreset === 'function' && window.fx.preset !== targetPreset) {
+    window.setPreset(targetPreset, { silent: true, preserveCamera: false, noSave: true });
+  } else if (typeof window.syncFxUniforms === 'function') {
+    window.syncFxUniforms();
+  }
+}

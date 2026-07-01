@@ -691,3 +691,29 @@ window.trimRuntimeCaches = function(reason, aggressive) {
   if (typeof window.collectRuntimePerfSnapshot === 'function') window.collectRuntimePerfSnapshot(window.runtimePerfState.lastCacheTrimAt);
   return dropped;
 };
+
+function isPodcastSong(song) {
+  return !!(song && song.type === 'podcast');
+}
+
+function setDjModeActive(active, song) {
+  active = !!active;
+  var key = active ? window.djSongKey(song) : '';
+  var changed = window.djMode.active !== active || window.djMode.songKey !== key;
+  window.djMode.active = active;
+  window.djMode.songKey = key;
+  if (changed) {
+    window.djMode.startedAt = performance.now();
+    if (typeof window.resetDjModeMeter === 'function') window.resetDjModeMeter();
+  }
+  if (active) {
+    window.currentBeatMap = null;
+    window.beatMapNextIdx = 0;
+    if (typeof window.cancelBeatAnalysisTimer === 'function') window.cancelBeatAnalysisTimer();
+    if (typeof window.hideBeatChip === 'function') window.hideBeatChip();
+  }
+}
+
+function applySavedLyricPaletteState() {
+  if (typeof window.setStageLyricPalette === 'function') window.setStageLyricPalette();
+}

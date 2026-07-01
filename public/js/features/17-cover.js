@@ -49,6 +49,7 @@ window.songCustomCoverKey = function(song) {
   return (title || artist) ? ('meta:' + (title + '|' + artist).slice(0, 220)) : '';
 }
 window.getCustomCoverForSong = function(song) {
+  if (!song || typeof song !== "object") return "";
   if (!song) return '';
   if (song.customCover) return song.customCover;
   var key = window.songCustomCoverKey(song);
