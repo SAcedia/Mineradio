@@ -1,3 +1,4 @@
+window.homeWallpaperPrewarmStarted = false;
 //  Discover / Home page helpers (extracted from js/core/discover.js)
 // ============================================================
 window.setHomeArt = function(id, url, size) {
@@ -356,7 +357,7 @@ window.updateEmptyHomeVisibility = function(opts) {
   emptyHomeActive = show;
   document.body.classList.toggle('empty-home-active', show);
   if (!show) setHomeControlsLocked(false);
-  if (show) activateHomeWallpaperPreview();
+  if (show) window.activateHomeWallpaperPreview();
   else deactivateHomeWallpaperPreview(false);
   if (show) {
     setPeek(document.getElementById('search-area'), true, 'search');
@@ -373,7 +374,7 @@ window.updateEmptyHomeVisibility = function(opts) {
       renderHomeDiscover();
     } else {
       renderHomeDiscover();
-      scheduleVisualApply(function(){ loadHomeDiscover(!!opts.forceLoad); }, 220, 1200);
+      window.scheduleVisualApply(function(){ loadHomeDiscover(!!opts.forceLoad); }, 220, 1200);
     }
   }
   return show;
@@ -456,11 +457,11 @@ window.dismissHomePage = function(opts) {
 }
 
 window.prewarmHomeWallpaperPreview = function() {
-  if (homeWallpaperPrewarmStarted) return;
-  homeWallpaperPrewarmStarted = true;
-  if (!shouldUseIdleWallpaperPreview(true)) return;
-  scheduleVisualApply(function(){
-    if (!shouldUseIdleWallpaperPreview(true)) return;
-    activateHomeWallpaperPreview({ skipTransition: true, instant: true });
+  if (window.homeWallpaperPrewarmStarted) return;
+  window.homeWallpaperPrewarmStarted = true;
+  if (!window.shouldUseIdleWallpaperPreview(true)) return;
+  window.scheduleVisualApply(function(){
+    if (!window.shouldUseIdleWallpaperPreview(true)) return;
+    window.activateHomeWallpaperPreview({ skipTransition: true, instant: true });
   }, 900, 2600);
 };

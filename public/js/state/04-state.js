@@ -559,6 +559,18 @@ window.updateFxFabAutoHideFromPointer = function(x, y) {
   document.body.classList.toggle('fx-fab-peek', panelOpen || (nearBottomRight && fxFabAutoHideRevealArmed));
 };
 
+
+function syncDiyModeButton() {
+  ["diy-mode-btn", "fullscreen-diy-btn"].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    btn.classList.toggle("on", diyPlayerMode);
+    btn.setAttribute("aria-pressed", diyPlayerMode ? "true" : "false");
+    btn.title = diyPlayerMode ? "关闭 DIY 玩家模式" : "开启 DIY 玩家模式";
+    btn.setAttribute("aria-label", btn.title);
+  });
+}
+
 window.applyDiyMode = function(on, opts) {
   opts = opts || {};
   diyPlayerMode = !!on;

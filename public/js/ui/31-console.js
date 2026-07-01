@@ -2084,8 +2084,8 @@ window.bindFxPanel = function() {
   document.querySelectorAll('#shelf-seg button').forEach(function(b){
     b.addEventListener('click', function(){ setShelfMode(b.dataset.shelf); });
   });
-  document.querySelectorAll('#shelf-window.camera-seg [data-shelf-window.camera]').forEach(function(b){
-    b.addEventListener('click', function(){ setShelfCameraMode(b.getAttribute('data-shelf-window.camera')); });
+  document.querySelectorAll('#shelf-camera-seg [data-shelf-camera]').forEach(function(b){
+    b.addEventListener('click', function(){ setShelfCameraMode(b.getAttribute('data-shelf-camera')); });
   });
   document.querySelectorAll('#shelf-presence-seg [data-shelf-presence]').forEach(function(b){
     b.addEventListener('click', function(){ setShelfPresence(b.getAttribute('data-shelf-presence')); });
@@ -2239,8 +2239,8 @@ window.setShelfMode = function(m) {
 window.updateShelfControlUi = function() {
   window.fx.shelfCameraMode = window.normalizeShelfCameraMode(window.fx.shelfCameraMode || window.fxDefaults.shelfCameraMode);
   window.fx.shelfPresence = normalizeShelfPresence(window.fx.shelfPresence || window.fxDefaults.shelfPresence);
-  document.querySelectorAll('#shelf-window.camera-seg [data-shelf-window.camera]').forEach(function(btn){
-    btn.classList.toggle('active', btn.getAttribute('data-shelf-window.camera') === window.fx.shelfCameraMode);
+  document.querySelectorAll('#shelf-camera-seg [data-shelf-camera]').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-shelf-camera') === window.fx.shelfCameraMode);
   });
   document.querySelectorAll('#shelf-presence-seg [data-shelf-presence]').forEach(function(btn){
     btn.classList.toggle('active', btn.getAttribute('data-shelf-presence') === window.fx.shelfPresence);
