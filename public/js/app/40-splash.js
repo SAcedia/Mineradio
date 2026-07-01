@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function(){
   if (!s) return;
   markAppPerf('dom-content-loaded');
   armSplashSoundFallback();
-  prewarmHomeWallpaperPreview();
+  window.prewarmHomeWallpaperPreview();
   function requestSplashEnter() {
     window.playMineradioIntroSound();
     if (window.splashReadyToEnter) dismissSplash();

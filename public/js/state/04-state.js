@@ -566,7 +566,7 @@ window.applyDiyMode = function(on, opts) {
   document.documentElement.classList.toggle('simple-mode-preload', !diyPlayerMode);
   document.body.classList.toggle('diy-mode', diyPlayerMode);
   document.body.classList.toggle('simple-mode', !diyPlayerMode);
-  syncDiyModeButton();
+  window.syncDiyModeButton();
   if (opts.save) saveDiyModePreference(diyPlayerMode);
   if (!diyPlayerMode) {
     toggleFxPanel(false);

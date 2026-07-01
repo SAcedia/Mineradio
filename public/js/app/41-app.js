@@ -49,7 +49,7 @@ window.sampleRenderPerf = function(now, dt) {
     renderPerfState.frames = 0;
     renderPerfState.lastSampleAt = now;
   }
-  maybeTrimRuntimeCaches(now);
+  window.maybeTrimRuntimeCaches(now);
 }
 window.animate = function() {
   requestAnimationFrame(animate);

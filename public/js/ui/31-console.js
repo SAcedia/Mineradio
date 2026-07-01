@@ -2021,7 +2021,7 @@ window.bindFxPanel = function() {
   ['ui-accent-picker','visual-tint-picker','home-accent-picker','home-icon-picker','visual-icon-picker','bg-color-picker','shelf-accent-picker','lyric-color-picker','lyric-highlight-picker','lyric-glow-picker'].forEach(function(id){
     bindColorLabPicker(document.getElementById(id));
   });
-  bindColorLabRows();
+  window.bindColorLabRows();
   var sv = document.getElementById('color-lab-sv');
   if (sv && !sv._bound) {
     sv._bound = true;

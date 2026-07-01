@@ -454,3 +454,13 @@ window.dismissHomePage = function(opts) {
   setPeek(document.getElementById('search-area'), false, 'search');
   if (typeof setFocusZone === 'function') setFocusZone(null, true);
 }
+
+window.prewarmHomeWallpaperPreview = function() {
+  if (homeWallpaperPrewarmStarted) return;
+  homeWallpaperPrewarmStarted = true;
+  if (!shouldUseIdleWallpaperPreview(true)) return;
+  scheduleVisualApply(function(){
+    if (!shouldUseIdleWallpaperPreview(true)) return;
+    activateHomeWallpaperPreview({ skipTransition: true, instant: true });
+  }, 900, 2600);
+};

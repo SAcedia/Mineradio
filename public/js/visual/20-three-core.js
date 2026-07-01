@@ -1987,3 +1987,20 @@ window.bindColorLabPicker = function(picker) {
     if (e.key === 'Enter' || e.key === ' ') openFromPickerEvent(e);
   });
 };
+
+window.bindColorLabRows = function() {
+  document.querySelectorAll('.lyric-color-row').forEach(function(row){
+    if (!row || row._colorLabRowBound || row.classList.contains('linked')) return;
+    var picker = row.querySelector('.lyric-color-picker');
+    if (!picker) return;
+    row._colorLabRowBound = true;
+    row.addEventListener('pointerdown', function(e){
+      if (!e || !e.target) return;
+      if (e.target.closest('button,.fx-mini-btn,input[type="range"],select,textarea')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      picker._colorLabOpenedAt = Date.now();
+      openColorLabForPicker(picker);
+    });
+  });
+};
