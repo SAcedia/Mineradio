@@ -236,7 +236,6 @@ setInterval(function(){
 }, 320);
 
 // 全屏
-var desktopFullscreenActive = false;
 var documentFullscreenActive = false;
 var desktopWindowState = {};
 

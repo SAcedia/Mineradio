@@ -1,4 +1,5 @@
 var uiSfxCtx = null, lastShelfSelectSfxAt = 0;
+var desktopFullscreenActive = false;     // used by 24-gesture.js, 34-misc-ui.js, 41-desktop-overlay.js
 var FFT_SIZE = 2048;
 var frequencyData = new Uint8Array(FFT_SIZE / 2);
 var timeDomainData = new Uint8Array(FFT_SIZE);
