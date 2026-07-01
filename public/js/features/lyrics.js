@@ -10,9 +10,9 @@ async function fetchLyric(songOrId, token, preferSource) {
   try {
     // 没有指定 source 时（正常切歌），重置为默认源
     if (!preferSource) {
-      _lyricSourceIdx = 0;
+      _lyricSourceIdx = -1;
       var srcBtn = document.getElementById('lyric-source-btn');
-      if (srcBtn) srcBtn.textContent = '源·' + (_lyricSourceLabels[_lyricSources[0]] || 'A');
+      if (srcBtn) srcBtn.textContent = '词';
     }
     var song = (songOrId && typeof songOrId === 'object') ? songOrId : null;
     var provider = Mineradio.util.songProviderKey(song);
@@ -255,12 +255,14 @@ function showLyricOffsetToast() {
 }
 var _lyricSources = ['lrclib', 'music-kit', 'netease', 'kugou', 'yt-captions'];
 var _lyricSourceLabels = { 'lrclib': 'LRC', 'music-kit': 'YT', 'netease': '网', 'kugou': '酷', 'yt-captions': 'CC' };
-var _lyricSourceIdx = 0;
+var _lyricSourceIdx = -1; // -1 = auto
 function cycleLyricSource() {
-  _lyricSourceIdx = (_lyricSourceIdx + 1) % _lyricSources.length;
-  var src = _lyricSources[_lyricSourceIdx];
+  _lyricSourceIdx = (_lyricSourceIdx + 1) % (_lyricSources.length + 1);
+  var src = _lyricSourceIdx < 0 ? 'auto' : _lyricSources[_lyricSourceIdx];
   var btn = document.getElementById('lyric-source-btn');
-  if (btn) btn.textContent = '源·' + (_lyricSourceLabels[src] || src);
+  if (btn) btn.textContent = src === 'auto' ? '词' : (_lyricSourceLabels[src] || src);
+  // auto 模式: 用默认源 (第一个)
+  var actualSrc = src === 'auto' ? _lyricSources[0] : src;
   // 重新获取当前歌曲歌词
   var song = playQueue && currentIdx >= 0 ? playQueue[currentIdx] : null;
   if (song && Mineradio.util.songProviderKey(song) === 'youtube') {

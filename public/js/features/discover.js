@@ -940,11 +940,50 @@ function openHomeInsight() {
   if (summary.topSong && summary.topSong.name) { if (typeof window.runHomeSearch === 'function') window.runHomeSearch(summary.topSong.name); return; }
   if (typeof window.showToast === 'function') window.showToast('播放几首歌后会生成听歌画像');
 }
+async function playFromListenRecord(r) {
+  if (!r) return;
+  homeForcedOpen = false;
+  homeSuppressed = false;
+  setHomeControlsLocked(false);
+  var provider = r.source || (r.key && r.key.split(':')[0]) || '';
+  var song = {
+    id: r.id || r.key || '',
+    mid: r.mid || '',
+    mediaMid: r.mediaMid || '',
+    name: r.name || '未知歌曲',
+    artist: r.artist || '',
+    cover: r.cover || '',
+    provider: provider,
+    sourceKey: r.sourceKey || ''
+  };
+  // YouTube 不需要登录即可播放
+  if (provider === 'youtube') {
+    playQueue = [song];
+    currentIdx = 0;
+    safeRenderQueuePanel('home-continue');
+    safeShelfRebuild('home-continue', true);
+    forcePlaybackControlsInteractive();
+    await playQueueAt(0).catch(function(e){ console.warn('[ContinuePlay]', e); });
+    return;
+  }
+  // 非 YouTube 平台需登录
+  if (!hasAnyPlatformLogin() && !homeDiscoverState.loggedIn) {
+    showLoginModal({ source: 'home-continue' });
+    return;
+  }
+  playQueue = [song];
+  currentIdx = 0;
+  safeRenderQueuePanel('home-continue');
+  safeShelfRebuild('home-continue', true);
+  forcePlaybackControlsInteractive();
+  await playQueueAt(0).catch(function(e){ console.warn('[ContinuePlay]', e); });
+}
 async function playHomeRecent(record) {
   var r = record || (window.homeListenState ? window.homeListenState.recents : null);
   r = r && r.length ? r[0] : null;
   if (!r) { if (typeof window.playHomeDaily === 'function') { window.playHomeDaily(); return; } }
-  if (r && typeof window.playFromListenRecord === 'function') { window.homeSuppressed = false; window.playFromListenRecord(r); }
+  window.homeSuppressed = false;
+  await playFromListenRecord(r);
 }
 
 // ============================================================
