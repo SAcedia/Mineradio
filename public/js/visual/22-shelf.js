@@ -10,10 +10,10 @@ window.shelfManager = null;
 window.shelfOpenAnimAt = -10;
 window.shelfHoverCue = { target: 0, value: 0, x: 0, y: 0, lastAt: 0, enteredAt: 0, zoneActive: false, guide: false };
 var shelfVisibility = 0;  // 0..1, 侧栏自动隐藏的整体透明度系数
-window.isPortraitShelfViewport = function() {
+function isPortraitShelfViewport() {
   return innerHeight > innerWidth * 1.08;
 }
-window.shelfLayoutProfile = function() {
+function shelfLayoutProfile() {
   var portrait = isPortraitShelfViewport();
   var narrow = !portrait && innerWidth < 980;
   var skullShelf = shouldUseSkullSafeShelfCamera();
@@ -50,42 +50,42 @@ window.shelfLayoutProfile = function() {
     }
   };
 }
-window.shelfHotZoneWidth = function() {
+function shelfHotZoneWidth() {
   var ratio = isPortraitShelfViewport() ? 0.26 : 0.18;
   return Math.min(isPortraitShelfViewport() ? 280 : 360, Math.max(148, innerWidth * ratio));
 }
-window.shelfPreviewUseZoneWidth = function() {
+function shelfPreviewUseZoneWidth() {
   return Math.min(820, Math.max(shelfHotZoneWidth(), innerWidth * 0.56));
 }
-window.shelfWheelZoneWidth = function() {
+function shelfWheelZoneWidth() {
   var portrait = isPortraitShelfViewport();
   var ratioWidth = innerWidth * (portrait ? 0.24 : 0.18);
   return Math.min(portrait ? 280 : 360, Math.max(shelfHotZoneWidth(), ratioWidth));
 }
-window.isShelfClickZone = function(e) {
+function isShelfClickZone(e) {
   var edge = window.shelfPinnedOpen ? Math.min(390, Math.max(210, innerWidth * 0.22)) : shelfHotZoneWidth();
   return e.clientX > innerWidth - edge && e.clientY > 130 && e.clientY < innerHeight - 150;
 }
-window.isShelfPreviewUseZone = function(e) {
+function isShelfPreviewUseZone(e) {
   var edge = shelfPreviewUseZoneWidth();
   return e.clientX > innerWidth - edge && e.clientY > 96 && e.clientY < innerHeight - 96;
 }
-window.isShelfWheelZone = function(e) {
+function isShelfWheelZone(e) {
   var edge = shelfWheelZoneWidth();
   return e.clientX > innerWidth - edge && e.clientY > 116 && e.clientY < innerHeight - 116;
 }
-window.canUseSideShelfWithoutPinnedOpen = function() {
+function canUseSideShelfWithoutPinnedOpen() {
   return !!window.shelfAlwaysVisible();
 }
-window.shelfPreviewIsVisible = function() {
+function shelfPreviewIsVisible() {
   return shelfHoverCue.guide || shelfHoverCue.zoneActive || shelfHoverCue.target > 0 || shelfHoverCue.value > 0.10 || shelfVisibility > 0.12;
 }
-window.shelfAutoHiddenInputReady = function() {
+function shelfAutoHiddenInputReady() {
   if (window.shelfPinnedOpen || window.shelfAlwaysVisible()) return true;
   if (window.shelfManager && window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent()) return true;
   return !!(shelfHoverCue.guide || shelfHoverCue.zoneActive || shelfHoverCue.value > 0.18 || shelfVisibility > 0.16);
 }
-window.canShowShelfHoverCueAt = function(e) {
+function canShowShelfHoverCueAt(e) {
   if (!e) return false;
   if (!shelfHoverCue.guide) return false;
   if (document.body.classList.contains('splash-active')) return false;
@@ -97,17 +97,17 @@ window.canShowShelfHoverCueAt = function(e) {
   if (isShelfClickZone(e)) return true;
   return shelfPreviewIsVisible() && isShelfPreviewUseZone(e);
 }
-window.shelfCueRect = function() {
+function shelfCueRect() {
   var w = shelfHotZoneWidth();
   var top = Math.max(136, innerHeight * 0.22);
   var h = Math.min(390, innerHeight - top - 142);
   return { left: innerWidth - w, top: top, width: w, height: h, right: innerWidth, bottom: top + h };
 }
-window.shelfCueCenter = function() {
+function shelfCueCenter() {
   var r = shelfCueRect();
   return { x: r.left + r.width * 0.58, y: r.top + r.height * 0.50 };
 }
-window.setShelfGuideCueActive = function(on) {
+function setShelfGuideCueActive(on) {
   shelfHoverCue.guide = !!on;
   if (on) {
     var c = shelfCueCenter();
@@ -120,7 +120,7 @@ window.setShelfGuideCueActive = function(on) {
     shelfHoverCue.target = 0;
   }
 }
-window.updateShelfHoverCueFromPointer = function(e) {
+function updateShelfHoverCueFromPointer(e) {
   if (!e) {
     if (!shelfHoverCue.guide) shelfHoverCue.target = 0;
     shelfHoverCue.zoneActive = false;
@@ -142,7 +142,7 @@ window.updateShelfHoverCueFromPointer = function(e) {
   shelfHoverCue.y = e.clientY;
   shelfHoverCue.lastAt = performance.now();
 }
-window.tickShelfHoverCue = function(dt) {
+function tickShelfHoverCue(dt) {
   if (!shelfHoverCue.guide && shelfHoverCue.zoneActive) {
     var heldPointer = { clientX: shelfHoverCue.x, clientY: shelfHoverCue.y };
     if (canShowShelfHoverCueAt(heldPointer)) {
@@ -160,7 +160,7 @@ window.tickShelfHoverCue = function(dt) {
   if (shelfHoverCue.value < 0.006 && !target) shelfHoverCue.value = 0;
   return shelfHoverCue.value;
 }
-window.setShelfPinnedOpen = function(open, immediate) {
+function setShelfPinnedOpen(open, immediate) {
   var nextOpen = !!open;
   if (nextOpen && typeof suppressBottomControlsForShelf === 'function') suppressBottomControlsForShelf(980);
   if (nextOpen && !window.shelfPinnedOpen) {
@@ -179,7 +179,7 @@ window.setShelfPinnedOpen = function(open, immediate) {
   if (window.shelfManager && window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent()) return;
   if (typeof setFocusZone === 'function') setFocusZone(window.shelfPinnedOpen ? 'shelf-side' : null, immediate);
 }
-window.clearShelfPreviewOnPointerExit = function() {
+function clearShelfPreviewOnPointerExit() {
   if (!window.shelfManager || !window.shelfManager.getMode || window.shelfManager.getMode() !== 'side') return;
   var hasContent = window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent();
   updateShelfHoverCueFromPointer(null);
@@ -194,7 +194,7 @@ window.clearShelfPreviewOnPointerExit = function() {
   shelfVisibility = 0;
   if (typeof setFocusZone === 'function') setFocusZone(null, true);
 }
-window.suppressShelfPreviewForPlaybackSwitch = function() {
+function suppressShelfPreviewForPlaybackSwitch() {
   if (!window.shelfManager || !window.shelfManager.getMode || window.shelfManager.getMode() !== 'side') return;
   if (window.shelfPinnedOpen || (window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent())) return;
   updateShelfHoverCueFromPointer(null);
@@ -208,7 +208,7 @@ window.suppressShelfPreviewForPlaybackSwitch = function() {
   if (window.shelfManager && window.shelfManager.clearSelected) window.shelfManager.clearSelected();
   if (typeof setFocusZone === 'function') setFocusZone(null, true);
 }
-window.makeShelfManager = function() {
+function makeShelfManager() {
   var group = null;
   var cards = [];          // [{canvas, ctx, texture, mesh, item, index, slot}]
   var allItems = [];
@@ -1124,7 +1124,7 @@ void main(){ vec4 t = texture2D(uDotTex, gl_PointCoord); if (t.a < 0.02) discard
   };
 }
 shelfManager = window.makeShelfManager();
-window.safeShelfRebuild = function(reason, asyncCards) {
+function safeShelfRebuild(reason, asyncCards) {
   if (!window.shelfManager || typeof window.shelfManager.rebuild !== 'function') return false;
   try {
     window.shelfManager.rebuild(asyncCards);
@@ -1135,7 +1135,7 @@ window.safeShelfRebuild = function(reason, asyncCards) {
   }
 }
 window.deferredShelfRebuild = { raf: 0, reason: '', asyncCards: true, token: 0 };
-window.scheduleShelfRebuild = function(reason, asyncCards) {
+function scheduleShelfRebuild(reason, asyncCards) {
   deferredShelfRebuild.reason = reason || deferredShelfRebuild.reason || 'deferred';
   deferredShelfRebuild.asyncCards = asyncCards !== false;
   deferredShelfRebuild.token += 1;
@@ -1149,7 +1149,7 @@ window.scheduleShelfRebuild = function(reason, asyncCards) {
     }, 260);
   });
 }
-window.safeShelfCloseContent = function(reason) {
+function safeShelfCloseContent(reason) {
   if (!window.shelfManager || typeof window.shelfManager.closeContent !== 'function') return false;
   try {
     window.shelfManager.closeContent();
@@ -1159,12 +1159,12 @@ window.safeShelfCloseContent = function(reason) {
     return false;
   }
 }
-window.isPlaylistPanelVisibleForRender = function() {
+function isPlaylistPanelVisibleForRender() {
   var panel = document.getElementById('playlist-panel');
   var panelOpen = panel && (panel.classList.contains('show') || panel.classList.contains('peek') || panel.classList.contains('pinned'));
   return !!(panelOpen || window.miniQueueOpen);
 }
-window.safeRenderQueuePanel = function(reason, opts) {
+function safeRenderQueuePanel(reason, opts) {
   opts = opts || {};
   if (!isPlaylistPanelVisibleForRender() && opts.deferWhenHidden !== false) {
     queuePanelDirty = true;
@@ -1179,11 +1179,11 @@ window.safeRenderQueuePanel = function(reason, opts) {
     return false;
   }
 }
-window.flushDeferredQueuePanel = function(reason) {
+function flushDeferredQueuePanel(reason) {
   if (!window.queuePanelDirty) return;
   window.safeRenderQueuePanel(reason || 'flush-deferred-queue', { animate: false, scrollCurrent: window.miniQueueOpen, deferWhenHidden: false });
 }
-window.safeSwitchPlaylistTab = function(tab, reason) {
+function safeSwitchPlaylistTab(tab, reason) {
   try {
     window.switchPlaylistTab(tab);
     return true;
@@ -1201,7 +1201,7 @@ document.addEventListener('mouseout', function(e) {
 // ============================================================
 //  二级内容框 (歌单内的歌曲列表) — 同样 PSP 风格滚动
 // ============================================================
-window.makeContentListManager = function() {
+function makeContentListManager() {
   var group = null;
   var rows = [];           // 每行一张卡 (歌曲)
   var panel = null;
@@ -2019,13 +2019,13 @@ window.makeContentListManager = function() {
     }
 }
 
-window.compactCount = function(n) {
+function compactCount(n) {
   n = Number(n) || 0;
   if (n >= 100000000) return (n / 100000000).toFixed(1) + '亿';
   if (n >= 10000) return (n / 10000).toFixed(1) + '万';
   return String(n);
 }
-window.drawCanvasHeart = function(ctx, cx, cy, size, color) {
+function drawCanvasHeart(ctx, cx, cy, size, color) {
   var s = (size || 20) / 28;
   ctx.save();
   ctx.translate(cx, cy);
@@ -2043,7 +2043,7 @@ window.drawCanvasHeart = function(ctx, cx, cy, size, color) {
   ctx.fill();
   ctx.restore();
 }
-window.requestPlaylistCover = function(url, cb) {
+function requestPlaylistCover(url, cb) {
   if (!url) { if (cb) cb(null); return; }
   var rec = window.playlistCoverCache[url];
   if (rec && rec.loaded) { if (cb) setTimeout(function(){ cb(rec.img); }, 0); return; }
@@ -2075,18 +2075,18 @@ window.requestPlaylistCover = function(url, cb) {
 //   - 点击两侧卡: 滚到那张
 //   - ESC: 关闭内容框
 // ============================================================
-window.raycasterFromPointerEvent = function(e) {
+function raycasterFromPointerEvent(e) {
   var mx = (e.clientX / innerWidth) * 2 - 1;
   var my = -(e.clientY / innerHeight) * 2 + 1;
   var rc = new THREE.Raycaster();
   rc.setFromCamera(new THREE.Vector2(mx, my), window.camera);
   return rc;
 }
-window.pointerCardHit = function(rc, e, screenPad) {
+function pointerCardHit(rc, e, screenPad) {
   if (!window.shelfManager) return null;
   return window.shelfManager.raycastCards(rc) || (window.shelfManager.pickCardAtScreen && window.shelfManager.pickCardAtScreen(e.clientX, e.clientY, screenPad));
 }
-window.isSideShelfFocusHit = function(e) {
+function isSideShelfFocusHit(e) {
   if (!e || !window.shelfManager || !window.shelfManager.getMode || window.shelfManager.getMode() !== 'side') return false;
   if (window.shelfPinnedOpen) return true;
   if (window.shelfAlwaysVisible()) return !!pointerCardHit(raycasterFromPointerEvent(e), e, 18);
@@ -2094,7 +2094,7 @@ window.isSideShelfFocusHit = function(e) {
   if (shelfVisibility > 0.34 && (isShelfClickZone(e) || isShelfPreviewUseZone(e))) return true;
   return !!(shelfPreviewIsVisible() && pointerCardHit(raycasterFromPointerEvent(e), e, 24));
 }
-window.updateShelfCardHoverSelection = function(e) {
+function updateShelfCardHoverSelection(e) {
   if (!window.shelfManager || !window.shelfManager.clearSelected || !window.shelfManager.setSelected) return;
   if (!e || document.body.classList.contains('splash-active') || isPointerOverUi(e)) {
     window.shelfManager.clearSelected();
@@ -2134,7 +2134,7 @@ window.updateShelfCardHoverSelection = function(e) {
   if (hit && hit.card) window.shelfManager.setSelected(hit.card.index);
   else window.shelfManager.clearSelected();
 }
-window.isShelfPlaylistPlayHit = function(hit) {
+function isShelfPlaylistPlayHit(hit) {
   if (!hit || !hit.card || !hit.uv || !hit.card.item || hit.card.item.type !== 'window.playlist') return false;
   return hit.uv.x >= 0.49 && hit.uv.x <= 0.72 && hit.uv.y >= 0.13 && hit.uv.y <= 0.42;
 }
@@ -2283,10 +2283,10 @@ window.renderer.domElement.addEventListener('wheel', function(e){
 }, { passive: false, capture: true });
 
 // 键盘 / 全局事件
-window.isFreeCameraControlCode = function(code) {
+function isFreeCameraControlCode(code) {
   return /^(KeyW|KeyA|KeyS|KeyD|KeyQ|KeyE|Space|ShiftLeft|ShiftRight|ControlLeft|ControlRight)$/.test(code);
 }
-window.consumeFreeCameraKeyEvent = function(e, isDown) {
+function consumeFreeCameraKeyEvent(e, isDown) {
   if (window.isTypingTarget(e.target)) return false;
   if (isDown && e.code === 'KeyR') {
     e.preventDefault();

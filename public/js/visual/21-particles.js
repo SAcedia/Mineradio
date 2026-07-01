@@ -1,6 +1,6 @@
 //  粒子点纹理 (干净圆点, 无 glow)
 // ============================================================
-window.makeDotTexture = function() {
+function makeDotTexture() {
   var cv = document.createElement('canvas'); cv.width = cv.height = 64;
   var ctx = cv.getContext('2d');
   var g = ctx.createRadialGradient(32, 32, 0, 32, 32, 31);
@@ -34,7 +34,7 @@ window.coverResolutionReloadTimer = null;
 window.currentCoverSource = null;
 window.coverPickerCanvas = null;
 
-window.buildCoverParticleGeometry = function(grid) {
+function buildCoverParticleGeometry(grid) {
   grid = window.coverParticleGridForResolution(grid / 118);
   var count = grid * grid;
   var nextGeo = new THREE.BufferGeometry();
@@ -66,7 +66,7 @@ window.buildCoverParticleGeometry = function(grid) {
 
 window.geo = buildCoverParticleGeometry(GRID_X);
 
-window.applyCoverParticleResolution = function(value, opts) {
+function applyCoverParticleResolution(value, opts) {
   opts = opts || {};
   window.fx.coverResolution = window.normalizeCoverResolution(value);
   var grid = window.coverParticleGridForResolution(window.fx.coverResolution);
@@ -83,7 +83,7 @@ window.applyCoverParticleResolution = function(value, opts) {
   if (opts.reload !== false) scheduleCoverResolutionReload();
 }
 
-window.scheduleCoverResolutionReload = function() {
+function scheduleCoverResolutionReload() {
   if (!currentCoverSource || !currentCoverSource.src) return;
   if (coverResolutionReloadTimer) clearTimeout(coverResolutionReloadTimer);
   coverResolutionReloadTimer = setTimeout(function(){
@@ -735,7 +735,7 @@ window.floatBaseArr = null;
 window.floatPhaseArr = null;
 window.floatColorArr = null;
 
-window.createFloatLayer = function() {
+function createFloatLayer() {
   window.fx.floatLayer = false;
   window.uniforms.uFloatAlpha.value = 0;
   if (floatGroup) destroyFloatLayer();
@@ -840,7 +840,7 @@ window.createFloatLayer = function() {
   floatGroup.frustumCulled = false;
   window.scene.add(floatGroup);
 }
-window.destroyFloatLayer = function() {
+function destroyFloatLayer() {
   if (!floatGroup) return;
   window.scene.remove(floatGroup);
   floatGroup.geometry.dispose(); floatGroup.material.dispose();
@@ -898,7 +898,7 @@ var skullTintScratch = {
   light: new THREE.Color()
 };
 
-window.effectiveSkullVisualTint = function() {
+function effectiveSkullVisualTint() {
   var pal = window.stageLyrics && (window.stageLyrics.coverPalette || window.stageLyrics.palette) || {};
   var custom = window.fx && window.fx.visualTintMode === 'custom';
   var color = custom
@@ -909,7 +909,7 @@ window.effectiveSkullVisualTint = function() {
   return { color: color, strength: strength, custom: custom };
 }
 
-window.syncSkullParticleColors = function() {
+function syncSkullParticleColors() {
   if (!skullParticleGroup || !skullParticleGroup.material || !skullParticleGroup.material.uniforms) return;
   var u = skullParticleGroup.material.uniforms;
   var tint = effectiveSkullVisualTint();
@@ -929,7 +929,7 @@ window.syncSkullParticleColors = function() {
   if (u.uLight) u.uLight.value.copy(skullTintScratch.light);
 }
 
-window.buildSkullParticleGeometryFromAsset = function(points) {
+function buildSkullParticleGeometryFromAsset(points) {
   var count = Math.floor((points && points.length || 0) / 5);
   var geo = new THREE.BufferGeometry();
   var positions = new Float32Array(count * 3);
@@ -948,7 +948,7 @@ window.buildSkullParticleGeometryFromAsset = function(points) {
   return geo;
 }
 
-window.loadSkullParticleAsset = function() {
+function loadSkullParticleAsset() {
   if (skullParticleAsset.data || skullParticleAsset.promise || skullParticleAsset.failed) return skullParticleAsset.promise || Promise.resolve(skullParticleAsset.data);
   if (typeof fetch !== 'function') {
     skullParticleAsset.failed = true;
@@ -974,12 +974,12 @@ window.loadSkullParticleAsset = function() {
   return skullParticleAsset.promise;
 }
 
-window.skullPushPoint = function(pos, seed, kind, x, y, z, k) {
+function skullPushPoint(pos, seed, kind, x, y, z, k) {
   pos.push(x, y, z);
   seed.push(Math.random() * 1000);
   kind.push(k == null ? 0 : k);
 }
-window.skullPushCurve = function(pos, seed, kind, count, fn, k, jitter) {
+function skullPushCurve(pos, seed, kind, count, fn, k, jitter) {
   jitter = jitter == null ? 0.012 : jitter;
   for (var i = 0; i < count; i++) {
     var t = count > 1 ? i / (count - 1) : 0;
@@ -987,7 +987,7 @@ window.skullPushCurve = function(pos, seed, kind, count, fn, k, jitter) {
     skullPushPoint(pos, seed, kind, p.x + (Math.random() - 0.5) * jitter, p.y + (Math.random() - 0.5) * jitter, p.z + (Math.random() - 0.5) * jitter, k);
   }
 }
-window.createSkullParticleLayer = function() {
+function createSkullParticleLayer() {
   if (skullParticleGroup) return skullParticleGroup;
   var asset = skullParticleAsset.data;
   if (!asset) return null;
@@ -1253,13 +1253,13 @@ window.createSkullParticleLayer = function() {
   window.scene.add(skullParticleGroup);
   return skullParticleGroup;
 }
-window.isSkullShelfCompositionActive = function() {
+function isSkullShelfCompositionActive() {
   if (!(window.fx && window.fx.preset === SKULL_PRESET_INDEX)) return false;
   if (!window.shelfManager || !window.shelfManager.getMode || window.shelfManager.getMode() !== 'side') return false;
   if (window.shelfPinnedOpen || shelfVisibility > 0.18) return true;
   return !!(window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent());
 }
-window.clearSkullPresetResidue = function() {
+function clearSkullPresetResidue() {
   skullParticleOpacity = 0;
   skullAmpPulse = 0;
   skullBeatFlash = 0;
@@ -1273,7 +1273,7 @@ window.clearSkullPresetResidue = function() {
     if (skullParticleGroup.material.uniforms.uSkullFlash) skullParticleGroup.material.uniforms.uSkullFlash.value = 0;
   }
 }
-window.resetSkullPresetView = function(immediate, opts) {
+function resetSkullPresetView(immediate, opts) {
   opts = opts || {};
   if (!(window.fx && window.fx.preset === SKULL_PRESET_INDEX)) return;
   skullWheelZoomTarget = 0;
@@ -1297,7 +1297,7 @@ window.resetSkullPresetView = function(immediate, opts) {
     window.camera.updateProjectionMatrix();
   }
 }
-window.skullBreathOffset = function(t, shelfComposition) {
+function skullBreathOffset(t, shelfComposition) {
   var strength = shelfComposition ? 0.70 : 1.0;
   return {
     x: strength * (Math.sin(t * 0.33 + 1.7) * 0.028 + Math.sin(t * 0.61 + 0.4) * 0.010),
@@ -1305,7 +1305,7 @@ window.skullBreathOffset = function(t, shelfComposition) {
     z: strength * (Math.sin(t * 0.24 + 2.6) * 0.026)
   };
 }
-window.setSkullCameraTargetVectors = function(pos, look, portrait, shelfComposition, zoom) {
+function setSkullCameraTargetVectors(pos, look, portrait, shelfComposition, zoom) {
   zoom = Number(zoom) || 0;
   if (shelfComposition) {
     pos.set(portrait ? -0.06 : 0.00, portrait ? -2.36 : -2.50, (portrait ? 4.88 : 4.96) + zoom * 0.78);
@@ -1315,7 +1315,7 @@ window.setSkullCameraTargetVectors = function(pos, look, portrait, shelfComposit
   pos.set(0.00, portrait ? -2.38 : -2.52, (portrait ? 4.92 : 4.98) + zoom);
   look.set(0.00, portrait ? -0.28 : -0.20, 0.02);
 }
-window.applySkullCameraPose = function(dt) {
+function applySkullCameraPose(dt) {
   if (window.freeCamera && (window.freeCamera.active || window.freeCamera.locked || window.freeCamera.resetTween)) return;
   var active = window.fx && window.fx.preset === SKULL_PRESET_INDEX;
   skullCameraBlend += ((active ? 1 : 0) - skullCameraBlend) * Math.min(1, dt * (active ? 4.8 : 7.2));
@@ -1335,7 +1335,7 @@ window.applySkullCameraPose = function(dt) {
   window.camera.lookAt(skullCameraMixedLook);
   window.camera.updateProjectionMatrix();
 }
-window.updateSkullParticleLayer = function(dt) {
+function updateSkullParticleLayer(dt) {
   var active = window.fx && window.fx.preset === SKULL_PRESET_INDEX;
   if (active && !skullParticleAsset.data && !skullParticleAsset.failed) {
     loadSkullParticleAsset();
@@ -1397,7 +1397,7 @@ window.BACK_COVER_COUNT = 3000;
 window.backCoverGroup = null;
 window.backCoverColorArr = null;
 
-window.createBackCoverLayer = function() {
+function createBackCoverLayer() {
   if (backCoverGroup) return;
   var bg = new THREE.BufferGeometry();
   var bp = new Float32Array(BACK_COVER_COUNT * 3);
@@ -1473,14 +1473,14 @@ window.createBackCoverLayer = function() {
   window.scene.add(backCoverGroup);
 }
 
-window.destroyBackCoverLayer = function() {
+function destroyBackCoverLayer() {
   if (!backCoverGroup) return;
   window.scene.remove(backCoverGroup);
   backCoverGroup.geometry.dispose(); backCoverGroup.material.dispose();
   backCoverGroup = null; backCoverColorArr = null;
 }
 
-window.refreshBackCoverColorsFromCanvas = function(coverCanvas) {
+function refreshBackCoverColorsFromCanvas(coverCanvas) {
   if (!backCoverGroup || !coverCanvas || !backCoverColorArr) return;
   var ctx = coverCanvas.getContext('2d');
   var img = ctx.getImageData(0, 0, coverCanvas.width, coverCanvas.height).data;
@@ -1498,10 +1498,10 @@ window.refreshBackCoverColorsFromCanvas = function(coverCanvas) {
   }
   attr.aColor.needsUpdate = true;
 }
-window.updateFloatLayer = function(dt) {
+function updateFloatLayer(dt) {
   // 漂移已在 shader 中完成, JS 不需要每帧改 buffer
 }
-window.refreshFloatColorsFromCover = function(coverCanvas) {
+function refreshFloatColorsFromCover(coverCanvas) {
   if (!floatGroup || !coverCanvas) return;
   var ctx = coverCanvas.getContext('2d');
   var img = ctx.getImageData(0, 0, coverCanvas.width, coverCanvas.height).data;
@@ -1516,7 +1516,7 @@ window.refreshFloatColorsFromCover = function(coverCanvas) {
   }
   floatGroup.geometry.attributes.aColor.needsUpdate = true;
 }
-window.resetFloatColorsToIdle = function() {
+function resetFloatColorsToIdle() {
   if (!floatGroup || !floatColorArr) return;
   for (var i = 0; i < FLOAT_COUNT; i++) {
     var white = 0.88 + (i % 17) / 17 * 0.12;
@@ -1545,13 +1545,13 @@ for (var ry = 0; ry < 3; ry++) for (var rx = 0; rx < 3; rx++) {
   });
 }
 
-window.triggerRipple = function(x, y, strength) {
+function triggerRipple(x, y, strength) {
   var r = ripples[rippleIdx];
   r.x = x; r.y = y; r.age = 0; r.str = strength;
   rippleIdx = (rippleIdx + 1) % RIPPLE_MAX;
 }
 
-window.updateRipples = function(dt) {
+function updateRipples(dt) {
   var isBassHit = window.bass > BASS_THRESHOLD && !lastBassRising;
   lastBassRising = window.bass > BASS_THRESHOLD * 0.75;
   var now = window.uniforms.uTime.value;
@@ -1594,7 +1594,7 @@ window.updateRipples = function(dt) {
 //  封面 + 边缘 + 启发式深度 处理 (CPU 端)
 //   生成 256×256 RGBA 纹理: R=depth G=edge B=fg-mask A=lum
 // ============================================================
-window.coverDepthCacheId = function(raw) {
+function coverDepthCacheId(raw) {
   var str = String(raw || '');
   if (!str) return '';
   var h = 2166136261;
@@ -1604,7 +1604,7 @@ window.coverDepthCacheId = function(raw) {
   }
   return str.length + ':' + (h >>> 0).toString(36);
 }
-window.getCoverDepthCache = function(raw) {
+function getCoverDepthCache(raw) {
   var id = coverDepthCacheId(raw);
   if (!id || !coverDepthCache[id]) return null;
   coverDepthCache[id].at = Date.now();
@@ -1615,7 +1615,7 @@ window.getCoverDepthCache = function(raw) {
   } else coverDepthCacheKeys.push(id);
   return coverDepthCache[id];
 }
-window.setCoverDepthCache = function(raw, canvas, aiEnhanced) {
+function setCoverDepthCache(raw, canvas, aiEnhanced) {
   var id = coverDepthCacheId(raw);
   if (!id || !canvas) return;
   var idx = coverDepthCacheKeys.indexOf(id);
@@ -1628,7 +1628,7 @@ window.setCoverDepthCache = function(raw, canvas, aiEnhanced) {
   }
 }
 
-window.buildEdgeAndDepth = function(srcCanvas) {
+function buildEdgeAndDepth(srcCanvas) {
   var W = 256, H = 256, N = W * H;
   var normalized = document.createElement('canvas');
   normalized.width = W;
@@ -1710,7 +1710,7 @@ window.buildEdgeAndDepth = function(srcCanvas) {
 }
 
 // AI 深度估计 (Xenova/depth-anything-small) - 异步加载, 失败回退
-window.ensureAIDepthPipeline = async function() {
+async function ensureAIDepthPipeline() {
   if (aiDepthReady && aiDepthPipeline) return aiDepthPipeline;
   if (aiDepthBusy) return null;
   aiDepthBusy = true;
@@ -1730,7 +1730,7 @@ window.ensureAIDepthPipeline = async function() {
   }
 }
 
-window.makeAIDepthInputCanvas = function(srcCanvas) {
+function makeAIDepthInputCanvas(srcCanvas) {
   if (!srcCanvas) return srcCanvas;
   var size = 160;
   var cv = document.createElement('canvas');
@@ -1744,7 +1744,7 @@ window.makeAIDepthInputCanvas = function(srcCanvas) {
   }
 }
 
-window.estimateAIDepth = async function(srcCanvas, token) {
+async function estimateAIDepth(srcCanvas, token) {
   if (!window.fx.aiDepth) return null;
   if (performance.now() < aiDepthFailUntil) return null;
   showAIDepthChip('后台增强封面深度…');
@@ -1773,7 +1773,7 @@ window.estimateAIDepth = async function(srcCanvas, token) {
   }
 }
 
-window.mergeAIDepthIntoEdgeTexture = function(heuristicCanvas, aiCanvas) {
+function mergeAIDepthIntoEdgeTexture(heuristicCanvas, aiCanvas) {
   // 把 AI 深度 (灰度) 写入 R 通道, 保留启发式的 G/B/A
   var W = heuristicCanvas.width || 256, H = heuristicCanvas.height || 256;
   var hctx = heuristicCanvas.getContext('2d');
@@ -1812,7 +1812,7 @@ window.mergeAIDepthIntoEdgeTexture = function(heuristicCanvas, aiCanvas) {
   return heuristicCanvas;
 }
 
-window.queueAIDepthForCover = function(srcCanvas, edgeCanvas, token, opts, cacheSeed, force) {
+function queueAIDepthForCover(srcCanvas, edgeCanvas, token, opts, cacheSeed, force) {
   opts = opts || {};
   if (!window.fx.aiDepth || !srcCanvas || !edgeCanvas) return;
   if (!force && isHiddenForBackgroundOptimization()) return;
@@ -1835,7 +1835,7 @@ window.queueAIDepthForCover = function(srcCanvas, edgeCanvas, token, opts, cache
   }, force ? 240 : 1800, force ? 1200 : 3000);
 }
 
-window.queueAIDepthForCurrentCover = function(force) {
+function queueAIDepthForCurrentCover(force) {
   if (!coverTex || !coverTex.image || !coverEdgeTex || !coverEdgeTex.image) return;
   if (!window.uniforms.uHasCover.value || !window.uniforms.uHasDepth.value) return;
   queueAIDepthForCover(coverTex.image, coverEdgeTex.image, coverProcessToken, {}, '', !!force);
@@ -1843,7 +1843,7 @@ window.queueAIDepthForCurrentCover = function(force) {
 
 // 颜色渐变 tween (切歌时旧封面→新封面)
 window.colorMixTween = null;
-window.startColorMixTween = function(durationMs) {
+function startColorMixTween(durationMs) {
   if (colorMixTween) cancelAnimationFrame(colorMixTween.raf);
   durationMs = Math.max(1, durationMs || 1);
   var start = performance.now();
@@ -1862,7 +1862,7 @@ window.startColorMixTween = function(durationMs) {
 window.alphaTween = null;
 window.floatAlphaTween = null;
 window.IDLE_PARTICLE_ALPHA = 0;
-window.tweenParticleAlpha = function(from, to, durationMs) {
+function tweenParticleAlpha(from, to, durationMs) {
   if (alphaTween) cancelAnimationFrame(alphaTween.raf);
   var start = performance.now();
   function step(now) {
@@ -1874,7 +1874,7 @@ window.tweenParticleAlpha = function(from, to, durationMs) {
   }
   alphaTween = { raf: requestAnimationFrame(step) };
 }
-window.tweenFloatAlpha = function(from, to, durationMs) {
+function tweenFloatAlpha(from, to, durationMs) {
   if (floatAlphaTween) cancelAnimationFrame(floatAlphaTween.raf);
   var start = performance.now();
   function step(now) {
@@ -1886,7 +1886,7 @@ window.tweenFloatAlpha = function(from, to, durationMs) {
   }
   floatAlphaTween = { raf: requestAnimationFrame(step) };
 }
-window.revealIdleParticles = function(target, durationMs) {
+function revealIdleParticles(target, durationMs) {
   if (!window.uniforms || !window.uniforms.uFloatAlpha) return;
   if (floatAlphaTween) { cancelAnimationFrame(floatAlphaTween.raf); floatAlphaTween = null; }
   window.uniforms.uFloatAlpha.value = 0;
@@ -1903,11 +1903,11 @@ window.loadingTween = null;
 window.loadingShownAt = 0;
 window.loadingHideTimer = null;
 window.coverDepthTween = null;
-window.visualEase = function(t) {
+function visualEase(t) {
   t = Math.max(0, Math.min(1, t));
   return t * t * (3 - 2 * t);
 }
-window.tweenLoading = function(to, durationMs, onComplete) {
+function tweenLoading(to, durationMs, onComplete) {
   if (loadingTween) cancelAnimationFrame(loadingTween.raf);
   durationMs = Math.max(1, durationMs || 1);
   if (isHiddenForBackgroundOptimization() || isDeepBackgroundMode()) {
@@ -1931,7 +1931,7 @@ window.tweenLoading = function(to, durationMs, onComplete) {
   }
   loadingTween = { raf: requestAnimationFrame(step) };
 }
-window.showLoading = function() {
+function showLoading() {
   loadingShownAt = performance.now();
   if (loadingHideTimer) {
     clearTimeout(loadingHideTimer);
@@ -1940,7 +1940,7 @@ window.showLoading = function() {
   var current = window.uniforms.uLoading.value || 0;
   tweenLoading(Math.max(current, 0.56), current > 0.04 ? 86 : 118);
 }
-window.hideLoading = function() {
+function hideLoading() {
   if (loadingHideTimer) clearTimeout(loadingHideTimer);
   if (isHiddenForBackgroundOptimization() || isDeepBackgroundMode()) {
     forceLoadingSettled('background-hide');
@@ -1962,7 +1962,7 @@ window.hideLoading = function() {
     tweenLoading(0, current > 0.38 ? 126 : 96);
   }, wait);
 }
-window.forceLoadingSettled = function(reason) {
+function forceLoadingSettled(reason) {
   if (loadingHideTimer) {
     clearTimeout(loadingHideTimer);
     loadingHideTimer = null;
@@ -1975,7 +1975,7 @@ window.forceLoadingSettled = function(reason) {
   loadingShownAt = 0;
   if (reason && window.__mineradioDebugLoading) console.log('[LoadingSettled]', reason);
 }
-window.recoverVisualsAfterBackground = function(reason) {
+function recoverVisualsAfterBackground(reason) {
   applyRendererPowerMode();
   if (typeof scheduleMainRendererViewportRefresh === 'function') scheduleMainRendererViewportRefresh(reason || 'restore');
   if (window.audio && window.audio.src && !window.audio.paused && ((window.uniforms.uLoading.value || 0) > 0.015 || loadingTween || loadingHideTimer)) {
@@ -1984,7 +1984,7 @@ window.recoverVisualsAfterBackground = function(reason) {
   if (typeof markRenderInteraction === 'function') window.markRenderInteraction('restore', 1100);
 }
 
-window.setCoverDepthState = function(depthTo, aiTo, durationMs) {
+function setCoverDepthState(depthTo, aiTo, durationMs) {
   depthTo = Math.max(0, Math.min(1, Number(depthTo) || 0));
   aiTo = Math.max(0, Math.min(1, Number(aiTo) || 0));
   if (coverDepthTween) {
@@ -2015,12 +2015,12 @@ window.setCoverDepthState = function(depthTo, aiTo, durationMs) {
   coverDepthTween = { raf: requestAnimationFrame(step) };
 }
 
-window.coverApplyStillCurrent = function(opts) {
+function coverApplyStillCurrent(opts) {
   opts = opts || {};
   return !opts.trackToken || opts.trackToken === window.trackSwitchToken;
 }
 
-window.setControlCoverSrc = function(src) {
+function setControlCoverSrc(src) {
   var cover = document.getElementById('control-cover');
   if (!cover) return;
   if (!src) {
@@ -2032,7 +2032,7 @@ window.setControlCoverSrc = function(src) {
   cover.classList.remove('cover-empty');
 }
 
-window.updateControlTrackInfo = function(song) {
+function updateControlTrackInfo(song) {
   song = song || {};
   var title = document.getElementById('control-title');
   var artist = document.getElementById('control-artist');
@@ -2040,7 +2040,7 @@ window.updateControlTrackInfo = function(song) {
   if (artist) artist.textContent = song.artist || '';
 }
 
-window.applyCoverCanvas = function(cv, thumbSrc, opts) {
+function applyCoverCanvas(cv, thumbSrc, opts) {
   opts = opts || {};
   if (!cv || !coverApplyStillCurrent(opts)) return;
   var token = ++coverProcessToken;

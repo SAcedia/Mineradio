@@ -1,7 +1,7 @@
 // ============================================================
 //  播放队列
 // ============================================================
-window.queueSong = function(song, opts) {
+function queueSong(song, opts) {
   opts = opts || {};
   if (!song) return -1;
   var cloned = window.cloneSong(song);
@@ -30,10 +30,10 @@ window.queueSong = function(song, opts) {
   window.safeShelfRebuild('queue-song');
   return insertAt;
 }
-window.queueSongNext = function(song) {
+function queueSongNext(song) {
   return window.queueSong(song, { position: 'next' });
 }
-window.safePlaybackStep = function(label, fn) {
+function safePlaybackStep(label, fn) {
   try {
     return fn();
   } catch (err) {
@@ -41,7 +41,7 @@ window.safePlaybackStep = function(label, fn) {
     return null;
   }
 }
-window.skipFailedQueueItem = function(idx, token, message) {
+function skipFailedQueueItem(idx, token, message) {
   window.hideLoading();
   if (token !== window.trackSwitchToken) return;
   markQueueItemPlaybackFailed(idx);
@@ -58,7 +58,7 @@ window.skipFailedQueueItem = function(idx, token, message) {
   currentIdx = nextIdx;
   window.playQueueAt(nextIdx, { fallbackDepth: 0 });
 }
-window.tryAutoPlaybackFallback = async function(song, data, idx, token, opts) {
+async function tryAutoPlaybackFallback(song, data, idx, token, opts) {
   opts = opts || {};
   if (opts.fallbackDepth > 0) {
     skipFailedQueueItem(idx, token, '自动换源后的版本仍不可播，正在播放下一首。');
@@ -91,7 +91,7 @@ window.tryAutoPlaybackFallback = async function(song, data, idx, token, opts) {
     return true;
   }
 }
-window.handlePlaybackUnavailable = function(song, data) {
+function handlePlaybackUnavailable(song, data) {
   window.hideLoading();
   window.forcePlaybackControlsInteractive();
   var provider = playbackLoginProvider(song);
@@ -106,12 +106,12 @@ window.handlePlaybackUnavailable = function(song, data) {
     }, 520);
   }
 }
-window.closeSourceFallbackNotice = function() {
+function closeSourceFallbackNotice() {
   var notice = document.getElementById('source-fallback-notice');
   if (sourceFallbackNoticeTimer) { clearTimeout(sourceFallbackNoticeTimer); sourceFallbackNoticeTimer = null; }
   if (notice) notice.classList.remove('show');
 }
-window.showSourceFallbackNotice = function(title, body) {
+function showSourceFallbackNotice(title, body) {
   var notice = document.getElementById('source-fallback-notice');
   var titleEl = document.getElementById('source-fallback-title');
   var bodyEl = document.getElementById('source-fallback-body');
@@ -122,7 +122,7 @@ window.showSourceFallbackNotice = function(title, body) {
   if (sourceFallbackNoticeTimer) clearTimeout(sourceFallbackNoticeTimer);
   sourceFallbackNoticeTimer = setTimeout(window.closeSourceFallbackNotice, 5000);
 }
-window.playQueueAt = async function(idx, opts) {
+async function playQueueAt(idx, opts) {
   opts = opts || {};
   if (idx < 0 || idx >= window.playQueue.length) return;
   window.markRenderInteraction('track-switch', 1500);
@@ -398,7 +398,7 @@ window.playQueueAt = async function(idx, opts) {
     window.showToast(playbackFailureToastText(setupErr));
   }
 }
-window.togglePlay = async function() {
+async function togglePlay() {
   if (window.playToggleBusy) return;
   playToggleBusy = true;
   try {
@@ -441,7 +441,7 @@ window.togglePlay = async function() {
     playToggleBusy = false;
   }
 }
-window.nextTrack = function() {
+function nextTrack() {
   if (!window.playQueue.length) return;
   playToggleBusy = false;
   window.forcePlaybackControlsInteractive();
@@ -449,14 +449,14 @@ window.nextTrack = function() {
   else currentIdx = (window.currentIdx + 1) % window.playQueue.length;
   Promise.resolve(window.playQueueAt(window.currentIdx)).finally(window.forcePlaybackControlsInteractive);
 }
-window.prevTrack = function() {
+function prevTrack() {
   if (!window.playQueue.length) return;
   playToggleBusy = false;
   window.forcePlaybackControlsInteractive();
   currentIdx = (window.currentIdx - 1 + window.playQueue.length) % window.playQueue.length;
   Promise.resolve(window.playQueueAt(window.currentIdx)).finally(window.forcePlaybackControlsInteractive);
 }
-window.shuffleQueue = function() {
+function shuffleQueue() {
   for (var i = window.playQueue.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
     var tmp = window.playQueue[i]; window.playQueue[i] = window.playQueue[j]; window.playQueue[j] = tmp;
@@ -465,7 +465,7 @@ window.shuffleQueue = function() {
   window.showToast('队列已随机');
   window.safeShelfRebuild('shuffle-queue');
 }
-window.clearQueue = function() {
+function clearQueue() {
   playQueue = []; currentIdx = -1;
   window.safeRenderQueuePanel('clear-queue');
   window.safeShelfRebuild('clear-queue');
@@ -473,7 +473,7 @@ window.clearQueue = function() {
   window.updateCustomLyricControls();
   updateEmptyHomeVisibility({ forceLoad: false });
 }
-window.forcePlaybackControlsInteractive = function() {
+function forcePlaybackControlsInteractive() {
   if (!hasActivePlaybackControls()) return;
   try {
     document.body.classList.remove('home-controls-locked');
@@ -498,11 +498,11 @@ window.forcePlaybackControlsInteractive = function() {
   }
 }
 
-window.normalizeControlGlassChromaticOffset = function(value) {
+function normalizeControlGlassChromaticOffset(value) {
   return Math.max(0, Math.min(40, Number(value) || 0));
 };
 
-window.applyControlGlassChromaticOffset = function() {
+function applyControlGlassChromaticOffset() {
   if (!window.fx) return;
   window.fx.controlGlassChromaticOffset = window.normalizeControlGlassChromaticOffset(window.fx.controlGlassChromaticOffset);
   var filter = document.getElementById('mineradio-control-glass-filter');
@@ -514,7 +514,7 @@ window.applyControlGlassChromaticOffset = function() {
   });
 };
 
-window.pauseCurrentAudioForTrackSwitch = function() {
+function pauseCurrentAudioForTrackSwitch() {
   window.playToggleBusy = false;
   if (!window.audio) return;
   try {
@@ -528,7 +528,7 @@ window.pauseCurrentAudioForTrackSwitch = function() {
   if (typeof window.syncPlaybackStateFromAudioEvent === 'function') window.syncPlaybackStateFromAudioEvent('track-switch');
 };
 
-window.isPlaybackRecursionError = function(err) {
+function isPlaybackRecursionError(err) {
   var msg = String((err && err.message) || err || '');
   return err instanceof RangeError || /maximum call stack size exceeded/i.test(msg);
 };

@@ -19,18 +19,18 @@ window.splashTimer = null;
 window.reduceSplashMotion = false;
 window.splashReadyToEnter = false;
 
-window.splashClamp01 = function(v) {
+function splashClamp01(v) {
  return Math.max(0, Math.min(1, v)); }
-window.splashSmoothstep = function(edge0, edge1, x) {
+function splashSmoothstep(edge0, edge1, x) {
   var t = splashClamp01((x - edge0) / Math.max(0.0001, edge1 - edge0));
   return t * t * (3 - 2 * t);
 }
-window.splashEaseOutCubic = function(t) {
+function splashEaseOutCubic(t) {
   t = splashClamp01(t);
   return 1 - Math.pow(1 - t, 3);
 }
 
-window.initMineradioSplashWebgl = function(canvas) {
+function initMineradioSplashWebgl(canvas) {
   var gl = null;
   try {
     gl = canvas.getContext('webgl', {
@@ -202,7 +202,7 @@ window.initMineradioSplashWebgl = function(canvas) {
   return true;
 };
 
-window.drawMineradioSplashWebgl = function(elapsed) {
+function drawMineradioSplashWebgl(elapsed) {
   var gl = splashGl;
   if (!gl || !splashGlProgram || !splashGlUniforms) return;
   gl.viewport(0, 0, window.splashCanvas.width, window.splashCanvas.height);
@@ -215,7 +215,7 @@ window.drawMineradioSplashWebgl = function(elapsed) {
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 };
 
-window.drawMineradioSplash = function() {
+function drawMineradioSplash() {
   if (!window.splashAnimating || (!window.splashCtx && !splashGl)) return;
   requestAnimationFrame(drawMineradioSplash);
   var elapsed = (performance.now() - splashStartedAt) / 1000;
@@ -376,7 +376,7 @@ window.drawMineradioSplash = function() {
   window.splashCtx.restore();
 }
 
-window.playMineradioIntroSound = function() {
+function playMineradioIntroSound() {
   if (splashSoundPlayed) return;
   try {
     var AudioContextCtor = window.AudioContext || window.webkitAudioContext;
@@ -454,7 +454,7 @@ window.playMineradioIntroSound = function() {
     softTone('sine', 1760, 1040, 3.64, 0.46, 0.010);
   } catch (e) {}
 }
-window.armSplashSoundFallback = function() {
+function armSplashSoundFallback() {
   if (splashSoundFallbackArmed) return;
   splashSoundFallbackArmed = true;
   function unlock() {
@@ -466,7 +466,7 @@ window.armSplashSoundFallback = function() {
   document.addEventListener('keydown', unlock, true);
 }
 
-window.dismissSplash = function() {
+function dismissSplash() {
   var s = document.getElementById('splash');
   if (!s || s.classList.contains('hide') || s.classList.contains('exiting')) return;
   markAppPerf('splash-dismiss');
@@ -513,7 +513,7 @@ window.dismissSplash = function() {
   }, 1180);
 }
 
-window.markSplashReadyToEnter = function() {
+function markSplashReadyToEnter() {
   var s = document.getElementById('splash');
   if (!s || s.classList.contains('hide') || s.classList.contains('exiting')) return;
   markAppPerf('splash-ready');
@@ -630,10 +630,10 @@ var desktopOverlayPushState = {
   window.addEventListener('resize', resize);
   drawMineradioSplash();
 })();
-window.getDesktopWindowApi = function() {
+function getDesktopWindowApi() {
   return window.desktopWindow && window.desktopWindow.isDesktop ? window.desktopWindow : null;
 }
-window.currentDesktopSongMeta = function() {
+function currentDesktopSongMeta() {
   var song = window.playQueue && window.currentIdx >= 0 ? window.playQueue[window.currentIdx] : null;
   song = song || window.currentLyricSong && window.currentLyricSong() || {};
   return {
@@ -642,10 +642,10 @@ window.currentDesktopSongMeta = function() {
     cover: (typeof songCoverSrc === 'function' && song) ? (window.songCoverSrc(song, 360) || song.cover || '') : (song.cover || '')
   };
 }
-window.normalizeDesktopLyricText = function(text) {
+function normalizeDesktopLyricText(text) {
   return String(text || '').replace(/\s+/g, ' ').trim();
 }
-window.currentDesktopLyricSnapshot = function() {
+function currentDesktopLyricSnapshot() {
   var t = window.audio && isFinite(window.audio.currentTime) ? Number(window.audio.currentTime) : 0;
   var lines = Array.isArray(window.lyricsLines) ? lyricsLines : [];
   if (window.playing && window.audio && lines.length) {
@@ -685,14 +685,14 @@ window.currentDesktopLyricSnapshot = function() {
   }
   return { text: normalizeDesktopLyricText(currentDesktopSongMeta().title || 'Mineradio'), progress: 0, progressSpan: 4.8 };
 }
-window.desktopOverlayColorValue = function(value, fallback) {
+function desktopOverlayColorValue(value, fallback) {
   var raw = String(value || '').trim();
   fallback = String(fallback || '#d6f8ff').trim();
   if (/^#[0-9a-f]{3}$/i.test(raw) || /^#[0-9a-f]{6}$/i.test(raw)) return window.normalizeHexColor(raw, fallback);
   if (/^rgba?\(/i.test(raw) || /^hsla?\(/i.test(raw)) return raw;
   return window.normalizeHexColor(raw, fallback);
 }
-window.desktopOverlayColors = function() {
+function desktopOverlayColors() {
   var pal = window.stageLyrics && window.stageLyrics.palette || {};
   return {
     primary: desktopOverlayColorValue(pal.primary || window.fx.lyricColor || '#d6f8ff', '#d6f8ff'),
@@ -701,7 +701,7 @@ window.desktopOverlayColors = function() {
     glow: desktopOverlayColorValue(pal.glowColor || pal.secondary || pal.primary || window.fx.lyricGlowColor || '#9cffdf', '#9cffdf')
   };
 }
-window.desktopLyricsMotionPayload = function() {
+function desktopLyricsMotionPayload() {
   return {
     lyricGlow: !!window.fx.lyricGlow,
     lyricGlowBeat: !!window.fx.lyricGlowBeat,
@@ -712,7 +712,7 @@ window.desktopLyricsMotionPayload = function() {
     bass: isFinite(window.bass) ? window.clampRange(window.bass, 0, 1.2) : 0
   };
 }
-window.desktopLyricsPlaybackPayload = function() {
+function desktopLyricsPlaybackPayload() {
   var time = window.audio && isFinite(window.audio.currentTime) ? Number(window.audio.currentTime) : 0;
   var duration = window.audio && isFinite(window.audio.duration) ? Number(window.audio.duration) : 0;
   var rate = window.audio && isFinite(window.audio.playbackRate) && window.audio.playbackRate > 0 ? Number(window.audio.playbackRate) : 1;
@@ -722,14 +722,14 @@ window.desktopLyricsPlaybackPayload = function() {
     rate: window.clampRange(rate, 0.25, 4)
   };
 }
-window.desktopLyricsActiveBeatMap = function() {
+function desktopLyricsActiveBeatMap() {
   var useDj = !!(window.djMode && window.djMode.active && currentDjBeatMap);
   return {
     source: useDj ? 'dj' : 'mr',
     map: useDj ? currentDjBeatMap : window.currentBeatMap
   };
 }
-window.desktopLyricsBeatMapPayload = function(force) {
+function desktopLyricsBeatMapPayload(force) {
   var selected = desktopLyricsActiveBeatMap();
   var map = selected && selected.map;
   var source = selected && selected.source || 'mr';
@@ -746,17 +746,17 @@ window.desktopLyricsBeatMapPayload = function(force) {
   if (shouldSendMap) payload.beatMap = map ? packLocalBeatMap(map) : null;
   return payload;
 }
-window.notifyDesktopLyricsBeatMapReady = function() {
+function notifyDesktopLyricsBeatMapReady() {
   try {
     if (window.fx && window.fx.desktopLyrics) pushDesktopLyricsState(true);
   } catch (e) {}
 }
-window.desktopLyricsPushInterval = function() {
+function desktopLyricsPushInterval() {
   var fps = window.normalizeDesktopLyricsFps(window.fx && window.fx.desktopLyricsFps);
   if (!fps) return 8;
   return Math.max(8, Math.min(42, 1000 / fps));
 }
-window.desktopLyricsPayload = function(forceBeatMap) {
+function desktopLyricsPayload(forceBeatMap) {
   var meta = currentDesktopSongMeta();
   var lyric = currentDesktopLyricSnapshot();
   var beatPayload = desktopLyricsBeatMapPayload(!!forceBeatMap);
@@ -790,7 +790,7 @@ window.desktopLyricsPayload = function(forceBeatMap) {
   if (Object.prototype.hasOwnProperty.call(beatPayload, 'beatMap')) payload.beatMap = beatPayload.beatMap;
   return payload;
 }
-window.wallpaperPayload = function() {
+function wallpaperPayload() {
   var meta = currentDesktopSongMeta();
   return {
     enabled: !!window.fx.wallpaperMode && !window.isDevelopmentLockedFx('wallpaperMode'),
@@ -803,7 +803,7 @@ window.wallpaperPayload = function() {
     colors: desktopOverlayColors()
   };
 }
-window.pushDesktopLyricsState = function(force) {
+function pushDesktopLyricsState(force) {
   var api = getDesktopWindowApi();
   if (!api || typeof api.updateDesktopLyrics !== 'function') return;
   var now = performance.now();
@@ -817,7 +817,7 @@ window.pushDesktopLyricsState = function(force) {
   desktopOverlayPushState.lastLyricsKey = key;
   api.updateDesktopLyrics(payload).catch(function(e){ console.warn('desktop lyrics update failed:', e); });
 }
-window.applyDesktopLyricsState = function(force) {
+function applyDesktopLyricsState(force) {
   var api = getDesktopWindowApi();
   if (!api) return;
   window.normalizeDevelopmentLockedFxState();
@@ -827,7 +827,7 @@ window.applyDesktopLyricsState = function(force) {
   }
   pushDesktopLyricsState(!!force);
 }
-window.pushWallpaperState = function(force) {
+function pushWallpaperState(force) {
   var api = getDesktopWindowApi();
   if (!api || typeof api.updateWallpaperMode !== 'function') return;
   var now = performance.now();
@@ -839,7 +839,7 @@ window.pushWallpaperState = function(force) {
   desktopOverlayPushState.lastWallpaperKey = key;
   api.updateWallpaperMode(payload).catch(function(e){ console.warn('wallpaper update failed:', e); });
 }
-window.applyWallpaperModeState = function(force) {
+function applyWallpaperModeState(force) {
   var api = getDesktopWindowApi();
   if (!api) return;
   window.normalizeDevelopmentLockedFxState();
@@ -849,7 +849,7 @@ window.applyWallpaperModeState = function(force) {
   }
   pushWallpaperState(!!force);
 }
-window.syncDesktopOverlayState = function() {
+function syncDesktopOverlayState() {
   if (window.fx.desktopLyrics) pushDesktopLyricsState(false);
   if (window.fx.wallpaperMode) pushWallpaperState(false);
 }
@@ -862,7 +862,7 @@ window.desktopFullscreenActive = false;
 window.documentFullscreenActive = false;
 window.desktopWindowState = {};
 
-window.toggleFullscreen = function() {
+function toggleFullscreen() {
   var api = window.desktopWindow;
   if (api && api.isDesktop && typeof api.toggleFullscreen === 'function') {
     if (document.fullscreenElement && document.exitFullscreen) {

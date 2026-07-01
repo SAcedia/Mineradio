@@ -1,10 +1,10 @@
 // ============================================================
 //  搜索
 // ============================================================
-window.searchResultKey = function(q, mode) {
+function searchResultKey(q, mode) {
   return (mode || window.searchMode || 'song') + '|' + String(q || '').trim();
 }
-window.clearSearchResults = function() {
+function clearSearchResults() {
   window.searchRequestSeq++;
   searchLastResultQuery = '';
   playlist = [];
@@ -14,7 +14,7 @@ window.clearSearchResults = function() {
   $results.innerHTML = '';
   $results.classList.remove('show');
 }
-window.renderSearchHistory = function() {
+function renderSearchHistory() {
   if (window.searchMode !== 'song' && window.searchMode !== 'netease' && window.searchMode !== 'qq' && window.searchMode !== 'youtube') return false;
   var items = readSearchHistory();
   if (!items.length) {
@@ -33,7 +33,7 @@ window.renderSearchHistory = function() {
   requestAnimationFrame(updateSearchPillGlassDisplacementMap);
   return true;
 }
-window.updateSearchModeTabs = function() {
+function updateSearchModeTabs() {
   var songBtn = document.getElementById('search-mode-song');
   var neteaseBtn = document.getElementById('search-mode-netease');
   var qqBtn = document.getElementById('search-mode-qq');
@@ -72,7 +72,7 @@ window.updateSearchModeTabs = function() {
   }
   requestAnimationFrame(updateSearchPillGlassDisplacementMap);
 }
-window.setSearchMode = function(mode) {
+function setSearchMode(mode) {
   mode = (mode === 'podcast' || mode === 'netease' || mode === 'qq' || mode === 'youtube') ? mode : 'song';
   if (searchMode === mode) return;
   searchMode = mode;
@@ -90,12 +90,12 @@ window.setSearchMode = function(mode) {
     renderSearchHistory();
   }
 }
-window.songSourceTagHtml = function(song) {
+function songSourceTagHtml(song) {
   var key = window.songProviderKey(song);
   var label = ({ netease: 'NE', qq: 'QQ', youtube: 'YT' })[key] || key.toUpperCase();
   return '<span class="tag-window.source ' + key + '">' + label + '</span>';
 }
-window.mergeSongSearchResults = function(neteaseSongs, qqSongs, limit, q, youtubeSongs) {
+function mergeSongSearchResults(neteaseSongs, qqSongs, limit, q, youtubeSongs) {
   var out = [];
   var seen = {};
   function push(song, sourceIndex) {
@@ -112,7 +112,7 @@ window.mergeSongSearchResults = function(neteaseSongs, qqSongs, limit, q, youtub
   out.sort(function(a, b){ return (b._searchScore || 0) - (a._searchScore || 0); });
   return out.slice(0, limit);
 }
-window.fetchMusicSearchResults = async function(q, mode) {
+async function fetchMusicSearchResults(q, mode) {
   if (mode === 'qq') {
     var qqOnly = await window.qqSearch(q, 12);
     return mergeSongSearchResults([], qqOnly.songs || [], 18, q);
@@ -143,7 +143,7 @@ window.fetchMusicSearchResults = async function(q, mode) {
   }
   return mergeSongSearchResults(neteaseSongs, qqSongs, 18, q, youtubeSongs);
 }
-window.doSearch = async function(q, opts) {
+async function doSearch(q, opts) {
   opts = opts || {};
   q = String(q || '').trim();
   if (!q) {

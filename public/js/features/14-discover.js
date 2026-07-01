@@ -1,7 +1,7 @@
 window.homeWallpaperPrewarmStarted = false;
 //  Discover / Home page helpers (extracted from js/core/discover.js)
 // ============================================================
-window.setHomeArt = function(id, url, size) {
+function setHomeArt(id, url, size) {
   var el = document.getElementById(id);
   if (!el) return;
   var src = url ? window.coverUrlWithSize(url, size || 260) : '';
@@ -9,30 +9,30 @@ window.setHomeArt = function(id, url, size) {
   el.classList.toggle('has-cover', !!src);
   el.classList.toggle('home-skeleton', !src && homeDiscoverState.loading);
 }
-window.compactHomeCount = function(n) {
+function compactHomeCount(n) {
   n = Number(n) || 0;
   if (n >= 100000000) return (n / 100000000).toFixed(1).replace(/\.0$/, '') + '亿';
   if (n >= 10000) return Math.round(n / 10000) + '万';
   return n ? String(n) : '';
 }
-window.mostPlayedSong = function() {
+function mostPlayedSong() {
   var list = Object.keys((window.listenStatsState || {}).songs || {}).map(function(key){ return window.listenStatsState.songs[key]; });
   list.sort(function(a, b){ return (b.plays - a.plays) || (b.listenMs - a.listenMs) || (b.lastPlayedAt - a.lastPlayedAt); });
   return list[0] || null;
 }
-window.topListenArtist = function() {
+function topListenArtist() {
   var list = Object.keys(window.listenStatsState.artists || {}).map(function(key){ return window.listenStatsState.artists[key]; });
   list.sort(function(a, b){ return (b.plays - a.plays) || (b.listenMs - a.listenMs) || (b.lastPlayedAt - a.lastPlayedAt); });
   return list[0] || null;
 }
-window.homeListenSummary = function() {
+function homeListenSummary() {
   var recent = (window.listenStatsState && window.listenStatsState.history || [])[0] || null;
   var topSong = window.mostPlayedSong();
   var topArtist = window.topListenArtist();
   var totalPlays = Object.keys((window.listenStatsState || {}).songs || {}).reduce(function(sum, key){ return sum + ((window.listenStatsState.songs[key] && window.listenStatsState.songs[key].plays) || 0); }, 0);
   return { recent: recent, topSong: topSong, topArtist: topArtist, totalPlays: totalPlays };
 }
-window.fallbackHomeTiles = function() {
+function fallbackHomeTiles() {
   return [
     { kind: 'login', title: '登录同步歌单', sub: '网易云 / QQ 音乐' },
     { kind: 'search', title: '搜索一首歌', sub: '原唱优先', query: '' },
@@ -41,12 +41,12 @@ window.fallbackHomeTiles = function() {
     { kind: 'guide', title: '看看视觉舞台', sub: '粒子 / 歌词 / 封面' },
   ];
 }
-window.homeTileCover = function(item) {
+function homeTileCover(item) {
   if (!item) return '';
   if (item.kind === 'song' || item.kind === 'weatherSong') return window.songCoverSrc(item.song, 220);
   return item.cover ? window.coverUrlWithSize(item.cover, 220) : '';
 }
-window.homeToneForItem = function(item, index) {
+function homeToneForItem(item, index) {
   if (!item) return 'daily';
   if (item.kind === 'weatherSong') return 'daily';
   if (item.kind === 'recent') return 'search';
@@ -61,7 +61,7 @@ window.homeToneForItem = function(item, index) {
   if (item.kind === 'search') return 'search';
   return ['daily', 'window.playlist', 'local', 'guide', 'search'][index % 5];
 }
-window.renderHomeMosaic = function(items) {
+function renderHomeMosaic(items) {
   var cells = document.querySelectorAll('#home-mosaic .home-mosaic-cell');
   if (!cells.length) return;
   var covers = [];
@@ -76,7 +76,7 @@ window.renderHomeMosaic = function(items) {
     cells[i].classList.toggle('home-skeleton', !src && homeDiscoverState.loading);
   }
 }
-window.renderHomeTiles = function() {
+function renderHomeTiles() {
   var row = document.getElementById('home-tile-row');
   var title = document.getElementById('home-rail-title');
   var note = document.getElementById('home-rail-note');
@@ -129,7 +129,7 @@ window.renderHomeTiles = function() {
   row._homeTiles = tiles;
   renderHomeMosaic(tiles);
 }
-window.renderHomeDiscover = function() {
+function renderHomeDiscover() {
   var sub = document.getElementById('home-subtitle');
   var loggedOutHome = !homeDiscoverState.loggedIn && !window.hasAnyPlatformLogin();
   var weather = homeWeatherRadioState.weather;
@@ -212,7 +212,7 @@ window.renderHomeDiscover = function() {
   }
   renderHomeTiles();
 }
-window.loadHomeDiscover = async function(force) {
+async function loadHomeDiscover(force) {
   if (homeDiscoverState.loading) return;
   if (homeDiscoverState.loaded && !force) return;
   var token = ++homeDiscoverToken;
@@ -239,7 +239,7 @@ window.loadHomeDiscover = async function(force) {
     }
   }
 }
-window.homeWeatherRadioUrl = function(opts) {
+function homeWeatherRadioUrl(opts) {
   opts = opts || {};
   var params = [];
   if (opts.lat != null && opts.lon != null) {
@@ -253,7 +253,7 @@ window.homeWeatherRadioUrl = function(opts) {
   params.push('t=' + Date.now());
   return '/api/weather/radio?' + params.join('&');
 }
-window.loadHomeWeatherRadio = async function(force, opts) {
+async function loadHomeWeatherRadio(force, opts) {
   opts = opts || {};
   if (homeWeatherRadioState.loading && homeWeatherLoadPromise && opts.lat == null && opts.lon == null && !opts.city) {
     return homeWeatherLoadPromise;
@@ -297,7 +297,7 @@ window.loadHomeWeatherRadio = async function(force, opts) {
     if (homeWeatherLoadPromise === loadPromise) homeWeatherLoadPromise = null;
   }
 }
-window.scheduleHomeWeatherLoad = function(delay) {
+function scheduleHomeWeatherLoad(delay) {
   if (homeWeatherLoadTimer) return;
   homeWeatherLoadTimer = setTimeout(function(){
     homeWeatherLoadTimer = null;
@@ -305,7 +305,7 @@ window.scheduleHomeWeatherLoad = function(delay) {
     loadHomeWeatherRadio(false);
   }, delay || 760);
 }
-window.shouldShowEmptyHomeCore = function(ignoreSplash) {
+function shouldShowEmptyHomeCore(ignoreSplash) {
   if (!ignoreSplash && document.body.classList.contains('splash-active')) return false;
   if (window.immersiveMode) return false;
   if (homeForcedOpen) return true;
@@ -317,17 +317,17 @@ window.shouldShowEmptyHomeCore = function(ignoreSplash) {
   if (window.playing) return false;
   return true;
 }
-window.shouldShowEmptyHome = function() {
+function shouldShowEmptyHome() {
   return shouldShowEmptyHomeCore(false);
 }
-window.setHomeControlsLocked = function(locked) {
+function setHomeControlsLocked(locked) {
   document.body.classList.toggle('home-controls-locked', !!locked);
   var bottom = document.getElementById('bottom-bar');
   if (bottom && locked && !hasActivePlaybackControls()) bottom.classList.add('soft-hidden');
   if (bottom && !locked) bottom.classList.remove('soft-hidden');
   if (locked) closeMiniQueue();
 }
-window.ensureHomeWallpaperParticles = function(opts) {
+function ensureHomeWallpaperParticles(opts) {
   opts = opts || {};
   if (window.uniforms && window.uniforms.uAlpha && opts.instant) {
     window.uniforms.uAlpha.value = 0.96;
@@ -337,12 +337,12 @@ window.ensureHomeWallpaperParticles = function(opts) {
   if (window.uniforms && window.uniforms.uFloatAlpha) window.uniforms.uFloatAlpha.value = 0;
   if (floatGroup) destroyFloatLayer();
 }
-window.activateHomeWallpaperPreview = function(opts) {
+function activateHomeWallpaperPreview(opts) {
   opts = opts || {};
   document.body.classList.add('home-wallpaper-preview');
   ensureHomeWallpaperParticles(opts);
 }
-window.deactivateHomeWallpaperPreview = function(playback) {
+function deactivateHomeWallpaperPreview(playback) {
   document.body.classList.remove('home-wallpaper-preview');
   if (!homeVisualPresetActive) return;
   homeVisualPresetActive = false;
@@ -351,7 +351,7 @@ window.deactivateHomeWallpaperPreview = function(playback) {
     setPreset(nextPreset, { silent: true, preserveCamera: false, skipTransition: false, noSave: true });
   }
 }
-window.updateEmptyHomeVisibility = function(opts) {
+function updateEmptyHomeVisibility(opts) {
   opts = opts || {};
   var show = shouldShowEmptyHome();
   emptyHomeActive = show;
@@ -379,7 +379,7 @@ window.updateEmptyHomeVisibility = function(opts) {
   }
   return show;
 }
-window.runHomeSearch = function(query, mode) {
+function runHomeSearch(query, mode) {
   homeForcedOpen = false;
   homeSuppressed = false;
   setHomeControlsLocked(false);
@@ -397,13 +397,13 @@ window.runHomeSearch = function(query, mode) {
   else if (searchMode === 'podcast') loadPodcastHot();
   else renderSearchHistory();
 }
-window.waitForHomeDiscoverIdle = async function(timeout) {
+async function waitForHomeDiscoverIdle(timeout) {
   var started = Date.now();
   while (homeDiscoverState.loading && Date.now() - started < (timeout || 2200)) {
     await new Promise(function(resolve){ setTimeout(resolve, 80); });
   }
 }
-window.playHomeDaily = async function() {
+async function playHomeDaily() {
   homeForcedOpen = false;
   homeSuppressed = false;
   setHomeControlsLocked(false);
@@ -426,7 +426,7 @@ window.playHomeDaily = async function() {
   window.forcePlaybackControlsInteractive();
   window.playQueueAt(0).catch(function(e){ console.warn('[HomeDailyPlay]', e); });
 }
-window.goHome = function() {
+function goHome() {
   if (homeForcedOpen || emptyHomeActive) {
     dismissHomePage({ toast: true });
     window.showToast('已关闭 Home');
@@ -446,7 +446,7 @@ window.goHome = function() {
   updateEmptyHomeVisibility({ forceLoad: true });
   window.showToast('已回到 Home');
 }
-window.dismissHomePage = function(opts) {
+function dismissHomePage(opts) {
   opts = opts || {};
   homeForcedOpen = false;
   homeSuppressed = true;
@@ -456,7 +456,7 @@ window.dismissHomePage = function(opts) {
   if (typeof setFocusZone === 'function') setFocusZone(null, true);
 }
 
-window.prewarmHomeWallpaperPreview = function() {
+function prewarmHomeWallpaperPreview() {
   if (window.homeWallpaperPrewarmStarted) return;
   window.homeWallpaperPrewarmStarted = true;
   if (!window.shouldUseIdleWallpaperPreview(true)) return;
@@ -466,7 +466,7 @@ window.prewarmHomeWallpaperPreview = function() {
   }, 900, 2600);
 };
 
-window.shouldUseIdleWallpaperPreview = function(ignoreSplash) {
+function shouldUseIdleWallpaperPreview(ignoreSplash) {
   if (!ignoreSplash && document.body.classList.contains('splash-active')) return false;
   if (window.immersiveMode || window.playing || (window.audio && !window.audio.paused)) return false;
   if (window.shelfPinnedOpen) return false;
@@ -474,7 +474,7 @@ window.shouldUseIdleWallpaperPreview = function(ignoreSplash) {
   return true;
 };
 
-window.openHomePlayerConsole = function() {
+function openHomePlayerConsole() {
   if (typeof window.setHomeControlsLocked === 'function') window.setHomeControlsLocked(false);
   var bar = document.getElementById('bottom-bar');
   if (bar) {
@@ -490,7 +490,7 @@ window.openHomePlayerConsole = function() {
   if (typeof window.showToast === 'function') window.showToast('播放器控制台已展开');
 };
 
-window.openHomeInsight = function() {
+function openHomeInsight() {
   var summary = typeof window.homeListenSummary === 'function' ? window.homeListenSummary() : {};
   if (summary.topArtist && summary.topArtist.name) {
     if (typeof window.runHomeSearch === 'function') window.runHomeSearch(summary.topArtist.name);
@@ -503,7 +503,7 @@ window.openHomeInsight = function() {
   if (typeof window.showToast === 'function') window.showToast('播放几首歌后会生成听歌画像');
 };
 
-window.playHomeSong = function(index) {
+function playHomeSong(index) {
   window.homeForcedOpen = false;
   window.homeSuppressed = false;
   if (typeof window.setHomeControlsLocked === 'function') window.setHomeControlsLocked(false);
@@ -521,7 +521,7 @@ window.playHomeSong = function(index) {
   if (typeof window.playQueueAt === 'function') window.playQueueAt(window.currentIdx).catch(function(e){ console.warn('[HomeSongPlay]', e); });
 };
 
-window.openHomeLibrary = function() {
+function openHomeLibrary() {
   if (!window.hasAnyPlatformLogin || !window.hasAnyPlatformLogin()) {
     if (typeof window.openHomeProductGuide === 'function') window.openHomeProductGuide();
     return;
@@ -532,7 +532,7 @@ window.openHomeLibrary = function() {
   if (typeof window.refreshUserPlaylists === 'function') window.refreshUserPlaylists(true);
 };
 
-window.playHomeRecent = async function(record) {
+async function playHomeRecent(record) {
   var r = record || (typeof window.homeListenState === 'object' ? window.homeListenState.recents : null);
   r = r && r.length ? r[0] : null;
   if (!r) {

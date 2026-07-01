@@ -15,14 +15,14 @@ window.RENDER_INTERACTION_HUGE_FPS = 0;
 window.RENDER_INTERACTION_HOLD_MS = 900;
 window.renderInteractionBoostUntil = 0;
 window.renderInteractionReason = '';
-window.renderQualityProfile = function() {
+function renderQualityProfile() {
   var quality = window.normalizePerformanceQuality(window.fx && window.fx.performanceQuality);
   if (quality === 'eco') return { cap: 0.95, min: 0.56, budget: 2400000 };
   if (quality === 'balanced') return { cap: 1.12, min: 0.66, budget: 3800000 };
   if (quality === 'ultra') return { cap: 1.75, min: 0.85, budget: 7800000 };
   return { cap: RENDER_DPR_CAP, min: RENDER_MIN_DPR, budget: RENDER_PIXEL_BUDGET };
 }
-window.getRenderPixelRatio = function() {
+function getRenderPixelRatio() {
   var device = window.devicePixelRatio || 1;
   if (isDeepBackgroundMode()) return Math.min(device, 0.30);
   var cssPixels = Math.max(1, innerWidth * innerHeight);
@@ -31,21 +31,21 @@ window.getRenderPixelRatio = function() {
   var cap = Math.min(quality.cap, budgetCap);
   return Math.max(quality.min, Math.min(device, cap));
 }
-window.getRenderPixelLoad = function() {
+function getRenderPixelLoad() {
   var ratio = getRenderPixelRatio();
   return Math.max(1, innerWidth * innerHeight) * ratio * ratio;
 }
-window.markRenderInteraction = function(reason, holdMs) {
+function markRenderInteraction(reason, holdMs) {
   if (isDeepBackgroundMode()) return;
   var now = performance.now();
   renderInteractionBoostUntil = Math.max(renderInteractionBoostUntil, now + (holdMs || RENDER_INTERACTION_HOLD_MS));
   renderInteractionReason = reason || renderInteractionReason || 'interaction';
   if (typeof renderPerfState !== 'undefined' && renderPerfState) renderPerfState.lastRenderAt = 0;
 }
-window.isRenderInteractionActive = function(now) {
+function isRenderInteractionActive(now) {
   return (now || performance.now()) < renderInteractionBoostUntil;
 }
-window.getRenderLoadTier = function() {
+function getRenderLoadTier() {
   var cssPixels = Math.max(1, innerWidth * innerHeight);
   var renderPixels = (typeof getRenderPixelLoad === 'function') ? getRenderPixelLoad() : cssPixels;
   if (cssPixels >= 7200000 || renderPixels >= 5000000) return 2;
@@ -97,7 +97,7 @@ window.ZERO_VEC = new THREE.Vector3(0,0,0);
 window.BASE_FOV = 45;
 window.camPunch = 0;
 window.cinemaT = 0;
-window.defaultFreeCameraState = function() {
+function defaultFreeCameraState() {
   return {
     active: false,
     locked: false,
@@ -111,7 +111,7 @@ window.defaultFreeCameraState = function() {
     resetTween: null
   };
 }
-window.readFreeCameraState = function() {
+function readFreeCameraState() {
   var state = defaultFreeCameraState();
   try {
     var raw = JSON.parse(localStorage.getItem(window.FREE_CAMERA_STORE_KEY) || '{}') || {};
@@ -141,7 +141,7 @@ window.FREE_CAMERA_RESET_QUAT = new THREE.Quaternion();
 window.FREE_CAMERA_UP = new THREE.Vector3(0, 1, 0);
 window.freeCameraPointer = { seen: false, x: 0, y: 0 };
 window.freeCameraDeferredSaveTimer = 0;
-window.saveFreeCameraState = function() {
+function saveFreeCameraState() {
   if (!window.freeCamera) return;
   try {
     localStorage.setItem(window.FREE_CAMERA_STORE_KEY, JSON.stringify({
@@ -155,21 +155,21 @@ window.saveFreeCameraState = function() {
     }));
   } catch (e) {}
 }
-window.scheduleFreeCameraStateSave = function(delay) {
+function scheduleFreeCameraStateSave(delay) {
   if (freeCameraDeferredSaveTimer) return;
   freeCameraDeferredSaveTimer = setTimeout(function(){
     freeCameraDeferredSaveTimer = 0;
     saveFreeCameraState();
   }, delay || 720);
 }
-window.easeOutCubic01 = function(t) {
+function easeOutCubic01(t) {
   t = window.clamp01(t);
   return 1 - Math.pow(1 - t, 3);
 }
-window.shortestAngleDelta = function(from, to) {
+function shortestAngleDelta(from, to) {
   return Math.atan2(Math.sin(to - from), Math.cos(to - from));
 }
-window.getDefaultFreeCameraResetPose = function() {
+function getDefaultFreeCameraResetPose() {
   var pose = {
     position: new THREE.Vector3(0, 0, 6.6),
     yaw: 0,
@@ -190,7 +190,7 @@ window.getDefaultFreeCameraResetPose = function() {
   }
   return pose;
 }
-window.captureFreeCameraFromCurrent = function() {
+function captureFreeCameraFromCurrent() {
   if (!window.freeCamera) freeCamera = defaultFreeCameraState();
   window.camera.updateMatrixWorld(true);
   window.freeCamera.position.copy(window.camera.position);
@@ -200,7 +200,7 @@ window.captureFreeCameraFromCurrent = function() {
   window.freeCamera.roll = FREE_CAMERA_EULER.z;
   window.freeCamera.fov = window.clampRange(window.camera.fov || BASE_FOV, 26, 72);
 }
-window.applyFreeCameraToCamera = function() {
+function applyFreeCameraToCamera() {
   if (!window.freeCamera || !(window.freeCamera.active || window.freeCamera.locked)) return false;
   var cameraShake = window.clampRange(Number((typeof window.fx !== 'undefined' && window.fx) ? window.fx.cinemaShake : 0.5) || 0, 0, 1.8);
   window.camera.position.copy(window.freeCamera.position);
@@ -221,11 +221,11 @@ window.applyFreeCameraToCamera = function() {
   camPunch *= 0.86;
   return true;
 }
-window.updateFreeCameraHint = function() {
+function updateFreeCameraHint() {
   var el = document.getElementById('free-camera-hint');
   if (el) el.classList.toggle('show', !!(window.freeCamera && window.freeCamera.active));
 }
-window.resetFreeCameraToDefault = function() {
+function resetFreeCameraToDefault() {
   if (!window.freeCamera) return;
   if (freeCameraDeferredSaveTimer) {
     clearTimeout(freeCameraDeferredSaveTimer);
@@ -259,7 +259,7 @@ window.resetFreeCameraToDefault = function() {
   updateFreeCameraHint();
   window.showToast('自由镜头正在平滑回正');
 }
-window.toggleFreeCamera = function() {
+function toggleFreeCamera() {
   if (!window.freeCamera) freeCamera = defaultFreeCameraState();
   if (window.freeCamera.active) {
     window.freeCamera.active = false;
@@ -292,7 +292,7 @@ window.toggleFreeCamera = function() {
   }
   window.showToast('自由镜头: WASD 移动 · 鼠标转向 · K 回正');
 }
-window.updateFreeCamera = function(dt) {
+function updateFreeCamera(dt) {
   if (!window.freeCamera) return;
   if (window.freeCamera.resetTween) {
     var tw = window.freeCamera.resetTween;
@@ -344,14 +344,14 @@ window.updateFreeCamera = function(dt) {
   if (rollDir) window.freeCamera.roll = window.clampRange(window.freeCamera.roll + rollDir * dt * 0.9, -Math.PI, Math.PI);
   scheduleFreeCameraStateSave(720);
 }
-window.flushPersistentVisualState = function() {
+function flushPersistentVisualState() {
   try { saveLyricLayout(); } catch (e) {}
   try { saveFreeCameraState(); } catch (e) {}
 }
 window.addEventListener('beforeunload', flushPersistentVisualState);
 window.addEventListener('pagehide', flushPersistentVisualState);
 
-window.resetBeatCameraSync = function(t) {
+function resetBeatCameraSync(t) {
   window.beatCam.nextIdx = 0;
   window.beatCam.events.length = 0;
   window.beatCam.punch = 0;
@@ -373,13 +373,13 @@ window.resetBeatCameraSync = function(t) {
   resetRealtimeBeatEngine();
 }
 
-window.syncBeatCameraToTime = function(t) {
+function syncBeatCameraToTime(t) {
   resetBeatCameraSync(t);
   if (!window.currentBeatMap) return;
   alignBeatCameraCursorToTime(t);
 }
 
-window.alignBeatCameraCursorToTime = function(t) {
+function alignBeatCameraCursorToTime(t) {
   if (!window.currentBeatMap) return;
   var beats = window.currentBeatMap.cameraBeats || window.currentBeatMap.beats || window.currentBeatMap.kicks || [];
   window.beatCam.nextIdx = 0;
@@ -390,12 +390,12 @@ window.alignBeatCameraCursorToTime = function(t) {
   }
 }
 
-window.easeBeatCamera = function(x) {
+function easeBeatCamera(x) {
   x = Math.max(0, Math.min(1, x));
   return x * x * (3 - 2 * x);
 }
 
-window.updateCinemaDynamics = function(rawEnergy, rawLow) {
+function updateCinemaDynamics(rawEnergy, rawLow) {
   var e = window.clamp01(rawEnergy || 0);
   var l = window.clamp01(rawLow || 0);
   var isDj = window.djMode.active;
@@ -425,13 +425,13 @@ window.updateCinemaDynamics = function(rawEnergy, rawLow) {
   cinemaDynamics.scale += (target - cinemaDynamics.scale) * (target > cinemaDynamics.scale ? (isDj ? 0.070 : 0.045) : (isDj ? 0.030 : 0.022));
 }
 
-window.cameraDynamicsScale = function(extra) {
+function cameraDynamicsScale(extra) {
   var isDj = window.djMode.active;
   var djBoost = isDj ? (1.06 + window.clamp01(window.djMode.sectionLow) * 0.16 + window.clamp01(rtBeat.tempoConfidence) * 0.08) : 1;
   return window.clampRange((cinemaDynamics.scale || 0.82) * (cinemaTrackProfile.scale || 1) * (extra == null ? 1 : extra) * djBoost, isDj ? 0.24 : 0.18, isDj ? 1.42 : 1.18);
 }
 
-window.cinemaTrackNameHint = function(song) {
+function cinemaTrackNameHint(song) {
   var label = ((song && song.name) || '') + ' ' + ((song && song.artist) || '');
   label = label.toLowerCase().replace(/\s+/g, '');
   if (/after17/.test(label)) return 0.46;
@@ -439,7 +439,7 @@ window.cinemaTrackNameHint = function(song) {
   return 1.0;
 }
 
-window.cinemaAnalysisProfileForSong = function(song) {
+function cinemaAnalysisProfileForSong(song) {
   var title = String((song && (song.name || song.title)) || '').toLowerCase().replace(/\s+/g, '');
   var artist = String((song && song.artist) || '').toLowerCase().replace(/\s+/g, '');
   var label = title + ' ' + artist;
@@ -456,7 +456,7 @@ window.cinemaAnalysisProfileForSong = function(song) {
   return { id: 'default', softGroove: false, phaseScan: false, localRefine: false, sparseCamera: false, introPattern: false };
 }
 
-window.resetCinemaTrackProfile = function(song) {
+function resetCinemaTrackProfile(song) {
   var isDj = isPodcastSong(song);
   cinemaTrackProfile.scale = isDj ? 1.08 : 1.0;
   cinemaTrackProfile.target = isDj ? 1.10 : 1.0;
@@ -470,7 +470,7 @@ window.resetCinemaTrackProfile = function(song) {
   cinemaTrackProfile.density = 0;
 }
 
-window.updateCinemaTrackProfile = function(sample) {
+function updateCinemaTrackProfile(sample) {
   if (!sample) return;
   var p = cinemaTrackProfile;
   p.frames++;
@@ -498,7 +498,7 @@ window.updateCinemaTrackProfile = function(sample) {
   p.scale += (target - p.scale) * (target > p.scale ? (window.djMode.active ? 0.045 : 0.030) : (window.djMode.active ? 0.030 : 0.045));
 }
 
-window.applyCinemaProfileFromBeatMap = function(map) {
+function applyCinemaProfileFromBeatMap(map) {
   if (!map || !map.duration) return;
   var events = (map.cameraBeats || map.beats || []).filter(function(b){ return b && typeof b !== 'number' && b.camera !== false; });
   if (!events.length) return;
@@ -519,7 +519,7 @@ window.applyCinemaProfileFromBeatMap = function(map) {
   cinemaTrackProfile.scale += (target - cinemaTrackProfile.scale) * (target < cinemaTrackProfile.scale ? 0.55 : 0.22);
 }
 
-window.resetRealtimeBeatEngine = function() {
+function resetRealtimeBeatEngine() {
   rtBeat.subFast = rtBeat.subSlow = rtBeat.lowFast = rtBeat.lowSlow = 0;
   rtBeat.bodyFast = rtBeat.bodySlow = rtBeat.vocalFast = rtBeat.vocalSlow = rtBeat.snapFast = rtBeat.snapSlow = 0;
   rtBeat.prevSub = rtBeat.prevLow = rtBeat.prevBody = rtBeat.prevVocal = rtBeat.prevSnap = rtBeat.prevRms = 0;
@@ -545,7 +545,7 @@ window.resetRealtimeBeatEngine = function() {
   rtBeat.stats.rejected = 0;
 }
 
-window.resetAudioVisualState = function() {
+function resetAudioVisualState() {
   bass = 0;
   mid = 0;
   treble = 0;
@@ -570,11 +570,11 @@ window.resetAudioVisualState = function() {
   if (window.djMode.active) resetDjModeMeter();
 }
 
-window.beatEventTime = function(ev) {
+function beatEventTime(ev) {
   return typeof ev === 'number' ? ev : (ev && isFinite(ev.time) ? ev.time : Infinity);
 }
 
-window.yieldToPaint = function() {
+function yieldToPaint() {
   return new Promise(function(resolve) {
     if (isHiddenForBackgroundOptimization() || typeof requestAnimationFrame !== 'function') {
       setTimeout(resolve, 0);
@@ -584,7 +584,7 @@ window.yieldToPaint = function() {
   });
 }
 
-window.yieldToIdle = function(timeout) {
+function yieldToIdle(timeout) {
   return new Promise(function(resolve) {
     if (isHiddenForBackgroundOptimization()) {
       setTimeout(resolve, Math.min(timeout || 80, 80));
@@ -598,7 +598,7 @@ window.yieldToIdle = function(timeout) {
   });
 }
 
-window.scheduleAnalysisTask = function(fn, timeout) {
+function scheduleAnalysisTask(fn, timeout) {
   if (typeof fn !== 'function') return;
   if (isHiddenForBackgroundOptimization()) {
     setTimeout(fn, 0);
@@ -611,7 +611,7 @@ window.scheduleAnalysisTask = function(fn, timeout) {
   }
 }
 
-window.scheduleVisualApply = function(fn, delay, timeout) {
+function scheduleVisualApply(fn, delay, timeout) {
   if (typeof fn !== 'function') return;
   setTimeout(function(){
     if (isHiddenForBackgroundOptimization() || typeof requestAnimationFrame !== 'function') {
@@ -624,7 +624,7 @@ window.scheduleVisualApply = function(fn, delay, timeout) {
   }, delay || 0);
 }
 
-window.scheduleUiWarmTask = function(fn, timeout) {
+function scheduleUiWarmTask(fn, timeout) {
   if (typeof fn !== 'function') return;
   var run = function(){ requestAnimationFrame(fn); };
   if (isHiddenForBackgroundOptimization() || typeof requestAnimationFrame !== 'function') {
@@ -636,28 +636,28 @@ window.scheduleUiWarmTask = function(fn, timeout) {
   }
 }
 
-window.cancelBeatAnalysisTimer = function() {
+function cancelBeatAnalysisTimer() {
   if (beatAnalysisTimer) {
     clearTimeout(beatAnalysisTimer);
     beatAnalysisTimer = null;
   }
 }
 
-window.cancelBeatPrefetchTimer = function() {
+function cancelBeatPrefetchTimer() {
   if (beatPrefetchTimer) {
     clearTimeout(beatPrefetchTimer);
     beatPrefetchTimer = null;
   }
 }
 
-window.beatAnalysisYieldMs = function(options, currentMs, prefetchMs) {
+function beatAnalysisYieldMs(options, currentMs, prefetchMs) {
   options = options || {};
   if (options.prefetch) return prefetchMs == null ? 620 : prefetchMs;
   if (options.background) return currentMs == null ? 120 : currentMs;
   return Math.min(currentMs == null ? 120 : currentMs, 160);
 }
 
-window.beatBandRms = function(data, sampleRate, fftSize, hz0, hz1) {
+function beatBandRms(data, sampleRate, fftSize, hz0, hz1) {
   var binHz = sampleRate / fftSize;
   var a = Math.max(1, Math.floor(hz0 / binHz));
   var b = Math.min(data.length - 1, Math.ceil(hz1 / binHz));
@@ -670,7 +670,7 @@ window.beatBandRms = function(data, sampleRate, fftSize, hz0, hz1) {
   return count ? Math.sqrt(sum / count) : 0;
 }
 
-window.processRealtimeBeatEngine = function(dt) {
+function processRealtimeBeatEngine(dt) {
   if (!window.beatAnalyser || !window.audioCtx || !window.audio || window.audio.paused) return null;
   dt = Math.max(0.001, Math.min(0.080, dt || 0.016));
   var dj = window.djMode.active;
@@ -862,7 +862,7 @@ window.processRealtimeBeatEngine = function(dt) {
   };
 }
 
-window.mergeRealtimeBeatCamera = function(time, amp, tone) {
+function mergeRealtimeBeatCamera(time, amp, tone) {
   var best = null;
   var bestDist = window.beatCam.realtimeMergeWindow;
   for (var i = 0; i < window.beatCam.events.length; i++) {
@@ -894,7 +894,7 @@ window.mergeRealtimeBeatCamera = function(time, amp, tone) {
   return true;
 }
 
-window.scheduleBeatCamera = function(beat, source) {
+function scheduleBeatCamera(beat, source) {
   if (!window.fx.cinema) return;
   var time = typeof beat === 'number' ? beat : beat.time;
   if (!isFinite(time)) return;
@@ -1172,7 +1172,7 @@ window.scheduleBeatCamera = function(beat, source) {
   if (window.beatCam.events.length > maxEvents) window.beatCam.events.splice(0, window.beatCam.events.length - maxEvents);
 }
 
-window.updateBeatCamera = function(dt) {
+function updateBeatCamera(dt) {
   var t = window.audio ? window.audio.currentTime : window.uniforms.uTime.value;
   if (!window.audio || window.audio.paused) {
     window.beatCam.punch *= Math.pow(0.08, dt);
@@ -1269,11 +1269,11 @@ window.updateBeatCamera = function(dt) {
   window.beatCam.rollKick += (rollKick - window.beatCam.rollKick) * (Math.abs(rollKick) > Math.abs(window.beatCam.rollKick) ? (djEase ? 0.82 : 0.72) : (djEase ? 0.44 : 0.38));
 }
 
-window.unlockCenteredView = function() {
+function unlockCenteredView() {
   orbit.centerLocked = false;
 }
 
-window.clearCenteredViewOffsets = function() {
+function clearCenteredViewOffsets() {
   window.pointerTarget.x = 0;
   window.pointerTarget.y = 0;
   window.pointerParallax.x = 0;
@@ -1302,7 +1302,7 @@ window.clearCenteredViewOffsets = function() {
   }
 }
 
-window.updateCamera = function() {
+function updateCamera() {
   if (applyFreeCameraToCamera()) return;
   if (orbit.recentering) {
     orbit.userTheta  += (orbit.baselineTheta - orbit.userTheta)  * 0.04;
@@ -1372,37 +1372,37 @@ window.updateCamera = function() {
 
 // 焦点跟拍 (hover 0.5s 后镜头移到目标)
 window.focusHover = { wantType: null, pendingTimer: null, exitTimer: null };
-window.shouldUseWallpaperSafeShelfCamera = function() {
+function shouldUseWallpaperSafeShelfCamera() {
   return !!(window.fx && Number(window.fx.preset) === 5);
 }
-window.shouldUseSkullSafeShelfCamera = function() {
+function shouldUseSkullSafeShelfCamera() {
   return !!(window.fx && Number(window.fx.preset) === SKULL_PRESET_INDEX);
 }
-window.shouldUseWallpaperLyricCameraLock = function() {
+function shouldUseWallpaperLyricCameraLock() {
   return !!(window.fx && Number(window.fx.preset) === 5 && window.fx.lyricCameraLock);
 }
-window.requestStageLyricCameraSnap = function(frames) {
+function requestStageLyricCameraSnap(frames) {
   if (typeof stageLyrics === 'undefined' || !window.stageLyrics) return;
   window.stageLyrics.snapCameraLockFrames = Math.max(window.stageLyrics.snapCameraLockFrames || 0, frames || 8);
 }
-window.shouldDimWallpaperForShelf = function() {
+function shouldDimWallpaperForShelf() {
   if (!shouldUseWallpaperSafeShelfCamera()) return false;
   if (!window.shelfManager || !window.shelfManager.getMode || window.shelfManager.getMode() !== 'side') return false;
   if (window.shelfPinnedOpen) return true;
   return !!(window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent());
 }
-window.shouldOffsetLyricsForShelfDetail = function() {
+function shouldOffsetLyricsForShelfDetail() {
   if (!window.shelfManager || !window.shelfManager.getMode || window.shelfManager.getMode() !== 'side') return false;
   return !!(window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent());
 }
-window.shouldAvoidStageLyricsForShelf = function() {
+function shouldAvoidStageLyricsForShelf() {
   if (!window.shelfManager || !window.shelfManager.getMode || window.shelfManager.getMode() !== 'side') return false;
   if (window.shelfAlwaysVisible()) return true;
   if (window.shelfPinnedOpen) return true;
   if (window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent()) return true;
   return !!(shelfVisibility > 0.24 || (shelfHoverCue && shelfHoverCue.value > 0.28));
 }
-window.activateFocusZone = function(type) {
+function activateFocusZone(type) {
   unlockCenteredView();
   orbit.focus.active = true;
   orbit.focus.type = type;
@@ -1452,7 +1452,7 @@ window.activateFocusZone = function(type) {
     orbit.focus.lookAt.set(-1.2, 0, 0);
   }
 }
-window.setFocusZone = function(type, immediate) {
+function setFocusZone(type, immediate) {
   if (type && !shouldUseShelfDynamicCamera(type)) {
     if (/^shelf-/.test(String(orbit.focus.type || ''))) orbit.focus.active = false;
     type = null;
@@ -1488,7 +1488,7 @@ window.setFocusZone = function(type, immediate) {
 window.lastCamPunchAt = -10;
 var CAM_PUNCH_MIN_INTERVAL = 0.45;     // 秒
 var CAM_PUNCH_BEAT_THRESHOLD = 0.55;   // 必须够强才触发
-window.updateCinema = function(dt) {
+function updateCinema(dt) {
   cinemaT += dt;
   updateBeatCamera(dt);
   if (!window.fx.cinema) {
@@ -1509,7 +1509,7 @@ window.updateCinema = function(dt) {
 }
 updateCamera();
 
-window.recenterCamera = function() {
+function recenterCamera() {
   orbit.centerLocked = true;
   orbit.recentering = true;
   clearCenteredViewOffsets();
@@ -1533,11 +1533,11 @@ window.recenterCamera = function() {
   window.showToast('视角回正');
 }
 
-window.hasActivePlaybackControls = function() {
+function hasActivePlaybackControls() {
   return !!(window.playing || (window.audio && !window.audio.paused) || (Array.isArray(window.playQueue) && window.currentIdx >= 0 && window.playQueue[window.currentIdx]));
 }
 
-window.setControlsHidden = function(hidden) {
+function setControlsHidden(hidden) {
   var bar = document.getElementById('bottom-bar');
   if (!bar) return;
   if (hidden && (window.controlsHovering || window.miniQueueOpen)) hidden = false;
@@ -1546,7 +1546,7 @@ window.setControlsHidden = function(hidden) {
   updateControlsChromeState();
 }
 
-window.isBottomControlsSuppressedForShelf = function() {
+function isBottomControlsSuppressedForShelf() {
   var shelfContentOpen = false;
   try {
     shelfContentOpen = !!(typeof window.shelfManager !== 'undefined' && window.shelfManager && window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent());
@@ -1554,7 +1554,7 @@ window.isBottomControlsSuppressedForShelf = function() {
   return !!(window.shelfPinnedOpen || shelfContentOpen || (controlsShelfSuppressUntil && performance.now() < controlsShelfSuppressUntil));
 }
 
-window.suppressBottomControlsForShelf = function(duration) {
+function suppressBottomControlsForShelf(duration) {
   controlsShelfSuppressUntil = performance.now() + (duration == null ? 900 : duration);
   controlsHovering = false;
   if (window.controlsHideTimer) {
@@ -1571,7 +1571,7 @@ window.suppressBottomControlsForShelf = function(duration) {
   updateControlsChromeState();
 }
 
-window.scheduleControlsHide = function(delay) {
+function scheduleControlsHide(delay) {
   if (window.controlsHideTimer) clearTimeout(window.controlsHideTimer);
   if (!window.controlsAutoHide) return;
   controlsHideTimer = setTimeout(function(){
@@ -1580,7 +1580,7 @@ window.scheduleControlsHide = function(delay) {
   }, delay == null ? 480 : delay);
 }
 
-window.revealBottomControls = function(delay) {
+function revealBottomControls(delay) {
   if (document.body.classList.contains('home-controls-locked')) return;
   var bar = document.getElementById('bottom-bar');
   if (isBottomControlsSuppressedForShelf()) return;
@@ -1590,7 +1590,7 @@ window.revealBottomControls = function(delay) {
   if (window.controlsAutoHide) window.scheduleControlsHide(delay == null ? 520 : delay);
 }
 
-window.updateControlsChromeState = function() {
+function updateControlsChromeState() {
   var bar = document.getElementById('bottom-bar');
   var handle = document.getElementById('bottom-handle');
   var active = !!(bar && bar.classList.contains('visible') && !bar.classList.contains('soft-hidden'));
@@ -1598,7 +1598,7 @@ window.updateControlsChromeState = function() {
   if (handle) handle.classList.toggle('active', active);
 }
 
-window.wakeBottomHandle = function(duration) {
+function wakeBottomHandle(duration) {
   document.body.classList.add('controls-handle-awake');
   if (controlsHandleDimTimer) clearTimeout(controlsHandleDimTimer);
   controlsHandleDimTimer = setTimeout(function(){
@@ -1607,7 +1607,7 @@ window.wakeBottomHandle = function(duration) {
   }, duration == null ? 2000 : duration);
 }
 
-window.forcePlaybackControlsInteractive = function() {
+function forcePlaybackControlsInteractive() {
   if (!hasActivePlaybackControls()) return;
   try {
     document.body.classList.remove('home-controls-locked');
@@ -1632,14 +1632,14 @@ window.forcePlaybackControlsInteractive = function() {
   }
 }
 
-window.toggleBottomControlsFromHandle = function() {
+function toggleBottomControlsFromHandle() {
   var bar = document.getElementById('bottom-bar');
   if (!bar || document.body.classList.contains('home-controls-locked')) return;
   if (isBottomControlsSuppressedForShelf()) return;
   revealBottomControls(900);
 }
 
-window.updateControlsAutoHideFromPointer = function(x, y) {
+function updateControlsAutoHideFromPointer(x, y) {
   if (document.body.classList.contains('home-controls-locked')) return;
   if (isBottomControlsSuppressedForShelf()) return;
   var bar = document.getElementById('bottom-bar');
@@ -1671,7 +1671,7 @@ window.updateControlsAutoHideFromPointer = function(x, y) {
   else window.scheduleControlsHide(70);
 }
 
-window.toggleControlsAutoHide = function() {
+function toggleControlsAutoHide() {
   controlsAutoHide = !window.controlsAutoHide;
   saveBooleanPreference(window.CONTROLS_AUTO_HIDE_STORE_KEY, window.controlsAutoHide);
   var btn = document.getElementById('controls-hide-btn');
@@ -1686,7 +1686,7 @@ window.toggleControlsAutoHide = function() {
   }
 }
 
-window.applyControlsAutoHidePreference = function() {
+function applyControlsAutoHidePreference() {
   var btn = document.getElementById('controls-hide-btn');
   if (btn) btn.classList.toggle('active', !!window.controlsAutoHide);
   if (!window.controlsAutoHide && window.controlsHideTimer) {
@@ -1723,22 +1723,22 @@ window.applyControlsAutoHidePreference = function() {
   updateControlsChromeState();
 })();
 
-window.isCursorAutoHideMode = function() {
+function isCursorAutoHideMode() {
   return !document.hidden;
 }
 
-window.clearCursorAutoHideTimer = function() {
+function clearCursorAutoHideTimer() {
   if (cursorHideTimer) {
     clearTimeout(cursorHideTimer);
     cursorHideTimer = null;
   }
 }
 
-window.setCursorHidden = function(hidden) {
+function setCursorHidden(hidden) {
   document.body.classList.toggle('cursor-hidden', !!hidden && isCursorAutoHideMode());
 }
 
-window.scheduleCursorHide = function(delay) {
+function scheduleCursorHide(delay) {
   clearCursorAutoHideTimer();
   if (!isCursorAutoHideMode()) {
     setCursorHidden(false);
@@ -1750,7 +1750,7 @@ window.scheduleCursorHide = function(delay) {
   }, delay == null ? CURSOR_HIDE_DELAY : delay);
 }
 
-window.revealCursorForActivity = function() {
+function revealCursorForActivity() {
   if (!isCursorAutoHideMode()) {
     clearCursorAutoHideTimer();
     setCursorHidden(false);
@@ -1760,7 +1760,7 @@ window.revealCursorForActivity = function() {
   scheduleCursorHide(CURSOR_HIDE_DELAY);
 }
 
-window.syncCursorAutoHideMode = function() {
+function syncCursorAutoHideMode() {
   if (isCursorAutoHideMode()) revealCursorForActivity();
   else {
     clearCursorAutoHideTimer();
@@ -1955,14 +1955,14 @@ window.renderer.domElement.addEventListener('dblclick', function(e){
   recenterCamera();
 });
 
-window.liftFxFloatingPopups = function() {
+function liftFxFloatingPopups() {
   ['cover-color-pop', 'color-lab-pop', 'cover-color-loupe'].forEach(function(id){
     var el = document.getElementById(id);
     if (el && el.parentElement !== document.body) document.body.appendChild(el);
   });
 };
 
-window.bindColorLabPicker = function(picker) {
+function bindColorLabPicker(picker) {
   if (!picker || picker._colorLabBound) return;
   picker._colorLabBound = true;
   picker.setAttribute('aria-haspopup', 'dialog');
@@ -1988,7 +1988,7 @@ window.bindColorLabPicker = function(picker) {
   });
 };
 
-window.bindColorLabRows = function() {
+function bindColorLabRows() {
   document.querySelectorAll('.lyric-color-row').forEach(function(row){
     if (!row || row._colorLabRowBound || row.classList.contains('linked')) return;
     var picker = row.querySelector('.lyric-color-picker');
@@ -2005,7 +2005,7 @@ window.bindColorLabRows = function() {
   });
 };
 
-window.applyShelfCameraDefaultAngle = function(force) {
+function applyShelfCameraDefaultAngle(force) {
   if (!window.fx) return;
   window.fx.shelfCameraMode = window.normalizeShelfCameraMode(window.fx.shelfCameraMode || window.fxDefaults.shelfCameraMode);
   if (force || window.fx.shelfAngleYManual !== true) {
@@ -2016,7 +2016,7 @@ window.applyShelfCameraDefaultAngle = function(force) {
   }
 };
 
-window.placeFxFloatingPanel = function(pop, anchor, opts) {
+function placeFxFloatingPanel(pop, anchor, opts) {
   if (!pop || !anchor || !anchor.getBoundingClientRect) return;
   opts = opts || {};
   var gap = opts.gap == null ? 12 : opts.gap;
@@ -2046,7 +2046,7 @@ window.placeFxFloatingPanel = function(pop, anchor, opts) {
   pop.style.transform = 'none';
 };
 
-window.repositionFxFloatingPanels = function() {
+function repositionFxFloatingPanels() {
   var colorPop = document.getElementById('color-lab-pop');
   if (colorPop && colorPop.classList.contains('show') && colorLabState.picker) {
     window.placeFxFloatingPanel(colorPop, colorLabState.picker.closest('.lyric-color-row') || colorLabState.picker, { gap: 12, pad: 14 });
@@ -2057,11 +2057,11 @@ window.repositionFxFloatingPanels = function() {
   }
 };
 
-window.shelfAccentHex = function() {
+function shelfAccentHex() {
   return window.normalizeHexColor((window.fx && window.fx.shelfAccentColor) || window.fxDefaults.shelfAccentColor, window.fxDefaults.shelfAccentColor);
 };
 
-window.tickLyricsParticles = function() {
+function tickLyricsParticles() {
   if (!window.fx || !window.fx.particleLyrics) {
     if (window.stageLyrics && (window.stageLyrics.current || window.stageLyrics.currentText || (window.stageLyrics.outgoing && window.stageLyrics.outgoing.length))) window.clearStageLyrics();
     return;
@@ -2101,7 +2101,7 @@ window.tickLyricsParticles = function() {
   }
 };
 
-window.hexToRgb = function(hex) {
+function hexToRgb(hex) {
   hex = window.normalizeHexColor(hex).slice(1);
   return {
     r: parseInt(hex.slice(0, 2), 16),
@@ -2110,7 +2110,7 @@ window.hexToRgb = function(hex) {
   };
 };
 
-window.updateStageLyrics3D = function(dt) {
+function updateStageLyrics3D(dt) {
   if (!window.stageLyrics || !window.stageLyrics.group) return;
   if (!window.fx || (!window.fx.particleLyrics && !window.stageLyrics.current && (!window.stageLyrics.outgoing || !window.stageLyrics.outgoing.length))) return;
   if (!isFinite(window.stageLyrics.highBloom)) window.stageLyrics.highBloom = 0;
@@ -2151,7 +2151,7 @@ window.updateStageLyrics3D = function(dt) {
   if (typeof window.applyLyricRenderProfile === 'function') window.applyLyricRenderProfile();
 };
 
-window.normalizeCustomBackgroundMedia = function(value) {
+function normalizeCustomBackgroundMedia(value) {
   if (!value) return null;
   if (typeof value === 'string') {
     var img = window.normalizeCustomBackgroundImage(value);
@@ -2174,18 +2174,18 @@ window.normalizeCustomBackgroundMedia = function(value) {
   return null;
 };
 
-window.customBackgroundMediaLabel = function(media) {
+function customBackgroundMediaLabel(media) {
   media = window.normalizeCustomBackgroundMedia(media);
   if (!media) return '未设置';
   return media.type === 'video' ? '视频已设置' : '图片已设置';
 };
 
-window.shouldUseShelfDynamicCamera = function(type) {
+function shouldUseShelfDynamicCamera(type) {
   if (!window.fx) return true;
   if (window.fx.shelfDynamicDetail !== false && type === 'shelf-detail') return true;
   return false;
 };
 
-window.shelfAlwaysVisible = function() {
+function shelfAlwaysVisible() {
   return !!(window.fx && window.normalizeShelfPresence(window.fx.shelfPresence) === 'always');
 };

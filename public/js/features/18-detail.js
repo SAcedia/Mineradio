@@ -2,18 +2,18 @@
 // ============================================================
 window.trackDetailSeq = 0;
 window.detailArtistSongs = [];
-window.currentArtistNames = function(song) {
+function currentArtistNames(song) {
   var text = String((song && song.artist) || '').trim();
   if (!text) return [];
   return text.split(/\s*\/\s*|\s*,\s*|、/).map(function(s){ return s.trim(); }).filter(Boolean);
 }
-window.normalizeArtistNameForMatch = function(name) {
+function normalizeArtistNameForMatch(name) {
   return String(name || '')
     .toLowerCase()
     .replace(/[\s·・,，、/\\|&＋+_-]+/g, '')
     .replace(/[()（）\[\]【】"'“”‘’]/g, '');
 }
-window.artistNameMatches = function(expectedNames, actualName) {
+function artistNameMatches(expectedNames, actualName) {
   var actual = window.normalizeArtistNameForMatch(actualName);
   if (!actual) return false;
   return (expectedNames || []).some(function(name){
@@ -21,7 +21,7 @@ window.artistNameMatches = function(expectedNames, actualName) {
     return expected && (expected === actual || expected.indexOf(actual) >= 0 || actual.indexOf(expected) >= 0);
   });
 }
-window.currentArtistId = function(song) {
+function currentArtistId(song) {
   if (!song) return '';
   if (!window.isCloudSong(song)) return '';
   if (song.artistId) return String(song.artistId);
@@ -31,7 +31,7 @@ window.currentArtistId = function(song) {
   }
   return '';
 }
-window.currentQQArtistMid = function(song) {
+function currentQQArtistMid(song) {
   if (!song || window.songProviderKey(song) !== 'qq') return '';
   if (song.artistMid) return String(song.artistMid);
   if (song.singerMid) return String(song.singerMid);
@@ -43,7 +43,7 @@ window.currentQQArtistMid = function(song) {
   }
   return '';
 }
-window.commentTimeLabel = function(ms) {
+function commentTimeLabel(ms) {
   var t = Number(ms) || 0;
   if (!t) return '';
   try {
@@ -52,7 +52,7 @@ window.commentTimeLabel = function(ms) {
     return '';
   }
 }
-window.renderDetailComments = function(comments) {
+function renderDetailComments(comments) {
   if (!comments || !comments.length) return '<div class="detail-empty">暂无评论</div>';
   return '<div class="detail-scroll">' + comments.map(function(c){
     var user = c.user || {};
@@ -64,7 +64,7 @@ window.renderDetailComments = function(comments) {
     '</div>';
   }).join('') + '</div>';
 }
-window.renderArtistSongList = function(songs) {
+function renderArtistSongList(songs) {
   detailArtistSongs = (songs || []).map(window.cloneSong);
   if (!detailArtistSongs.length) return '<div class="detail-empty">暂无热门歌曲</div>';
   return '<div class="detail-scroll">' + detailArtistSongs.map(function(s, i){
@@ -83,7 +83,7 @@ window.renderArtistSongList = function(songs) {
     '</div>';
   }).join('') + '</div>';
 }
-window.playArtistDetailSong = function(i) {
+function playArtistDetailSong(i) {
   var song = detailArtistSongs[i];
   if (!song) return;
   playQueue = detailArtistSongs.map(window.cloneSong);
@@ -93,25 +93,25 @@ window.playArtistDetailSong = function(i) {
   window.closeTrackDetailModal();
   window.playQueueAt(i).catch(function(e){ console.warn('[ArtistDetailPlay]', e); });
 }
-window.collectArtistDetailSong = function(i) {
+function collectArtistDetailSong(i) {
   var song = detailArtistSongs[i];
   if (!song) return;
   window.collectDetailSong(song);
 }
-window.queueArtistDetailSongNext = function(i) {
+function queueArtistDetailSongNext(i) {
   var song = detailArtistSongs[i];
   if (!song) return;
   queueDetailSongNext(song);
 }
-window.bindTrackDetailScrollers = function() {
+function bindTrackDetailScrollers() {
   var body = document.getElementById('track-detail-body');
   bindSmoothWheelScroll(body);
   if (body) body.querySelectorAll('.detail-scroll').forEach(bindSmoothWheelScroll);
 }
-window.closeTrackDetailModal = function() {
+function closeTrackDetailModal() {
   window.closeGsapModal(document.getElementById('track-detail-modal'));
 }
-window.openTrackDetailModal = function(type, songOverride) {
+function openTrackDetailModal(type, songOverride) {
   var song = songOverride || window.currentCoverSong();
   if (!song) { window.showToast('先播放或选择一首歌'); return; }
   if (window.immersiveMode) setImmersiveMode(false);
@@ -232,7 +232,7 @@ window.openTrackDetailModal = function(type, songOverride) {
   window.bindTrackDetailScrollers();
   window.openGsapModal(document.getElementById('track-detail-modal'));
 }
-window.openArtistDetailForSong = function(song) {
+function openArtistDetailForSong(song) {
   if (!song) { window.showToast('未找到歌手信息'); return; }
   if (window.currentArtistId(song) || window.currentQQArtistMid(song)) {
     window.openTrackDetailModal('artist', song);
@@ -250,7 +250,7 @@ window.openArtistDetailForSong = function(song) {
     window.showToast('当前歌曲缺少歌手主页信息');
   }
 }
-window.resolveArtistSongForDetail = function(song, artist) {
+function resolveArtistSongForDetail(song, artist) {
   var provider = window.songProviderKey(song) === 'qq' ? 'qq' : (window.songProviderKey(song) === 'youtube' ? 'youtube' : 'netease');
   var url = provider === 'qq'
     ? '/api/qq/search?keywords=' + encodeURIComponent(artist) + '&limit=8'
@@ -269,6 +269,6 @@ window.resolveArtistSongForDetail = function(song, artist) {
   });
 }
 
-window.closeCustomLyricModal = function() {
+function closeCustomLyricModal() {
   closeGsapModal(document.getElementById('custom-lyric-modal'));
 };

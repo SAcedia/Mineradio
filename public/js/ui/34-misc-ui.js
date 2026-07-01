@@ -35,14 +35,14 @@ var idleGuideInteraction = {
   tiltX: 0,
   tiltY: 0
 };
-window.setIdleGuideVisible = function(show, interactive) {
+function setIdleGuideVisible(show, interactive) {
   document.body.classList.toggle('idle-guide-on', show);
   document.body.classList.toggle('idle-guide-interactive', !!interactive);
   if (!interactive) document.body.classList.remove('idle-guide-dragging');
   if (idleGuideVisible === show) return;
   idleGuideVisible = show;
 }
-window.shouldShowIdleGuide = function() {
+function shouldShowIdleGuide() {
   if (!IDLE_GUIDE_BACKGROUND_ENABLED) return false;
   if (document.body.classList.contains('splash-active')) return false;
   if (window.immersiveMode) return false;
@@ -52,7 +52,7 @@ window.shouldShowIdleGuide = function() {
   if (window.uniforms && window.uniforms.uHasCover && window.uniforms.uHasCover.value > 0.5) return false;
   return true;
 }
-window.shouldShowShelfHoverCue = function(value) {
+function shouldShowShelfHoverCue(value) {
   if (document.body.classList.contains('splash-active')) return false;
   if (!shelfHoverCue.guide && document.querySelector('.modal-mask.show')) return false;
   if (!shelfHoverCue.guide) {
@@ -63,16 +63,16 @@ window.shouldShowShelfHoverCue = function(value) {
   }
   return shelfHoverCue.guide || shelfHoverCue.target > 0 || (value || shelfHoverCue.value) > 0.015;
 }
-window.shouldHandleIdleGuidePointer = function(e) {
+function shouldHandleIdleGuidePointer(e) {
   if (!window.idleGuideCanvas || !shouldShowIdleGuide()) return false;
   if (isPointerOverUi(e)) return false;
   return true;
 }
-window.clampIdleGuideSpin = function(v) {
+function clampIdleGuideSpin(v) {
   if (!isFinite(v)) return 0;
   return Math.max(-4.8, Math.min(4.8, v));
 }
-window.idleGuidePointerDown = function(e) {
+function idleGuidePointerDown(e) {
   if (!window.shouldHandleIdleGuidePointer(e)) return;
   window.idleGuideInteraction.dragging = true;
   window.idleGuideInteraction.pointerActive = true;
@@ -83,7 +83,7 @@ window.idleGuidePointerDown = function(e) {
   window.idleGuideInteraction.pointerY = e.clientY / Math.max(1, window.idleGuideH || innerHeight);
   document.body.classList.add('idle-guide-dragging');
 }
-window.idleGuidePointerMove = function(e) {
+function idleGuidePointerMove(e) {
   if (!window.idleGuideCanvas) return;
   var canReact = window.shouldHandleIdleGuidePointer(e) || window.idleGuideInteraction.dragging;
   window.idleGuideInteraction.pointerActive = canReact;
@@ -108,15 +108,15 @@ window.idleGuidePointerMove = function(e) {
   window.idleGuideInteraction.lastY = e.clientY;
   window.idleGuideInteraction.lastT = now;
 }
-window.idleGuidePointerUp = function() {
+function idleGuidePointerUp() {
   if (!window.idleGuideInteraction.dragging) return;
   window.idleGuideInteraction.dragging = false;
   document.body.classList.remove('idle-guide-dragging');
 }
-window.idleGuidePointerLeave = function() {
+function idleGuidePointerLeave() {
   if (!window.idleGuideInteraction.dragging) window.idleGuideInteraction.pointerActive = false;
 }
-window.idleGuideWheel = function(e) {
+function idleGuideWheel(e) {
   if (!window.shouldHandleIdleGuidePointer(e)) return false;
   var guide = window.idleGuideInteraction;
   guide.pointerActive = true;
@@ -127,7 +127,7 @@ window.idleGuideWheel = function(e) {
   guide.zoomPulse = Math.min(1, guide.zoomPulse + Math.min(0.28, Math.abs(e.deltaY) * 0.0014));
   return true;
 }
-window.resizeIdleGuideCanvas = function() {
+function resizeIdleGuideCanvas() {
   if (!window.idleGuideCanvas) return;
   idleGuideDpr = Math.min(window.devicePixelRatio || 1, 1.6);
   idleGuideW = window.innerWidth;
@@ -170,7 +170,7 @@ window.resizeIdleGuideCanvas = function() {
     });
   }
 }
-window.projectIdleGuidePoint = function(x, y, z, rot, cx, cy, depth) {
+function projectIdleGuidePoint(x, y, z, rot, cx, cy, depth) {
   var x1 = x * rot.cy + z * rot.sy;
   var z1 = -x * rot.sy + z * rot.cy;
   var y1 = y * rot.cx - z1 * rot.sx;
@@ -184,10 +184,10 @@ window.projectIdleGuidePoint = function(x, y, z, rot, cx, cy, depth) {
     scale: scale
   };
 }
-window.resetIdleGuideTrails = function() {
+function resetIdleGuideTrails() {
   idleGuideTrails = [[], [], [], []];
 }
-window.pushIdleGuideTrail = function(index, pt, alpha, now) {
+function pushIdleGuideTrail(index, pt, alpha, now) {
   var trail = idleGuideTrails[index];
   if (!trail) trail = idleGuideTrails[index] = [];
   var last = trail[trail.length - 1];
@@ -198,7 +198,7 @@ window.pushIdleGuideTrail = function(index, pt, alpha, now) {
   }
   while (trail.length > 26) trail.shift();
 }
-window.drawIdleGuideTrail = function(ctx, trail, now, alpha, energy) {
+function drawIdleGuideTrail(ctx, trail, now, alpha, energy) {
   if (!trail || trail.length < 2) return;
   while (trail.length && now - trail[0].t > 680) trail.shift();
   if (trail.length < 2) return;
@@ -223,7 +223,7 @@ window.drawIdleGuideTrail = function(ctx, trail, now, alpha, energy) {
   }
   ctx.restore();
 }
-window.scheduleIdleGuideFrame = function(delay) {
+function scheduleIdleGuideFrame(delay) {
   if (idleGuideDelayTimer) {
     clearTimeout(idleGuideDelayTimer);
     idleGuideDelayTimer = null;
@@ -237,7 +237,7 @@ window.scheduleIdleGuideFrame = function(delay) {
     requestAnimationFrame(drawIdleGuideFrame);
   }
 }
-window.drawIdleGuideFrame = function() {
+function drawIdleGuideFrame() {
   if (!window.idleGuideCanvas || !idleGuideCtx) return;
   var ctx = idleGuideCtx;
   var nowFrame = performance.now();
@@ -413,7 +413,7 @@ window.drawIdleGuideFrame = function() {
   ctx.globalCompositeOperation = 'window.source-over';
   scheduleIdleGuideFrame(0);
 }
-window.idleRoundRect = function(ctx, x, y, w, h, r) {
+function idleRoundRect(ctx, x, y, w, h, r) {
   if (ctx.roundRect) {
     ctx.roundRect(x, y, w, h, r);
     return;
@@ -430,7 +430,7 @@ window.idleRoundRect = function(ctx, x, y, w, h, r) {
   ctx.lineTo(x, y + r);
   ctx.quadraticCurveTo(x, y, x + r, y);
 }
-window.drawShelfGuideCue = function(ctx, t, strength) {
+function drawShelfGuideCue(ctx, t, strength) {
   strength = Math.max(0, Math.min(1, strength == null ? shelfHoverCue.value : strength));
   if (strength <= 0.01) return;
   var r = shelfCueRect();
@@ -469,7 +469,7 @@ window.drawShelfGuideCue = function(ctx, t, strength) {
   }
   ctx.restore();
 }
-window.initIdleGuideCanvas = function() {
+function initIdleGuideCanvas() {
   idleGuideCanvas = document.getElementById('idle-guide-canvas');
   if (!window.idleGuideCanvas) return;
   idleGuideCtx = window.idleGuideCanvas.getContext('2d');
@@ -484,7 +484,7 @@ window.initIdleGuideCanvas = function() {
 //  toast
 // ============================================================
 window.toastTimer = null;
-window.showToast = function(msg) {
+function showToast(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
@@ -568,16 +568,16 @@ var visualGuideStepsDiy = [
     body: '右侧的 3D 歌单架会在靠近时半透明浮现，点击卡片可打开歌单，点卡片里的播放按钮可直接播放整张歌单。'
   }
 ];
-window.activeVisualGuideSteps = function() {
+function activeVisualGuideSteps() {
   return window.diyPlayerMode ? visualGuideStepsDiy : visualGuideSteps;
 }
-window.visualGuideWasSeen = function() {
+function visualGuideWasSeen() {
   try { return localStorage.getItem(window.VISUAL_GUIDE_SEEN_STORE_KEY) === '1'; } catch (e) { return true; }
 }
-window.markVisualGuideSeen = function() {
+function markVisualGuideSeen() {
   try { localStorage.setItem(window.VISUAL_GUIDE_SEEN_STORE_KEY, '1'); } catch (e) {}
 }
-window.maybeRunStartupVisualGuide = function(source) {
+function maybeRunStartupVisualGuide(source) {
   if (visualGuideWasSeen() || window.visualGuideActive || window.immersiveMode || window.playing) return false;
   if (window.source !== 'manual' && !window.hasAnyPlatformLogin()) return false;
   setTimeout(function(){
@@ -585,7 +585,7 @@ window.maybeRunStartupVisualGuide = function(source) {
   }, source === 'splash' ? 3600 : 1400);
   return true;
 }
-window.startVisualGuide = function(opts) {
+function startVisualGuide(opts) {
   opts = opts || {};
   if (document.body.classList.contains('splash-active')) {
     setTimeout(function(){ startVisualGuide(opts); }, 700);
@@ -617,7 +617,7 @@ window.startVisualGuide = function(opts) {
   }
   showVisualGuideStep(0);
 }
-window.prepareVisualGuideStep = function(step) {
+function prepareVisualGuideStep(step) {
   var search = document.getElementById('search-area');
   var bottom = document.getElementById('bottom-bar');
   var fxPanel = document.getElementById('fx-panel');
@@ -633,12 +633,12 @@ window.prepareVisualGuideStep = function(step) {
     revealBottomControls(1500);
   }
 }
-window.scheduleVisualGuidePositioning = function() {
+function scheduleVisualGuidePositioning() {
   requestAnimationFrame(positionVisualGuideStep);
   setTimeout(positionVisualGuideStep, 180);
   setTimeout(positionVisualGuideStep, 620);
 }
-window.showVisualGuideStep = function(index) {
+function showVisualGuideStep(index) {
   var steps = activeVisualGuideSteps();
   visualGuideStep = Math.max(0, Math.min(steps.length - 1, index));
   var step = steps[visualGuideStep];
@@ -657,7 +657,7 @@ window.showVisualGuideStep = function(index) {
   if (next) next.textContent = visualGuideStep === steps.length - 1 ? '完成' : '下一步';
   scheduleVisualGuidePositioning();
 }
-window.guideTargetRect = function(step) {
+function guideTargetRect(step) {
   if (step && step.target === 'stage') {
     var stageW = Math.min(620, Math.max(260, innerWidth - 72));
     var stageH = Math.min(310, Math.max(178, innerHeight * 0.34));
@@ -711,7 +711,7 @@ window.guideTargetRect = function(step) {
   }
   return { left: innerWidth * 0.5 - 120, top: innerHeight * 0.5 - 40, width: 240, height: 80, right: innerWidth * 0.5 + 120, bottom: innerHeight * 0.5 + 40 };
 }
-window.positionVisualGuideStep = function() {
+function positionVisualGuideStep() {
   if (!window.visualGuideActive) return;
   var guide = document.getElementById('visual-guide');
   var ring = document.getElementById('visual-guide-ring');
@@ -745,7 +745,7 @@ window.positionVisualGuideStep = function() {
   card.style.left = cardLeft + 'px';
   card.style.top = cardTop + 'px';
 }
-window.nextVisualGuideStep = function() {
+function nextVisualGuideStep() {
   var steps = activeVisualGuideSteps();
   if (visualGuideStep >= steps.length - 1) {
     window.closeVisualGuide(true);
@@ -753,7 +753,7 @@ window.nextVisualGuideStep = function() {
   }
   showVisualGuideStep(visualGuideStep + 1);
 }
-window.closeVisualGuide = function(markSeen) {
+function closeVisualGuide(markSeen) {
   var guide = document.getElementById('visual-guide');
   visualGuideActive = false;
   if (markSeen) markVisualGuideSeen();
@@ -773,7 +773,7 @@ window.closeVisualGuide = function(markSeen) {
   if (playlistPanel && !visualGuideState.plWasPeek) setPeek(playlistPanel, false, 'pl');
   if (bottom && !visualGuideState.bottomWasVisible && !window.playing) bottom.classList.remove('visible', 'soft-hidden');
 }
-window.handleVisualGuideSurfaceClick = function(e) {
+function handleVisualGuideSurfaceClick(e) {
   if (!window.visualGuideActive) return;
   if (e && e.target && e.target.closest && e.target.closest('button')) return;
   if (e && e.preventDefault) e.preventDefault();
@@ -787,7 +787,7 @@ window.handleVisualGuideSurfaceClick = function(e) {
 // ============================================================
 //  动态库加载
 // ============================================================
-window.loadScriptOnce = function(src) {
+function loadScriptOnce(src) {
   return new Promise(function(resolve, reject){
     var hit = document.querySelector('script[src="' + src + '"]');
     if (hit) { resolve(); return; }
@@ -805,9 +805,9 @@ window.loadScriptOnce = function(src) {
 //   - 捏合 = 拖动旋转封面 (Y 反向修正)
 //   - 没有挥扫 / 没有手势切歌
 // ============================================================
-window.startHeadTracking = function() {
+function startHeadTracking() {
 }     // stub: 兼容旧调用
-window.stopHeadTracking = function() {
+function stopHeadTracking() {
 }      // stub
 
 window.gestureVideo = null;
@@ -830,12 +830,12 @@ window.PARTICLE_HAND_SPIN_X = 4.15;
 window.PARTICLE_HAND_SPIN_Y = 4.30;
 window.PARTICLE_SPIN_MAX = 6.2;
 
-window.clampParticleSpinVelocity = function(v) {
+function clampParticleSpinVelocity(v) {
   if (!isFinite(v)) return 0;
   return Math.max(-PARTICLE_SPIN_MAX, Math.min(PARTICLE_SPIN_MAX, v));
 }
 
-window.applyParticleSpinDrag = function(dx, dy, dt) {
+function applyParticleSpinDrag(dx, dy, dt) {
   var rx = dy * PARTICLE_POINTER_SPIN_X;
   var ry = dx * PARTICLE_POINTER_SPIN_Y;
   gestureRotation.x += rx;
@@ -846,7 +846,7 @@ window.applyParticleSpinDrag = function(dx, dy, dt) {
   }
 }
 
-window.resetParticleRotationTarget = function(syncVisual) {
+function resetParticleRotationTarget(syncVisual) {
   gestureRotation.x = 0;
   gestureRotation.y = 0;
   particleSpin.vx = 0;
@@ -859,7 +859,7 @@ window.resetParticleRotationTarget = function(syncVisual) {
   }
 }
 
-window.rebaseParticleRotationAxis = function(axis) {
+function rebaseParticleRotationAxis(axis) {
   var limit = Math.PI * 10;
   if (Math.abs(gestureRotation[axis]) < limit) return;
   var offset = Math.round(gestureRotation[axis] / (Math.PI * 2)) * Math.PI * 2;
@@ -872,7 +872,7 @@ window.rebaseParticleRotationAxis = function(axis) {
   if (window.stageLyrics.group) window.stageLyrics.group.rotation[axis] -= offset;
 }
 
-window.rebaseParticleRotationIfNeeded = function() {
+function rebaseParticleRotationIfNeeded() {
   rebaseParticleRotationAxis('x');
   rebaseParticleRotationAxis('y');
 }
@@ -882,7 +882,7 @@ window.handCanvasCtx = null;
 // 平滑系数 (越小越平滑, 但反应越慢)
 window.HAND_SMOOTH_ALPHA = 0.35;
 
-window.startGestureControl = async function() {
+async function startGestureControl() {
   if (gestureActive) return;
   window.showToast('正在加载手势识别…');
   try {
@@ -919,7 +919,7 @@ window.startGestureControl = async function() {
   }
 }
 
-window.stopGestureControl = function() {
+function stopGestureControl() {
   if (!gestureActive) return;
   try { if (gestureCamera && gestureCamera.stop) gestureCamera.stop(); } catch(e){}
   try { if (gestureVideo && gestureVideo.srcObject) gestureVideo.srcObject.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
@@ -940,7 +940,7 @@ window.stopGestureControl = function() {
   }
 }
 
-window.resizeHandCanvas = function() {
+function resizeHandCanvas() {
   if (!handCanvas) return;
   var dpr = Math.min(devicePixelRatio || 1, 2);
   handCanvas.width = innerWidth * dpr;
@@ -951,7 +951,7 @@ window.resizeHandCanvas = function() {
 }
 window.addEventListener('resize', resizeHandCanvas);
 
-window.onHandLost = function() {
+function onHandLost() {
   // 平滑淡出, 不立即清零 — 给一点缓冲
   if (pinchState.active) pinchState.active = false;
   gestureGrip.target = 0;
@@ -965,7 +965,7 @@ window.onHandLost = function() {
 }
 
 // 把单帧 21 个 landmark 平滑到 handLmSmooth, 镜像 X (摄像头是反的)
-window.smoothLandmarks = function(lm) {
+function smoothLandmarks(lm) {
   if (!handLmSmooth) {
     handLmSmooth = lm.map(function(p){ return { x: 1 - p.x, y: p.y, z: p.z || 0 }; });
     return handLmSmooth;
@@ -981,13 +981,13 @@ window.smoothLandmarks = function(lm) {
 }
 
 // 手掌中心 ≈ wrist(0) 和 mcp 平均 (5,9,13,17 是各指根)
-window.palmCenter = function(lm) {
+function palmCenter(lm) {
   var px = (lm[0].x + lm[5].x + lm[9].x + lm[13].x + lm[17].x) / 5;
   var py = (lm[0].y + lm[5].y + lm[9].y + lm[13].y + lm[17].y) / 5;
   return { x: px, y: py };
 }
 
-window.handOpenness = function(lm, palm) {
+function handOpenness(lm, palm) {
   var span = Math.hypot(lm[5].x - lm[17].x, lm[5].y - lm[17].y);
   span = Math.max(0.055, span);
   var tips = [8, 12, 16, 20];
@@ -997,7 +997,7 @@ window.handOpenness = function(lm, palm) {
   return window.clampRange((avg / span - 0.62) / 0.78, 0, 1);
 }
 
-window.processHandFrame = function(rawLm) {
+function processHandFrame(rawLm) {
   handLmLastSeen = performance.now();
   var lm = smoothLandmarks(rawLm);
 
@@ -1085,7 +1085,7 @@ var HAND_BONES = [
   [0,17],[17,18],[18,19],[19,20], // 小指
   [5,9],[9,13],[13,17],           // 掌横连
 ];
-window.drawHandSkeleton = function(lm, isPinch, openness, isFist) {
+function drawHandSkeleton(lm, isPinch, openness, isFist) {
   if (!handCanvasCtx) return;
   var ctx = handCanvasCtx;
   ctx.clearRect(0, 0, innerWidth, innerHeight);
@@ -1167,7 +1167,7 @@ window.drawHandSkeleton = function(lm, isPinch, openness, isFist) {
 }
 
 // 每帧调用 — 应用惯性旋转 + handActive 衰减
-window.tickGestureRotation = function(dt) {
+function tickGestureRotation(dt) {
   if (Math.abs(particleSpin.vx) > 0.0001 || Math.abs(particleSpin.vy) > 0.0001) {
     var rx = particleSpin.vx * dt;
     var ry = particleSpin.vy * dt;
@@ -1190,7 +1190,7 @@ window.tickGestureRotation = function(dt) {
   }
 }
 
-window.showGestureHUD = function(label, progress, detail) {
+function showGestureHUD(label, progress, detail) {
   var hud = document.getElementById('gesture-hud');
   if (!hud) return;
   document.getElementById('gesture-label').textContent = label || '待命';
@@ -1199,16 +1199,16 @@ window.showGestureHUD = function(label, progress, detail) {
   if (fill) fill.style.width = Math.max(0, Math.min(100, (progress || 0) * 100)) + '%';
   hud.classList.add('show');
 }
-window.showGestureCursor = function() {
+function showGestureCursor() {
 }  // stub: 兼容旧调用
-window.hideGestureCursor = function() {
+function hideGestureCursor() {
 }  // stub: 兼容旧调用
 
 
 // ============================================================
 //  Resize / 快捷键
 // ============================================================
-window.refreshMainRendererViewport = function(reason) {
+function refreshMainRendererViewport(reason) {
   if (typeof window.camera !== 'undefined' && window.camera) {
     window.camera.aspect = Math.max(1, innerWidth) / Math.max(1, innerHeight);
     window.camera.updateProjectionMatrix();
@@ -1218,7 +1218,7 @@ window.refreshMainRendererViewport = function(reason) {
     requestStageLyricCameraSnap(reason === 'resize' ? 4 : 10);
   }
 }
-window.scheduleMainRendererViewportRefresh = function(reason) {
+function scheduleMainRendererViewportRefresh(reason) {
   refreshMainRendererViewport(reason || 'sync');
   [48, 140, 320].forEach(function(delay){
     setTimeout(function(){ refreshMainRendererViewport(reason || 'sync'); }, delay);
@@ -1298,7 +1298,7 @@ document.addEventListener('keydown', function(e){
 // ============================================================
 window.PEEK_HIDE_DELAY = 170;
 window.peekTimers = { search:null, fx:null, pl:null };
-window.setPeek = function(el, on, key) {
+function setPeek(el, on, key) {
   if (!el) return;
   if (window.immersiveMode && on && (key === 'search' || key === 'window.fx')) return;
   if (on && !window.diyPlayerMode && key === 'window.fx') return;
@@ -1341,13 +1341,13 @@ window.setPeek = function(el, on, key) {
     }, PEEK_HIDE_DELAY);
   }
 }
-window.uploadTipWasSeen = function() {
+function uploadTipWasSeen() {
   try { return localStorage.getItem(window.UPLOAD_TIP_STORE_KEY) === '1'; } catch (e) { return true; }
 }
-window.markUploadTipSeen = function() {
+function markUploadTipSeen() {
   try { localStorage.setItem(window.UPLOAD_TIP_STORE_KEY, '1'); } catch (e) {}
 }
-window.closeUploadTip = function(manual) {
+function closeUploadTip(manual) {
   var tip = document.getElementById('upload-tip');
   if (uploadTipTimer) { clearTimeout(uploadTipTimer); uploadTipTimer = null; }
   if (manual) markUploadTipSeen();
@@ -1370,7 +1370,7 @@ window.closeUploadTip = function(manual) {
     tip.classList.remove('show');
   }
 }
-window.maybeShowUploadTipOnce = function() {
+function maybeShowUploadTipOnce() {
   if (!window.diyPlayerMode) return;
   if (uploadTipWasSeen()) return;
   if (window.immersiveMode) {
@@ -1423,21 +1423,21 @@ window.SECONDARY_PLAYLIST_EDGE_MIN_X = 36;
 window.SECONDARY_PLAYLIST_EDGE_MAX_X = 96;
 window.SECONDARY_PLAYLIST_EDGE_DWELL_MS = 220;
 window.SECONDARY_PLAYLIST_SEAM_CLOSE_X = 28;
-window.isSecondaryLeftDisplaySeamGuardActive = function() {
+function isSecondaryLeftDisplaySeamGuardActive() {
   var state = (typeof desktopWindowState !== 'undefined' && desktopWindowState) ? desktopWindowState : {};
   return !!(window.desktopWindow && window.desktopWindow.isDesktop && state.isPrimaryDisplay === false && state.hasDisplayOnLeft);
 }
-window.resetSecondaryPlaylistEdgeGuard = function() {
+function resetSecondaryPlaylistEdgeGuard() {
   if (secondaryPlaylistEdgeGuard.timer) {
     clearTimeout(secondaryPlaylistEdgeGuard.timer);
     secondaryPlaylistEdgeGuard.timer = null;
   }
   secondaryPlaylistEdgeGuard.enteredAt = 0;
 }
-window.isSecondaryPlaylistSafeBandPoint = function(ex, ey, H) {
+function isSecondaryPlaylistSafeBandPoint(ex, ey, H) {
   return ey > 132 && ey < H - 132 && ex >= SECONDARY_PLAYLIST_EDGE_MIN_X && ex < SECONDARY_PLAYLIST_EDGE_MAX_X;
 }
-window.armSecondaryPlaylistEdgeDwell = function() {
+function armSecondaryPlaylistEdgeDwell() {
   if (secondaryPlaylistEdgeGuard.timer) return;
   secondaryPlaylistEdgeGuard.timer = setTimeout(function(){
     secondaryPlaylistEdgeGuard.timer = null;
@@ -1447,7 +1447,7 @@ window.armSecondaryPlaylistEdgeDwell = function() {
     if (panel) setPeek(panel, true, 'pl');
   }, SECONDARY_PLAYLIST_EDGE_DWELL_MS);
 }
-window.isPlaylistEdgeTrigger = function(ex, ey, H) {
+function isPlaylistEdgeTrigger(ex, ey, H) {
   var inVerticalBand = ey > 132 && ey < H - 132;
   if (!inVerticalBand) {
     resetSecondaryPlaylistEdgeGuard();
@@ -1469,13 +1469,13 @@ window.isPlaylistEdgeTrigger = function(ex, ey, H) {
   armSecondaryPlaylistEdgeDwell();
   return now - secondaryPlaylistEdgeGuard.enteredAt >= SECONDARY_PLAYLIST_EDGE_DWELL_MS;
 }
-window.playlistPanelExitPadding = function() {
+function playlistPanelExitPadding() {
   return isSecondaryLeftDisplaySeamGuardActive() ? 34 : 72;
 }
-window.playlistPanelFocusPadding = function() {
+function playlistPanelFocusPadding() {
   return isSecondaryLeftDisplaySeamGuardActive() ? 28 : 52;
 }
-window.shouldClosePlaylistPanelFromPointer = function(ppOn, ex, ppRect) {
+function shouldClosePlaylistPanelFromPointer(ppOn, ex, ppRect) {
   if (!ppOn) return false;
   if (isSecondaryLeftDisplaySeamGuardActive() && ex < SECONDARY_PLAYLIST_SEAM_CLOSE_X) return true;
   // 详情面板显示时，鼠标在其区域内不关闭主面板
@@ -1486,7 +1486,7 @@ window.shouldClosePlaylistPanelFromPointer = function(ppOn, ex, ppRect) {
   }
   return ex > ppRect.right + playlistPanelExitPadding();
 }
-window.isPlaylistPanelFocusActive = function(inTrigger, inPanel, pp, ex, ppRect) {
+function isPlaylistPanelFocusActive(inTrigger, inPanel, pp, ex, ppRect) {
   if (isSecondaryLeftDisplaySeamGuardActive() && ex < SECONDARY_PLAYLIST_SEAM_CLOSE_X) return false;
   return inTrigger || inPanel || (pp && pp.classList.contains('peek') && ex < ppRect.right + playlistPanelFocusPadding());
 }

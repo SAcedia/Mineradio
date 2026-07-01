@@ -31,7 +31,7 @@ window.HOTKEY_ACTIONS = [
   { key:'window.toggleFullscreen', label:'全屏', category:'窗口', local:'KeyF', global:'Ctrl+Alt+KeyF' },
   { key:'toggleDesktopLyrics', label:'桌面歌词', category:'歌词', local:'Alt+KeyL', global:'Ctrl+Alt+KeyL' }
 ];
-window.getHotkeyDefaults = function() {
+function getHotkeyDefaults() {
   var defaults = { local: {}, global: {} };
   window.HOTKEY_ACTIONS.forEach(function(action){
     defaults.local[action.key] = action.local || '';
@@ -39,7 +39,7 @@ window.getHotkeyDefaults = function() {
   });
   return defaults;
 };
-window.readHotkeySettings = function() {
+function readHotkeySettings() {
   var defaults = window.getHotkeyDefaults();
   try {
     var raw = JSON.parse(localStorage.getItem(window.HOTKEY_SETTINGS_STORE_KEY) || '{}') || {};
@@ -218,9 +218,9 @@ window.PACKAGED_DEFAULT_FX_SNAPSHOT = Object.freeze({
   shelfAccentColor: '#ffffff',
   cam: 'off'
 });
-window.clonePackagedDefaultFxSnapshot = function() {
+function clonePackagedDefaultFxSnapshot() {
   return Object.assign({}, window.PACKAGED_DEFAULT_FX_SNAPSHOT);
 };
-window.packagedDefaultLyricLayoutRaw = function() {
+function packagedDefaultLyricLayoutRaw() {
   return Object.assign({ desktopLyricsSchema: 'desktop-lyrics-v3' }, window.clonePackagedDefaultFxSnapshot());
 };

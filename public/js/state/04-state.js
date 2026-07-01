@@ -1,31 +1,31 @@
 // ============================================================
-window.normalizeCoverResolution = function(v) {
+function normalizeCoverResolution(v) {
   if (v == null) return 1.50;
   v = clampRange(Number(v) || 1.50, 0.60, 1.65);
   v = Math.round(v / 0.05) * 0.05;
   return v;
 };
-window.normalizePerformanceBackgroundMode = function(v, liveKeepFallback) {
+function normalizePerformanceBackgroundMode(v, liveKeepFallback) {
   if (liveKeepFallback) return 'keep';
   if (v === 'release' || v === 'deep') return v;
   return 'auto';
 };
-window.normalizePerformanceQuality = function(v) {
+function normalizePerformanceQuality(v) {
   return /^(eco|balanced|high|ultra)$/.test(v) ? v : 'high';
 };
-window.coverParticleGridForResolution = function(v) {
+function coverParticleGridForResolution(v) {
   v = normalizeCoverResolution(v);
   if (v >= 1.32) return 256;
   if (v >= 1.10) return 196;
   return 128;
 };
-window.coverTextureSizeForResolution = function(v) {
+function coverTextureSizeForResolution(v) {
   v = normalizeCoverResolution(v);
   if (v >= 1.32) return 512;
   if (v >= 1.10) return 384;
   return 256;
 };
-window.readSavedLyricLayout = function() {
+function readSavedLyricLayout() {
   try {
     var savedLayoutRaw = localStorage.getItem(LYRIC_LAYOUT_STORE_KEY);
     var raw = savedLayoutRaw ? (JSON.parse(savedLayoutRaw) || {}) : packagedDefaultLyricLayoutRaw();
@@ -113,40 +113,40 @@ window.readSavedLyricLayout = function() {
   }
 };
 
-window.normalizeHexColor = function(value, fallback) {
+function normalizeHexColor(value, fallback) {
   if (value && typeof value === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(value)) return value;
   return (fallback || '#000000');
 };
-window.normalizeDesktopLyricsFps = function(value) {
+function normalizeDesktopLyricsFps(value) {
   value = Math.round(Number(value) || 60);
   if (value > 0 && value <= 60) return value;
   return 60;
 };
-window.normalizeShelfCameraMode = function(value) {
+function normalizeShelfCameraMode(value) {
   return value === 'dynamic' ? 'dynamic' : 'static';
 };
-window.shelfDefaultAngleForCameraMode = function(mode) {
+function shelfDefaultAngleForCameraMode(mode) {
   return normalizeShelfCameraMode(mode) === 'static' ? -15 : 0;
 };
-window.normalizeLyricFontKey = function(value) {
+function normalizeLyricFontKey(value) {
   return value === 'hei' ? 'hei' : 'sans';
 };
-window.normalizeShelfPresence = function(value) {
+function normalizeShelfPresence(value) {
   return value === 'always' ? 'always' : 'auto';
 };
 
-window.isDeepBackgroundMode = function() {
+function isDeepBackgroundMode() {
   if (typeof window.isLiveBackgroundKeepMode === 'function' && window.isLiveBackgroundKeepMode()) return false;
   var ds = (typeof window.desktopRuntimeState !== 'undefined' ? window.desktopRuntimeState : null) || {};
   return !!(document.hidden || ds.minimized || ds.visible === false);
 };
 
-window.currentCoverSong = function() {
+function currentCoverSong() {
   if (typeof window.playQueue === 'undefined' || !window.playQueue || !window.playQueue.length || window.currentIdx < 0) return null;
   return window.playQueue[window.currentIdx];
 };
 
-window.saveUserFxArchives = function() {
+function saveUserFxArchives() {
   try { localStorage.setItem(USER_FX_ARCHIVE_STORE_KEY, JSON.stringify(userFxArchives)); }
   catch (e) { showToast('用户存档保存失败'); }
 };
@@ -498,12 +498,12 @@ var runtimePerfState = {
 
 
 // Render power hooks (was in state.js but not extracted)
-window.installRenderPowerHooks = function() {
+function installRenderPowerHooks() {
   window.updateDesktopRuntimeState({ mode: 'shelf', panel: 'playlists' });
   window.addEventListener('resize', function(){ applyRendererPowerMode(); });
   if (typeof window.scheduleShelfRebuild === 'function') window.scheduleShelfRebuild('install-power', 200);
 };
-window.applyRendererPowerMode = function() {
+function applyRendererPowerMode() {
   if (typeof window.renderer === 'undefined' || !window.renderer) return;
   var deep = window.isDeepBackgroundMode();
   var width = deep ? 4 : Math.max(1, innerWidth);
@@ -519,21 +519,21 @@ window.applyRendererPowerMode = function() {
   if (deep) { if (window.renderer.domElement) { window.renderer.domElement.style.opacity = '0'; } }
   else { if (window.renderer.domElement) { window.renderer.domElement.style.opacity = ''; } }
 };
-window.getRenderPixelRatio = function() {
+function getRenderPixelRatio() {
   var device = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
   if (window.isDeepBackgroundMode()) return Math.min(device, 0.30);
   return device;
 };
 
 
-window.updateDesktopRuntimeState = function(state) {
+function updateDesktopRuntimeState(state) {
   if (typeof window.desktopRuntimeState === 'undefined') window.desktopRuntimeState = {};
   if (state) Object.assign(window.desktopRuntimeState, state);
   if (typeof window.updateRenderPowerClasses === 'function') window.updateRenderPowerClasses();
   if (typeof window.applyRendererPowerMode === 'function') window.applyRendererPowerMode();
 };
 
-window.updateUserCapsuleAutoHideFromPointer = function(x, y) {
+function updateUserCapsuleAutoHideFromPointer(x, y) {
   if (!userCapsuleAutoHide || immersiveMode) {
     document.body.classList.remove('user-capsule-peek');
     return;
@@ -542,11 +542,11 @@ window.updateUserCapsuleAutoHideFromPointer = function(x, y) {
   document.body.classList.toggle('user-capsule-peek', nearTopRight);
 };
 
-window.getDesktopWindowApi = function() {
+function getDesktopWindowApi() {
   return window.desktopWindow && window.desktopWindow.isDesktop ? window.desktopWindow : null;
 };
 
-window.updateFxFabAutoHideFromPointer = function(x, y) {
+function updateFxFabAutoHideFromPointer(x, y) {
   if (!fxFabAutoHide || !diyPlayerMode || immersiveMode) {
     document.body.classList.remove('fx-fab-peek');
     fxFabAutoHideRevealArmed = true;
@@ -571,7 +571,7 @@ function syncDiyModeButton() {
   });
 }
 
-window.applyDiyMode = function(on, opts) {
+function applyDiyMode(on, opts) {
   opts = opts || {};
   diyPlayerMode = !!on;
   document.documentElement.classList.toggle('diy-mode-preload', diyPlayerMode);
@@ -598,7 +598,7 @@ window.applyDiyMode = function(on, opts) {
   }
 };
 
-window.markAppPerf = function(name) {
+function markAppPerf(name) {
   try {
     var value = performance.now();
     appPerfMarks.push({ name: name, value: Math.round(value) });
@@ -607,31 +607,31 @@ window.markAppPerf = function(name) {
   } catch (e) {}
 };
 
-window.isDevelopmentLockedFx = function(key) {
+function isDevelopmentLockedFx(key) {
   return !!window.DEVELOPMENT_LOCKED_FX && !!window.DEVELOPMENT_LOCKED_FX[key];
 };
 
-window.normalizeDevelopmentLockedFxState = function() {
+function normalizeDevelopmentLockedFxState() {
   if (!window.fx) return;
   window.fx.wallpaperMode = false;
 };
 
-window.currentLyricSong = function() {
+function currentLyricSong() {
   if (window.currentIdx >= 0 && window.playQueue && window.playQueue[window.currentIdx]) return window.playQueue[window.currentIdx];
   return window.currentLocalSong || null;
 };
 
-window.avatarSrc = function(url) {
+function avatarSrc(url) {
   if (!url) return '';
   if (typeof window.coverProxySrc === 'function') return window.coverProxySrc(url, true);
   return url;
 };
 
-window.isHiddenForBackgroundOptimization = function() {
+function isHiddenForBackgroundOptimization() {
   return !!(document.hidden && !window.isLiveBackgroundKeepMode());
 };
 
-window.maybeTrimRuntimeCaches = function(now) {
+function maybeTrimRuntimeCaches(now) {
   now = now || performance.now();
   var deep = window.isDeepBackgroundMode();
   var gap = deep ? (window.isBackgroundReleaseMode() ? 3600 : 7000) : 45000;
@@ -640,19 +640,19 @@ window.maybeTrimRuntimeCaches = function(now) {
   window.trimRuntimeCaches(deep ? (window.isBackgroundReleaseMode() ? 'release-frame' : 'deep-frame') : 'active-frame', deep);
 };
 
-window.currentPerformanceBackgroundMode = function() {
+function currentPerformanceBackgroundMode() {
   return window.normalizePerformanceBackgroundMode((window.fx||{}).performanceBackground, (window.fx||{}).liveBackgroundKeep === true);
 };
 
-window.isLiveBackgroundKeepMode = function() {
+function isLiveBackgroundKeepMode() {
   return window.currentPerformanceBackgroundMode() === 'keep';
 };
 
-window.isBackgroundReleaseMode = function() {
+function isBackgroundReleaseMode() {
   return window.currentPerformanceBackgroundMode() === 'release';
 };
 
-window.updateFullscreenDiyPeekFromPointer = function(x, y) {
+function updateFullscreenDiyPeekFromPointer(x, y) {
   var ds = window.desktopRuntimeState || {};
   var isFullscreen = !!(ds.fullscreen || window.desktopFullscreenActive || document.fullscreenElement || document.body.classList.contains('desktop-fullscreen'));
   if (!isFullscreen || window.immersiveMode || window.shouldSuppressFullscreenDiyPeek()) {
@@ -674,7 +674,7 @@ window.customBgApplyToken = 0;
 
 window.customBgObjectUrl = null;
 
-window.trimRuntimeCaches = function(reason, aggressive) {
+function trimRuntimeCaches(reason, aggressive) {
   var protectedCovers = typeof window.collectProtectedCoverUrls === 'function' ? window.collectProtectedCoverUrls() : [];
   var protectedBeats = typeof window.collectProtectedBeatMapKeys === 'function' ? window.collectProtectedBeatMapKeys() : [];
   var dropped = 0;

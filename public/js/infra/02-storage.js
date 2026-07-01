@@ -1,15 +1,15 @@
 // 02-storage.js — localStorage utilities extracted from shared.js + prefs.js
 // Loads after 01-constants.js (store keys, fxDefaults) and shared.js (clampRange, VISUAL_PRESET_SCHEMA)
 
-window.readDiyModePreference = function() {
+function readDiyModePreference() {
   try { return localStorage.getItem(window.DIY_MODE_STORE_KEY) === '1'; } catch (e) { return false; }
 };
 
-window.readBooleanPreference = function(key, fallback) {
+function readBooleanPreference(key, fallback) {
   try { var v = localStorage.getItem(key); return v == null ? !!fallback : (v === 'true' || v === '1'); } catch (e) { return !!fallback; }
 };
 
-window.readSavedVolume = function() {
+function readSavedVolume() {
   try {
     var v = parseFloat(localStorage.getItem('apex-player-volume'));
     return isFinite(v) ? Math.max(0, Math.min(1, v)) : 1.0;
@@ -18,15 +18,15 @@ window.readSavedVolume = function() {
   }
 };
 
-window.saveDiyModePreference = function(on) {
+function saveDiyModePreference(on) {
   try { localStorage.setItem(window.DIY_MODE_STORE_KEY, on ? '1' : '0'); } catch (e) {}
 };
 
-window.saveBooleanPreference = function(key, on) {
+function saveBooleanPreference(key, on) {
   try { localStorage.setItem(key, on ? '1' : '0'); } catch (e) {}
 };
 
-window.readSavedPlaybackVisualPreset = function() {
+function readSavedPlaybackVisualPreset() {
   try {
     var raw = JSON.parse(localStorage.getItem(window.LYRIC_LAYOUT_STORE_KEY) || '{}') || {};
     if (!Object.prototype.hasOwnProperty.call(raw, 'preset')) return window.fxDefaults.preset;

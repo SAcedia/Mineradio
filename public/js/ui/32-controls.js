@@ -3,7 +3,7 @@ window.$input = document.getElementById("search-input");
 // ============================================================
 //  进度/时间格式化
 // ============================================================
-window.formatProgramTime = function(sec) {
+function formatProgramTime(sec) {
   sec = Math.max(0, Number(sec) || 0);
   var h = Math.floor(sec / 3600);
   var m = Math.floor((sec % 3600) / 60);
@@ -14,7 +14,7 @@ window.formatProgramTime = function(sec) {
 // ============================================================
 //  播放列表面板
 // ============================================================
-window.animateListItems = function(container, selector, opts) {
+function animateListItems(container, selector, opts) {
   if (!container || !window.gsap) return;
   opts = opts || {};
   var items = Array.prototype.slice.call(container.querySelectorAll(selector));
@@ -37,7 +37,7 @@ window.animateListItems = function(container, selector, opts) {
     overwrite: true
   });
 }
-window.smoothScrollToItem = function(scroller, item, opts) {
+function smoothScrollToItem(scroller, item, opts) {
   if (!scroller || !item) return;
   opts = opts || {};
   var target = item.offsetTop - Math.max(0, (scroller.clientHeight - item.offsetHeight) * (opts.align == null ? 0.42 : opts.align));
@@ -52,7 +52,7 @@ window.smoothScrollToItem = function(scroller, item, opts) {
     scroller.scrollTop = target;
   }
 }
-window.bindSmoothWheelScroll = function(scroller) {
+function bindSmoothWheelScroll(scroller) {
   if (!scroller || scroller.__smoothWheelBound) return;
   scroller.__smoothWheelBound = true;
   var targetTop = scroller.scrollTop;
@@ -95,7 +95,7 @@ window.bindSmoothWheelScroll = function(scroller) {
     if (!tween) targetTop = scroller.scrollTop;
   }, { passive: true });
 }
-window.bindSmoothQueueScrolling = function() {
+function bindSmoothQueueScrolling() {
   if (window.smoothWheelScrollBound) return;
   smoothWheelScrollBound = true;
   [
@@ -108,7 +108,7 @@ window.bindSmoothQueueScrolling = function() {
     bindSmoothWheelScroll(document.getElementById(id));
   });
 }
-window.animateVisiblePanelList = function(listEl, selector, scroller, activeSelector, opts) {
+function animateVisiblePanelList(listEl, selector, scroller, activeSelector, opts) {
   if (!listEl) return;
   opts = opts || {};
   requestAnimationFrame(function(){
@@ -117,10 +117,10 @@ window.animateVisiblePanelList = function(listEl, selector, scroller, activeSele
     if (active && scroller && opts.scrollActive !== false) smoothScrollToItem(scroller, active, { duration: 0.32 });
   });
 }
-window.miniQueueSkeleton = function() {
+function miniQueueSkeleton() {
   return '<div class="mini-queue-skeleton"></div><div class="mini-queue-skeleton"></div><div class="mini-queue-skeleton"></div>';
 }
-window.togglePlaylistPanel = function(force) {
+function togglePlaylistPanel(force) {
   var el = document.getElementById('playlist-panel');
   if (force === false) el.classList.remove('show');
   else if (force === true) el.classList.add('show');
@@ -137,7 +137,7 @@ window.togglePlaylistPanel = function(force) {
     }, 180);
   }
 }
-window.applyPlaylistPanelPinState = function(openPanel) {
+function applyPlaylistPanelPinState(openPanel) {
   var panel = document.getElementById('playlist-panel');
   var btn = document.getElementById('playlist-pin-btn');
   if (panel) {
@@ -152,16 +152,16 @@ window.applyPlaylistPanelPinState = function(openPanel) {
     btn.title = window.playlistPanelPinned ? '取消常开歌单' : '常开歌单';
   }
 }
-window.setPlaylistPanelPinned = function(on, silent) {
+function setPlaylistPanelPinned(on, silent) {
   playlistPanelPinned = !!on;
   saveBooleanPreference(window.PLAYLIST_PANEL_PIN_STORE_KEY, window.playlistPanelPinned);
   applyPlaylistPanelPinState(window.playlistPanelPinned);
   if (!silent) window.showToast(window.playlistPanelPinned ? '左侧歌单已常开' : '左侧歌单已恢复自动隐藏');
 }
-window.togglePlaylistPanelPinned = function() {
+function togglePlaylistPanelPinned() {
   setPlaylistPanelPinned(!window.playlistPanelPinned);
 }
-window.scrollPlaylistPanelToCurrent = function() {
+function scrollPlaylistPanelToCurrent() {
   var panel = document.getElementById('playlist-panel');
   var list = document.getElementById('queue-list');
   if (!panel || !list || window.queueViewTab !== 'queue') return;
@@ -172,7 +172,7 @@ window.scrollPlaylistPanelToCurrent = function() {
     smoothScrollToItem(panel, list.querySelector('.queue-item.now'), { duration: 0.28, align: 0.34 });
   });
 }
-window.switchPlaylistTab = function(tab) {
+function switchPlaylistTab(tab) {
   tab = tab === 'podcasts' ? 'podcasts' : (tab === 'playlists' ? 'playlists' : 'queue');
   if (tab !== 'playlists') window.hideLocalPlaylistDetail();
   queueViewTab = tab;
@@ -189,7 +189,7 @@ window.switchPlaylistTab = function(tab) {
   if (tab === 'playlists') { window.renderLocalPlaylistsIntoView(); animateVisiblePanelList(document.getElementById('pl-list'), '.pl-card', document.getElementById('playlist-panel')); }
   if (tab === 'podcasts') animateVisiblePanelList(document.getElementById('podcast-list'), '.pl-card', document.getElementById('playlist-panel'));
 }
-window.setMiniQueueOpen = function(open) {
+function setMiniQueueOpen(open) {
   miniQueueOpen = !!open;
   var pop = document.getElementById('mini-queue-popover');
   var btn = document.getElementById('mini-queue-btn');
@@ -204,21 +204,21 @@ window.setMiniQueueOpen = function(open) {
     revealBottomControls(1300);
   }
 }
-window.toggleMiniQueue = function(e) {
+function toggleMiniQueue(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   setMiniQueueOpen(!window.miniQueueOpen);
 }
-window.closeMiniQueue = function() {
+function closeMiniQueue() {
   setMiniQueueOpen(false);
 }
-window.openPlaylistPanelTab = function(tab, preserve) {
+function openPlaylistPanelTab(tab, preserve) {
   tab = tab === 'podcasts' ? 'podcasts' : (tab === 'playlists' ? 'playlists' : 'queue');
   var panel = document.getElementById('playlist-panel');
   if (panel && panel.dataset && preserve !== false) panel.dataset.preserveTabOnOpen = '1';
   window.switchPlaylistTab(tab);
   setPeek(panel, true, 'pl');
 }
-window.renderMiniQueuePanel = function(opts) {
+function renderMiniQueuePanel(opts) {
   opts = opts || {};
   var $list = document.getElementById('mini-queue-list');
   var $count = document.getElementById('mini-queue-count');
@@ -251,7 +251,7 @@ document.addEventListener('click', function(e){
   if (window.miniQueueOpen && !(e.target && e.target.closest && e.target.closest('#bottom-bar'))) closeMiniQueue();
 });
 bindSmoothQueueScrolling();
-window.renderQueuePanel = function(opts) {
+function renderQueuePanel(opts) {
   opts = opts || {};
   var $ql = document.getElementById('queue-list');
   var seq = ++window.queueRenderSeq;
@@ -279,7 +279,7 @@ window.renderQueuePanel = function(opts) {
   if (opts.animate && seq === window.queueRenderSeq) animateVisiblePanelList($ql, '.queue-item', document.getElementById('playlist-panel'), '.queue-item.now');
   renderMiniQueuePanel({ scrollCurrent: window.miniQueueOpen });
 }
-window.refreshUserPlaylists = async function(force) {
+async function refreshUserPlaylists(force) {
   if (!window.loginStatus.loggedIn && !window.qqLoginStatus.loggedIn) {
     resetPlaylistPanelRenderLimit();
     document.getElementById('pl-list').innerHTML = '<div style="text-align:center;padding:24px 0;color:rgba(255,255,255,.32);font-size:11.5px">登录后显示个人歌单</div>';
@@ -326,30 +326,30 @@ window.refreshUserPlaylists = async function(force) {
 //  进度条
 // ============================================================
 var progressDragState = { active: false, lastParticleAt: 0 };
-window.normalizePlaybackDurationSeconds = function(value) {
+function normalizePlaybackDurationSeconds(value) {
   var raw = Number(value);
   if (!isFinite(raw) || raw <= 0) return 0;
   return raw > 1000 ? raw / 1000 : raw;
 }
-window.playbackDurationFromSong = function(song) {
+function playbackDurationFromSong(song) {
   if (!song) return 0;
   return normalizePlaybackDurationSeconds(song.duration || song.durationMs || song.dt || 0);
 }
-window.getPlaybackDurationSeconds = function() {
+function getPlaybackDurationSeconds() {
   if (window.audio && isFinite(window.audio.duration) && window.audio.duration > 0) return window.audio.duration;
   return playbackDurationFromSong(window.currentCoverSong());
 }
-window.getPlaybackCurrentSeconds = function() {
+function getPlaybackCurrentSeconds() {
   return window.audio && isFinite(window.audio.currentTime) && window.audio.currentTime > 0 ? window.audio.currentTime : 0;
 }
-window.setProgressVisual = function(percent) {
+function setProgressVisual(percent) {
   percent = window.clampRange(percent || 0, 0, 100);
   var fill = document.getElementById('progress-fill');
   var thumb = document.getElementById('progress-thumb');
   if (fill) fill.style.width = percent + '%';
   if (thumb) thumb.style.left = percent + '%';
 }
-window.updatePlaybackProgressUi = function() {
+function updatePlaybackProgressUi() {
   var durationSec = getPlaybackDurationSeconds();
   var currentSec = getPlaybackCurrentSeconds();
   if (durationSec > 0 && currentSec > durationSec) currentSec = durationSec;
@@ -357,7 +357,7 @@ window.updatePlaybackProgressUi = function() {
   var timeDisplay = document.getElementById('time-display');
   if (timeDisplay) timeDisplay.textContent = formatProgramTime(currentSec) + ' / ' + (durationSec > 0 ? formatProgramTime(durationSec) : '0:00');
 }
-window.bindPlaybackProgressEvents = function(audioEl) {
+function bindPlaybackProgressEvents(audioEl) {
   if (!audioEl || audioEl._mineradioProgressBound) return;
   audioEl._mineradioProgressBound = true;
   ['loadedmetadata', 'durationchange', 'timeupdate', 'seeked', 'play', 'pause', 'emptied'].forEach(function(name){
@@ -367,7 +367,7 @@ window.bindPlaybackProgressEvents = function(audioEl) {
     audioEl.addEventListener(name, function(){ syncPlaybackStateFromAudioEvent(name); });
   });
 }
-window.emitProgressDragParticles = function(x, y) {
+function emitProgressDragParticles(x, y) {
   var now = performance.now();
   if (now - progressDragState.lastParticleAt < 46) return;
   progressDragState.lastParticleAt = now;
@@ -384,7 +384,7 @@ window.emitProgressDragParticles = function(x, y) {
     setTimeout((function(el){ return function(){ if (el && el.parentNode) el.parentNode.removeChild(el); }; })(dot), 700);
   }
 }
-window.seekFromProgressPointer = function(e, emitParticles) {
+function seekFromProgressPointer(e, emitParticles) {
   var durationSec = getPlaybackDurationSeconds();
   if (!window.audio || !durationSec) return;
   var bar = document.getElementById('progress-bar');
@@ -407,7 +407,7 @@ progressBar.addEventListener('pointermove', function(e){
   if (!progressDragState.active) return;
   seekFromProgressPointer(e, true);
 });
-window.endProgressDrag = function(e) {
+function endProgressDrag(e) {
   if (!progressDragState.active) return;
   progressDragState.active = false;
   progressBar.classList.remove('is-dragging');
@@ -426,11 +426,11 @@ setInterval(function(){
 // ============================================================
 //  播放模式
 // ============================================================
-window.playModeLabel = function(mode) {
+function playModeLabel(mode) {
   return { loop: '顺序循环', shuffle: '随机播放', single: '单曲循环' }[mode] || '顺序循环';
 }
 
-window.playModeIconMarkup = function(mode) {
+function playModeIconMarkup(mode) {
   if (mode === 'shuffle') {
     return '<path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/>';
   }
@@ -440,7 +440,7 @@ window.playModeIconMarkup = function(mode) {
   return '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>';
 }
 
-window.updatePlayModeButton = function(animate) {
+function updatePlayModeButton(animate) {
   var label = window.playModeLabel(window.playMode);
   var chip = document.getElementById('play-mode-chip');
   var btn = document.getElementById('play-mode-btn');
@@ -473,7 +473,7 @@ window.updatePlayModeButton = function(animate) {
   }
 }
 
-window.cyclePlayMode = function() {
+function cyclePlayMode() {
   var modes = ['loop', 'shuffle', 'single'];
   var idx = modes.indexOf(window.playMode);
   playMode = modes[(idx + 1) % modes.length];
@@ -484,7 +484,7 @@ window.cyclePlayMode = function() {
 // ============================================================
 //  队列操作
 // ============================================================
-window.shuffleQueue = function() {
+function shuffleQueue() {
   for (var i = window.playQueue.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
     var tmp = window.playQueue[i]; window.playQueue[i] = window.playQueue[j]; window.playQueue[j] = tmp;
@@ -494,7 +494,7 @@ window.shuffleQueue = function() {
   window.safeShelfRebuild('shuffle-queue');
 }
 
-window.clearQueue = function() {
+function clearQueue() {
   playQueue = []; currentIdx = -1;
   window.safeRenderQueuePanel('clear-queue');
   window.safeShelfRebuild('clear-queue');
@@ -506,7 +506,7 @@ window.clearQueue = function() {
 // ============================================================
 //  控制条自动隐藏
 // ============================================================
-window.toggleControlsAutoHide = function() {
+function toggleControlsAutoHide() {
   controlsAutoHide = !window.controlsAutoHide;
   saveBooleanPreference(window.CONTROLS_AUTO_HIDE_STORE_KEY, window.controlsAutoHide);
   var btn = document.getElementById('controls-hide-btn');
@@ -524,14 +524,14 @@ window.toggleControlsAutoHide = function() {
 // ============================================================
 //  沉浸模式
 // ============================================================
-window.toggleImmersiveMode = function() {
+function toggleImmersiveMode() {
   setImmersiveMode(!window.immersiveMode);
 }
 
 // ============================================================
 //  全屏
 // ============================================================
-window.toggleFullscreen = function() {
+function toggleFullscreen() {
   var api = window.desktopWindow;
   if (api && api.isDesktop && typeof api.toggleFullscreen === 'function') {
     if (document.fullscreenElement && document.exitFullscreen) {

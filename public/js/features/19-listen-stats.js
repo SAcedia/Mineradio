@@ -1,6 +1,6 @@
 // Listen Statistics / Tracking
 // ============================================================
-window.loadListenStatsState = function() {
+function loadListenStatsState() {
   try {
     var raw = localStorage.getItem(HOME_LISTEN_STATS_KEY);
     if (!raw) return { history: [], songs: {}, artists: {}, updatedAt: 0 };
@@ -15,13 +15,13 @@ window.loadListenStatsState = function() {
     return { history: [], songs: {}, artists: {}, updatedAt: 0 };
   }
 }
-window.saveListenStatsState = function() {
+function saveListenStatsState() {
   try {
     window.listenStatsState.updatedAt = Date.now();
     localStorage.setItem(HOME_LISTEN_STATS_KEY, JSON.stringify(window.listenStatsState));
   } catch (e) {}
 }
-window.listenSongSnapshot = function(song) {
+function listenSongSnapshot(song) {
   song = song || {};
   return {
     key: queueItemKey(song),
@@ -38,7 +38,7 @@ window.listenSongSnapshot = function(song) {
     duration: Number(song.duration) || 0,
   };
 }
-window.beginListenSession = function(song, context) {
+function beginListenSession(song, context) {
   if (!song) return;
   var snap = window.listenSongSnapshot(song);
   if (!snap.key) return;
@@ -54,7 +54,7 @@ window.beginListenSession = function(song, context) {
     maxProgress: 0,
   };
 }
-window.updateListenStatsTick = function(force) {
+function updateListenStatsTick(force) {
   if (!window.audio || !window.audio.duration || window.audio.paused) return;
   var song = window.currentCoverSong();
   if (!song) return;
@@ -72,7 +72,7 @@ window.updateListenStatsTick = function(force) {
   window.listenSession.lastAudioTime = audioTime;
   window.listenSession.maxProgress = Math.max(window.listenSession.maxProgress || 0, window.audio.duration ? audioTime / window.audio.duration : 0);
 }
-window.finalizeListenSession = function(completed) {
+function finalizeListenSession(completed) {
   if (!window.listenSession) return;
   window.updateListenStatsTick(true);
   var session = window.listenSession;
@@ -120,12 +120,12 @@ window.finalizeListenSession = function(completed) {
   window.saveListenStatsState();
   if (emptyHomeActive) renderHomeDiscover();
 }
-window.mostPlayedSong = function() {
+function mostPlayedSong() {
   var list = Object.keys((window.listenStatsState || {}).songs || {}).map(function(key){ return window.listenStatsState.songs[key]; });
   list.sort(function(a, b){ return (b.plays - a.plays) || (b.listenMs - a.listenMs) || (b.lastPlayedAt - a.lastPlayedAt); });
   return list[0] || null;
 }
-window.topListenArtist = function() {
+function topListenArtist() {
   var list = Object.keys((window.listenStatsState || {}).artists || {}).map(function(key){ return window.listenStatsState.artists[key]; });
   list.sort(function(a, b){ return (b.plays - a.plays) || (b.listenMs - a.listenMs) || (b.lastPlayedAt - a.lastPlayedAt); });
   return list[0] || null;

@@ -1,10 +1,10 @@
 // ============================================================
 //  音质管理
 // ============================================================
-window.hasProviderSvip = function(provider, status) {
+function hasProviderSvip(provider, status) {
   return provider === 'netease' && providerVipLevel(provider, status) === 'svip';
 }
-window.updatePlaybackQualityUi = function() {
+function updatePlaybackQualityUi() {
   var label = document.getElementById('quality-btn-label');
   var btn = document.getElementById('quality-btn');
   var wrap = document.getElementById('quality-control');
@@ -27,7 +27,7 @@ window.updatePlaybackQualityUi = function() {
     option.title = locked ? '需要网易云 SVIP 账号' : window.playbackQualityLabel(q);
   });
 }
-window.setPlaybackQuality = function(value) {
+function setPlaybackQuality(value) {
   var next = window.normalizePlaybackQuality(value);
   if (next === 'jymaster' && !hasProviderSvip('netease', window.loginStatus)) {
     window.showToast(window.hasPlatformLogin('netease') ? '超清母带需要网易云 SVIP' : '登录网易云 SVIP 后可用超清母带');
@@ -41,14 +41,14 @@ window.setPlaybackQuality = function(value) {
   if (wrap) wrap.classList.remove('open');
   window.applyPlaybackQualityToCurrentTrack(next);
 }
-window.canReloadCurrentTrackForQuality = function() {
+function canReloadCurrentTrackForQuality() {
   if (window.currentIdx < 0 || window.currentIdx >= window.playQueue.length) return false;
   if (!window.audio || !window.audio.src || window.audio.paused || window.audio.ended) return false;
   var song = window.playQueue[window.currentIdx];
   if (!song || song.type === 'local' || song.source === 'local') return false;
   return window.songProviderKey(song) === 'netease' || window.songProviderKey(song) === 'qq';
 }
-window.applyPlaybackQualityToCurrentTrack = function(nextQuality) {
+function applyPlaybackQualityToCurrentTrack(nextQuality) {
   var label = window.playbackQualityLabel(nextQuality || window.playbackQuality);
   if (!window.canReloadCurrentTrackForQuality()) {
     window.showToast('音质偏好: ' + label + ' · 下次播放生效');
@@ -66,12 +66,12 @@ window.applyPlaybackQualityToCurrentTrack = function(nextQuality) {
     window.showToast('音质切换失败，已保留偏好');
   }).finally(window.forcePlaybackControlsInteractive);
 }
-window.toggleQualityPanel = function(e) {
+function toggleQualityPanel(e) {
   if (e) e.stopPropagation();
   var wrap = document.getElementById('quality-control');
   if (wrap) wrap.classList.toggle('open');
 }
-window.bindQualityControl = function() {
+function bindQualityControl() {
   var wrap = document.getElementById('quality-control');
   if (wrap) {
     wrap.addEventListener('mouseenter', function(){ wrap.classList.add('open'); });

@@ -47,7 +47,7 @@ window.lyricBaseQuat = new THREE.Quaternion();
 window.lyricTiltQuat = new THREE.Quaternion();
 window.lyricTargetQuat = new THREE.Quaternion();
 window.LYRIC_CAMERA_LOCK_MAX_SCALE = 0.80;
-window.setStageLyricViewBasisFromCameraOrQuaternion = function(fallbackQuat) {
+function setStageLyricViewBasisFromCameraOrQuaternion(fallbackQuat) {
   if (fallbackQuat) {
     lyricCameraDir.set(0, 0, 1).applyQuaternion(fallbackQuat);
     lyricCameraRight.set(1, 0, 0).applyQuaternion(fallbackQuat);
@@ -65,18 +65,18 @@ window.setStageLyricViewBasisFromCameraOrQuaternion = function(fallbackQuat) {
   lyricCameraRight.normalize();
   lyricCameraUp.normalize();
 }
-window.applyStageLyricLayoutOffset = function(target, x, y, z) {
+function applyStageLyricLayoutOffset(target, x, y, z) {
   return target
     .addScaledVector(lyricCameraRight, x || 0)
     .addScaledVector(lyricCameraUp, y || 0)
     .addScaledVector(lyricCameraDir, z || 0);
 }
-window.stageLyricTargetQuaternion = function(baseQuat, tiltX, tiltY) {
+function stageLyricTargetQuaternion(baseQuat, tiltX, tiltY) {
   lyricTiltEuler.set((tiltX || 0) * Math.PI / 180, (tiltY || 0) * Math.PI / 180, 0, 'YXZ');
   lyricTiltQuat.setFromEuler(lyricTiltEuler);
   return lyricTargetQuat.copy(baseQuat || lyricBaseQuat).multiply(lyricTiltQuat);
 }
-window.getStageLyricLockBounds = function() {
+function getStageLyricLockBounds() {
   var maxW = 0, maxH = 0;
   function take(mesh) {
     if (!mesh || !mesh.userData || !mesh.userData.lyric) return;
@@ -89,7 +89,7 @@ window.getStageLyricLockBounds = function() {
   for (var i = 0; i < window.stageLyrics.outgoing.length; i++) take(window.stageLyrics.outgoing[i]);
   return { w: maxW || 5.4, h: maxH || 0.78 };
 }
-window.lyricCameraLockFit = function(layoutScale, layoutX, layoutY, distance) {
+function lyricCameraLockFit(layoutScale, layoutX, layoutY, distance) {
   if (!window.camera || !window.camera.isPerspectiveCamera) return 1;
   layoutScale = Math.max(0.1, layoutScale || 1);
   var fov = (window.camera.fov || 45) * Math.PI / 180;
@@ -115,7 +115,7 @@ window.lyricsAttrTargetA = null;
 window.lyricsAttrTargetB = null;
 window.lyricsAttrSeed = null;
 
-window.createLyricsParticles = function() {
+function createLyricsParticles() {
   if (window.stageLyrics.group) {
     ensureLyricStarRiver();
     return;
@@ -126,7 +126,7 @@ window.createLyricsParticles = function() {
   ensureLyricStarRiver();
 }
 
-window.ensureLyricStarRiver = function() {
+function ensureLyricStarRiver() {
   if (!window.stageLyrics.group || window.stageLyrics.starRiver) return window.stageLyrics.starRiver;
   var count = 420;
   var geo = new THREE.BufferGeometry();
@@ -211,7 +211,7 @@ window.ensureLyricStarRiver = function() {
   return points;
 }
 
-window.updateLyricStarRiver = function(dt) {
+function updateLyricStarRiver(dt) {
   var river = ensureLyricStarRiver();
   if (!river || !river.material || !river.material.uniforms) return;
   if (window.fx && window.fx.preset === SKULL_PRESET_INDEX) {
@@ -241,7 +241,7 @@ window.updateLyricStarRiver = function(dt) {
   river.rotation.z = Math.sin(t * 0.22) * 0.012;
 }
 
-window.disposeLyricMesh = function(mesh) {
+function disposeLyricMesh(mesh) {
   if (!mesh) return;
   if (mesh.parent) mesh.parent.remove(mesh);
   mesh.traverse(function(obj){
@@ -258,7 +258,7 @@ window.disposeLyricMesh = function(mesh) {
   });
 }
 
-window.rgbToHsl = function(r, g, b) {
+function rgbToHsl(r, g, b) {
   r /= 255; g /= 255; b /= 255;
   var max = Math.max(r, g, b), min = Math.min(r, g, b);
   var h = 0, s = 0, l = (max + min) / 2;
@@ -272,7 +272,7 @@ window.rgbToHsl = function(r, g, b) {
   }
   return { h:h, s:s, l:l };
 }
-window.hslToRgb = function(h, s, l) {
+function hslToRgb(h, s, l) {
   function hue2rgb(p, q, t) {
     if (t < 0) t += 1;
     if (t > 1) t -= 1;
@@ -292,20 +292,20 @@ window.hslToRgb = function(h, s, l) {
   }
   return { r:Math.round(r * 255), g:Math.round(g * 255), b:Math.round(b * 255) };
 }
-window.rgbCss = function(c, a) {
+function rgbCss(c, a) {
   if (a == null) return 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
   return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + a + ')';
 }
-window.normalizeCoverResolution = function(v) {
+function normalizeCoverResolution(v) {
   return window.clampRange(Number(v) || 1, 0.75, 1.55);
 }
-window.normalizePerformanceBackgroundMode = function(v, liveKeepFallback) {
+function normalizePerformanceBackgroundMode(v, liveKeepFallback) {
   var value = String(v || '');
   if (value === 'keep' || liveKeepFallback === true) return 'keep';
   if (value === 'release') return 'release';
   return 'auto';
 }
-window.normalizePerformanceQuality = function(v) {
+function normalizePerformanceQuality(v) {
   var value = String(v || '');
   return /^(eco|balanced|high|ultra)$/.test(value) ? value : window.fxDefaults.performanceQuality;
 }

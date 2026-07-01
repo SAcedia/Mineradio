@@ -3,7 +3,7 @@
 // Extracted from api-helper.js and cover.js. All functions use window.* prefix.
 
 // ---- Fetch wrapper ----
-window.apiJson = async function(url, opts) {
+async function apiJson(url, opts) {
   opts = opts || {};
   var timeoutMs = Number(opts.timeoutMs) || 0;
   var fetchOpts = Object.assign({}, opts);
@@ -23,7 +23,7 @@ window.apiJson = async function(url, opts) {
 }
 
 // ---- Playback quality normalization ----
-window.normalizePlaybackQuality = function(value) {
+function normalizePlaybackQuality(value) {
   value = String(value || '').toLowerCase();
   if (value === 'jymaster' || value === 'master' || value === 'svip') return 'jymaster';
   if (value === 'hires' || value === 'hi-res' || value === 'highres' || value === 'highest') return 'hires';
@@ -33,7 +33,7 @@ window.normalizePlaybackQuality = function(value) {
   return 'hires';
 }
 
-window.playbackQualityLabel = function(value) {
+function playbackQualityLabel(value) {
   value = window.normalizePlaybackQuality(value);
   if (value === 'jymaster') return '超清母带';
   if (value === 'hires') return '高清臻音';
@@ -43,7 +43,7 @@ window.playbackQualityLabel = function(value) {
   return '高清臻音';
 }
 
-window.playbackQualityShortLabel = function(value) {
+function playbackQualityShortLabel(value) {
   value = window.normalizePlaybackQuality(value);
   if (value === 'jymaster') return '母带';
   if (value === 'hires') return '臻音';
@@ -53,7 +53,7 @@ window.playbackQualityShortLabel = function(value) {
   return '臻音';
 }
 
-window.playbackQualityRank = function(value) {
+function playbackQualityRank(value) {
   value = window.normalizePlaybackQuality(value);
   if (value === 'jymaster') return 5;
   if (value === 'hires') return 4;
@@ -63,25 +63,25 @@ window.playbackQualityRank = function(value) {
   return 4;
 }
 
-window.playbackQualityWasDowngraded = function(requested, resolved) {
+function playbackQualityWasDowngraded(requested, resolved) {
   return window.playbackQualityRank(resolved) < window.playbackQualityRank(requested);
 }
 
-window.playbackBitrateLabel = function(br) {
+function playbackBitrateLabel(br) {
   br = Number(br) || 0;
   if (!br) return '';
   if (br >= 1000000) return (br / 1000000).toFixed(br >= 2000000 ? 1 : 2).replace(/\.0+$/, '') + ' Mbps';
   return Math.round(br / 1000) + ' kbps';
 }
 
-window.playbackResolvedQualityText = function(data) {
+function playbackResolvedQualityText(data) {
   data = data || {};
   var label = window.playbackQualityLabel(data.level || data.quality || window.playbackQuality);
   var br = window.playbackBitrateLabel(data.br);
   return br ? (label + ' · ' + br) : label;
 }
 
-window.readPlaybackQualityPreference = function() {
+function readPlaybackQualityPreference() {
   try {
     return window.normalizePlaybackQuality(localStorage.getItem(window.PLAYBACK_QUALITY_STORE_KEY) || 'hires');
   } catch (e) {
@@ -89,12 +89,12 @@ window.readPlaybackQualityPreference = function() {
   }
 }
 
-window.savePlaybackQualityPreference = function() {
+function savePlaybackQualityPreference() {
   try { localStorage.setItem(window.PLAYBACK_QUALITY_STORE_KEY, window.playbackQuality); } catch (e) {}
 }
 
 // ---- Cover / image helpers ----
-window.coverUrlWithSize = function(url, size) {
+function coverUrlWithSize(url, size) {
   if (!url || window.isInlineCoverSrc(url) || !/^https?:\/\//i.test(url)) return url || '';
   if (!size) return url;
   var param = 'param=' + size + 'y' + size;
@@ -102,11 +102,11 @@ window.coverUrlWithSize = function(url, size) {
   return url + (url.indexOf('?') >= 0 ? '&' : '?') + param;
 }
 
-window.cssImageUrl = function(url) {
+function cssImageUrl(url) {
   return String(url || '').replace(/\\/g, '\\\\').replace(/"/g, '%22');
 }
 
-window.coverProxySrc = function(url, cacheBust) {
+function coverProxySrc(url, cacheBust) {
   if (!url) return '';
   if (window.isInlineCoverSrc(url)) return url;
   if (!window.isProxyableCoverUrl(url)) return '';
@@ -116,7 +116,7 @@ window.coverProxySrc = function(url, cacheBust) {
 // ---- Audio URL cache (from shared.js) ----
 window._audioUrlCache = {};
 window._prefetchAudioEls = {};
-window._cacheKeyForSong = function(song) {
+function _cacheKeyForSong(song) {
   var provider = window.songProviderKey(song);
   return provider + ':' + (song.id || song.mid || song.songmid || (song.name + '|' + song.artist));
 }

@@ -1,7 +1,7 @@
 // ============================================================
 //  音频上下文 & 频谱分析
 // ============================================================
-window.initAudio = function() {
+function initAudio() {
   if (window.audioReady) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   source = window.audioCtx.createMediaElementSource(window.audio);
@@ -23,12 +23,12 @@ window.initAudio = function() {
   resetRealtimeBeatEngine();
   audioReady = true;
 }
-window.resumeAudioAnalysis = function() {
+function resumeAudioAnalysis() {
   if (window.audioCtx && window.audioCtx.state === 'suspended') return window.audioCtx.resume().catch(function(e){ console.warn('window.audio context resume failed:', e); });
   return Promise.resolve();
 }
 
-window.ensureUiSfxContext = function() {
+function ensureUiSfxContext() {
   var AudioContextCtor = window.AudioContext || window.webkitAudioContext;
   if (!AudioContextCtor) return null;
   if (!window.uiSfxCtx || window.uiSfxCtx.state === 'closed') uiSfxCtx = new AudioContextCtor();
@@ -36,7 +36,7 @@ window.ensureUiSfxContext = function() {
   return window.uiSfxCtx;
 }
 
-window.playShelfSelectTick = function(direction, variant) {
+function playShelfSelectTick(direction, variant) {
   var nowMs = performance.now();
   var minGap = variant === 'row' ? 36 : 42;
   if (nowMs - lastShelfSelectSfxAt < minGap) return;
@@ -106,7 +106,7 @@ window.playShelfSelectTick = function(direction, variant) {
   }, 160);
 }
 
-window.clearAudioFadeTimers = function() {
+function clearAudioFadeTimers() {
   if (window.audioFadeTimer) {
     clearTimeout(window.audioFadeTimer);
     audioFadeTimer = null;
@@ -116,19 +116,19 @@ window.clearAudioFadeTimers = function() {
     audioElementFadeFrame = 0;
   }
 }
-window.currentAudioOutputGain = function() {
+function currentAudioOutputGain() {
   if (window.gainNode && window.gainNode.gain && isFinite(window.gainNode.gain.value)) return window.clampRange(Number(window.gainNode.gain.value), 0, 1);
   if (window.audio && isFinite(window.audio.volume)) return window.clampRange(Number(window.audio.volume), 0, 1);
   return window.clampRange(window.targetVolume, 0, 1);
 }
-window.audioSilentFloor = function() {
+function audioSilentFloor() {
   return window.targetVolume > 0.001 ? AUDIO_SILENCE_GAIN : 0;
 }
-window.normalizeAudioFadeTarget = function(value) {
+function normalizeAudioFadeTarget(value) {
   value = window.clampRange(Number(value) || 0, 0, 1);
   return value <= 0.001 ? audioSilentFloor() : value;
 }
-window.holdAudioOutputGain = function(now) {
+function holdAudioOutputGain(now) {
   var current = currentAudioOutputGain();
   if (!window.gainNode || !window.audioCtx || !window.gainNode.gain) return current;
   var param = window.gainNode.gain;
@@ -147,7 +147,7 @@ window.holdAudioOutputGain = function(now) {
   }
   return current;
 }
-window.setAudioOutputGainImmediate = function(value) {
+function setAudioOutputGainImmediate(value) {
   value = normalizeAudioFadeTarget(value);
   clearAudioFadeTimers();
   if (window.gainNode && window.audioCtx) {
@@ -158,7 +158,7 @@ window.setAudioOutputGainImmediate = function(value) {
     window.audio.volume = value;
   }
 }
-window.rampAudioOutputGain = function(value, durationMs) {
+function rampAudioOutputGain(value, durationMs) {
   value = normalizeAudioFadeTarget(value);
   durationMs = Math.max(0, Number(durationMs) || 0);
   clearAudioFadeTimers();
@@ -186,11 +186,11 @@ window.rampAudioOutputGain = function(value, durationMs) {
   }
   audioElementFadeFrame = requestAnimationFrame(tickAudioFade);
 }
-window.preparePlaybackFadeIn = function() {
+function preparePlaybackFadeIn() {
   window.audioFadeSerial++;
   setAudioOutputGainImmediate(0);
 }
-window.startPlaybackFadeIn = function() {
+function startPlaybackFadeIn() {
   window.audioFadeSerial++;
   if (window.targetVolume <= 0.001) {
     setAudioOutputGainImmediate(0);
@@ -198,11 +198,11 @@ window.startPlaybackFadeIn = function() {
   }
   rampAudioOutputGain(window.targetVolume, window.AUDIO_FADE_IN_MS);
 }
-window.restorePlaybackGain = function() {
+function restorePlaybackGain() {
   window.audioFadeSerial++;
   setAudioOutputGainImmediate(window.targetVolume);
 }
-window.fadeOutAndPauseAudio = function() {
+function fadeOutAndPauseAudio() {
   if (!window.audio || window.audio.paused) return Promise.resolve(false);
   var serial = ++window.audioFadeSerial;
   rampAudioOutputGain(0, window.AUDIO_FADE_OUT_MS);
@@ -220,7 +220,7 @@ window.fadeOutAndPauseAudio = function() {
   });
 }
 
-window.applyVolumeToAudio = function() {
+function applyVolumeToAudio() {
   if (window.audio) {
     window.audio.muted = false;
     window.audio.volume = window.gainNode ? 1 : window.targetVolume;
@@ -232,7 +232,7 @@ window.applyVolumeToAudio = function() {
   }
 }
 
-window.updateVolumeUi = function() {
+function updateVolumeUi() {
   var slider = document.getElementById('volume-slider');
   var value = document.getElementById('volume-value');
   var icon = document.getElementById('volume-icon');
@@ -250,7 +250,7 @@ window.updateVolumeUi = function() {
   }
 }
 
-window.setVolume = function(value, silent) {
+function setVolume(value, silent) {
   var next = Math.max(0, Math.min(1, Number(value) || 0));
   targetVolume = next;
   if (next > 0.01) lastNonZeroVolume = next;
@@ -259,24 +259,24 @@ window.setVolume = function(value, silent) {
   updateVolumeUi();
   if (!silent) window.showToast('音量 ' + Math.round(next * 100) + '%');
 }
-window.adjustVolumeByKeyboard = function(delta) {
+function adjustVolumeByKeyboard(delta) {
   var step = Number(delta) || 0;
   if (!step) return;
   setVolume(window.clampRange(window.targetVolume + step, 0, 1), false);
 }
 
-window.toggleVolumePanel = function(e) {
+function toggleVolumePanel(e) {
   if (e) e.stopPropagation();
   var wrap = document.getElementById('volume-control');
   if (volumeCloseTimer) { clearTimeout(volumeCloseTimer); volumeCloseTimer = null; }
   if (wrap) wrap.classList.toggle('open');
 }
 
-window.toggleMute = function() {
+function toggleMute() {
   setVolume(window.targetVolume > 0.01 ? 0 : (window.lastNonZeroVolume || 0.8));
 }
 
-window.bindVolumeControls = function() {
+function bindVolumeControls() {
   var slider = document.getElementById('volume-slider');
   var btn = document.getElementById('volume-btn');
   var wrap = document.getElementById('volume-control');
@@ -324,7 +324,7 @@ window.bindVolumeControls = function() {
 //    优点: 完全规避人声干扰; 预先准备好节奏表
 //    缺点: 每首歌首次要 1-3 秒
 // ============================================================
-window.medianGap = function(times, minGap, maxGap) {
+function medianGap(times, minGap, maxGap) {
   if (!times || times.length < 2) return 0;
   var gaps = [];
   for (var i = 1; i < times.length; i++) {
@@ -335,7 +335,7 @@ window.medianGap = function(times, minGap, maxGap) {
   return gaps.length ? gaps[Math.floor(gaps.length * 0.5)] : 0;
 }
 
-window.normalizeMusicTempoBeats = function(times, duration) {
+function normalizeMusicTempoBeats(times, duration) {
   if (!times || !times.length) return [];
   var sorted = times
     .filter(function(t){ return isFinite(t) && t >= 0.05 && (!duration || t < duration - 0.05); })
@@ -354,7 +354,7 @@ window.normalizeMusicTempoBeats = function(times, duration) {
   return out;
 }
 
-window.estimateTempoPhaseOffset = function(tempoBeats, beatCandidates, step, duration) {
+function estimateTempoPhaseOffset(tempoBeats, beatCandidates, step, duration) {
   if (!tempoBeats || tempoBeats.length < 8 || !beatCandidates || beatCandidates.length < 4 || !step) return 0;
   var maxOffset = Math.min(0.26, Math.max(0.12, step * 0.58));
   var binSize = 0.025;
@@ -410,7 +410,7 @@ window.estimateTempoPhaseOffset = function(tempoBeats, beatCandidates, step, dur
 }
 
 window.musicTempoLoadPromise = null;
-window.ensureMusicTempo = function() {
+function ensureMusicTempo() {
   if (window.MusicTempo) return Promise.resolve(window.MusicTempo);
   if (musicTempoLoadPromise) return musicTempoLoadPromise;
   musicTempoLoadPromise = fetch('/vendor/music-tempo.min.js')
@@ -430,7 +430,7 @@ window.ensureMusicTempo = function() {
 }
 
 window.musicTempoWorkerUrl = null;
-window.getMusicTempoWorkerUrl = function() {
+function getMusicTempoWorkerUrl() {
   if (musicTempoWorkerUrl) return musicTempoWorkerUrl;
   var code = [
     'self.onmessage=function(e){',
@@ -449,7 +449,7 @@ window.getMusicTempoWorkerUrl = function() {
   return musicTempoWorkerUrl;
 }
 
-window.analyzeMusicTempoInWorker = async function(buffer, token) {
+async function analyzeMusicTempoInWorker(buffer, token) {
   if (typeof Worker === 'undefined' || typeof Blob === 'undefined' || typeof URL === 'undefined') return null;
   try {
     showBeatChip('后台锁定电影主拍…');
@@ -516,7 +516,7 @@ window.analyzeMusicTempoInWorker = async function(buffer, token) {
   }
 }
 
-window.scheduleBeatAnalysis = function(songId, audioUrl, token, song) {
+function scheduleBeatAnalysis(songId, audioUrl, token, song) {
   if (!songId || !audioUrl) return;
   if (window.djMode.active) {
     window.cancelBeatAnalysisTimer();
@@ -578,7 +578,7 @@ window.scheduleBeatAnalysis = function(songId, audioUrl, token, song) {
   }, beatAnalysisConfig.delayMs);
 }
 
-window.beatMapSongKey = function(song) {
+function beatMapSongKey(song) {
   if (!song) return '';
   if (song.type === 'local' && song.localKey) return 'local:' + song.localKey;
   if (window.songProviderKey(song) === 'qq') return 'qq:' + (song.mid || song.songmid || song.id || (song.name + '|' + song.artist));
@@ -586,12 +586,12 @@ window.beatMapSongKey = function(song) {
   return '';
 }
 
-window.localBeatDiskKey = function(localKey, mode) {
+function localBeatDiskKey(localKey, mode) {
   if (!localKey) return '';
   return 'local:' + localKey + ':' + (mode === 'dj' ? 'dj' : 'mr');
 }
 
-window.updateBeatDiskCacheStatus = function(data) {
+function updateBeatDiskCacheStatus(data) {
   if (!data) return;
   beatDiskCacheStatus.checked = true;
   beatDiskCacheStatus.enabled = !!data.enabled || data.mode === 'disk';
@@ -603,7 +603,7 @@ window.updateBeatDiskCacheStatus = function(data) {
   }
 }
 
-window.ensureBeatDiskCacheStatus = async function() {
+async function ensureBeatDiskCacheStatus() {
   if (beatDiskCacheStatus.checked) return beatDiskCacheStatus;
   try {
     updateBeatDiskCacheStatus(await window.neteaseBeatmapCacheStatus());
@@ -615,7 +615,7 @@ window.ensureBeatDiskCacheStatus = async function() {
 
 var BEAT_DISK_FAIL_CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 失败缓存有效期7天
 
-window.readBeatDiskCache = async function(key) {
+async function readBeatDiskCache(key) {
   if (!key || window.beatMapCache[key]) return window.beatMapCache[key] || null;
   var st = await ensureBeatDiskCacheStatus();
   if (!st.enabled) return null;
@@ -642,7 +642,7 @@ window.readBeatDiskCache = async function(key) {
   }
 }
 
-window.writeBeatDiskCache = async function(key, map, song, mode) {
+async function writeBeatDiskCache(key, map, song, mode) {
   if (!key || !map) return false;
   var st = await ensureBeatDiskCacheStatus();
   if (!st.enabled) return false;
@@ -669,7 +669,7 @@ window.writeBeatDiskCache = async function(key, map, song, mode) {
   }
 }
 
-window.writeBeatDiskFailCache = async function(key, song) {
+async function writeBeatDiskFailCache(key, song) {
   if (!key) return false;
   window.beatMapCache[key] = { _failed: true };
   var st = await ensureBeatDiskCacheStatus();
@@ -695,12 +695,12 @@ window.writeBeatDiskFailCache = async function(key, song) {
   }
 }
 
-window.isBeatPrefetchCandidate = function(song) {
+function isBeatPrefetchCandidate(song) {
   if (!song || isPodcastSong(song) || song.type === 'local' || song.localUrl) return false;
   return !!window.beatMapSongKey(song);
 }
 
-window.findNextBeatPrefetchIndex = function(fromIdx, seen) {
+function findNextBeatPrefetchIndex(fromIdx, seen) {
   if (!window.playQueue.length) return -1;
   seen = seen || {};
   var total = window.playQueue.length;
@@ -716,7 +716,7 @@ window.findNextBeatPrefetchIndex = function(fromIdx, seen) {
   return -1;
 }
 
-window.normalizeBeatPrefetchState = function(state) {
+function normalizeBeatPrefetchState(state) {
   state = state || {};
   return {
     keys: Object.assign({}, state.keys || state),
@@ -724,7 +724,7 @@ window.normalizeBeatPrefetchState = function(state) {
   };
 }
 
-window.fetchBeatPrefetchAudioUrl = async function(song) {
+async function fetchBeatPrefetchAudioUrl(song) {
   if (!song) return null;
   var isQQ = window.songProviderKey(song) === 'qq';
   var requestedQuality = window.normalizePlaybackQuality(window.playbackQuality);
@@ -738,7 +738,7 @@ window.fetchBeatPrefetchAudioUrl = async function(song) {
   return '/api/window.audio?url=' + encodeURIComponent(data.url);
 }
 
-window.scheduleQueueBeatPrefetch = function(fromIdx, delayMs, state) {
+function scheduleQueueBeatPrefetch(fromIdx, delayMs, state) {
   window.cancelBeatPrefetchTimer();
   if (!window.playQueue.length || beatPrefetchBusy || window.localBeatAnalysis.active) return;
   var prefetchState = normalizeBeatPrefetchState(state);
@@ -754,7 +754,7 @@ window.scheduleQueueBeatPrefetch = function(fromIdx, delayMs, state) {
   }, waitMs);
 }
 
-window.runQueueBeatPrefetch = async function(fromIdx, token, seq, state) {
+async function runQueueBeatPrefetch(fromIdx, token, seq, state) {
   if (token !== window.beatMapToken || seq !== beatPrefetchToken || beatPrefetchBusy || !window.playQueue.length) return;
   if (window.audio && window.audio.paused) return;
   state = normalizeBeatPrefetchState(state);
@@ -808,7 +808,7 @@ window.runQueueBeatPrefetch = async function(fromIdx, token, seq, state) {
   }
 }
 
-window.analyzeAudioBeats = async function(audioUrl, durationSec, token, options) {
+async function analyzeAudioBeats(audioUrl, durationSec, token, options) {
   options = options || {};
   // YT/SP 歌曲不显示分析提示（静默分析，失败也不卡界面）
   var isNonNativeSource = options.song && window.songProviderKey(options.song) === 'youtube';
@@ -1581,7 +1581,7 @@ window.analyzeAudioBeats = async function(audioUrl, durationSec, token, options)
   }
 }
 
-window.schedulePodcastDjAnalysis = function(songKey, audioUrl, token, durationSec) {
+function schedulePodcastDjAnalysis(songKey, audioUrl, token, durationSec) {
   cancelDjBeatAnalysisTimer();
   if (!songKey || !audioUrl) return;
   djBeatAnalysisTimer = setTimeout(function waitForDjStart(){
@@ -1613,7 +1613,7 @@ window.schedulePodcastDjAnalysis = function(songKey, audioUrl, token, durationSe
   }, 900);
 }
 
-window.analyzePodcastDjIntroBeats = async function(audioUrl, token, durationSec) {
+async function analyzePodcastDjIntroBeats(audioUrl, token, durationSec) {
   if (!/^https?:\/\//i.test(audioUrl || '')) return null;
   if (token !== djBeatMapToken || !window.djMode.active) return null;
   var introResp = await fetch('/api/podcast/dj-beatmap?url=' + encodeURIComponent(audioUrl) + '&duration=' + encodeURIComponent(durationSec || 0) + '&intro=180');
@@ -1625,7 +1625,7 @@ window.analyzePodcastDjIntroBeats = async function(audioUrl, token, durationSec)
   return null;
 }
 
-window.buildPodcastDjLowOnlyBeatMap = async function(buffer, token) {
+async function buildPodcastDjLowOnlyBeatMap(buffer, token) {
   if (!buffer) return null;
   var sr = buffer.sampleRate || 44100;
   var duration = buffer.duration || (buffer.length / sr) || 0;
@@ -1994,7 +1994,7 @@ window.buildPodcastDjLowOnlyBeatMap = async function(buffer, token) {
   };
 }
 
-window.analyzePodcastDjBeats = async function(audioUrl, token, durationSec) {
+async function analyzePodcastDjBeats(audioUrl, token, durationSec) {
   try {
     djBeatMapBusy = true;
     showBeatChip('DJ 离线锁拍…');
@@ -2354,7 +2354,7 @@ window.analyzePodcastDjBeats = async function(audioUrl, token, durationSec) {
   }
 }
 
-window.applyPodcastDjProfileFromMap = function(map) {
+function applyPodcastDjProfileFromMap(map) {
   if (!map || !window.djMode.active) return;
   var density = (map.cameraBeats || []).length / Math.max(20, map.duration || 20);
   cinemaTrackProfile.density = density;
@@ -2364,7 +2364,7 @@ window.applyPodcastDjProfileFromMap = function(map) {
   cinemaTrackProfile.scale += (target - cinemaTrackProfile.scale) * 0.34;
 }
 
-window.smoothPodcastDjMapHandoff = function(songKey, map, token) {
+function smoothPodcastDjMapHandoff(songKey, map, token) {
   if (!map) return;
   showBeatChip('DJ 锁拍完成…');
   var apply = function() {
@@ -2380,7 +2380,7 @@ window.smoothPodcastDjMapHandoff = function(songKey, map, token) {
   scheduleVisualApply(apply, 260, 360);
 }
 
-window.smoothPodcastDjIntroHandoff = function(songKey, map, token) {
+function smoothPodcastDjIntroHandoff(songKey, map, token) {
   if (!map || !map.partial) return;
   if (currentDjBeatMap && !currentDjBeatMap.partial) return;
   var apply = function() {
@@ -2395,22 +2395,22 @@ window.smoothPodcastDjIntroHandoff = function(songKey, map, token) {
   scheduleVisualApply(apply, 0, 240);
 }
 
-window.showBeatChip = function(text) {
+function showBeatChip(text) {
   document.getElementById('beat-text').textContent = text || '分析节奏…';
   document.getElementById('beat-chip').classList.add('show');
   if (window.localBeatAnalysis && window.localBeatAnalysis.active) setLocalBeatStatus(text || '分析中...', 'warn');
 }
-window.hideBeatChip = function() {
+function hideBeatChip() {
   document.getElementById('beat-chip').classList.remove('show');
 }
 
-window.localBeatRound = function(v, scale) {
+function localBeatRound(v, scale) {
   v = Number(v);
   if (!isFinite(v)) return 0;
   scale = scale || 1000;
   return Math.round(v * scale) / scale;
 }
-window.packLocalBeatEvent = function(ev) {
+function packLocalBeatEvent(ev) {
   if (typeof ev === 'number') return [localBeatRound(ev, 1000), 0.42, 0.72, 0.42, 0.62, 0.22, 0.16, 0, 7, 0.62, 0.12, 0];
   ev = ev || {};
   var comboIdx = Math.max(0, window.LOCAL_BEAT_COMBOS.indexOf(ev.combo || ''));
@@ -2436,7 +2436,7 @@ window.packLocalBeatEvent = function(ev) {
     localBeatRound(ev.step || 0, 1000)
   ];
 }
-window.unpackLocalBeatEvent = function(row) {
+function unpackLocalBeatEvent(row) {
   if (typeof row === 'number') return row;
   if (!Array.isArray(row)) return row;
   var flags = row[8] || 0;
@@ -2460,7 +2460,7 @@ window.unpackLocalBeatEvent = function(row) {
     step: row[11] || 0
   };
 }
-window.packLocalBeatMap = function(map) {
+function packLocalBeatMap(map) {
   if (!map) return null;
   var camera = (map.cameraBeats || map.beats || map.kicks || []).map(packLocalBeatEvent);
   var pulse = (map.pulseBeats || map.kicks || []).map(packLocalBeatEvent);
@@ -2478,7 +2478,7 @@ window.packLocalBeatMap = function(map) {
     pulseBeats: pulse
   };
 }
-window.unpackLocalBeatMap = function(stored) {
+function unpackLocalBeatMap(stored) {
   if (!stored) return null;
   if (stored.v && stored.v !== 1 && stored.v !== 2) return stored;
   var camera = (stored.cameraBeats || []).map(unpackLocalBeatEvent);
@@ -2498,14 +2498,14 @@ window.unpackLocalBeatMap = function(stored) {
     partialUntilSec: stored.partialUntilSec || 0
   };
 }
-window.readLocalBeatPrefs = function() {
+function readLocalBeatPrefs() {
   try { return JSON.parse(localStorage.getItem(window.LOCAL_BEAT_PREF_STORE_KEY) || '{}') || {}; }
   catch (e) { return {}; }
 }
-window.saveLocalBeatPrefs = function() {
+function saveLocalBeatPrefs() {
   try { localStorage.setItem(window.LOCAL_BEAT_PREF_STORE_KEY, JSON.stringify(window.localBeatMapPrefs || {})); } catch (e) {}
 }
-window.readLocalBeatMapCache = function() {
+function readLocalBeatMapCache() {
   var out = {};
   try {
     var raw = JSON.parse(localStorage.getItem(window.LOCAL_BEATMAP_STORE_KEY) || '{}') || {};
@@ -2523,7 +2523,7 @@ window.readLocalBeatMapCache = function() {
 // Initialize state globals (read from localStorage now that all read* functions are defined)
 localBeatMapCache = readLocalBeatMapCache();
 localBeatMapPrefs = readLocalBeatPrefs();
-window.packLocalBeatCache = function(maxEntries) {
+function packLocalBeatCache(maxEntries) {
   var entries = Object.keys(window.localBeatMapCache || {}).map(function(key){
     var entry = window.localBeatMapCache[key] || {};
     return { key:key, updatedAt: entry.updatedAt || 0, entry:entry };
@@ -2537,7 +2537,7 @@ window.packLocalBeatCache = function(maxEntries) {
   });
   return packed;
 }
-window.saveLocalBeatMapCache = function() {
+function saveLocalBeatMapCache() {
   var attempts = [12, 8, 5, 3];
   for (var i = 0; i < attempts.length; i++) {
     try {
@@ -2547,11 +2547,11 @@ window.saveLocalBeatMapCache = function() {
   }
   return false;
 }
-window.getLocalBeatEntry = function(localKey, mode) {
+function getLocalBeatEntry(localKey, mode) {
   var entry = localKey && window.localBeatMapCache ? window.localBeatMapCache[localKey] : null;
   return entry && entry[mode] ? entry[mode] : null;
 }
-window.storeLocalBeatEntry = function(localKey, mode, map, song, opts) {
+function storeLocalBeatEntry(localKey, mode, map, song, opts) {
   if (!localKey || !map) return;
   opts = opts || {};
   var entry = window.localBeatMapCache[localKey] || {};
@@ -2563,7 +2563,7 @@ window.storeLocalBeatEntry = function(localKey, mode, map, song, opts) {
   saveLocalBeatMapCache();
   if (!opts.skipDisk) writeBeatDiskCache(localBeatDiskKey(localKey, mode), map, song || { type:'local', localKey:localKey }, mode);
 }
-window.setLocalBeatStatus = function(text, tone) {
+function setLocalBeatStatus(text, tone) {
   var el = document.getElementById('local-beat-status');
   if (!el) return;
   el.textContent = text || '';
@@ -2571,15 +2571,15 @@ window.setLocalBeatStatus = function(text, tone) {
   el.classList.toggle('fail', tone === 'fail');
 }
 
-window.localBeatVisualCount = function(map) {
+function localBeatVisualCount(map) {
   return map ? (map.visualBeatCount || (map.cameraBeats && map.cameraBeats.length) || (map.beats && map.beats.length) || 0) : 0;
 }
-window.setLocalBeatPreference = function(localKey, mode) {
+function setLocalBeatPreference(localKey, mode) {
   if (!localKey) return;
   window.localBeatMapPrefs[localKey] = mode === 'dj' ? 'dj' : 'mr';
   saveLocalBeatPrefs();
 }
-window.applyLocalBeatMap = function(song, mode, map, fromCache) {
+function applyLocalBeatMap(song, mode, map, fromCache) {
   if (!song || !song.localKey || !map) return false;
   mode = mode === 'dj' ? 'dj' : 'mr';
   song.localBeatMode = mode;
@@ -2605,7 +2605,7 @@ window.applyLocalBeatMap = function(song, mode, map, fromCache) {
   if (fromCache) window.showToast((mode === 'dj' ? 'DJ' : 'MR') + ' 本地节奏缓存已载入');
   return true;
 }
-window.prepareLocalBeatAnalysis = function(song, audioUrl) {
+function prepareLocalBeatAnalysis(song, audioUrl) {
   if (!song || !song.localKey || !audioUrl) return;
   var preferred = window.localBeatMapPrefs[song.localKey] === 'dj' ? 'dj' : 'mr';
   var cached = getLocalBeatEntry(song.localKey, preferred) ||
@@ -2634,7 +2634,7 @@ window.prepareLocalBeatAnalysis = function(song, audioUrl) {
     if (diskToken === window.trackSwitchToken && currentLocalSong && currentLocalSong.localKey === song.localKey) openLocalBeatModal(song, audioUrl);
   });
 }
-window.openLocalBeatModal = function(song, audioUrl) {
+function openLocalBeatModal(song, audioUrl) {
   if (window.immersiveMode) setImmersiveMode(false);
   window.localBeatAnalysis.song = song || currentLocalSong;
   window.localBeatAnalysis.audioUrl = audioUrl || (window.audio && window.audio.src) || '';
@@ -2644,16 +2644,16 @@ window.openLocalBeatModal = function(song, audioUrl) {
   updateLocalBeatModal();
   window.openGsapModal(document.getElementById('local-beat-modal'));
 }
-window.closeLocalBeatModal = function() {
+function closeLocalBeatModal() {
   if (window.localBeatAnalysis.active) return;
   window.closeGsapModal(document.getElementById('local-beat-modal'));
 }
-window.selectLocalBeatMode = function(mode) {
+function selectLocalBeatMode(mode) {
   if (window.localBeatAnalysis.active) return;
   window.localBeatAnalysis.mode = mode === 'dj' ? 'dj' : 'mr';
   updateLocalBeatModal();
 }
-window.updateLocalBeatModal = function() {
+function updateLocalBeatModal() {
   var song = window.localBeatAnalysis.song || currentLocalSong || {};
   var mode = window.localBeatAnalysis.mode === 'dj' ? 'dj' : 'mr';
   var modal = document.querySelector('#local-beat-modal .local-beat-modal');
@@ -2685,7 +2685,7 @@ window.updateLocalBeatModal = function() {
   if (cancel) cancel.style.display = window.localBeatAnalysis.active ? '' : 'none';
   if (later) later.style.display = window.localBeatAnalysis.active ? 'none' : '';
 }
-window.cancelLocalBeatAnalysis = function() {
+function cancelLocalBeatAnalysis() {
   if (!window.localBeatAnalysis.active) {
     closeLocalBeatModal();
     return;
@@ -2703,7 +2703,7 @@ window.cancelLocalBeatAnalysis = function() {
   setLocalBeatStatus('已取消分析', 'fail');
   updateLocalBeatModal();
 }
-window.startLocalBeatAnalysis = async function(mode) {
+async function startLocalBeatAnalysis(mode) {
   var song = window.localBeatAnalysis.song || currentLocalSong;
   var audioUrl = window.localBeatAnalysis.audioUrl || (song && song.localUrl) || (window.audio && window.audio.src) || '';
   mode = mode || window.localBeatAnalysis.mode;
@@ -2764,7 +2764,7 @@ window.startLocalBeatAnalysis = async function(mode) {
   }
 }
 
-window.smoothBeatMapHandoff = function(songId, map, token, song) {
+function smoothBeatMapHandoff(songId, map, token, song) {
   if (!map) return;
   showBeatChip('节奏缓冲中…');
   var wait = Math.max(260, Math.min(720, 340 + (window.beatPulse + window.beatCam.punch) * 260));
@@ -2784,7 +2784,7 @@ window.smoothBeatMapHandoff = function(songId, map, token, song) {
   scheduleVisualApply(apply, wait, 460);
 }
 
-window.applyBeatMapCacheForCurrent = function(songId, map, token, message) {
+function applyBeatMapCacheForCurrent(songId, map, token, message) {
   if (!songId || !map || token !== window.beatMapToken) return false;
   window.beatMapCache[songId] = map;
   currentBeatMap = map;
@@ -2798,7 +2798,7 @@ window.applyBeatMapCacheForCurrent = function(songId, map, token, message) {
 }
 
 // 每帧调用 — 按 beatMap 触发预演鼓点
-window.syncBeatMapPlaybackCursor = function(t, preserveVisualState) {
+function syncBeatMapPlaybackCursor(t, preserveVisualState) {
   if (window.djMode.active) {
     syncPodcastDjMapCursor(t, preserveVisualState);
     return;
@@ -2813,7 +2813,7 @@ window.syncBeatMapPlaybackCursor = function(t, preserveVisualState) {
   else syncBeatCameraToTime(t);
 }
 
-window.syncPodcastDjMapCursor = function(t, preserveVisualState) {
+function syncPodcastDjMapCursor(t, preserveVisualState) {
   t = isFinite(t) ? t : 0;
   djBeatMapNextIdx = 0;
   djBeatPulseNextIdx = 0;
@@ -2828,7 +2828,7 @@ window.syncPodcastDjMapCursor = function(t, preserveVisualState) {
   if (!preserveVisualState) resetBeatCameraSync(t);
 }
 
-window.tickPodcastDjBeatMap = function() {
+function tickPodcastDjBeatMap() {
   if (!window.djMode.active || !currentDjBeatMap || !window.audio || window.audio.paused) return;
   var t = window.audio.currentTime || 0;
   if (currentDjBeatMap.partialUntilSec && t > currentDjBeatMap.partialUntilSec + window.beatCam.lookahead) return;
@@ -2847,7 +2847,7 @@ window.tickPodcastDjBeatMap = function() {
   }
 }
 
-window.tickBeatMap = function() {
+function tickBeatMap() {
   if (window.djMode.active) return;
   if (!window.currentBeatMap || !window.audio || window.audio.paused) return;
   var t = window.audio.currentTime;
@@ -2870,7 +2870,7 @@ window.tickBeatMap = function() {
   }
 }
 
-window.triggerScheduledBeat = function(beat) {
+function triggerScheduledBeat(beat) {
   var strength = typeof beat === 'number' ? 0.42 : Math.max(0, Math.min(1, beat && beat.strength != null ? beat.strength : 0.42));
   var impact = typeof beat === 'number' ? strength : Math.max(0, Math.min(1, beat && beat.impact != null ? beat.impact : strength));
   if (impact < 0.18 && strength < 0.52) return;
@@ -2889,15 +2889,15 @@ window.triggerScheduledBeat = function(beat) {
 window.scheduledBeatPulse = 0;
 window.scheduledBeatFlag = false;
 
-window.showAIDepthChip = function(text) {
+function showAIDepthChip(text) {
   document.getElementById('ai-depth-text').textContent = text || 'AI 深度估计…';
   document.getElementById('ai-depth-chip').classList.add('show');
 }
-window.hideAIDepthChip = function() {
+function hideAIDepthChip() {
   document.getElementById('ai-depth-chip').classList.remove('show');
 }
 
-window.loadCoverFromUrl = function(directUrl, opts) {
+function loadCoverFromUrl(directUrl, opts) {
   opts = opts || {};
   if (!directUrl || typeof directUrl !== 'string' || !/^https?:\/\//i.test(directUrl)) {
     if (!coverApplyStillCurrent(opts)) return;
@@ -2950,7 +2950,7 @@ window.loadCoverFromUrl = function(directUrl, opts) {
   img.src = proxiedUrl;
 }
 
-window.setAlbumBackground = function(src) {
+function setAlbumBackground(src) {
   var bg = document.getElementById('album-bg');
   if (!bg) return;
   if (!src) {
@@ -2962,7 +2962,7 @@ window.setAlbumBackground = function(src) {
   bg.classList.add('visible');
 }
 
-window.makeSquareCoverCanvas = function(img, size, crop) {
+function makeSquareCoverCanvas(img, size, crop) {
   size = size || 512;
   var cv = document.createElement('canvas');
   cv.width = cv.height = size;
@@ -2979,7 +2979,7 @@ window.makeSquareCoverCanvas = function(img, size, crop) {
   return cv;
 }
 
-window.coverCanvasToDataUrl = function(cv) {
+function coverCanvasToDataUrl(cv) {
   try {
     var webp = cv.toDataURL('image/webp', 0.88);
     if (/^data:image\/webp/i.test(webp)) return webp;
@@ -2987,7 +2987,7 @@ window.coverCanvasToDataUrl = function(cv) {
   return cv.toDataURL('image/jpeg', 0.88);
 }
 
-window.applyCoverDataUrl = function(dataUrl, opts) {
+function applyCoverDataUrl(dataUrl, opts) {
   opts = opts || {};
   if (!dataUrl) return;
   var img = new Image();
@@ -3001,14 +3001,14 @@ window.applyCoverDataUrl = function(dataUrl, opts) {
   img.src = dataUrl;
 }
 
-window.commitCustomCoverCanvas = function(cv, opts) {
+function commitCustomCoverCanvas(cv, opts) {
   var out = document.createElement('canvas');
   out.width = out.height = 512;
   out.getContext('2d').drawImage(cv, 0, 0, 512, 512);
   window.setCustomCoverForCurrent(coverCanvasToDataUrl(out), opts);
 }
 
-window.loadCoverFromFile = function(file, opts) {
+function loadCoverFromFile(file, opts) {
   var reader = new FileReader();
   reader.onload = function(e) {
     var img = new Image();
@@ -3026,7 +3026,7 @@ window.loadCoverFromFile = function(file, opts) {
   reader.readAsDataURL(file);
 }
 
-window.bindCoverCropModal = function() {
+function bindCoverCropModal() {
   if (coverCropBound) return;
   coverCropBound = true;
   var stage = document.getElementById('cover-crop-stage');
@@ -3076,7 +3076,7 @@ window.bindCoverCropModal = function() {
   });
 }
 
-window.openCoverCropModal = function(img, dataUrl) {
+function openCoverCropModal(img, dataUrl) {
   bindCoverCropModal();
   var modal = document.getElementById('cover-crop-modal');
   var stage = document.getElementById('cover-crop-stage');
@@ -3106,7 +3106,7 @@ window.openCoverCropModal = function(img, dataUrl) {
   });
 }
 
-window.initCoverCropGeometry = function() {
+function initCoverCropGeometry() {
   if (!coverCropState) return;
   var stage = document.getElementById('cover-crop-stage');
   var rect = stage ? stage.getBoundingClientRect() : null;
@@ -3118,7 +3118,7 @@ window.initCoverCropGeometry = function() {
   updateCoverCropTransform();
 }
 
-window.clampCoverCropPan = function() {
+function clampCoverCropPan() {
   if (!coverCropState) return;
   var s = coverCropState.baseScale * coverCropState.scaleFactor;
   var rw = coverCropState.naturalW * s;
@@ -3129,7 +3129,7 @@ window.clampCoverCropPan = function() {
   coverCropState.y = Math.max(-maxY, Math.min(maxY, coverCropState.y));
 }
 
-window.updateCoverCropTransform = function() {
+function updateCoverCropTransform() {
   if (!coverCropState) return;
   clampCoverCropPan();
   var imgEl = document.getElementById('cover-crop-img');
@@ -3142,7 +3142,7 @@ window.updateCoverCropTransform = function() {
   drawCoverCropPreview();
 }
 
-window.currentCoverCropRect = function() {
+function currentCoverCropRect() {
   if (!coverCropState) return null;
   var s = coverCropState.baseScale * coverCropState.scaleFactor;
   var rw = coverCropState.naturalW * s;
@@ -3157,7 +3157,7 @@ window.currentCoverCropRect = function() {
   return { sx: sx, sy: sy, sSize: sSize };
 }
 
-window.drawCoverCropPreview = function() {
+function drawCoverCropPreview() {
   if (!coverCropState) return;
   var preview = document.getElementById('cover-crop-preview');
   var crop = currentCoverCropRect();
@@ -3167,13 +3167,13 @@ window.drawCoverCropPreview = function() {
   ctx.drawImage(coverCropState.img, crop.sx, crop.sy, crop.sSize, crop.sSize, 0, 0, preview.width, preview.height);
 }
 
-window.pulseCoverCropStage = function() {
+function pulseCoverCropStage() {
   var stage = document.getElementById('cover-crop-stage');
   if (!stage || !window.gsap) return;
   window.gsap.fromTo(stage, { scale: 0.985 }, { scale: 1, duration: 0.72, ease: 'expo.out', overwrite: true });
 }
 
-window.closeCoverCropModal = function() {
+function closeCoverCropModal() {
   var modal = document.getElementById('cover-crop-modal');
   window.closeGsapModal(modal, function(){
     var imgEl = document.getElementById('cover-crop-img');
@@ -3182,7 +3182,7 @@ window.closeCoverCropModal = function() {
   });
 }
 
-window.commitCoverCrop = function() {
+function commitCoverCrop() {
   if (!coverCropState) return;
   var crop = currentCoverCropRect();
   if (!crop) return;
@@ -3192,7 +3192,7 @@ window.commitCoverCrop = function() {
 }
 
 
-window.attemptAudioPlay = async function(opts) {
+async function attemptAudioPlay(opts) {
   opts = opts || {};
   try {
     if (!window.audio) return false;

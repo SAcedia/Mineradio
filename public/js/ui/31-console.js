@@ -42,24 +42,24 @@ var lyricColorPresets = [
 window.USER_FX_ARCHIVE_STORE_KEY = 'mineradio-user-window.fx-archives-v1';
 window.USER_FX_ARCHIVE_EXPORT_TYPE = 'mineradio-user-window.fx-archive';
 window.USER_FX_ARCHIVE_SCHEMA = 1;
-window.defaultUserFxArchiveName = function(index) {
+function defaultUserFxArchiveName(index) {
   return '用户存档 ' + (Number(index) + 1);
 }
-window.normalizeUserFxArchiveName = function(name, index) {
+function normalizeUserFxArchiveName(name, index) {
   name = String(name || '').replace(/\s+/g, ' ').trim();
   if (!name) name = defaultUserFxArchiveName(index);
   return name.slice(0, 28);
 }
-window.archiveNumber = function(raw, key, fallback, min, max) {
+function archiveNumber(raw, key, fallback, min, max) {
   var value = raw && raw[key] != null ? Number(raw[key]) : fallback;
   if (!isFinite(value)) value = fallback;
   return window.clampRange(value, min, max);
 }
-window.archiveMode = function(raw, key, pattern, fallback) {
+function archiveMode(raw, key, pattern, fallback) {
   var value = String(raw && raw[key] != null ? raw[key] : fallback);
   return pattern.test(value) ? value : fallback;
 }
-window.normalizeFxArchiveSnapshot = function(raw) {
+function normalizeFxArchiveSnapshot(raw) {
   if (!raw || typeof raw !== 'object') return null;
   var savedPreset = window.clampRange(Number(raw.preset) || 0, 0, presetMeta.length - 1);
   if (savedPreset === 3 && raw.visualPresetSchema !== window.VISUAL_PRESET_SCHEMA) savedPreset = 5;
@@ -144,7 +144,7 @@ window.normalizeFxArchiveSnapshot = function(raw) {
     cam: archiveMode(raw, 'cam', /^(off|gesture)$/, window.fxDefaults.cam)
   };
 }
-window.readUserFxArchives = function() {
+function readUserFxArchives() {
   var raw = [];
   try { raw = JSON.parse(localStorage.getItem(USER_FX_ARCHIVE_STORE_KEY) || '[]') || []; } catch(e) { raw = []; }
   if (!Array.isArray(raw)) raw = [];
@@ -154,17 +154,17 @@ window.readUserFxArchives = function() {
     return { name: normalizeUserFxArchiveName(slot.name, index), createdAt: Number(slot.createdAt) || (snapshot ? (Number(slot.savedAt) || Date.now()) : 0), savedAt: snapshot ? (Number(slot.savedAt) || Date.now()) : 0, snapshot: snapshot };
   }).filter(function(slot){ return !!(slot.snapshot || slot.savedAt || slot.createdAt); });
 }
-window.hasStoredUserFxArchives = function() {
+function hasStoredUserFxArchives() {
   try { return localStorage.getItem(USER_FX_ARCHIVE_STORE_KEY) != null; } catch(e) { return true; }
 }
-window.createPackagedDefaultUserFxArchiveSlot = function() {
+function createPackagedDefaultUserFxArchiveSlot() {
   return { name: normalizeUserFxArchiveName(PACKAGED_DEFAULT_USER_FX_ARCHIVE_NAME, 0), createdAt: PACKAGED_DEFAULT_USER_FX_ARCHIVE_EXPORTED_AT, savedAt: PACKAGED_DEFAULT_USER_FX_ARCHIVE_SAVED_AT, snapshot: normalizeFxArchiveSnapshot(window.clonePackagedDefaultFxSnapshot()) };
 }
 window.hadStoredUserFxArchives = hasStoredUserFxArchives();
 window.userFxArchives = readUserFxArchives();
 if (!hadStoredUserFxArchives) { userFxArchives = [createPackagedDefaultUserFxArchiveSlot()]; saveUserFxArchives(); }
 window.userFxArchiveEditing = -1;
-window.formatUserArchiveTime = function(ts) {
+function formatUserArchiveTime(ts) {
   ts = Number(ts) || 0;
   if (!ts) return '空槽位';
   var diff = Date.now() - ts;
@@ -174,13 +174,13 @@ window.formatUserArchiveTime = function(ts) {
   function pad(v) { return String(v).padStart(2, '0'); }
   return pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
 }
-window.userFxArchiveAt = function(index) {
+function userFxArchiveAt(index) {
   index = Number(index);
   if (!isFinite(index)) return null;
   index = Math.floor(index);
   return index >= 0 && index < userFxArchives.length ? userFxArchives[index] : null;
 }
-window.renderUserFxArchives = function() {
+function renderUserFxArchives() {
   var grid = document.getElementById('user-archive-grid');
   if (!grid) return;
   var toolbar =
@@ -225,7 +225,7 @@ window.renderUserFxArchives = function() {
   }
 }
 renderUserFxArchives();
-window.createUserFxArchive = function() {
+function createUserFxArchive() {
   var index = userFxArchives.length;
   userFxArchives.push({
     name: normalizeUserFxArchiveName('', index),
@@ -238,7 +238,7 @@ window.createUserFxArchive = function() {
   renderUserFxArchives();
   window.showToast('已新建空白用户存档');
 }
-window.saveUserFxArchive = function(index) {
+function saveUserFxArchive(index) {
   var slot = userFxArchiveAt(index);
   if (!slot) return;
   slot.snapshot = captureFxArchiveSnapshot();
@@ -249,7 +249,7 @@ window.saveUserFxArchive = function(index) {
   renderUserFxArchives();
   window.showToast('已保存到 ' + slot.name);
 }
-window.applyUserFxArchive = function(index) {
+function applyUserFxArchive(index) {
   var slot = userFxArchiveAt(index);
   if (!slot || !slot.snapshot) {
     window.showToast('这个用户存档还是空白');
@@ -257,12 +257,12 @@ window.applyUserFxArchive = function(index) {
   }
   if (applyFxArchiveSnapshot(slot.snapshot)) window.showToast('已应用 ' + slot.name);
 }
-window.renameUserFxArchive = function(index) {
+function renameUserFxArchive(index) {
   if (!userFxArchiveAt(index)) return;
   userFxArchiveEditing = Math.floor(Number(index) || 0);
   renderUserFxArchives();
 }
-window.commitUserFxArchiveRename = function(index) {
+function commitUserFxArchiveRename(index) {
   var slot = userFxArchiveAt(index);
   if (!slot) return;
   var input = document.getElementById('user-archive-input-' + index);
@@ -273,11 +273,11 @@ window.commitUserFxArchiveRename = function(index) {
   renderUserFxArchives();
   window.showToast('已命名为 ' + slot.name);
 }
-window.cancelUserFxArchiveRename = function() {
+function cancelUserFxArchiveRename() {
   userFxArchiveEditing = -1;
   renderUserFxArchives();
 }
-window.removeUserFxArchive = function(index) {
+function removeUserFxArchive(index) {
   if (!userFxArchiveAt(index)) return;
   userFxArchives.splice(index, 1);
   userFxArchiveEditing = -1;
@@ -285,7 +285,7 @@ window.removeUserFxArchive = function(index) {
   renderUserFxArchives();
   window.showToast('已删除用户存档');
 }
-window.userFxArchiveExportPayload = function(slot) {
+function userFxArchiveExportPayload(slot) {
   return {
     type: USER_FX_ARCHIVE_EXPORT_TYPE,
     schema: USER_FX_ARCHIVE_SCHEMA,
@@ -295,10 +295,10 @@ window.userFxArchiveExportPayload = function(slot) {
     snapshot: slot.snapshot
   };
 }
-window.safeArchiveFileName = function(name) {
+function safeArchiveFileName(name) {
   return String(name || 'Mineradio 用户存档').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 48) + '.json';
 }
-window.exportUserFxArchive = function(index) {
+function exportUserFxArchive(index) {
   var slot = userFxArchiveAt(index);
   if (!slot || !slot.snapshot) {
     window.showToast('空白存档不能导出');
@@ -322,7 +322,7 @@ window.exportUserFxArchive = function(index) {
   a.click();
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
 }
-window.normalizeImportedFxArchivePayload = function(payload, fileName) {
+function normalizeImportedFxArchivePayload(payload, fileName) {
   if (!payload || typeof payload !== 'object') return null;
   var snapshot = payload.snapshot ? normalizeFxArchiveSnapshot(payload.snapshot) : normalizeFxArchiveSnapshot(payload);
   if (!snapshot) return null;
@@ -334,7 +334,7 @@ window.normalizeImportedFxArchivePayload = function(payload, fileName) {
     snapshot: snapshot
   };
 }
-window.importUserFxArchiveText = function(text, fileName) {
+function importUserFxArchiveText(text, fileName) {
   var payload = null;
   try { payload = JSON.parse(String(text || '')); } catch (e) {}
   var slot = normalizeImportedFxArchivePayload(payload, fileName);
@@ -348,7 +348,7 @@ window.importUserFxArchiveText = function(text, fileName) {
   window.showToast('已导入 ' + slot.name);
   return true;
 }
-window.importUserFxArchiveFromDialog = function() {
+function importUserFxArchiveFromDialog() {
   var api = getDesktopWindowApi && getDesktopWindowApi();
   if (api && typeof api.importJsonFile === 'function') {
     api.importJsonFile().then(function(res){
@@ -366,7 +366,7 @@ window.importUserFxArchiveFromDialog = function() {
   };
   input.click();
 }
-window.readUserFxArchiveImportFile = function(file) {
+function readUserFxArchiveImportFile(file) {
   if (!file || !/\.json$/i.test(file.name || '')) {
     window.showToast('请导入 JSON 用户存档');
     return;
@@ -376,7 +376,7 @@ window.readUserFxArchiveImportFile = function(file) {
   reader.onerror = function(){ window.showToast('导入失败'); };
   reader.readAsText(file, 'utf-8');
 }
-window.bindUserFxArchiveDrop = function() {
+function bindUserFxArchiveDrop() {
   var grid = document.getElementById('user-archive-grid');
   if (!grid || grid._archiveDropBound) return;
   grid._archiveDropBound = true;
@@ -396,7 +396,7 @@ window.bindUserFxArchiveDrop = function() {
   });
 }
 
-window.buildLyricColorControls = function() {
+function buildLyricColorControls() {
   var grid = document.getElementById('lyric-color-grid');
   if (!grid) return;
   var html = '<button class="lyric-swatch auto" type="button" data-auto="1" onclick="setLyricColorAuto()" title="封面取色">AUTO</button>';
@@ -405,7 +405,7 @@ window.buildLyricColorControls = function() {
   }).join('');
   grid.innerHTML = html;
 }
-window.updateLyricColorControls = function() {
+function updateLyricColorControls() {
   var picker = document.getElementById('lyric-color-picker');
   var value = document.getElementById('lyric-color-value');
   var autoBtn = document.getElementById('lyric-auto-btn');
@@ -419,7 +419,7 @@ window.updateLyricColorControls = function() {
     btn.classList.toggle('active', isAuto ? window.fx.lyricColorMode !== 'custom' : (window.fx.lyricColorMode === 'custom' && isColor));
   });
 }
-window.updateLyricHighlightControls = function() {
+function updateLyricHighlightControls() {
   var picker = document.getElementById('lyric-highlight-picker');
   var value = document.getElementById('lyric-highlight-value');
   var autoBtn = document.getElementById('lyric-highlight-auto-btn');
@@ -428,7 +428,7 @@ window.updateLyricHighlightControls = function() {
   if (value) value.textContent = window.fx.lyricHighlightMode === 'custom' ? color.toUpperCase() : '跟随歌词';
   if (autoBtn) autoBtn.classList.toggle('active', window.fx.lyricHighlightMode !== 'custom');
 }
-window.updateLyricGlowControls = function() {
+function updateLyricGlowControls() {
   var row = document.getElementById('lyric-glow-row');
   var picker = document.getElementById('lyric-glow-picker');
   var value = document.getElementById('lyric-glow-value');
@@ -444,13 +444,13 @@ window.updateLyricGlowControls = function() {
     linkBtn.title = linked ? '点击后单独设置溢光颜色' : '点击后让溢光跟随高亮';
   }
 }
-window.applyHomeAccentColor = function() {
+function applyHomeAccentColor() {
   var color = window.normalizeHexColor(window.fx.homeAccentColor || '#00f5d4');
   var rgb = hexToRgb(color);
   document.documentElement.style.setProperty('--home-accent', color);
   document.documentElement.style.setProperty('--home-accent-rgb', rgb.r + ',' + rgb.g + ',' + rgb.b);
 }
-window.updateHomeAccentControls = function() {
+function updateHomeAccentControls() {
   applyHomeAccentColor();
   var color = window.normalizeHexColor(window.fx.homeAccentColor || '#00f5d4');
   var picker = document.getElementById('home-accent-picker');
@@ -458,16 +458,16 @@ window.updateHomeAccentControls = function() {
   if (picker) picker.value = color;
   if (value) value.textContent = color.toUpperCase();
 }
-window.setHomeAccentColor = function(color, silent) {
+function setHomeAccentColor(color, silent) {
   window.fx.homeAccentColor = window.normalizeHexColor(color || '#00f5d4');
   updateHomeAccentControls();
   saveLyricLayout();
   if (!silent) window.showToast('Home 填充: ' + window.fx.homeAccentColor.toUpperCase());
 }
-window.resetHomeAccentColor = function() {
+function resetHomeAccentColor() {
   setHomeAccentColor(window.fxDefaults.homeAccentColor || '#00f5d4');
 }
-window.applyIconAccentColors = function() {
+function applyIconAccentColors() {
   var homeColor = window.normalizeHexColor(window.fx.homeIconColor || window.fxDefaults.homeIconColor || '#f4d28a', '#f4d28a');
   var visualColor = window.normalizeHexColor(window.fx.visualIconColor || window.fxDefaults.visualIconColor || '#7fd8ff', '#7fd8ff');
   var homeRgb = hexToRgb(homeColor);
@@ -478,7 +478,7 @@ window.applyIconAccentColors = function() {
   root.style.setProperty('--visual-icon-color', visualColor);
   root.style.setProperty('--visual-icon-rgb', visualRgb.r + ',' + visualRgb.g + ',' + visualRgb.b);
 }
-window.updateIconAccentControls = function() {
+function updateIconAccentControls() {
   applyIconAccentColors();
   var homeColor = window.normalizeHexColor(window.fx.homeIconColor || window.fxDefaults.homeIconColor || '#f4d28a', '#f4d28a');
   var visualColor = window.normalizeHexColor(window.fx.visualIconColor || window.fxDefaults.visualIconColor || '#7fd8ff', '#7fd8ff');
@@ -491,25 +491,25 @@ window.updateIconAccentControls = function() {
   if (visualPicker) visualPicker.value = visualColor;
   if (visualValue) visualValue.textContent = visualColor.toUpperCase();
 }
-window.setHomeIconColor = function(color, silent) {
+function setHomeIconColor(color, silent) {
   window.fx.homeIconColor = window.normalizeHexColor(color || window.fxDefaults.homeIconColor || '#f4d28a', '#f4d28a');
   updateIconAccentControls();
   saveLyricLayout();
   if (!silent) window.showToast('主页图标: ' + window.fx.homeIconColor.toUpperCase());
 }
-window.resetHomeIconColor = function() {
+function resetHomeIconColor() {
   setHomeIconColor(window.fxDefaults.homeIconColor || '#f4d28a');
 }
-window.setVisualIconColor = function(color, silent) {
+function setVisualIconColor(color, silent) {
   window.fx.visualIconColor = window.normalizeHexColor(color || window.fxDefaults.visualIconColor || '#7fd8ff', '#7fd8ff');
   updateIconAccentControls();
   saveLyricLayout();
   if (!silent) window.showToast('视觉图标: ' + window.fx.visualIconColor.toUpperCase());
 }
-window.resetVisualIconColor = function() {
+function resetVisualIconColor() {
   setVisualIconColor(window.fxDefaults.visualIconColor || '#7fd8ff');
 }
-window.applyCustomBackground = function() {
+function applyCustomBackground() {
   var color = window.normalizeHexColor(window.fx.backgroundColor || '#000000', '#000000');
   var media = normalizeCustomBackgroundMedia(window.fx.backgroundMedia || window.fx.backgroundImage);
   var image = media && media.type === 'image' ? media.src : '';
@@ -563,7 +563,7 @@ window.applyCustomBackground = function() {
     }).catch(function(err){ console.warn('background video load failed:', err); });
   }
 }
-window.updateCustomBackgroundControls = function() {
+function updateCustomBackgroundControls() {
   applyCustomBackground();
   var color = window.normalizeHexColor(window.fx.backgroundColor || '#000000', '#000000');
   var picker = document.getElementById('bg-color-picker');
@@ -580,7 +580,7 @@ window.updateCustomBackgroundControls = function() {
   if (imageValue) imageValue.textContent = customBackgroundMediaLabel(window.fx.backgroundMedia || window.fx.backgroundImage);
   applyBackgroundMediaHint();
 }
-window.setCustomBackgroundColor = function(color, silent, customFlag) {
+function setCustomBackgroundColor(color, silent, customFlag) {
   window.fx.backgroundColor = window.normalizeHexColor(color || '#000000', '#000000');
   window.fx.backgroundColorMode = customFlag === false ? 'cover' : 'custom';
   window.fx.backgroundColorCustom = customFlag !== false;
@@ -588,7 +588,7 @@ window.setCustomBackgroundColor = function(color, silent, customFlag) {
   saveLyricLayout();
   if (!silent) window.showToast('背景颜色: ' + window.fx.backgroundColor.toUpperCase());
 }
-window.setCustomBackgroundCoverMode = function(silent) {
+function setCustomBackgroundCoverMode(silent) {
   window.fx.backgroundColorMode = 'cover';
   window.fx.backgroundColorCustom = false;
   window.fx.backgroundColor = window.normalizeHexColor(window.fx.backgroundColor || window.fxDefaults.backgroundColor || '#000000', '#000000');
@@ -596,10 +596,10 @@ window.setCustomBackgroundCoverMode = function(silent) {
   saveLyricLayout();
   if (!silent) window.showToast('\u80cc\u666f\u989c\u8272: \u5c01\u9762\u6e10\u53d8');
 }
-window.resetCustomBackgroundColor = function() {
+function resetCustomBackgroundColor() {
   setCustomBackgroundCoverMode(false);
 }
-window.setCustomBackgroundOpacity = function(value, silent) {
+function setCustomBackgroundOpacity(value, silent) {
   window.fx.backgroundOpacity = window.clampRange(Number(value), 0, 1);
   window.fx.backgroundColorMode = 'custom';
   window.fx.backgroundColorCustom = true;
@@ -607,7 +607,7 @@ window.setCustomBackgroundOpacity = function(value, silent) {
   saveLyricLayout();
   if (!silent) window.showToast('背景透明度: ' + Math.round(window.fx.backgroundOpacity * 100) + '%');
 }
-window.setCustomBackgroundImage = function(src, silent) {
+function setCustomBackgroundImage(src, silent) {
   var image = normalizeCustomBackgroundImage(src);
   window.fx.backgroundImage = image;
   window.fx.backgroundMedia = image ? { type: 'image', src: image } : null;
@@ -615,10 +615,10 @@ window.setCustomBackgroundImage = function(src, silent) {
   saveLyricLayout();
   if (!silent) window.showToast(window.fx.backgroundImage ? '背景图片已应用' : '背景图片已清除');
 }
-window.clearCustomBackgroundImage = function() {
+function clearCustomBackgroundImage() {
   setCustomBackgroundImage('');
 }
-window.setCustomBackgroundMedia = function(media, silent) {
+function setCustomBackgroundMedia(media, silent) {
   media = normalizeCustomBackgroundMedia(media);
   window.fx.backgroundMedia = media;
   window.fx.backgroundImage = media && media.type === 'image' ? media.src : '';
@@ -626,7 +626,7 @@ window.setCustomBackgroundMedia = function(media, silent) {
   saveLyricLayout();
   if (!silent) window.showToast(media ? (media.type === 'video' ? '背景视频已应用' : '背景图片已应用') : '背景媒体已清除');
 }
-window.readBackgroundImageFile = function(file) {
+function readBackgroundImageFile(file) {
   if (!file || !/^image\//i.test(file.type || '')) {
     window.showToast('请选择图片文件');
     return;
@@ -658,7 +658,7 @@ window.readBackgroundImageFile = function(file) {
   reader.onerror = function(){ window.showToast('背景图片读取失败'); };
   reader.readAsDataURL(file);
 }
-window.readBackgroundVideoFile = function(file) {
+function readBackgroundVideoFile(file) {
   if (!file || !/^video\//i.test(file.type || '')) {
     window.showToast('请选择视频文件');
     return;
@@ -680,13 +680,13 @@ window.readBackgroundVideoFile = function(file) {
     reader.readAsDataURL(file);
   });
 }
-window.readBackgroundMediaFile = function(file) {
+function readBackgroundMediaFile(file) {
   if (!file) return;
   if (/^image\//i.test(file.type || '')) readBackgroundImageFile(file);
   else if (/^video\//i.test(file.type || '')) readBackgroundVideoFile(file);
   else window.showToast('请选择图片或视频文件');
 }
-window.applyUiAccentColor = function() {
+function applyUiAccentColor() {
   var color = window.normalizeHexColor(window.fx.uiAccentColor || '#00f5d4', '#00f5d4');
   var rgb = hexToRgb(color);
   var root = document.documentElement;
@@ -696,7 +696,7 @@ window.applyUiAccentColor = function() {
   root.style.setProperty('--glass-border', 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',.30)');
   root.style.setProperty('--glass-shadow-focus', '0 24px 72px rgba(0,0,0,.34),0 0 0 1px rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',.13),0 0 42px rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',.075),inset 0 1px 0 rgba(255,255,255,.20)');
 }
-window.updateUiAccentControls = function() {
+function updateUiAccentControls() {
   applyUiAccentColor();
   var color = window.normalizeHexColor(window.fx.uiAccentColor || '#00f5d4', '#00f5d4');
   var picker = document.getElementById('ui-accent-picker');
@@ -704,17 +704,17 @@ window.updateUiAccentControls = function() {
   if (picker) picker.value = color;
   if (value) value.textContent = color.toUpperCase();
 }
-window.setUiAccentColor = function(color, silent) {
+function setUiAccentColor(color, silent) {
   window.fx.uiAccentColor = window.normalizeHexColor(color || '#00f5d4', '#00f5d4');
   updateUiAccentControls();
   if (window.shelfManager && window.shelfManager.refreshTheme) window.shelfManager.refreshTheme();
   saveLyricLayout();
   if (!silent) window.showToast('界面高亮: ' + window.fx.uiAccentColor.toUpperCase());
 }
-window.resetUiAccentColor = function() {
+function resetUiAccentColor() {
   setUiAccentColor(window.fxDefaults.uiAccentColor || '#00f5d4');
 }
-window.updateVisualTintControls = function() {
+function updateVisualTintControls() {
   var picker = document.getElementById('visual-tint-picker');
   var value = document.getElementById('visual-tint-value');
   var autoBtn = document.getElementById('visual-tint-auto-btn');
@@ -724,14 +724,14 @@ window.updateVisualTintControls = function() {
   if (value) value.textContent = window.fx.visualTintMode === 'custom' ? color.toUpperCase() : '封面取色';
   if (autoBtn) autoBtn.classList.toggle('active', window.fx.visualTintMode !== 'custom');
 }
-window.setVisualTintAuto = function() {
+function setVisualTintAuto() {
   window.fx.visualTintMode = 'auto';
   updateVisualTintControls();
   syncFxUniforms();
   saveLyricLayout();
   window.showToast('视觉主色: 封面取色');
 }
-window.resetVisualTintColor = function() {
+function resetVisualTintColor() {
   window.fx.visualTintMode = 'auto';
   window.fx.visualTintColor = window.normalizeHexColor(window.fxDefaults.visualTintColor || '#9db8cf');
   updateVisualTintControls();
@@ -739,7 +739,7 @@ window.resetVisualTintColor = function() {
   saveLyricLayout();
   window.showToast('视觉主色已恢复默认');
 }
-window.setVisualTintCustom = function(color, silent) {
+function setVisualTintCustom(color, silent) {
   window.fx.visualTintMode = 'custom';
   window.fx.visualTintColor = window.normalizeHexColor(color || '#9db8cf');
   updateVisualTintControls();
@@ -748,12 +748,12 @@ window.setVisualTintCustom = function(color, silent) {
   if (!silent) window.showToast('视觉主色: ' + window.fx.visualTintColor.toUpperCase());
 }
 window.coverColorPickerState = { target: 'visualTint', canvas: null };
-window.currentCoverPickerCanvas = function() {
+function currentCoverPickerCanvas() {
   if (coverPickerCanvas && coverPickerCanvas.getContext) return coverPickerCanvas;
   if (coverTex && coverTex.image && coverTex.image.getContext) return coverTex.image;
   return null;
 }
-window.coverPickerSwatchColors = function() {
+function coverPickerSwatchColors() {
   var pal = window.stageLyrics.coverPalette || window.stageLyrics.palette || {};
   var list = [pal.primary, pal.secondary, pal.highlight, window.fx.visualTintColor, window.fx.uiAccentColor, window.fx.homeAccentColor]
     .map(function(c){ return window.normalizeHexColor(c || '', ''); })
@@ -765,11 +765,11 @@ window.coverPickerSwatchColors = function() {
     return true;
   }).slice(0, 5);
 }
-window.setCoverPickerPreview = function(hex) {
+function setCoverPickerPreview(hex) {
   var preview = document.getElementById('cover-color-preview');
   if (preview) preview.style.setProperty('--picked', window.normalizeHexColor(hex || '#9db8cf'));
 }
-window.renderCoverPickerSwatches = function() {
+function renderCoverPickerSwatches() {
   var wrap = document.getElementById('cover-color-swatches');
   if (!wrap) return;
   var colors = coverPickerSwatchColors();
@@ -777,7 +777,7 @@ window.renderCoverPickerSwatches = function() {
     return '<button type="button" style="--c:' + c + '" title="' + c.toUpperCase() + '" onclick="applyCoverPickerColor(\'' + c + '\')"></button>';
   }).join('');
 }
-window.openCoverColorPicker = function(target) {
+function openCoverColorPicker(target) {
   target = target || 'visualTint';
   var pop = document.getElementById('cover-color-pop');
   var art = document.getElementById('cover-color-art');
@@ -806,12 +806,12 @@ window.openCoverColorPicker = function(target) {
   pop.classList.add('show');
   placeFxFloatingPanel(pop, document.getElementById('visual-tint-auto-btn') || document.getElementById('visual-tint-picker') || art, { gap: 12, pad: 14 });
 }
-window.closeCoverColorPicker = function() {
+function closeCoverColorPicker() {
   var pop = document.getElementById('cover-color-pop');
   if (pop) pop.classList.remove('show');
   hideCoverColorLoupe();
 }
-window.applyCoverPickerColor = function(hex) {
+function applyCoverPickerColor(hex) {
   hex = window.normalizeHexColor(hex || '#9db8cf');
   setCoverPickerPreview(hex);
   if (coverColorPickerState.target === 'visualTint') {
@@ -820,7 +820,7 @@ window.applyCoverPickerColor = function(hex) {
   }
   closeCoverColorPicker();
 }
-window.moveCoverColorLoupe = function(e) {
+function moveCoverColorLoupe(e) {
   var cv = coverColorPickerState.canvas || currentCoverPickerCanvas();
   var loupe = document.getElementById('cover-color-loupe');
   var art = document.getElementById('cover-color-art');
@@ -839,11 +839,11 @@ window.moveCoverColorLoupe = function(e) {
   loupe.style.top = Math.min(window.innerHeight - 128, e.clientY + 18) + 'px';
   loupe.classList.add('show');
 }
-window.hideCoverColorLoupe = function() {
+function hideCoverColorLoupe() {
   var loupe = document.getElementById('cover-color-loupe');
   if (loupe) loupe.classList.remove('show');
 }
-window.pickCoverColorFromArt = function(e) {
+function pickCoverColorFromArt(e) {
   var cv = coverColorPickerState.canvas || currentCoverPickerCanvas();
   if (!cv || !cv.getContext) return;
   var rect = e.currentTarget.getBoundingClientRect();
@@ -860,12 +860,12 @@ window.pickCoverColorFromArt = function(e) {
     closeCoverColorPicker();
   }
 }
-window.updateLyricFontControls = function() {
+function updateLyricFontControls() {
   document.querySelectorAll('#lyric-font-grid button').forEach(function(btn){
     btn.classList.toggle('active', btn.dataset.font === window.normalizeLyricFontKey(window.fx.lyricFont));
   });
 }
-window.setLyricFont = function(key) {
+function setLyricFont(key) {
   window.fx.lyricFont = window.normalizeLyricFontKey(key);
   updateLyricFontControls();
   refreshCurrentLyricStyle();
@@ -873,7 +873,7 @@ window.setLyricFont = function(key) {
   pushDesktopLyricsState(true);
   window.showToast('歌词字体已切换');
 }
-window.setLyricGlowLinked = function(linked, openPicker) {
+function setLyricGlowLinked(linked, openPicker) {
   window.fx.lyricGlowLinked = linked !== false;
   if (!window.fx.lyricGlowLinked) window.fx.lyricGlowColor = window.normalizeHexColor(window.fx.lyricGlowColor || window.fx.lyricHighlightColor || '#9db8cf');
   setStageLyricPalette(window.fx.lyricColorMode === 'custom' ? lyricPaletteFromHex(window.fx.lyricColor) : (window.stageLyrics.coverPalette || window.stageLyrics.palette));
@@ -886,17 +886,17 @@ window.setLyricGlowLinked = function(linked, openPicker) {
     }, 0);
   }
 }
-window.toggleLyricGlowLink = function(e) {
+function toggleLyricGlowLink(e) {
   if (e && e.stopPropagation) e.stopPropagation();
   setLyricGlowLinked(window.fx.lyricGlowLinked === false);
 }
-window.handleLyricGlowRowClick = function(e) {
+function handleLyricGlowRowClick(e) {
   if (window.fx.lyricGlowLinked !== false) {
     if (e && e.preventDefault) e.preventDefault();
     setLyricGlowLinked(false, true);
   }
 }
-window.setLyricGlowCustom = function(color, silent) {
+function setLyricGlowCustom(color, silent) {
   window.fx.lyricGlowLinked = false;
   window.fx.lyricGlowColor = window.normalizeHexColor(color || '#9db8cf');
   setStageLyricPalette(window.fx.lyricColorMode === 'custom' ? lyricPaletteFromHex(window.fx.lyricColor) : (window.stageLyrics.coverPalette || window.stageLyrics.palette));
@@ -905,7 +905,7 @@ window.setLyricGlowCustom = function(color, silent) {
   pushDesktopLyricsState(true);
   if (!silent) window.showToast('溢光颜色: ' + window.fx.lyricGlowColor.toUpperCase());
 }
-window.setLyricColorAuto = function() {
+function setLyricColorAuto() {
   window.fx.lyricColorMode = 'auto';
   setStageLyricPalette(window.stageLyrics.coverPalette || window.stageLyrics.palette);
   updateLyricColorControls();
@@ -915,7 +915,7 @@ window.setLyricColorAuto = function() {
   pushDesktopLyricsState(true);
   window.showToast('歌词颜色: 封面取色');
 }
-window.setLyricColorCustom = function(color, silent) {
+function setLyricColorCustom(color, silent) {
   window.fx.lyricColorMode = 'custom';
   window.fx.lyricColor = window.normalizeHexColor(color);
   setStageLyricPalette(lyricPaletteFromHex(window.fx.lyricColor));
@@ -926,12 +926,12 @@ window.setLyricColorCustom = function(color, silent) {
   pushDesktopLyricsState(true);
   if (!silent) window.showToast('歌词颜色: ' + window.fx.lyricColor.toUpperCase());
 }
-window.setLyricColorPreset = function(i) {
+function setLyricColorPreset(i) {
   var p = lyricColorPresets[i];
   if (!p) return;
   setLyricColorCustom(p.color);
 }
-window.setLyricHighlightAuto = function() {
+function setLyricHighlightAuto() {
   window.fx.lyricHighlightMode = 'auto';
   setStageLyricPalette(window.fx.lyricColorMode === 'custom' ? lyricPaletteFromHex(window.fx.lyricColor) : (window.stageLyrics.coverPalette || window.stageLyrics.palette));
   updateLyricHighlightControls();
@@ -940,7 +940,7 @@ window.setLyricHighlightAuto = function() {
   pushDesktopLyricsState(true);
   window.showToast('高亮颜色: 跟随歌词');
 }
-window.setLyricHighlightCustom = function(color, silent) {
+function setLyricHighlightCustom(color, silent) {
   window.fx.lyricHighlightMode = 'custom';
   window.fx.lyricHighlightColor = window.normalizeHexColor(color);
   setStageLyricPalette(window.fx.lyricColorMode === 'custom' ? lyricPaletteFromHex(window.fx.lyricColor) : (window.stageLyrics.coverPalette || window.stageLyrics.palette));
@@ -951,7 +951,7 @@ window.setLyricHighlightCustom = function(color, silent) {
   if (!silent) window.showToast('高亮颜色: ' + window.fx.lyricHighlightColor.toUpperCase());
 }
 
-window.buildPresetGrid = function() {
+function buildPresetGrid() {
   var grid = document.getElementById('preset-grid');
   if (!grid) return;
   var seen = {};
@@ -974,12 +974,12 @@ window.buildPresetGrid = function() {
   }).join('');
   refreshPresetGrid();
 }
-window.refreshPresetGrid = function() {
+function refreshPresetGrid() {
   document.querySelectorAll('.preset-card').forEach(function(el){
     el.classList.toggle('active', Number(el.dataset.preset) === window.fx.preset);
   });
 }
-window.triggerPresetParticleTransition = function(fromPreset, toPreset) {
+function triggerPresetParticleTransition(fromPreset, toPreset) {
   window.presetTransition.active = true;
   window.presetTransition.start = window.uniforms.uTime.value;
   window.presetTransition.duration = toPreset === 5 ? 0.30 : 0.24;
@@ -1001,7 +1001,7 @@ window.triggerPresetParticleTransition = function(fromPreset, toPreset) {
     setTimeout(function(){ card.classList.remove('switching'); }, 760);
   }
 }
-window.tickPresetTransition = function() {
+function tickPresetTransition() {
   if (!window.presetTransition.active) return;
   var raw = (window.uniforms.uTime.value - window.presetTransition.start) / window.presetTransition.duration;
   var t = Math.max(0, Math.min(1, raw));
@@ -1016,7 +1016,7 @@ window.tickPresetTransition = function() {
     syncFxUniforms();
   }
 }
-window.setPreset = function(p, opts) {
+function setPreset(p, opts) {
   opts = opts || {};
   p = Math.max(0, Math.min(presetMeta.length - 1, Number(p) || 0));
   var prev = window.fx.preset;
@@ -1049,7 +1049,7 @@ window.setPreset = function(p, opts) {
   }
 }
 
-window.syncFxUniforms = function() {
+function syncFxUniforms() {
   window.uniforms.uPreset.value = window.fx.preset;
   window.uniforms.uIntensity.value = window.fx.intensity;
   window.uniforms.uDepth.value = window.fx.depth;
@@ -1068,7 +1068,7 @@ window.syncFxUniforms = function() {
   syncSkullParticleColors();
 }
 window.homeWaveTrackState = { bars: 0, smooth: [] };
-window.ensureHomeWaveTrackBars = function() {
+function ensureHomeWaveTrackBars() {
   var el = document.getElementById('home-wave-track');
   if (!el) return;
   var count = 24;
@@ -1077,7 +1077,7 @@ window.ensureHomeWaveTrackBars = function() {
   homeWaveTrackState.smooth = new Array(count).fill(0);
   el.innerHTML = new Array(count + 1).join('<span></span>');
 }
-window.updateHomeAudioVisual = function(dt) {
+function updateHomeAudioVisual(dt) {
   if (!emptyHomeActive) return;
   var wave = document.getElementById('home-wave-track');
   if (!wave) return;
@@ -1103,7 +1103,7 @@ window.updateHomeAudioVisual = function(dt) {
     bars[i].style.opacity = String(window.clampRange(0.36 + prev * 0.68, 0.32, 1));
   }
 }
-window.setRange = function(id, value) {
+function setRange(id, value) {
   var el = document.getElementById(id);
   if (!el) return;
   if (id === 'window.fx-lyricglow') value = Math.min(0.85, Math.max(0, value));
@@ -1115,7 +1115,7 @@ window.setRange = function(id, value) {
     ? coverParticleCountLabel(value)
     : (id === 'window.fx-lyricweight' || id === 'window.fx-glassaberration' || id === 'window.fx-lyrictiltx' || id === 'window.fx-lyrictilty' || id === 'window.fx-shelfangle' ? String(Math.round(Number(value) || 0)) : Number(value).toFixed(id === 'window.fx-lyricspacing' ? 3 : 2));
 }
-window.updateDevelopmentFxControls = function() {
+function updateDevelopmentFxControls() {
   [
     ['desktopLyrics', 't-desktopLyrics', '全屏幕置顶歌词'],
     ['desktopLyricsClickThrough', 't-desktopLyricsClickThrough', '锁定后防误触；鼠标移到桌面歌词上按中键可锁定/解锁'],
@@ -1150,13 +1150,13 @@ window.updateDevelopmentFxControls = function() {
     if (row) row.classList.toggle('dev-locked', locked);
   });
 }
-window.updateDesktopLyricsFpsControls = function() {
+function updateDesktopLyricsFpsControls() {
   var fps = window.normalizeDesktopLyricsFps(window.fx.desktopLyricsFps);
   document.querySelectorAll('#desktop-lyrics-fps-seg [data-desktop-lyrics-fps]').forEach(function(btn){
     btn.classList.toggle('active', window.normalizeDesktopLyricsFps(btn.getAttribute('data-desktop-lyrics-fps')) === fps);
   });
 }
-window.updatePerformanceControls = function() {
+function updatePerformanceControls() {
   window.fx.performanceBackground = window.normalizePerformanceBackgroundMode(window.fx.performanceBackground, window.fx.liveBackgroundKeep === true);
   window.fx.liveBackgroundKeep = window.fx.performanceBackground === 'keep';
   window.fx.performanceQuality = window.normalizePerformanceQuality(window.fx.performanceQuality);
@@ -1169,7 +1169,7 @@ window.updatePerformanceControls = function() {
   var liveBackgroundKeepToggle = document.getElementById('t-liveBackgroundKeep');
   if (liveBackgroundKeepToggle) liveBackgroundKeepToggle.classList.toggle('on', window.fx.liveBackgroundKeep === true);
 }
-window.setPerformanceBackgroundMode = function(mode, silent) {
+function setPerformanceBackgroundMode(mode, silent) {
   var next = window.normalizePerformanceBackgroundMode(mode, false);
   window.fx.performanceBackground = next;
   window.fx.liveBackgroundKeep = next === 'keep';
@@ -1183,7 +1183,7 @@ window.setPerformanceBackgroundMode = function(mode, silent) {
     window.showToast(next === 'keep' ? '后台策略: 保持运行' : (next === 'release' ? '后台策略: 停止并释放' : '后台策略: 自动优化'));
   }
 }
-window.setPerformanceQualityMode = function(mode, silent) {
+function setPerformanceQualityMode(mode, silent) {
   var next = window.normalizePerformanceQuality(mode);
   window.fx.performanceQuality = next;
   updatePerformanceControls();
@@ -1194,7 +1194,7 @@ window.setPerformanceQualityMode = function(mode, silent) {
     window.showToast('画质档位: ' + label);
   }
 }
-window.updateFxInputs = function() {
+function updateFxInputs() {
   window.normalizeDevelopmentLockedFxState();
   applyShelfCameraDefaultAngle(false);
   setRange('window.fx-intensity', window.fx.intensity);
@@ -1285,12 +1285,12 @@ window.updateFxInputs = function() {
   applyControlGlassChromaticOffset();
   syncFxUniforms();
 }
-window.animateFxResetButton = function(btn) {
+function animateFxResetButton(btn) {
   if (!btn || !window.gsap) return;
   window.gsap.fromTo(btn, { rotate: -120, scale: 0.88 }, { rotate: 0, scale: 1, duration: 0.48, ease: 'expo.out', overwrite: true });
   window.gsap.fromTo(btn, { boxShadow: '0 0 0 0 rgba(244,210,138,.38)' }, { boxShadow: '0 0 0 8px rgba(244,210,138,0)', duration: 0.55, ease: 'sine.out', overwrite: true });
 }
-window.resetFxSliderValue = function(id, key, btn) {
+function resetFxSliderValue(id, key, btn) {
   if (!Object.prototype.hasOwnProperty.call(window.fxDefaults, key)) return;
   if (key === 'shelfAngleY') {
     window.fx.shelfAngleYManual = false;
@@ -1307,7 +1307,7 @@ window.resetFxSliderValue = function(id, key, btn) {
   animateFxResetButton(btn);
   window.showToast('已恢复默认数值');
 }
-window.ensureFxSliderResetButton = function(id, key) {
+function ensureFxSliderResetButton(id, key) {
   var el = document.getElementById(id);
   if (!el || !el.parentElement || el.parentElement.querySelector('.fx-reset-one')) return;
   var btn = document.createElement('button');
@@ -1324,7 +1324,7 @@ window.ensureFxSliderResetButton = function(id, key) {
   el.parentElement.appendChild(btn);
 }
 window.fxPanelTab = 'presets';
-window.setFxPanelTab = function(tab) {
+function setFxPanelTab(tab) {
   var allowed = { presets:1, appearance:1, lyrics:1, motion:1, advanced:1 };
   fxPanelTab = allowed[tab] ? tab : 'presets';
   var panel = document.getElementById('fx-panel');
@@ -1337,11 +1337,11 @@ window.setFxPanelTab = function(tab) {
   });
   repositionFxFloatingPanels();
 }
-window.fxPanelInputId = function(node) {
+function fxPanelInputId(node) {
   var input = node && node.querySelector ? node.querySelector('input[id]') : null;
   return input ? input.id : '';
 }
-window.fxPanelTargetForNode = function(node, current) {
+function fxPanelTargetForNode(node, current) {
   if (!node) return current || 'presets';
   var id = node.id || '';
   var inputId = fxPanelInputId(node);
@@ -1355,7 +1355,7 @@ window.fxPanelTargetForNode = function(node, current) {
   if (/^window.fx-(intensity|depth|coverres|cineshake)$/.test(inputId)) return 'motion';
   return current || 'presets';
 }
-window.organizeFxPanel = function() {
+function organizeFxPanel() {
   var panel = document.getElementById('fx-panel');
   if (!panel) return;
   if (panel._fxPanelOrganized) {
@@ -1420,12 +1420,12 @@ window.organizeFxPanel = function() {
   setFxPanelTab(fxPanelTab);
 }
 
-window.fxControlBlock = function(id) {
+function fxControlBlock(id) {
   var el = document.getElementById(id);
   if (!el) return null;
   return el.closest('.fx-slider,.lyric-color-row,.lyric-color-grid,.fx-seg,.preset-grid,.user-archive-grid,.fx-font-grid') || el;
 }
-window.setFxSectionBefore = function(id, text) {
+function setFxSectionBefore(id, text) {
   var block = fxControlBlock(id);
   if (!block || !block.parentNode) return;
   var prev = block.previousElementSibling;
@@ -1436,12 +1436,12 @@ window.setFxSectionBefore = function(id, text) {
   }
   prev.textContent = text;
 }
-window.setFxSliderLabel = function(id, text) {
+function setFxSliderLabel(id, text) {
   var block = fxControlBlock(id);
   var label = block && block.querySelector ? block.querySelector('label') : null;
   if (label) label.textContent = text;
 }
-window.setFxSectionBeforeNode = function(node, text) {
+function setFxSectionBeforeNode(node, text) {
   if (!node || !node.parentNode) return;
   var prev = node.previousElementSibling;
   if (!prev || !prev.classList || !prev.classList.contains('window.fx-section-label')) {
@@ -1451,12 +1451,12 @@ window.setFxSectionBeforeNode = function(node, text) {
   }
   prev.textContent = text;
 }
-window.moveToggleToGrid = function(toggleId, grid) {
+function moveToggleToGrid(toggleId, grid) {
   var node = document.getElementById(toggleId);
   if (!node || !grid || node.parentNode === grid) return;
   grid.appendChild(node);
 }
-window.ensureLyricPrimaryControls = function() {
+function ensureLyricPrimaryControls() {
   var body = document.querySelector('#window.fx-lyric-fold .fx-fold-body');
   if (!body) return;
   var grid = document.getElementById('fx-lyric-primary-controls');
@@ -1482,7 +1482,7 @@ window.ensureLyricPrimaryControls = function() {
     't-lyricGlowParticles'
   ].forEach(function(id){ moveToggleToGrid(id, grid); });
 }
-window.applyBackgroundMediaHint = function() {
+function applyBackgroundMediaHint() {
   var value = document.getElementById('bg-image-value');
   if (value && !value.dataset.mediaHint) {
     value.dataset.mediaHint = '1';
@@ -1496,7 +1496,7 @@ window.applyBackgroundMediaHint = function() {
     label.appendChild(hint);
   }
 }
-window.relabelFxPanelControls = function() {
+function relabelFxPanelControls() {
   var title = document.querySelector('#window.fx-panel .fx-title');
   if (title) title.textContent = '视觉控制台';
   ensureLyricPrimaryControls();
@@ -1560,7 +1560,7 @@ window.relabelFxPanelControls = function() {
   setFxSliderLabel('window.fx-bgfade', '背景压暗');
 }
 
-window.getHotkeyDefaults = function() {
+function getHotkeyDefaults() {
   var defaults = { local: {}, global: {} };
   window.HOTKEY_ACTIONS.forEach(function(action){
     defaults.local[action.key] = action.local || '';
@@ -1568,7 +1568,7 @@ window.getHotkeyDefaults = function() {
   });
   return defaults;
 }
-window.readHotkeySettings = function() {
+function readHotkeySettings() {
   var defaults = window.getHotkeyDefaults();
   try {
     var raw = JSON.parse(localStorage.getItem(window.HOTKEY_SETTINGS_STORE_KEY) || '{}') || {};
@@ -1580,19 +1580,19 @@ window.readHotkeySettings = function() {
     return defaults;
   }
 }
-window.saveHotkeySettings = function() {
+function saveHotkeySettings() {
   try { localStorage.setItem(window.HOTKEY_SETTINGS_STORE_KEY, JSON.stringify(window.hotkeySettings || window.getHotkeyDefaults())); } catch (e) {}
 }
-window.hotkeyActionMeta = function(actionKey) {
+function hotkeyActionMeta(actionKey) {
   for (var i = 0; i < window.HOTKEY_ACTIONS.length; i++) {
     if (window.HOTKEY_ACTIONS[i].key === actionKey) return window.HOTKEY_ACTIONS[i];
   }
   return null;
 }
-window.isModifierKeyCode = function(code) {
+function isModifierKeyCode(code) {
   return /^(ControlLeft|ControlRight|ShiftLeft|ShiftRight|AltLeft|AltRight|MetaLeft|MetaRight)$/i.test(String(code || ''));
 }
-window.normalizeHotkeyEvent = function(e) {
+function normalizeHotkeyEvent(e) {
   if (!e || isModifierKeyCode(e.code)) return '';
   var mods = [];
   if (e.ctrlKey) mods.push('Ctrl');
@@ -1604,7 +1604,7 @@ window.normalizeHotkeyEvent = function(e) {
   if (!code) return '';
   return mods.concat([code]).join('+');
 }
-window.hotkeyDisplayPart = function(part) {
+function hotkeyDisplayPart(part) {
   if (part === 'Ctrl') return 'Ctrl';
   if (part === 'Alt') return 'Alt';
   if (part === 'Shift') return 'Shift';
@@ -1619,12 +1619,12 @@ window.hotkeyDisplayPart = function(part) {
   if (/^Numpad[0-9]$/.test(part)) return 'Num' + part.slice(6);
   return part.replace(/^Equal$/, '=').replace(/^Minus$/, '-');
 }
-window.formatHotkey = function(hotkey) {
+function formatHotkey(hotkey) {
   hotkey = String(hotkey || '').trim();
   if (!hotkey) return '未设置';
   return hotkey.split('+').map(hotkeyDisplayPart).join(' + ');
 }
-window.hotkeyToAccelerator = function(hotkey) {
+function hotkeyToAccelerator(hotkey) {
   var parts = String(hotkey || '').split('+').filter(Boolean);
   if (!parts.length) return '';
   return parts.map(function(part){
@@ -1642,7 +1642,7 @@ window.hotkeyToAccelerator = function(hotkey) {
     return part;
   }).join('+');
 }
-window.hotkeyDuplicateMap = function(scope) {
+function hotkeyDuplicateMap(scope) {
   var map = {};
   var source = (window.hotkeySettings && window.hotkeySettings[scope]) || {};
   Object.keys(source).forEach(function(action){
@@ -1652,7 +1652,7 @@ window.hotkeyDuplicateMap = function(scope) {
   });
   return map;
 }
-window.executeHotkeyAction = function(actionKey, source) {
+function executeHotkeyAction(actionKey, source) {
   if (actionKey === 'window.togglePlay') return window.togglePlay();
   if (actionKey === 'window.prevTrack') return window.prevTrack();
   if (actionKey === 'window.nextTrack') return window.nextTrack();
@@ -1661,7 +1661,7 @@ window.executeHotkeyAction = function(actionKey, source) {
   if (actionKey === 'window.toggleFullscreen') return window.toggleFullscreen();
   if (actionKey === 'toggleDesktopLyrics') return toggleFx('desktopLyrics');
 }
-window.handleConfiguredLocalHotkey = function(e) {
+function handleConfiguredLocalHotkey(e) {
   if (!window.hotkeySettings || !window.hotkeySettings.local || window.isTypingTarget(e.target)) return false;
   if (window.hotkeyCaptureState || document.getElementById('hotkey-modal') && document.getElementById('hotkey-modal').classList.contains('show')) return false;
   if (window.freeCamera && window.freeCamera.active && /^(KeyW|KeyA|KeyS|KeyD|KeyQ|KeyE|Space|ShiftLeft|ShiftRight|ControlLeft|ControlRight)$/.test(e.code)) return false;
@@ -1680,7 +1680,7 @@ window.handleConfiguredLocalHotkey = function(e) {
   }
   return false;
 }
-window.shouldSuppressDefaultConfiguredHotkey = function(e) {
+function shouldSuppressDefaultConfiguredHotkey(e) {
   if (!window.hotkeySettings || !window.hotkeySettings.local) return false;
   var combo = normalizeHotkeyEvent(e);
   if (!combo) return false;
@@ -1690,7 +1690,7 @@ window.shouldSuppressDefaultConfiguredHotkey = function(e) {
   }
   return false;
 }
-window.ensureHotkeySettingsButton = function() {
+function ensureHotkeySettingsButton() {
   var panel = document.getElementById('fx-panel');
   var head = panel && panel.querySelector('.fx-head');
   if (!head || document.getElementById('hotkey-settings-btn')) return;
@@ -1706,7 +1706,7 @@ window.ensureHotkeySettingsButton = function() {
   actions.appendChild(btn);
   head.appendChild(actions);
 }
-window.ensureHotkeyModal = function() {
+function ensureHotkeyModal() {
   var modal = document.getElementById('hotkey-modal');
   if (modal) return modal;
   modal = document.createElement('div');
@@ -1738,7 +1738,7 @@ window.ensureHotkeyModal = function() {
   });
   return modal;
 }
-window.hotkeyStatusMarkup = function(scope, actionKey, binding, duplicate) {
+function hotkeyStatusMarkup(scope, actionKey, binding, duplicate) {
   if (!binding) return '<span class="hotkey-status">未设置</span>';
   if (duplicate && duplicate[binding] > 1) return '<span class="hotkey-status conflict"><span class="source-icon">!</span>Mineradio 内部重复</span>';
   if (scope === 'local') return '<span class="hotkey-status ok">可用</span>';
@@ -1748,7 +1748,7 @@ window.hotkeyStatusMarkup = function(scope, actionKey, binding, duplicate) {
   var source = status.conflict && status.conflict.sourceName || '系统 / 其他软件';
   return '<span class="hotkey-status conflict"><span class="source-icon">!</span>' + window.escHtml(source) + '</span>';
 }
-window.renderHotkeyScope = function(scope) {
+function renderHotkeyScope(scope) {
   var wrap = document.getElementById(scope === 'global' ? 'hotkey-global-section' : 'hotkey-local-section');
   if (!wrap) return;
   var duplicate = hotkeyDuplicateMap(scope);
@@ -1772,7 +1772,7 @@ window.renderHotkeyScope = function(scope) {
   });
   wrap.innerHTML = html;
 }
-window.renderHotkeySettings = function() {
+function renderHotkeySettings() {
   var modal = ensureHotkeyModal();
   var active = modal.getAttribute('data-scope') || 'local';
   modal.classList.toggle('capturing', !!window.hotkeyCaptureState);
@@ -1786,30 +1786,30 @@ window.renderHotkeySettings = function() {
   renderHotkeyScope('local');
   renderHotkeyScope('global');
 }
-window.setHotkeyModalScope = function(scope) {
+function setHotkeyModalScope(scope) {
   var modal = ensureHotkeyModal();
   modal.setAttribute('data-scope', scope === 'global' ? 'global' : 'local');
   renderHotkeySettings();
 }
-window.openHotkeySettings = function() {
+function openHotkeySettings() {
   var modal = ensureHotkeyModal();
   modal.classList.add('show');
   modal.setAttribute('data-scope', modal.getAttribute('data-scope') || 'local');
   renderHotkeySettings();
   registerGlobalHotkeys();
 }
-window.closeHotkeySettings = function() {
+function closeHotkeySettings() {
   hotkeyCaptureState = null;
   var modal = document.getElementById('hotkey-modal');
   if (modal) modal.classList.remove('show', 'capturing');
 }
-window.startHotkeyCapture = function(action, scope) {
+function startHotkeyCapture(action, scope) {
   hotkeyCaptureState = { action: action, scope: scope === 'global' ? 'global' : 'local' };
   var modal = ensureHotkeyModal();
   modal.setAttribute('data-scope', window.hotkeyCaptureState.scope);
   renderHotkeySettings();
 }
-window.setHotkeyBinding = function(action, scope, value) {
+function setHotkeyBinding(action, scope, value) {
   if (!window.hotkeySettings) hotkeySettings = window.getHotkeyDefaults();
   if (!window.hotkeySettings[scope]) window.hotkeySettings[scope] = {};
   window.hotkeySettings[scope][action] = value || '';
@@ -1817,12 +1817,12 @@ window.setHotkeyBinding = function(action, scope, value) {
   renderHotkeySettings();
   if (scope === 'global') registerGlobalHotkeys();
 }
-window.resetHotkeyBinding = function(action, scope) {
+function resetHotkeyBinding(action, scope) {
   var meta = hotkeyActionMeta(action);
   if (!meta) return;
   setHotkeyBinding(action, scope, scope === 'global' ? meta.global : meta.local);
 }
-window.registerGlobalHotkeys = function() {
+function registerGlobalHotkeys() {
   var api = getDesktopWindowApi && getDesktopWindowApi();
   if (!api || typeof api.configureGlobalHotkeys !== 'function') {
     hotkeyGlobalStatus = {};
@@ -1850,7 +1850,7 @@ window.registerGlobalHotkeys = function() {
   });
 }
 window.globalHotkeyListenerBound = false;
-window.bindHotkeySettings = function() {
+function bindHotkeySettings() {
   ensureHotkeySettingsButton();
   ensureHotkeyModal();
   if (!globalHotkeyListenerBound) {
@@ -1894,7 +1894,7 @@ document.addEventListener('keydown', function(e){
   hotkeyCaptureState = null;
   setHotkeyBinding(target.action, target.scope, combo);
 }, true);
-window.bindFxPanel = function() {
+function bindFxPanel() {
   liftFxFloatingPopups();
   organizeFxPanel();
   relabelFxPanelControls();
@@ -2114,7 +2114,7 @@ window.bindFxPanel = function() {
   });
   updateFxInputs();
 }
-window.toggleFx = function(key) {
+function toggleFx(key) {
   if (window.isDevelopmentLockedFx(key)) {
     window.normalizeDevelopmentLockedFxState();
     saveLyricLayout();
@@ -2174,7 +2174,7 @@ window.toggleFx = function(key) {
     window.showToast(window.fx.aiDepth ? '已开启后台 AI 立体增强' : '已关闭 AI 立体增强, 使用轻量弧面');
   }
 }
-window.toggleFxPanel = function(force) {
+function toggleFxPanel(force) {
   var el = document.getElementById('fx-panel');
   if (!el) return;
   if (!window.diyPlayerMode && force !== false) {
@@ -2195,7 +2195,7 @@ window.toggleFxPanel = function(force) {
   el.classList.remove('show', 'closing');
   setPeek(el, true, 'window.fx');
 }
-window.resetFx = function() {
+function resetFx() {
   var savedCam = window.fx.cam;
   var savedShelf = window.fx.shelf;
   var savedShelfCameraMode = window.normalizeShelfCameraMode(window.fx.shelfCameraMode || window.fxDefaults.shelfCameraMode);
@@ -2223,7 +2223,7 @@ window.resetFx = function() {
   window.showToast('已恢复默认参数');
 }
 
-window.setShelfMode = function(m) {
+function setShelfMode(m) {
   m = /^(off|side|stage)$/.test(String(m || '')) ? m : window.fxDefaults.shelf;
   window.fx.shelf = m;
   document.querySelectorAll('#shelf-seg button').forEach(function(b){ b.classList.toggle('active', b.dataset.shelf === m); });
@@ -2236,7 +2236,7 @@ window.setShelfMode = function(m) {
   saveLyricLayout();
 }
 
-window.updateShelfControlUi = function() {
+function updateShelfControlUi() {
   window.fx.shelfCameraMode = window.normalizeShelfCameraMode(window.fx.shelfCameraMode || window.fxDefaults.shelfCameraMode);
   window.fx.shelfPresence = normalizeShelfPresence(window.fx.shelfPresence || window.fxDefaults.shelfPresence);
   document.querySelectorAll('#shelf-camera-seg [data-shelf-camera]').forEach(function(btn){
@@ -2251,12 +2251,12 @@ window.updateShelfControlUi = function() {
   if (picker) picker.value = color;
   if (value) value.textContent = color.toUpperCase();
 }
-window.refreshShelfVisuals = function(reason) {
+function refreshShelfVisuals(reason) {
   updateShelfControlUi();
   if (window.shelfManager && window.shelfManager.refreshTheme) window.shelfManager.refreshTheme();
   if (window.shelfManager && window.shelfManager.rebuild && reason === 'mode') window.shelfManager.rebuild(true);
 }
-window.setShelfCameraMode = function(mode) {
+function setShelfCameraMode(mode) {
   window.fx.shelfCameraMode = window.normalizeShelfCameraMode(mode);
   applyShelfCameraDefaultAngle(true);
   setRange('window.fx-shelfangle', window.fx.shelfAngleY);
@@ -2267,7 +2267,7 @@ window.setShelfCameraMode = function(mode) {
   saveLyricLayout();
   window.showToast(window.fx.shelfCameraMode === 'static' ? '3D歌单架: 静态镜头' : '3D歌单架: 动态镜头');
 }
-window.setShelfPresence = function(mode) {
+function setShelfPresence(mode) {
   window.fx.shelfPresence = normalizeShelfPresence(mode);
   updateShelfControlUi();
   if (window.shelfManager && window.shelfManager.setMode) window.shelfManager.setMode(window.fx.shelf);
@@ -2277,17 +2277,17 @@ window.setShelfPresence = function(mode) {
   saveLyricLayout();
   window.showToast(window.fx.shelfPresence === 'always' ? '3D歌单架: 常驻' : '3D歌单架: 自动隐藏');
 }
-window.setShelfAccentColor = function(color, silent) {
+function setShelfAccentColor(color, silent) {
   window.fx.shelfAccentColor = window.normalizeHexColor(color || window.fxDefaults.shelfAccentColor, window.fxDefaults.shelfAccentColor);
   refreshShelfVisuals('color');
   saveLyricLayout();
   if (!silent) window.showToast('歌单架颜色: ' + window.fx.shelfAccentColor.toUpperCase());
 }
-window.resetShelfAccentColor = function() {
+function resetShelfAccentColor() {
   setShelfAccentColor(window.fxDefaults.shelfAccentColor || '#f4d28a');
 }
 
-window.syncControlsAutoHideButton = function() {
+function syncControlsAutoHideButton() {
   var btn = document.getElementById('controls-hide-btn');
   if (btn) btn.classList.toggle('active', window.controlsAutoHide);
   if (!window.controlsAutoHide && window.controlsHideTimer) {
@@ -2296,7 +2296,7 @@ window.syncControlsAutoHideButton = function() {
   }
 }
 
-window.setParticleLyricsSilently = function(on) {
+function setParticleLyricsSilently(on) {
   window.fx.particleLyrics = !!on;
   if (window.fx.particleLyrics) createLyricsParticles();
   else clearStageLyrics();
@@ -2304,7 +2304,7 @@ window.setParticleLyricsSilently = function(on) {
   window.updateLyricOffsetVisibility();
 }
 
-window.updateImmersiveButton = function() {
+function updateImmersiveButton() {
   var btn = document.getElementById('immersive-btn');
   if (!btn) return;
   btn.classList.toggle('active', window.immersiveMode);
@@ -2313,7 +2313,7 @@ window.updateImmersiveButton = function() {
   btn.setAttribute('aria-label', btn.title);
 }
 
-window.closeImmersiveInterference = function() {
+function closeImmersiveInterference() {
   closeMiniQueue();
   toggleFxPanel(false);
   closeUploadTip(false);
@@ -2334,7 +2334,7 @@ window.closeImmersiveInterference = function() {
   setFocusZone(null, true);
 }
 
-window.setImmersiveMode = function(on) {
+function setImmersiveMode(on) {
   on = !!on;
   if (immersiveMode === on) return;
 
@@ -2380,11 +2380,11 @@ window.setImmersiveMode = function(on) {
   window.showToast('已退出全沉浸式');
 }
 
-window.toggleImmersiveMode = function() {
+function toggleImmersiveMode() {
   setImmersiveMode(!window.immersiveMode);
 }
 
-window.setCamMode = function(m) {
+function setCamMode(m) {
   if (m === 'head') m = 'gesture'; // v8: 头部追踪已下线, 兼容旧设置
   window.fx.cam = m;
   document.querySelectorAll('#cam-seg button').forEach(function(b){ b.classList.toggle('active', b.dataset.cam === m); });

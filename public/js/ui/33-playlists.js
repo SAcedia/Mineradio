@@ -2,7 +2,7 @@
 // ============================================================
 window.LOCAL_PLAYLIST_STORAGE_KEY = 'mineradio-local-playlists-v1';
 
-window.loadLocalPlaylists = function() {
+function loadLocalPlaylists() {
   try {
     var raw = localStorage.getItem(window.LOCAL_PLAYLIST_STORAGE_KEY);
     if (raw) return JSON.parse(raw);
@@ -10,13 +10,13 @@ window.loadLocalPlaylists = function() {
   return [];
 }
 
-window.saveLocalPlaylists = function(playlists) {
+function saveLocalPlaylists(playlists) {
   try {
     localStorage.setItem(window.LOCAL_PLAYLIST_STORAGE_KEY, JSON.stringify(playlists));
   } catch (e) {}
 }
 
-window.createLocalPlaylist = function(name) {
+function createLocalPlaylist(name) {
   if (name) {
     name = String(name).trim();
     if (!name) return;
@@ -53,7 +53,7 @@ window.createLocalPlaylist = function(name) {
   }, 100);
 }
 
-window.deleteLocalPlaylist = function(id) {
+function deleteLocalPlaylist(id) {
   var mask = document.createElement('div');
   mask.className = 'modal-mask';
   mask.innerHTML = '<div class="modal collect-modal" style="padding:28px;text-align:left;max-width:360px">' +
@@ -66,7 +66,7 @@ window.deleteLocalPlaylist = function(id) {
   document.body.appendChild(mask);
   window.openGsapModal(mask);
 }
-window.deleteLocalPlaylistConfirm = function(id) {
+function deleteLocalPlaylistConfirm(id) {
   var playlists = window.loadLocalPlaylists();
   playlists = playlists.filter(function(p){ return p.id !== id; });
   window.saveLocalPlaylists(playlists);
@@ -75,7 +75,7 @@ window.deleteLocalPlaylistConfirm = function(id) {
   window.showToast('已删除本地歌单');
 }
 
-window.addSongToLocalPlaylist = function(playlistId, song) {
+function addSongToLocalPlaylist(playlistId, song) {
   if (!song || !song.id) return;
   var playlists = window.loadLocalPlaylists();
   var pl = playlists.find(function(p){ return p.id === playlistId; });
@@ -99,7 +99,7 @@ window.addSongToLocalPlaylist = function(playlistId, song) {
   if (mask) window.closeGsapModal(mask);
 }
 
-window.removeSongFromLocalPlaylist = function(playlistId, songIdx) {
+function removeSongFromLocalPlaylist(playlistId, songIdx) {
   var playlists = window.loadLocalPlaylists();
   var pl = playlists.find(function(p){ return p.id === playlistId; });
   if (!pl) return;
@@ -109,7 +109,7 @@ window.removeSongFromLocalPlaylist = function(playlistId, songIdx) {
 }
 
 // 从收藏到歌单的输入框创建歌单并直接添加当前歌曲
-window.createLocalPlaylistFromPicker = function() {
+function createLocalPlaylistFromPicker() {
   var inp = document.getElementById('local-collect-new-name');
   var name = inp ? inp.value.trim() : '';
   if (!name) return;
@@ -133,7 +133,7 @@ window.createLocalPlaylistFromPicker = function() {
   window.showToast('已创建并添加到「' + name + '」');
 }
 
-window.showAddToLocalPlaylistPicker = function(song) {
+function showAddToLocalPlaylistPicker(song) {
   if (!song || !song.id) return;
   // 清除旧弹窗防止 ID 冲突
   var oldMask = document.getElementById('local-collect-mask');
@@ -193,7 +193,7 @@ window.showAddToLocalPlaylistPicker = function(song) {
   }
 }
 
-window.playLocalPlaylistSongs = function(songs, startIdx) {
+function playLocalPlaylistSongs(songs, startIdx) {
   if (!songs || !songs.length) return;
   startIdx = startIdx || 0;
   activeRadioContext = null;
@@ -208,7 +208,7 @@ window.playLocalPlaylistSongs = function(songs, startIdx) {
 }
 
 // 从 localStorage 收集所有已红心的 YT/SP 歌曲（含元数据）
-window.getLocalLikedSongs = function() {
+function getLocalLikedSongs() {
   var songs = [];
   try {
     for (var i = 0; i < localStorage.length; i++) {
@@ -241,7 +241,7 @@ window.getLocalLikedSongs = function() {
 }
 
 // 构建标准 song 对象用于播放
-window.toStandardSongs = function(songs) {
+function toStandardSongs(songs) {
   return songs.map(function(s){
     return { id: s.id, mid: s.mid || '', provider: s.provider || '', source: s.provider || '', type: 'song', name: s.name || '', artist: s.artist || '', cover: s.cover || '' };
   });
@@ -250,14 +250,14 @@ window.toStandardSongs = function(songs) {
 var localDetailSongs = []; // 当前详情面板的歌曲（标准格式）
 var localDetailPlaylistId = ''; // 当前详情面板打开的歌单 id
 
-window.hideLocalPlaylistDetail = function() {
+function hideLocalPlaylistDetail() {
   var panel = document.getElementById('playlist-detail-panel');
   if (panel) panel.classList.remove('show');
   localDetailSongs = [];
   localDetailPlaylistId = '';
 }
 
-window.showLocalPlaylistDetail = function(playlistId) {
+function showLocalPlaylistDetail(playlistId) {
   var $panel = document.getElementById('playlist-detail-panel');
   var $title = document.getElementById('detail-panel-title');
   var $list = document.getElementById('detail-panel-list');
@@ -290,7 +290,7 @@ window.showLocalPlaylistDetail = function(playlistId) {
 }
 
 // 渲染本地歌单卡片 → #local-pl-section
-window.renderLocalPlaylistsIntoView = function() {
+function renderLocalPlaylistsIntoView() {
   var $sec = document.getElementById('local-pl-section');
   if (!$sec) return;
   var playlists = window.loadLocalPlaylists();
@@ -350,15 +350,15 @@ window.renderLocalPlaylistsIntoView = function() {
 })();
 
 var playlistPanelDetailState = { key: '', loading: false, playlist: null, tracks: [], token: 0, renderLimit: PLAYLIST_DETAIL_INITIAL_RENDER };
-window.playlistPanelKey = function(provider, id) {
+function playlistPanelKey(provider, id) {
   if (provider === 'qq') return 'qq:' + String(id || '');
   return 'netease:' + String(id || '');
 }
-window.playlistPanelProviderId = function(provider, id) {
+function playlistPanelProviderId(provider, id) {
   if (provider === 'qq') return 'qq:' + id;
   return id;
 }
-window.playlistPanelDetailHtml = function(pl, provider) {
+function playlistPanelDetailHtml(pl, provider) {
   var key = window.playlistPanelKey(provider, pl && pl.id);
   if (window.playlistPanelDetailState.key !== key) return '';
   var tracks = window.playlistPanelDetailState.tracks || [];
@@ -393,16 +393,16 @@ window.playlistPanelDetailHtml = function(pl, provider) {
     '<div class="pl-detail-list">' + rows + '</div>' +
   '</div>';
 }
-window.renderPlaylistPanelDetailState = function() {
+function renderPlaylistPanelDetailState() {
   window.renderUserPlaylistsList();
 }
-window.scrollPlaylistPanelToTop = function() {
+function scrollPlaylistPanelToTop() {
   var panel = document.getElementById('playlist-panel');
   if (!panel) return;
   try { panel.scrollTo({ top: 0, behavior: 'smooth' }); }
   catch (e) { panel.scrollTop = 0; }
 }
-window.scrollPlaylistPanelDetailIntoView = function(key) {
+function scrollPlaylistPanelDetailIntoView(key) {
   var panel = document.getElementById('playlist-panel');
   if (!panel || !key) return;
   requestAnimationFrame(function(){
@@ -421,7 +421,7 @@ window.scrollPlaylistPanelDetailIntoView = function(key) {
     catch (e) { panel.scrollTop = top; }
   });
 }
-window.openPlaylistPanelDetail = async function(provider, pid, title) {
+async function openPlaylistPanelDetail(provider, pid, title) {
   if (!pid) return;
   provider = provider === 'qq' ? 'qq' : 'netease';
   var key = window.playlistPanelKey(provider, pid);
@@ -457,7 +457,7 @@ window.openPlaylistPanelDetail = async function(provider, pid, title) {
     window.showToast('歌单详情加载失败');
   }
 }
-window.playPlaylistPanelDetail = function() {
+function playPlaylistPanelDetail() {
   var st = window.playlistPanelDetailState;
   if (!st || !st.key) return;
   var parts = st.key.split(':');
@@ -465,7 +465,7 @@ window.playPlaylistPanelDetail = function() {
   var pid = parts.slice(1).join(':');
   window.loadPlaylistIntoQueueById(playlistPanelProviderId(provider, pid), true, st.playlist && st.playlist.name || '');
 }
-window.playPlaylistPanelDetailTrack = function(index) {
+function playPlaylistPanelDetailTrack(index) {
   var tracks = window.playlistPanelDetailState.tracks || [];
   if (!tracks[index]) return;
   playQueue = tracks.map(window.cloneSong);
@@ -476,11 +476,11 @@ window.playPlaylistPanelDetailTrack = function(index) {
   window.forcePlaybackControlsInteractive();
   window.playQueueAt(index).catch(function(e){ console.warn('[PlaylistPanelDetailPlay]', e); });
 }
-window.openPlaylistPanelDetailArtist = function(index) {
+function openPlaylistPanelDetailArtist(index) {
   var song = window.playlistPanelDetailState.tracks && window.playlistPanelDetailState.tracks[index];
   if (song) window.openArtistDetailForSong(song);
 }
-window.growPlaylistPanelDetailRenderLimit = function(amount) {
+function growPlaylistPanelDetailRenderLimit(amount) {
   var st = window.playlistPanelDetailState;
   var total = st && st.tracks ? st.tracks.length : 0;
   if (!st || st.loading || !st.key || !total) return false;
@@ -494,7 +494,7 @@ window.growPlaylistPanelDetailRenderLimit = function(amount) {
   if (panel) panel.scrollTop = keepTop;
   return true;
 }
-window.maybeGrowPlaylistPanelDetailRenderLimit = function() {
+function maybeGrowPlaylistPanelDetailRenderLimit() {
   var panel = document.getElementById('playlist-panel');
   var st = window.playlistPanelDetailState;
   if (!panel || !st || st.loading || !st.key || !st.tracks || st.renderLimit >= st.tracks.length) return;
@@ -502,17 +502,17 @@ window.maybeGrowPlaylistPanelDetailRenderLimit = function() {
     growPlaylistPanelDetailRenderLimit();
   }
 }
-window.resetPlaylistPanelRenderLimit = function() {
+function resetPlaylistPanelRenderLimit() {
   playlistPanelRenderLimit = PLAYLIST_PANEL_BATCH_SIZE;
 }
-window.growPlaylistPanelRenderLimit = function() {
+function growPlaylistPanelRenderLimit() {
   if (!window.userPlaylists.length) return;
   var next = Math.min(window.userPlaylists.length, (playlistPanelRenderLimit || PLAYLIST_PANEL_BATCH_SIZE) + PLAYLIST_PANEL_BATCH_SIZE);
   if (next <= playlistPanelRenderLimit) return;
   playlistPanelRenderLimit = next;
   window.renderUserPlaylistsList({ animate: true });
 }
-window.bindPlaylistPanelLazyRender = function() {
+function bindPlaylistPanelLazyRender() {
   var panel = document.getElementById('playlist-panel');
   if (!panel || window.playlistPanelLazyBound) return;
   playlistPanelLazyBound = true;
@@ -522,7 +522,7 @@ window.bindPlaylistPanelLazyRender = function() {
     if (panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 180) growPlaylistPanelRenderLimit();
   }, { passive: true });
 }
-window.renderUserPlaylistsList = function(opts) {
+function renderUserPlaylistsList(opts) {
   opts = opts || {};
   window.renderLocalPlaylistsIntoView();
   var $pl = document.getElementById('pl-list');
@@ -567,7 +567,7 @@ window.renderUserPlaylistsList = function(opts) {
   }
   if (opts.animate && seq === playlistRenderSeq) animateVisiblePanelList($pl, '.pl-card', document.getElementById('playlist-panel'));
 }
-window.renderMyPodcastCollections = function(opts) {
+function renderMyPodcastCollections(opts) {
   opts = opts || {};
   var $pod = document.getElementById('podcast-list');
   if (!$pod) return;
@@ -656,7 +656,7 @@ if (podcastListEl) {
     openMyPodcastCollection(card.getAttribute('data-podcast-key'), card.getAttribute('data-podcast-title') || '');
   });
 }
-window.renderMyPodcastRadioItems = function(key, title, items) {
+function renderMyPodcastRadioItems(key, title, items) {
   var $pod = document.getElementById('podcast-list');
   if (!$pod) return;
   if (!items.length) {
@@ -675,7 +675,7 @@ window.renderMyPodcastRadioItems = function(key, title, items) {
     }).join('');
   animateVisiblePanelList($pod, '.pl-card', document.getElementById('playlist-panel'));
 }
-window.openMyPodcastCollection = async function(key, title) {
+async function openMyPodcastCollection(key, title) {
   if (!key) return;
   window.showLoading();
   try {
@@ -707,7 +707,7 @@ window.openMyPodcastCollection = async function(key, title) {
     window.hideLoading();
   }
 }
-window.loadPodcastRadioIntoQueue = async function(id, autoplay, title) {
+async function loadPodcastRadioIntoQueue(id, autoplay, title) {
   if (!id) return;
   window.showLoading();
   try {
@@ -729,7 +729,7 @@ window.loadPodcastRadioIntoQueue = async function(id, autoplay, title) {
     window.hideLoading();
   }
 }
-window.loadPlaylistIntoQueueById = async function(id, autoplay, title) {
+async function loadPlaylistIntoQueueById(id, autoplay, title) {
   if (!id) return;
   homeForcedOpen = false;
   homeSuppressed = false;
@@ -779,30 +779,30 @@ window.loadPlaylistIntoQueueById = async function(id, autoplay, title) {
 
 // 进度条
 var progressDragState = { active: false, lastParticleAt: 0 };
-window.normalizePlaybackDurationSeconds = function(value) {
+function normalizePlaybackDurationSeconds(value) {
   var raw = Number(value);
   if (!isFinite(raw) || raw <= 0) return 0;
   return raw > 1000 ? raw / 1000 : raw;
 }
-window.playbackDurationFromSong = function(song) {
+function playbackDurationFromSong(song) {
   if (!song) return 0;
   return normalizePlaybackDurationSeconds(song.duration || song.durationMs || song.dt || 0);
 }
-window.getPlaybackDurationSeconds = function() {
+function getPlaybackDurationSeconds() {
   if (window.audio && isFinite(window.audio.duration) && window.audio.duration > 0) return window.audio.duration;
   return playbackDurationFromSong(window.currentCoverSong());
 }
-window.getPlaybackCurrentSeconds = function() {
+function getPlaybackCurrentSeconds() {
   return window.audio && isFinite(window.audio.currentTime) && window.audio.currentTime > 0 ? window.audio.currentTime : 0;
 }
-window.setProgressVisual = function(percent) {
+function setProgressVisual(percent) {
   percent = window.clampRange(percent || 0, 0, 100);
   var fill = document.getElementById('progress-fill');
   var thumb = document.getElementById('progress-thumb');
   if (fill) fill.style.width = percent + '%';
   if (thumb) thumb.style.left = percent + '%';
 }
-window.updatePlaybackProgressUi = function() {
+function updatePlaybackProgressUi() {
   var durationSec = getPlaybackDurationSeconds();
   var currentSec = getPlaybackCurrentSeconds();
   if (durationSec > 0 && currentSec > durationSec) currentSec = durationSec;
@@ -810,7 +810,7 @@ window.updatePlaybackProgressUi = function() {
   var timeDisplay = document.getElementById('time-display');
   if (timeDisplay) timeDisplay.textContent = formatProgramTime(currentSec) + ' / ' + (durationSec > 0 ? formatProgramTime(durationSec) : '0:00');
 }
-window.bindPlaybackProgressEvents = function(audioEl) {
+function bindPlaybackProgressEvents(audioEl) {
   if (!audioEl || audioEl._mineradioProgressBound) return;
   audioEl._mineradioProgressBound = true;
   ['loadedmetadata', 'durationchange', 'timeupdate', 'seeked', 'play', 'pause', 'emptied'].forEach(function(name){
@@ -820,7 +820,7 @@ window.bindPlaybackProgressEvents = function(audioEl) {
     audioEl.addEventListener(name, function(){ syncPlaybackStateFromAudioEvent(name); });
   });
 }
-window.emitProgressDragParticles = function(x, y) {
+function emitProgressDragParticles(x, y) {
   var now = performance.now();
   if (now - progressDragState.lastParticleAt < 46) return;
   progressDragState.lastParticleAt = now;
@@ -837,7 +837,7 @@ window.emitProgressDragParticles = function(x, y) {
     setTimeout((function(el){ return function(){ if (el && el.parentNode) el.parentNode.removeChild(el); }; })(dot), 700);
   }
 }
-window.seekFromProgressPointer = function(e, emitParticles) {
+function seekFromProgressPointer(e, emitParticles) {
   var durationSec = getPlaybackDurationSeconds();
   if (!window.audio || !durationSec) return;
   var bar = document.getElementById('progress-bar');
@@ -860,7 +860,7 @@ progressBar.addEventListener('pointermove', function(e){
   if (!progressDragState.active) return;
   seekFromProgressPointer(e, true);
 });
-window.endProgressDrag = function(e) {
+function endProgressDrag(e) {
   if (!progressDragState.active) return;
   progressDragState.active = false;
   progressBar.classList.remove('is-dragging');
@@ -880,7 +880,7 @@ setInterval(function(){
 //  文件拖放
 // ============================================================
 document.getElementById('file-input').addEventListener('change', function(e){ handleFiles(e.target.files); e.target.value = ''; });
-window.handleFiles = function(files) {
+function handleFiles(files) {
   var audioFile = null, imgFile = null;
   for (var i = 0; i < files.length; i++) {
     var f = files[i];
@@ -975,18 +975,18 @@ document.addEventListener('drop', function(e){
 // ============================================================
 //  更新提示预览
 // ============================================================
-window.formatUpdateBytes = function(bytes) {
+function formatUpdateBytes(bytes) {
   bytes = Number(bytes) || 0;
   if (bytes >= 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(2).replace(/\.00$/, '') + ' GB';
   if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1).replace(/\.0$/, '') + ' MB';
   if (bytes >= 1024) return Math.round(bytes / 1024) + ' KB';
   return bytes + ' B';
 }
-window.formatUpdateSpeed = function(bytesPerSecond) {
+function formatUpdateSpeed(bytesPerSecond) {
   bytesPerSecond = Number(bytesPerSecond) || 0;
   return bytesPerSecond > 0 ? (formatUpdateBytes(bytesPerSecond) + '/s') : '';
 }
-window.updateProgressDetailText = function() {
+function updateProgressDetailText() {
   var parts = [];
   if (updatePreviewState.attempts > 1 && updatePreviewState.attempt > 0) {
     parts.push('线路 ' + updatePreviewState.attempt + '/' + updatePreviewState.attempts);
@@ -1002,14 +1002,14 @@ window.updateProgressDetailText = function() {
   if (updatePreviewState.etaSeconds > 0 && updatePreviewState.etaSeconds < 3600) parts.push('约 ' + updatePreviewState.etaSeconds + ' 秒');
   return parts.join(' · ');
 }
-window.initUpdatePreview = function() {
+function initUpdatePreview() {
   renderUpdatePreviewPanel();
   setUpdatePreviewVisible(true);
   checkLatestUpdate();
   setTimeout(startUpdateIconBreathing, 760);
 }
 
-window.setUpdatePreviewVisible = function(visible) {
+function setUpdatePreviewVisible(visible) {
   updatePreviewState.visible = !!visible;
   var entry = document.getElementById('update-entry');
   if (!entry) return;
@@ -1027,7 +1027,7 @@ window.setUpdatePreviewVisible = function(visible) {
   }
 }
 
-window.checkLatestUpdate = async function() {
+async function checkLatestUpdate() {
   try {
     var data = await window.neteaseUpdateLatest();
     applyLatestUpdateInfo(data);
@@ -1040,7 +1040,7 @@ window.checkLatestUpdate = async function() {
   }
 }
 
-window.applyLatestUpdateInfo = function(data) {
+function applyLatestUpdateInfo(data) {
   data = data || {};
   var release = data.release || {};
   updatePreviewState.currentVersion = data.currentVersion || updatePreviewState.currentVersion;
@@ -1061,7 +1061,7 @@ window.applyLatestUpdateInfo = function(data) {
   setUpdatePreviewVisible(updatePreviewState.updateAvailable || updatePreviewState.preview);
 }
 
-window.startUpdateIconBreathing = function() {
+function startUpdateIconBreathing() {
   var entry = document.getElementById('update-entry');
   if (!entry || !window.gsap) return;
   var ring = entry.querySelector('.update-ring');
@@ -1088,7 +1088,7 @@ window.startUpdateIconBreathing = function() {
   }
 }
 
-window.renderUpdatePreviewPanel = function() {
+function renderUpdatePreviewPanel() {
   var version = document.getElementById('update-modal-version');
   var hero = document.getElementById('update-hero-main');
   var list = document.getElementById('update-list');
@@ -1104,7 +1104,7 @@ window.renderUpdatePreviewPanel = function() {
   syncUpdatePreviewStateClass();
 }
 
-window.syncUpdatePreviewStateClass = function() {
+function syncUpdatePreviewStateClass() {
   var entry = document.getElementById('update-entry');
   var modal = document.querySelector('#update-modal .update-modal');
   var isDownloading = updatePreviewState.status === 'downloading';
@@ -1148,7 +1148,7 @@ window.syncUpdatePreviewStateClass = function() {
   }
 }
 
-window.updateUpdatePreviewProgress = function(progress) {
+function updateUpdatePreviewProgress(progress) {
   updatePreviewState.progress = window.clampRange(Number(progress) || 0, 0, 100);
   var fill = document.getElementById('update-btn-fill');
   if (fill) fill.style.width = updatePreviewState.progress + '%';
@@ -1160,7 +1160,7 @@ window.updateUpdatePreviewProgress = function(progress) {
   syncUpdatePreviewStateClass();
 }
 
-window.openUpdatePanel = function() {
+function openUpdatePanel() {
   var mask = document.getElementById('update-modal');
   var entry = document.getElementById('update-entry');
   if (!mask) return;
@@ -1173,13 +1173,13 @@ window.openUpdatePanel = function() {
   animateUpdatePanelContents();
 }
 
-window.closeUpdatePanel = function() {
+function closeUpdatePanel() {
   window.closeGsapModal(document.getElementById('update-modal'), function(){
     updatePreviewState.open = false;
   });
 }
 
-window.animateUpdatePanelContents = function() {
+function animateUpdatePanelContents() {
   if (!window.gsap) return;
   var modal = document.querySelector('#update-modal .update-modal');
   if (!modal) return;
@@ -1206,7 +1206,7 @@ window.animateUpdatePanelContents = function() {
   }
 }
 
-window.startRealUpdateDownload = async function() {
+async function startRealUpdateDownload() {
   if (updatePreviewState.status === 'downloading' || updatePreviewState.status === 'opening') return;
   if (updatePreviewState.status === 'ready' && updatePreviewState.installerPath) {
     openDownloadedUpdateInstaller(updatePreviewState.installerPath);
@@ -1250,7 +1250,7 @@ window.startRealUpdateDownload = async function() {
     window.showToast('更新下载启动失败：' + updatePreviewState.errorReason);
   }
 }
-window.startRealUpdatePatch = async function() {
+async function startRealUpdatePatch() {
   if (updatePreviewState.status === 'downloading' || updatePreviewState.status === 'opening') return;
   if (updatePreviewState.status === 'ready' && updatePreviewState.mode === 'patch') {
     restartForAppliedPatch();
@@ -1297,7 +1297,7 @@ window.startRealUpdatePatch = async function() {
   }
 }
 
-window.pollUpdateDownloadJob = async function(id) {
+async function pollUpdateDownloadJob(id) {
   if (!id) return;
   try {
     var job = await window.apiJson('/api/update/download/status?id=' + encodeURIComponent(id) + '&t=' + Date.now());
@@ -1313,7 +1313,7 @@ window.pollUpdateDownloadJob = async function(id) {
     window.showToast('更新下载状态读取失败');
   }
 }
-window.pollUpdatePatchJob = async function(id) {
+async function pollUpdatePatchJob(id) {
   if (!id) return;
   try {
     var job = await window.apiJson('/api/update/patch/status?id=' + encodeURIComponent(id) + '&t=' + Date.now());
@@ -1330,7 +1330,7 @@ window.pollUpdatePatchJob = async function(id) {
   }
 }
 
-window.applyUpdateDownloadJob = function(job) {
+function applyUpdateDownloadJob(job) {
   if (!job || job.ok === false || job.status === 'error') {
     if (updatePreviewState.pollTimer) clearInterval(updatePreviewState.pollTimer);
     updatePreviewState.pollTimer = null;
@@ -1391,7 +1391,7 @@ window.applyUpdateDownloadJob = function(job) {
     }
   }
 }
-window.restartForAppliedPatch = async function() {
+async function restartForAppliedPatch() {
   if (!updatePreviewState.restartRequired) return;
   try {
     if (window.desktopWindow && typeof window.desktopWindow.restartApp === 'function') {
@@ -1402,7 +1402,7 @@ window.restartForAppliedPatch = async function() {
   window.showToast('请手动重启 Mineradio 让补丁生效');
 }
 
-window.openDownloadedUpdateInstaller = async function(filePath) {
+async function openDownloadedUpdateInstaller(filePath) {
   if (!filePath) return;
   if (updatePreviewState.installerOpened) return;
   updatePreviewState.status = 'opening';
@@ -1426,7 +1426,7 @@ window.openDownloadedUpdateInstaller = async function(filePath) {
   }
 }
 
-window.startUpdatePreviewDownload = function() {
+function startUpdatePreviewDownload() {
   var releaseLink = updatePreviewState.downloadUrl || updatePreviewState.releaseUrl;
   if (updatePreviewState.status === 'ready' && updatePreviewState.mode === 'patch') {
     restartForAppliedPatch();
@@ -1473,7 +1473,7 @@ window.startUpdatePreviewDownload = function() {
   }, 260);
 }
 
-window.pulseUpdateReady = function() {
+function pulseUpdateReady() {
   var entry = document.getElementById('update-entry');
   var btn = document.getElementById('update-primary-btn');
   if (!window.gsap) return;

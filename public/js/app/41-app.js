@@ -10,10 +10,10 @@ var renderPerfState = {
 };
 window.__mineradioPerf = renderPerfState;
 window.splashWarmRenderLast = 0;
-window.isMainSceneCoveredBySplash = function() {
+function isMainSceneCoveredBySplash() {
   return document.body.classList.contains('splash-active') && !document.body.classList.contains('splash-revealing');
 }
-window.getAdaptiveRenderFps = function() {
+function getAdaptiveRenderFps() {
   if (isDeepBackgroundMode()) return 1;
   if (RENDER_VISIBLE_VSYNC) return 0;
   var tier = (typeof getRenderLoadTier === 'function') ? getRenderLoadTier() : 0;
@@ -26,7 +26,7 @@ window.getAdaptiveRenderFps = function() {
   if (tier >= 1) return RENDER_LARGE_FPS;
   return RENDER_ACTIVE_FPS;
 }
-window.shouldSkipAdaptiveRenderFrame = function(now) {
+function shouldSkipAdaptiveRenderFrame(now) {
   var fps = getAdaptiveRenderFps();
   renderPerfState.mode = fps ? (fps + 'fps') : 'vsync';
   if (!fps) {
@@ -41,7 +41,7 @@ window.shouldSkipAdaptiveRenderFrame = function(now) {
   renderPerfState.lastRenderAt = now;
   return false;
 }
-window.sampleRenderPerf = function(now, dt) {
+function sampleRenderPerf(now, dt) {
   renderPerfState.frames += 1;
   if (dt > 0.034) renderPerfState.longFrames += 1;
   if (now - renderPerfState.lastSampleAt >= 1000) {
@@ -51,7 +51,7 @@ window.sampleRenderPerf = function(now, dt) {
   }
   window.maybeTrimRuntimeCaches(now);
 }
-window.animate = function() {
+function animate() {
   requestAnimationFrame(animate);
   var now = performance.now();
   if (shouldSkipAdaptiveRenderFrame(now)) return;
@@ -309,7 +309,7 @@ window.animate = function() {
 }
 bindPlaylistPanelLazyRender();
 
-window.bindModalBackdropClose = function() {
+function bindModalBackdropClose() {
   [
     ["track-detail-modal", closeTrackDetailModal],
     ["login-modal", closeLoginModal],

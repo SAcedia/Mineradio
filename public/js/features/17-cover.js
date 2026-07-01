@@ -1,6 +1,6 @@
 //  Cover helpers
 // ============================================================
-window.readCustomCoverMap = function() {
+function readCustomCoverMap() {
   try {
     var raw = localStorage.getItem(window.CUSTOM_COVER_STORE_KEY);
     var parsed = raw ? JSON.parse(raw) : {};
@@ -9,7 +9,7 @@ window.readCustomCoverMap = function() {
     return {};
   }
 }
-window.saveCustomCoverMap = function() {
+function saveCustomCoverMap() {
   try {
     localStorage.setItem(window.CUSTOM_COVER_STORE_KEY, JSON.stringify(window.customCoverMap || {}));
     return true;
@@ -18,26 +18,26 @@ window.saveCustomCoverMap = function() {
     return false;
   }
 }
-window.isInlineCoverSrc = function(src) {
+function isInlineCoverSrc(src) {
   return typeof src === 'string' && (/^data:image\//i.test(src) || /^blob:/i.test(src));
 }
-window.isProxyableCoverUrl = function(url) {
+function isProxyableCoverUrl(url) {
   return /^https?:\/\//i.test(String(url || ''));
 }
-window.coverProxySrc = function(url, cacheBust) {
+function coverProxySrc(url, cacheBust) {
   if (!url) return '';
   if (window.isInlineCoverSrc(url)) return url;
   if (!window.isProxyableCoverUrl(url)) return '';
   return '/api/cover?url=' + encodeURIComponent(url) + (cacheBust ? '&v=' + Date.now() : '');
 }
-window.coverUrlWithSize = function(url, size) {
+function coverUrlWithSize(url, size) {
   if (!url || window.isInlineCoverSrc(url) || !/^https?:\/\//i.test(url)) return url || '';
   if (!size) return url;
   var param = 'param=' + size + 'y' + size;
   if (/[?&]param=\d+y\d+/i.test(url)) return url.replace(/([?&])param=\d+y\d+/i, '$1' + param);
   return url + (url.indexOf('?') >= 0 ? '&' : '?') + param;
 }
-window.songCustomCoverKey = function(song) {
+function songCustomCoverKey(song) {
   if (!song) return '';
   if (song.customCoverKey) return String(song.customCoverKey);
   if (song.provider === 'qq' || song.source === 'qq' || song.type === 'qq') return 'qq:' + (song.mid || song.songmid || song.id || (song.name + '|' + song.artist));
@@ -48,28 +48,28 @@ window.songCustomCoverKey = function(song) {
   var artist = String(song.artist || '').trim();
   return (title || artist) ? ('meta:' + (title + '|' + artist).slice(0, 220)) : '';
 }
-window.getCustomCoverForSong = function(song) {
+function getCustomCoverForSong(song) {
   if (!song || typeof song !== "object") return "";
   if (!song) return '';
   if (song.customCover) return song.customCover;
   var key = window.songCustomCoverKey(song);
   return key && window.customCoverMap[key] ? window.customCoverMap[key] : '';
 }
-window.hydrateCustomCover = function(song) {
+function hydrateCustomCover(song) {
   if (!song) return song;
   var custom = window.getCustomCoverForSong(song);
   if (custom) song.customCover = custom;
   return song;
 }
-window.songCoverSrc = function(song, size) {
+function songCoverSrc(song, size) {
   var custom = window.getCustomCoverForSong(song);
   if (custom) return custom;
   return song && song.cover ? window.coverUrlWithSize(song.cover, size) : '';
 }
-window.cssImageUrl = function(url) {
+function cssImageUrl(url) {
   return String(url || '').replace(/\\/g, '\\\\').replace(/"/g, '%22');
 }
-window.setCustomCoverForCurrent = function(dataUrl, opts) {
+function setCustomCoverForCurrent(dataUrl, opts) {
   if (!dataUrl) return;
   var song = window.currentCoverSong();
   var saved = false;
@@ -93,7 +93,7 @@ window.setCustomCoverForCurrent = function(dataUrl, opts) {
   window.updateCustomCoverButton();
   window.showToast(song ? (!hasKey ? '封面已应用' : (saved ? '封面已保存' : '封面已应用，存储空间不足')) : '已应用临时封面');
 }
-window.updateCustomCoverButton = function() {
+function updateCustomCoverButton() {
   var btn = document.getElementById('clear-cover-btn');
   var hasCover = !!window.getCustomCoverForSong(window.currentCoverSong());
   var area = document.getElementById('search-area');
@@ -103,7 +103,7 @@ window.updateCustomCoverButton = function() {
   btn.title = hasCover ? '取消自定义封面' : '当前没有自定义封面';
   btn.setAttribute('aria-label', btn.title);
 }
-window.clearCustomCoverForCurrent = function() {
+function clearCustomCoverForCurrent() {
   var song = window.currentCoverSong();
   if (!song) {
     window.showToast('先播放或选择一首歌');
