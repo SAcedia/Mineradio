@@ -2173,3 +2173,15 @@ window.normalizeCustomBackgroundMedia = function(value) {
   }
   return null;
 };
+
+window.customBackgroundMediaLabel = function(media) {
+  media = window.normalizeCustomBackgroundMedia(media);
+  if (!media) return '未设置';
+  return media.type === 'video' ? '视频已设置' : '图片已设置';
+};
+
+window.shouldUseShelfDynamicCamera = function(type) {
+  if (!window.fx) return true;
+  if (window.fx.shelfDynamicDetail !== false && type === 'shelf-detail') return true;
+  return false;
+};

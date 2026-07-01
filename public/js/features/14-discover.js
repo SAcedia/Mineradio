@@ -473,3 +473,73 @@ window.shouldUseIdleWallpaperPreview = function(ignoreSplash) {
   if (window.shelfManager && window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent()) return false;
   return true;
 };
+
+window.openHomePlayerConsole = function() {
+  if (typeof window.setHomeControlsLocked === 'function') window.setHomeControlsLocked(false);
+  var bar = document.getElementById('bottom-bar');
+  if (bar) {
+    bar.classList.add('visible');
+    bar.classList.remove('soft-hidden');
+    bar.style.pointerEvents = '';
+  }
+  if (typeof window.wakeBottomHandle === 'function') window.wakeBottomHandle(2800);
+  if (typeof window.setControlsHidden === 'function') window.setControlsHidden(false);
+  if (typeof window.forcePlaybackControlsInteractive === 'function') window.forcePlaybackControlsInteractive();
+  if (typeof window.updateControlsChromeState === 'function') window.updateControlsChromeState();
+  if (window.controlsAutoHide && typeof window.scheduleControlsHide === 'function') window.scheduleControlsHide(1800);
+  if (typeof window.showToast === 'function') window.showToast('播放器控制台已展开');
+};
+
+window.openHomeInsight = function() {
+  var summary = typeof window.homeListenSummary === 'function' ? window.homeListenSummary() : {};
+  if (summary.topArtist && summary.topArtist.name) {
+    if (typeof window.runHomeSearch === 'function') window.runHomeSearch(summary.topArtist.name);
+    return;
+  }
+  if (summary.topSong && summary.topSong.name) {
+    if (typeof window.runHomeSearch === 'function') window.runHomeSearch(summary.topSong.name);
+    return;
+  }
+  if (typeof window.showToast === 'function') window.showToast('播放几首歌后会生成听歌画像');
+};
+
+window.playHomeSong = function(index) {
+  window.homeForcedOpen = false;
+  window.homeSuppressed = false;
+  if (typeof window.setHomeControlsLocked === 'function') window.setHomeControlsLocked(false);
+  var song = window.homeDiscoverState && window.homeDiscoverState.songs ? window.homeDiscoverState.songs[index] : null;
+  if (!song) {
+    if (index > 0 && typeof window.playHomePrivateRadio === 'function') window.playHomePrivateRadio();
+    else if (typeof window.playHomeDaily === 'function') window.playHomeDaily();
+    return;
+  }
+  window.playQueue = (window.homeDiscoverState.songs || []).map(function(s){ return typeof window.cloneSong === 'function' ? window.cloneSong(s) : Object.assign({}, s); });
+  window.currentIdx = Math.max(0, Math.min((window.playQueue || []).length - 1, index));
+  if (typeof window.safeRenderQueuePanel === 'function') window.safeRenderQueuePanel('home-song-card');
+  if (typeof window.safeShelfRebuild === 'function') window.safeShelfRebuild('home-song-card', true);
+  if (typeof window.forcePlaybackControlsInteractive === 'function') window.forcePlaybackControlsInteractive();
+  if (typeof window.playQueueAt === 'function') window.playQueueAt(window.currentIdx).catch(function(e){ console.warn('[HomeSongPlay]', e); });
+};
+
+window.openHomeLibrary = function() {
+  if (!window.hasAnyPlatformLogin || !window.hasAnyPlatformLogin()) {
+    if (typeof window.openHomeProductGuide === 'function') window.openHomeProductGuide();
+    return;
+  }
+  window.homeSuppressed = false;
+  if (typeof window.setHomeControlsLocked === 'function') window.setHomeControlsLocked(false);
+  if (typeof window.openPlaylistPanelTab === 'function') window.openPlaylistPanelTab('playlists', true);
+  if (typeof window.refreshUserPlaylists === 'function') window.refreshUserPlaylists(true);
+};
+
+window.playHomeRecent = async function(record) {
+  var r = record || (typeof window.homeListenState === 'object' ? window.homeListenState.recents : null);
+  r = r && r.length ? r[0] : null;
+  if (!r) {
+    if (typeof window.playHomeDaily === 'function') { window.playHomeDaily(); return; }
+  }
+  if (r && typeof window.playFromListenRecord === 'function') {
+    window.homeSuppressed = false;
+    window.playFromListenRecord(r);
+  }
+};
