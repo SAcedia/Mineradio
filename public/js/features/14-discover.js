@@ -912,3 +912,34 @@ document.addEventListener('click', function(e) {
   e.stopPropagation();
   dismissHomePage({ reason: 'blank-click' });
 }, true);
+
+function handleHomeTileClick(index) {
+  var row = document.getElementById('home-tile-row');
+  var item = row && row._homeTiles && row._homeTiles[index];
+  if (!item) return;
+  if (item.kind === 'weatherSong' && typeof window.playWeatherSong === 'function') window.playWeatherSong(item.index);
+  else if (item.kind === 'recent' && typeof window.playHomeRecent === 'function') window.playHomeRecent(item.record);
+  else if (item.kind === 'profile' && typeof window.openHomeInsight === 'function') window.openHomeInsight();
+  else if (item.kind === 'song' && typeof window.playHomeSong === 'function') window.playHomeSong(item.index);
+  else if (item.kind === 'login' && typeof window.showLoginModal === 'function') window.showLoginModal({ source: 'home-tile' });
+  else if (item.kind === 'local' && typeof window.openHomeLocalImport === 'function') window.openHomeLocalImport();
+  else if (item.kind === 'guide' && typeof window.openHomeProductGuide === 'function') window.openHomeProductGuide();
+  else if (item.kind === 'playlist' && typeof window.openHomePlaylist === 'function') window.openHomePlaylist(item.index);
+  else if (item.kind === 'podcast' && typeof window.openHomePodcast === 'function') window.openHomePodcast(item.index);
+  else if (item.kind === 'podcastSearch') { if (typeof window.setSearchMode === 'function') window.setSearchMode('podcast'); if (typeof window.loadPodcastHot === 'function') window.loadPodcastHot(); }
+  else if (item.kind === 'library' && typeof window.openHomeLibrary === 'function') window.openHomeLibrary();
+  else if (typeof window.runHomeSearch === 'function') window.runHomeSearch(item.query || item.title || '');
+}
+function openHomeInsight() {
+  var summary = typeof window.homeListenSummary === 'function' ? window.homeListenSummary() : {};
+  if (summary.topArtist && summary.topArtist.name) { if (typeof window.runHomeSearch === 'function') window.runHomeSearch(summary.topArtist.name); return; }
+  if (summary.topSong && summary.topSong.name) { if (typeof window.runHomeSearch === 'function') window.runHomeSearch(summary.topSong.name); return; }
+  if (typeof window.showToast === 'function') window.showToast('播放几首歌后会生成听歌画像');
+}
+async function playHomeRecent(record) {
+  var r = record || (window.homeListenState ? window.homeListenState.recents : null);
+  r = r && r.length ? r[0] : null;
+  if (!r) { if (typeof window.playHomeDaily === 'function') { window.playHomeDaily(); return; } }
+  if (r && typeof window.playFromListenRecord === 'function') { window.homeSuppressed = false; window.playFromListenRecord(r); }
+}
+

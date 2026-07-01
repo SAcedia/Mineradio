@@ -389,3 +389,101 @@ function avatarSrc(url) {
   if (!url) return '';
   return coverProxySrc(url, true);
 }
+
+function escHtml(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function cloneLyricLine(line) {
+  var copy = Object.assign({}, line || {});
+  if (line && Array.isArray(line.words)) copy.words = line.words.map(function(w){ return Object.assign({}, w); });
+  return copy;
+}
+function cloneLyricLines(lines) {
+  return (Array.isArray(lines) ? lines : []).map(cloneLyricLine);
+}
+
+function readCustomLyricMap() {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_LYRIC_STORE_KEY) || '{}') || {}; } catch (e) { return {}; }
+}
+function saveCustomLyricMap() {
+  try { localStorage.setItem(CUSTOM_LYRIC_STORE_KEY, JSON.stringify(window.customLyricMap || {})); return true; } catch (e) { return false; }
+}
+function readCustomLyricPrefs() {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_LYRIC_PREF_STORE_KEY) || '{}') || {}; } catch (e) { return {}; }
+}
+function saveCustomLyricPrefs() {
+  try { localStorage.setItem(CUSTOM_LYRIC_PREF_STORE_KEY, JSON.stringify(window.customLyricPrefs || {})); } catch (e) {}
+}
+function songCustomLyricKey(song) {
+  if (!song) return '';
+  return (song.id || song.mid || song.songmid || '') + '@' + (song.provider || songProviderKey(song));
+}
+function getCustomLyricEntry(song) {
+  var key = songCustomLyricKey(song);
+  return key && window.customLyricMap && window.customLyricMap[key] ? window.customLyricMap[key] : null;
+}
+function hasCustomLyricForSong(song) {
+  var entry = getCustomLyricEntry(song);
+  return !!(entry && String(entry.text || '').trim());
+}
+
+function setOriginalLyricsState(lines, hasNativeKaraoke, timingSource) {
+  window.originalLyricsState = window.originalLyricsState || {};
+  if (lines !== undefined) window.originalLyricsState.lines = lines;
+  if (hasNativeKaraoke !== undefined) window.originalLyricsState.hasNativeKaraoke = !!hasNativeKaraoke;
+  if (timingSource !== undefined) window.originalLyricsState.timingSource = timingSource;
+}
+function applyLyricsState(lines, hasNativeKaraoke, timingSource) {
+  if (lines) window.lyricsLines = lines;
+  if (hasNativeKaraoke !== undefined) window.lyricsHasNativeKaraoke = !!hasNativeKaraoke;
+  if (timingSource) window.lyricsTimingSource = timingSource;
+  if (typeof window.renderLyrics === 'function') window.renderLyrics();
+}
+function parseCustomLyricText(text) {
+  if (!text) return [];
+  var lines = text.split('\n').filter(Boolean);
+  return lines.map(function(l){
+    var match = l.match(/^\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\](.*)/);
+    if (match) {
+      return { t: parseInt(match[1])*60 + parseInt(match[2]) + (parseInt(match[3]||'0')/1000), text: match[4].trim(), source: 'custom-lrc' };
+    }
+    return { t: -1, text: l.trim(), source: 'custom-text' };
+  });
+}
+function applyCustomLyricState(song, silent) {
+  song = song || (typeof currentLyricSong === 'function' ? currentLyricSong() : null);
+  var entry = getCustomLyricEntry(song);
+  if (!entry || !String(entry.text || '').trim()) {
+    if (!silent && typeof window.openCustomLyricModal === 'function') window.openCustomLyricModal();
+    if (typeof window.updateCustomLyricControls === 'function') window.updateCustomLyricControls();
+    return false;
+  }
+  var lines = parseCustomLyricText(entry.text);
+  if (!lines.length) {
+    if (!silent && typeof window.showToast === 'function') window.showToast('自定义歌词内容为空');
+    if (typeof window.updateCustomLyricControls === 'function') window.updateCustomLyricControls();
+    return false;
+  }
+  window.lyricSourceMode = 'custom';
+  window.lyricsHasNativeKaraoke = false;
+  window.lyricsTimingSource = lines[0] && lines[0].source === 'custom-lrc' ? 'custom-lrc' : 'custom-text';
+  window.lyricsLines = lines;
+  if (typeof window.renderLyrics === 'function') window.renderLyrics();
+  if (typeof window.updateCustomLyricControls === 'function') window.updateCustomLyricControls();
+  return true;
+}
+function preferredLyricSourceForSong(song) {
+  var key = songCustomLyricKey(song);
+  var hasCustom = hasCustomLyricForSong(song);
+  if (!hasCustom) return 'original';
+  var pref = key && window.customLyricPrefs ? window.customLyricPrefs[key] : '';
+  if (pref === 'custom') return 'custom';
+  if (pref === 'original') return 'original';
+  return (window.originalLyricsState && window.originalLyricsState.timingSource === 'fallback') ? 'custom' : 'original';
+}
+function applyPreferredLyricsForCurrent(silent) {
+  var song = typeof currentLyricSong === 'function' ? currentLyricSong() : null;
+  if (song && preferredLyricSourceForSong(song) === 'custom' && applyCustomLyricState(song, true)) return;
+  applyOriginalLyricsState();
+  if (!silent && typeof window.updateCustomLyricControls === 'function') window.updateCustomLyricControls();
+}
+

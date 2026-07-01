@@ -122,3 +122,4 @@ function clonePackagedDefaultFxSnapshot() {
 function packagedDefaultLyricLayoutRaw() {
   return Object.assign({ desktopLyricsSchema: 'desktop-lyrics-v3' }, clonePackagedDefaultFxSnapshot());
 }
+function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }

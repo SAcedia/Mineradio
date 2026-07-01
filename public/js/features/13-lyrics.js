@@ -382,3 +382,19 @@ function updateMiniSourceBar() {
 }
 
 // ============================================================
+
+function currentLyricSong() {
+  if (window.currentIdx >= 0 && window.playQueue && window.playQueue[window.currentIdx]) return window.playQueue[window.currentIdx];
+  return window.currentLocalSong || null;
+}
+function setOriginalLyricsState(lines, hasNativeKaraoke, timingSource) {
+  window.originalLyricsState = { lines: lines || [], hasNativeKaraoke: !!hasNativeKaraoke, timingSource: timingSource || '' };
+}
+function applyOriginalLyricsState() {
+  if (!window.originalLyricsState || !window.originalLyricsState.lines) return;
+  window.lyricsLines = window.originalLyricsState.lines;
+  window.lyricsHasNativeKaraoke = window.originalLyricsState.hasNativeKaraoke;
+  window.lyricsTimingSource = window.originalLyricsState.timingSource || 'fallback';
+  if (typeof window.renderLyrics === 'function') window.renderLyrics();
+}
+

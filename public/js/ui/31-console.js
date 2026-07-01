@@ -1560,26 +1560,6 @@ function relabelFxPanelControls() {
   setFxSliderLabel('fx-bgfade', '背景压暗');
 }
 
-function getHotkeyDefaults() {
-  var defaults = { local: {}, global: {} };
-  HOTKEY_ACTIONS.forEach(function(action){
-    defaults.local[action.key] = action.local || '';
-    defaults.global[action.key] = action.global || '';
-  });
-  return defaults;
-}
-function readHotkeySettings() {
-  var defaults = getHotkeyDefaults();
-  try {
-    var raw = JSON.parse(localStorage.getItem(HOTKEY_SETTINGS_STORE_KEY) || '{}') || {};
-    return {
-      local: Object.assign({}, defaults.local, raw.local || {}),
-      global: Object.assign({}, defaults.global, raw.global || {})
-    };
-  } catch (e) {
-    return defaults;
-  }
-}
 function saveHotkeySettings() {
   try { localStorage.setItem(HOTKEY_SETTINGS_STORE_KEY, JSON.stringify(hotkeySettings || getHotkeyDefaults())); } catch (e) {}
 }
