@@ -11,6 +11,8 @@ var smoothBass = 0, smoothMid = 0, smoothTreb = 0, smoothEnergy = 0;
 var bassPeak = 0.12, midPeak = 0.10, treblePeak = 0.08, energyPeak = 0.10;
 var beatOnsetFlag = false;        // beat 上升沿瞬时标志,每帧消费一次
 var lastStrongDrop = 0;           // 用于 burst 预设的强 drop 时刻
+var diyPlayerMode;                // DIY 玩家模式,在 applyDiyMode 中赋值
+var audio;                        // Audio 元素,在 playback/playlists 中延迟创建
 
 var lyricsLines = [], lyricsVisible = false, lyricsHasNativeKaraoke = false, lyricsTimingSource = 'none';
 var playlist = [], playQueue = [], currentIdx = -1, playing = false, playToggleBusy = false;
