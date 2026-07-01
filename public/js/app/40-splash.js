@@ -200,7 +200,7 @@ window.initMineradioSplashWebgl = function(canvas) {
   gl.disable(gl.DEPTH_TEST);
   gl.disable(gl.CULL_FACE);
   return true;
-}
+};
 
 window.drawMineradioSplashWebgl = function(elapsed) {
   var gl = splashGl;
