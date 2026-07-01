@@ -268,3 +268,7 @@ window.resolveArtistSongForDetail = function(song, artist) {
     return null;
   });
 }
+
+window.closeCustomLyricModal = function() {
+  closeGsapModal(document.getElementById('custom-lyric-modal'));
+};

@@ -213,6 +213,7 @@ window.drawMineradioSplashWebgl = function(elapsed) {
   gl.uniform2f(splashGlUniforms.resolution, window.splashCanvas.width, window.splashCanvas.height);
   gl.uniform1f(splashGlUniforms.time, elapsed);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
+};
 
 window.drawMineradioSplash = function() {
   if (!window.splashAnimating || (!window.splashCtx && !splashGl)) return;
@@ -558,7 +559,8 @@ var desktopOverlayPushState = {
   lastLyricsBeatKey: '',
   lastWallpaperKey: ''
 };
-};(function initMineradioSplashCanvas() {
+;
+(function initMineradioSplashCanvas() {
   splashCanvas = document.getElementById('splash-canvas');
   if (!window.splashCanvas) return;
   if (!reduceSplashMotion && window.initMineradioSplashWebgl(window.splashCanvas)) {

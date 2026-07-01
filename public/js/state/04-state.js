@@ -541,3 +541,20 @@ window.updateUserCapsuleAutoHideFromPointer = function(x, y) {
   var nearTopRight = x > innerWidth - 112 && y < 126;
   document.body.classList.toggle('user-capsule-peek', nearTopRight);
 };
+
+window.getDesktopWindowApi = function() {
+  return window.desktopWindow && window.desktopWindow.isDesktop ? window.desktopWindow : null;
+};
+
+window.updateFxFabAutoHideFromPointer = function(x, y) {
+  if (!fxFabAutoHide || !diyPlayerMode || immersiveMode) {
+    document.body.classList.remove('fx-fab-peek');
+    fxFabAutoHideRevealArmed = true;
+    return;
+  }
+  var panel = document.getElementById('fx-panel');
+  var panelOpen = !!(panel && (panel.classList.contains('peek') || panel.classList.contains('show')));
+  var nearBottomRight = x > innerWidth - 126 && y > innerHeight - 158;
+  if (!nearBottomRight) fxFabAutoHideRevealArmed = true;
+  document.body.classList.toggle('fx-fab-peek', panelOpen || (nearBottomRight && fxFabAutoHideRevealArmed));
+};
