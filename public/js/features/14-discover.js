@@ -438,8 +438,8 @@ window.goHome = function() {
   if (window.shelfManager && window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent()) window.safeShelfCloseContent('open-empty-home');
   if (typeof setShelfPinnedOpen === 'function') window.setShelfPinnedOpen(false, true);
   window.togglePlaylistPanel(false);
-  setPeek(document.getElementById('window.playlist-panel'), false, 'pl');
-  setPeek(document.getElementById('window.fx-panel'), false, 'window.fx');
+  setPeek(document.getElementById('playlist-panel'), false, 'pl');
+  setPeek(document.getElementById('fx-panel'), false, 'window.fx');
   setPeek(document.getElementById('search-area'), true, 'search');
   if (typeof setFocusZone === 'function') setFocusZone(null, true);
   if (orbit && orbit.focus) orbit.focus.active = false;
@@ -464,4 +464,12 @@ window.prewarmHomeWallpaperPreview = function() {
     if (!window.shouldUseIdleWallpaperPreview(true)) return;
     window.activateHomeWallpaperPreview({ skipTransition: true, instant: true });
   }, 900, 2600);
+};
+
+window.shouldUseIdleWallpaperPreview = function(ignoreSplash) {
+  if (!ignoreSplash && document.body.classList.contains('splash-active')) return false;
+  if (window.immersiveMode || window.playing || (window.audio && !window.audio.paused)) return false;
+  if (window.shelfPinnedOpen) return false;
+  if (window.shelfManager && window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent()) return false;
+  return true;
 };

@@ -222,7 +222,7 @@ window.applyFreeCameraToCamera = function() {
   return true;
 }
 window.updateFreeCameraHint = function() {
-  var el = document.getElementById('free-window.camera-hint');
+  var el = document.getElementById('free-camera-hint');
   if (el) el.classList.toggle('show', !!(window.freeCamera && window.freeCamera.active));
 }
 window.resetFreeCameraToDefault = function() {
@@ -1646,8 +1646,8 @@ window.updateControlsAutoHideFromPointer = function(x, y) {
   if (!bar || !bar.classList.contains('visible')) return;
   if (!window.controlsAutoHide) { setControlsHidden(false); return; }
   if (window.diyPlayerMode) {
-    var fxPanel = document.getElementById('window.fx-panel');
-    var fxFab = document.getElementById('window.fx-fab');
+    var fxPanel = document.getElementById('fx-panel');
+    var fxFab = document.getElementById('fx-fab');
     var fr = fxPanel ? fxPanel.getBoundingClientRect() : null;
     var br = fxFab ? fxFab.getBoundingClientRect() : null;
     var overFxPanel = fxPanel && (fxPanel.classList.contains('peek') || fxPanel.classList.contains('show')) && fr && x >= fr.left - 18 && x <= fr.right + 18 && y >= fr.top - 18 && y <= fr.bottom + 18;
@@ -2003,4 +2003,15 @@ window.bindColorLabRows = function() {
       openColorLabForPicker(picker);
     });
   });
+};
+
+window.applyShelfCameraDefaultAngle = function(force) {
+  if (!window.fx) return;
+  window.fx.shelfCameraMode = window.normalizeShelfCameraMode(window.fx.shelfCameraMode || window.fxDefaults.shelfCameraMode);
+  if (force || window.fx.shelfAngleYManual !== true) {
+    window.fx.shelfAngleYManual = false;
+    window.fx.shelfAngleY = window.shelfDefaultAngleForCameraMode(window.fx.shelfCameraMode);
+  } else {
+    window.fx.shelfAngleY = Math.round(window.clampRange(Number(window.fx.shelfAngleY) || 0, -30, 30));
+  }
 };

@@ -600,8 +600,8 @@ window.startVisualGuide = function(opts) {
   visualGuideState = {
     bottomWasVisible: !!(document.getElementById('bottom-bar') && document.getElementById('bottom-bar').classList.contains('visible')),
     searchWasPeek: !!(document.getElementById('search-area') && document.getElementById('search-area').classList.contains('peek')),
-    fxWasPeek: !!(document.getElementById('window.fx-panel') && document.getElementById('window.fx-panel').classList.contains('peek')),
-    plWasPeek: !!(document.getElementById('window.playlist-panel') && document.getElementById('window.playlist-panel').classList.contains('peek')),
+    fxWasPeek: !!(document.getElementById('fx-panel') && document.getElementById('fx-panel').classList.contains('peek')),
+    plWasPeek: !!(document.getElementById('playlist-panel') && document.getElementById('playlist-panel').classList.contains('peek')),
     mode: window.diyPlayerMode ? 'diy' : 'simple',
     manual: !!opts.manual
   };
@@ -620,8 +620,8 @@ window.startVisualGuide = function(opts) {
 window.prepareVisualGuideStep = function(step) {
   var search = document.getElementById('search-area');
   var bottom = document.getElementById('bottom-bar');
-  var fxPanel = document.getElementById('window.fx-panel');
-  var playlistPanel = document.getElementById('window.playlist-panel');
+  var fxPanel = document.getElementById('fx-panel');
+  var playlistPanel = document.getElementById('playlist-panel');
   if (typeof setShelfGuideCueActive === 'function') setShelfGuideCueActive(step && step.target === 'shelf');
   if (step && step.selector === '#search-box') setPeek(search, true, 'search');
   if (step && step.selector === '#window.playlist-panel') setPeek(playlistPanel, true, 'pl');
@@ -765,8 +765,8 @@ window.closeVisualGuide = function(markSeen) {
   document.body.classList.remove('fullscreen-diy-peek');
   var search = document.getElementById('search-area');
   var bottom = document.getElementById('bottom-bar');
-  var fxPanel = document.getElementById('window.fx-panel');
-  var playlistPanel = document.getElementById('window.playlist-panel');
+  var fxPanel = document.getElementById('fx-panel');
+  var playlistPanel = document.getElementById('playlist-panel');
   if (typeof setShelfGuideCueActive === 'function') setShelfGuideCueActive(false);
   if (search && !visualGuideState.searchWasPeek && document.activeElement !== $input) setPeek(search, false, 'search');
   if (fxPanel && !visualGuideState.fxWasPeek) setPeek(fxPanel, false, 'window.fx');
@@ -1325,7 +1325,7 @@ window.setPeek = function(el, on, key) {
       }, 180);
     }
     if (key === 'window.fx') {
-      var fabOn = document.getElementById('window.fx-fab');
+      var fabOn = document.getElementById('fx-fab');
       if (fabOn) fabOn.classList.add('active');
     }
   } else {
@@ -1334,7 +1334,7 @@ window.setPeek = function(el, on, key) {
       el.classList.remove('peek');
       if (key === 'pl') window.hideLocalPlaylistDetail();
       if (key === 'window.fx') {
-        var fabOff = document.getElementById('window.fx-fab');
+        var fabOff = document.getElementById('fx-fab');
         if (fabOff && !el.classList.contains('show')) fabOff.classList.remove('active');
       }
       peekTimers[key] = null;
@@ -1443,7 +1443,7 @@ window.armSecondaryPlaylistEdgeDwell = function() {
     secondaryPlaylistEdgeGuard.timer = null;
     if (!isSecondaryLeftDisplaySeamGuardActive()) return;
     if (!isSecondaryPlaylistSafeBandPoint(secondaryPlaylistEdgeGuard.x, secondaryPlaylistEdgeGuard.y, secondaryPlaylistEdgeGuard.H)) return;
-    var panel = document.getElementById('window.playlist-panel');
+    var panel = document.getElementById('playlist-panel');
     if (panel) setPeek(panel, true, 'pl');
   }, SECONDARY_PLAYLIST_EDGE_DWELL_MS);
 }
@@ -1479,7 +1479,7 @@ window.shouldClosePlaylistPanelFromPointer = function(ppOn, ex, ppRect) {
   if (!ppOn) return false;
   if (isSecondaryLeftDisplaySeamGuardActive() && ex < SECONDARY_PLAYLIST_SEAM_CLOSE_X) return true;
   // 详情面板显示时，鼠标在其区域内不关闭主面板
-  var dp = document.getElementById('window.playlist-detail-panel');
+  var dp = document.getElementById('playlist-detail-panel');
   if (dp && dp.classList.contains('show')) {
     var dpRect = dp.getBoundingClientRect();
     if (ex >= dpRect.left - 12 && ex <= dpRect.right + 12) return false;
@@ -1492,8 +1492,8 @@ window.isPlaylistPanelFocusActive = function(inTrigger, inPanel, pp, ex, ppRect)
 }
 window.addEventListener('mousemove', function(e){
   var sa = document.getElementById('search-area');
-  var fp = document.getElementById('window.fx-panel');
-  var pp = document.getElementById('window.playlist-panel');
+  var fp = document.getElementById('fx-panel');
+  var pp = document.getElementById('playlist-panel');
   var ex = e.clientX, ey = e.clientY, W = innerWidth, H = innerHeight;
   updateUserCapsuleAutoHideFromPointer(ex, ey);
   updateFxFabAutoHideFromPointer(ex, ey);
@@ -1539,7 +1539,7 @@ window.addEventListener('mousemove', function(e){
   // 控制台: 右下角触发；一旦面板出现，就按真实面板矩形保留显示
   var fpOn = fp.classList.contains('peek') || fp.classList.contains('show');
   var fpRect = fp.getBoundingClientRect();
-  var fab = document.getElementById('window.fx-fab');
+  var fab = document.getElementById('fx-fab');
   var fabRect = fab ? fab.getBoundingClientRect() : { left:W, right:W, top:H, bottom:H };
   var inFxPanel = fpOn && ex >= fpRect.left - 24 && ex <= fpRect.right + 24 && ey >= fpRect.top - 24 && ey <= fpRect.bottom + 24;
   var inFxFab = ex >= fabRect.left - 18 && ex <= fabRect.right + 18 && ey >= fabRect.top - 18 && ey <= fabRect.bottom + 18;

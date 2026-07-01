@@ -6,7 +6,7 @@ window.fetchLyric = async function(songOrId, token, preferSource) {
     // 没有指定 source 时（正常切歌），重置为默认源
     if (!preferSource) {
       _lyricSourceIdx = 0;
-      var srcBtn = document.getElementById('lyric-window.source-btn');
+      var srcBtn = document.getElementById('lyric-source-btn');
       if (srcBtn) srcBtn.textContent = '源·' + (window._lyricSourceLabels[window._lyricSources[0]] || 'A');
     }
     var song = (songOrId && typeof songOrId === 'object') ? songOrId : null;
@@ -180,7 +180,7 @@ window.updateLyricOffsetVisibility = function() {
   var show = isYT && lyricsOn;
   ind.style.display = show ? '' : 'none';
   // 来源切换按钮只在原词模式下显示
-  var srcBtn = document.getElementById('lyric-window.source-btn');
+  var srcBtn = document.getElementById('lyric-source-btn');
   if (srcBtn) {
     // 用父级 style.display 判断；如果父级都是 none 就直接隐藏
     var parentVisible = ind.style.display !== 'none';
@@ -206,7 +206,7 @@ window._lyricSourceIdx = 0;
 window.cycleLyricSource = function() {
   _lyricSourceIdx = (window._lyricSourceIdx + 1) % window._lyricSources.length;
   var src = window._lyricSources[window._lyricSourceIdx];
-  var btn = document.getElementById('lyric-window.source-btn');
+  var btn = document.getElementById('lyric-source-btn');
   if (btn) btn.textContent = '源·' + (window._lyricSourceLabels[src] || src);
   // 重新获取当前歌曲歌词
   var song = window.playQueue && window.currentIdx >= 0 ? window.playQueue[window.currentIdx] : null;
@@ -245,7 +245,7 @@ window.setLyricSource = function(source) {
     _lyricSourceIdx = idx;
   }
   var curSrc = window._lyricSources[window._lyricSourceIdx];
-  var btn = document.getElementById('lyric-window.source-btn');
+  var btn = document.getElementById('lyric-source-btn');
   if (btn) btn.textContent = '源·' + (window._lyricSourceLabels[curSrc] || curSrc);
   window.updateMiniSourceButtons();
   var cur = window.currentCoverSong();
@@ -317,7 +317,7 @@ window.adjustPlaybackSpeed = function(delta) {
   if (song) _saveSongPref(song);
 }
 window.updateMiniSourceButtons = function() {
-  var bar = document.getElementById('mini-window.source-bar');
+  var bar = document.getElementById('mini-source-bar');
   if (!bar) return;
   var curSrc = window._lyricSources[window._lyricSourceIdx];
   var btns = bar.querySelectorAll('.mini-bar-btn');
@@ -329,7 +329,7 @@ window.updateMiniSourceButtons = function() {
   }
 }
 window.updateMiniSourceBar = function() {
-  var bar = document.getElementById('mini-window.source-bar');
+  var bar = document.getElementById('mini-source-bar');
   if (!bar) return;
   var song = window.currentCoverSong();
   var provider = song ? window.songProviderKey(song) : '';

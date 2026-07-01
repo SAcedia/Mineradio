@@ -107,14 +107,14 @@ window.handlePlaybackUnavailable = function(song, data) {
   }
 }
 window.closeSourceFallbackNotice = function() {
-  var notice = document.getElementById('window.source-fallback-notice');
+  var notice = document.getElementById('source-fallback-notice');
   if (sourceFallbackNoticeTimer) { clearTimeout(sourceFallbackNoticeTimer); sourceFallbackNoticeTimer = null; }
   if (notice) notice.classList.remove('show');
 }
 window.showSourceFallbackNotice = function(title, body) {
-  var notice = document.getElementById('window.source-fallback-notice');
-  var titleEl = document.getElementById('window.source-fallback-title');
-  var bodyEl = document.getElementById('window.source-fallback-body');
+  var notice = document.getElementById('source-fallback-notice');
+  var titleEl = document.getElementById('source-fallback-title');
+  var bodyEl = document.getElementById('source-fallback-body');
   if (!notice || !titleEl || !bodyEl) return;
   titleEl.textContent = title || '自动换源';
   bodyEl.textContent = body || '';
@@ -158,7 +158,7 @@ window.playQueueAt = async function(idx, opts) {
   currentLocalSong = null;
   window.safePlaybackStep('cover-button', window.updateCustomCoverButton);
   window.safePlaybackStep('like-buttons', function(){ window.updateLikeButtons(song); });
-  window.safePlaybackStep('mini-window.source-bar', function(){ if (typeof updateMiniSourceBar === 'function') window.updateMiniSourceBar(); });
+  window.safePlaybackStep('mini-source-bar', function(){ if (typeof updateMiniSourceBar === 'function') window.updateMiniSourceBar(); });
   window.safePlaybackStep('like-status', function(){ window.syncLikeStatusForSong(song); });
   window.safePlaybackStep('quality-ui', window.updatePlaybackQualityUi);
   window.safePlaybackStep('cinema-track-profile', function(){ resetCinemaTrackProfile(song); });

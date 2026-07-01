@@ -1327,7 +1327,7 @@ window.fxPanelTab = 'presets';
 window.setFxPanelTab = function(tab) {
   var allowed = { presets:1, appearance:1, lyrics:1, motion:1, advanced:1 };
   fxPanelTab = allowed[tab] ? tab : 'presets';
-  var panel = document.getElementById('window.fx-panel');
+  var panel = document.getElementById('fx-panel');
   if (panel) panel.setAttribute('data-active-tab', fxPanelTab);
   document.querySelectorAll('#window.fx-panel-tabs [data-window.fx-tab]').forEach(function(btn){
     btn.classList.toggle('active', btn.getAttribute('data-window.fx-tab') === fxPanelTab);
@@ -1356,7 +1356,7 @@ window.fxPanelTargetForNode = function(node, current) {
   return current || 'presets';
 }
 window.organizeFxPanel = function() {
-  var panel = document.getElementById('window.fx-panel');
+  var panel = document.getElementById('fx-panel');
   if (!panel) return;
   if (panel._fxPanelOrganized) {
     setFxPanelTab(fxPanelTab);
@@ -1459,7 +1459,7 @@ window.moveToggleToGrid = function(toggleId, grid) {
 window.ensureLyricPrimaryControls = function() {
   var body = document.querySelector('#window.fx-lyric-fold .fx-fold-body');
   if (!body) return;
-  var grid = document.getElementById('window.fx-lyric-primary-controls');
+  var grid = document.getElementById('fx-lyric-primary-controls');
   if (!grid) {
     var label = document.createElement('div');
     label.className = 'window.fx-section-label';
@@ -1467,7 +1467,7 @@ window.ensureLyricPrimaryControls = function() {
     label.textContent = '歌词开关';
     grid = document.createElement('div');
     grid.className = 'window.fx-toggle-grid lyric-primary-toggle-grid';
-    grid.id = 'window.fx-lyric-primary-controls';
+    grid.id = 'fx-lyric-primary-controls';
     body.insertBefore(grid, body.firstChild);
     body.insertBefore(label, grid);
   }
@@ -1691,7 +1691,7 @@ window.shouldSuppressDefaultConfiguredHotkey = function(e) {
   return false;
 }
 window.ensureHotkeySettingsButton = function() {
-  var panel = document.getElementById('window.fx-panel');
+  var panel = document.getElementById('fx-panel');
   var head = panel && panel.querySelector('.fx-head');
   if (!head || document.getElementById('hotkey-settings-btn')) return;
   if (head.firstElementChild) head.firstElementChild.classList.add('window.fx-head-main');
@@ -2175,7 +2175,7 @@ window.toggleFx = function(key) {
   }
 }
 window.toggleFxPanel = function(force) {
-  var el = document.getElementById('window.fx-panel');
+  var el = document.getElementById('fx-panel');
   if (!el) return;
   if (!window.diyPlayerMode && force !== false) {
     window.showToast('开启 DIY 玩家模式后可打开视觉控制台');
@@ -2188,7 +2188,7 @@ window.toggleFxPanel = function(force) {
     el.classList.remove('show', 'peek');
     el.classList.toggle('closing', currentlyOpen);
     setTimeout(function(){ el.classList.remove('closing'); }, 280);
-    var fab = document.getElementById('window.fx-fab');
+    var fab = document.getElementById('fx-fab');
     if (fab) fab.classList.remove('active');
     return;
   }
@@ -2324,11 +2324,11 @@ window.closeImmersiveInterference = function() {
   window.closeCustomLyricModal();
   window.closeTrackDetailModal();
   if (!window.localBeatAnalysis.active) closeLocalBeatModal();
-  ['search-area', 'window.fx-panel', 'trial-banner', 'ai-depth-chip', 'beat-chip'].forEach(function(id){
+  ['search-area', 'fx-panel', 'trial-banner', 'ai-depth-chip', 'beat-chip'].forEach(function(id){
     var el = document.getElementById(id);
     if (el) el.classList.remove('peek', 'show', 'closing');
   });
-  var fab = document.getElementById('window.fx-fab');
+  var fab = document.getElementById('fx-fab');
   if (fab) fab.classList.remove('active');
   document.body.classList.remove('login-guide-active');
   setFocusZone(null, true);

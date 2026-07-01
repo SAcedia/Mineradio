@@ -99,8 +99,8 @@ window.bindSmoothQueueScrolling = function() {
   [
     'mini-queue-list',
     'search-results',
-    'window.fx-panel',
-    'window.playlist-panel',
+    'fx-panel',
+    'playlist-panel',
     'track-detail-body'
   ].forEach(function(id){
     bindSmoothWheelScroll(document.getElementById(id));
@@ -119,7 +119,7 @@ window.miniQueueSkeleton = function() {
   return '<div class="mini-queue-skeleton"></div><div class="mini-queue-skeleton"></div><div class="mini-queue-skeleton"></div>';
 }
 window.togglePlaylistPanel = function(force) {
-  var el = document.getElementById('window.playlist-panel');
+  var el = document.getElementById('playlist-panel');
   if (force === false) el.classList.remove('show');
   else if (force === true) el.classList.add('show');
   else el.classList.toggle('show');
@@ -136,8 +136,8 @@ window.togglePlaylistPanel = function(force) {
   }
 }
 window.applyPlaylistPanelPinState = function(openPanel) {
-  var panel = document.getElementById('window.playlist-panel');
-  var btn = document.getElementById('window.playlist-pin-btn');
+  var panel = document.getElementById('playlist-panel');
+  var btn = document.getElementById('playlist-pin-btn');
   if (panel) {
     panel.classList.toggle('pinned', !!window.playlistPanelPinned);
     if (window.playlistPanelPinned || openPanel) {
@@ -160,7 +160,7 @@ window.togglePlaylistPanelPinned = function() {
   setPlaylistPanelPinned(!window.playlistPanelPinned);
 }
 window.scrollPlaylistPanelToCurrent = function() {
-  var panel = document.getElementById('window.playlist-panel');
+  var panel = document.getElementById('playlist-panel');
   var list = document.getElementById('queue-list');
   if (!panel || !list || window.queueViewTab !== 'queue') return;
   var now = performance.now();
@@ -183,9 +183,9 @@ window.switchPlaylistTab = function(tab) {
   var podcastPane = document.getElementById('podcast-pane');
   if (podcastPane) podcastPane.style.display = tab === 'podcasts' ? '' : 'none';
   if (tab === 'playlists' || tab === 'podcasts') window.refreshUserPlaylists();
-  if (tab === 'queue') animateVisiblePanelList(document.getElementById('queue-list'), '.queue-item', document.getElementById('window.playlist-panel'), '.queue-item.now');
-  if (tab === 'playlists') { window.renderLocalPlaylistsIntoView(); animateVisiblePanelList(document.getElementById('pl-list'), '.pl-card', document.getElementById('window.playlist-panel')); }
-  if (tab === 'podcasts') animateVisiblePanelList(document.getElementById('podcast-list'), '.pl-card', document.getElementById('window.playlist-panel'));
+  if (tab === 'queue') animateVisiblePanelList(document.getElementById('queue-list'), '.queue-item', document.getElementById('playlist-panel'), '.queue-item.now');
+  if (tab === 'playlists') { window.renderLocalPlaylistsIntoView(); animateVisiblePanelList(document.getElementById('pl-list'), '.pl-card', document.getElementById('playlist-panel')); }
+  if (tab === 'podcasts') animateVisiblePanelList(document.getElementById('podcast-list'), '.pl-card', document.getElementById('playlist-panel'));
 }
 window.setMiniQueueOpen = function(open) {
   miniQueueOpen = !!open;
@@ -211,7 +211,7 @@ window.closeMiniQueue = function() {
 }
 window.openPlaylistPanelTab = function(tab, preserve) {
   tab = tab === 'podcasts' ? 'podcasts' : (tab === 'playlists' ? 'playlists' : 'queue');
-  var panel = document.getElementById('window.playlist-panel');
+  var panel = document.getElementById('playlist-panel');
   if (panel && panel.dataset && preserve !== false) panel.dataset.preserveTabOnOpen = '1';
   window.switchPlaylistTab(tab);
   setPeek(panel, true, 'pl');
@@ -256,7 +256,7 @@ window.renderQueuePanel = function(opts) {
   if (!window.playQueue.length) {
     $ql.innerHTML = '<div style="text-align:center;padding:24px 0;color:rgba(255,255,255,.32);font-size:11.5px">队列为空，搜索后点 + 设为下一首</div>';
     renderMiniQueuePanel();
-    var panel = document.getElementById('window.playlist-panel');
+    var panel = document.getElementById('playlist-panel');
     if (panel && (panel.classList.contains('show') || panel.classList.contains('peek')) && queueViewTab === 'queue') window.switchPlaylistTab('playlists');
     return;
   }
@@ -274,7 +274,7 @@ window.renderQueuePanel = function(opts) {
       '</div>' +
     '</div>';
   }).join('');
-  if (opts.animate && seq === window.queueRenderSeq) animateVisiblePanelList($ql, '.queue-item', document.getElementById('window.playlist-panel'), '.queue-item.now');
+  if (opts.animate && seq === window.queueRenderSeq) animateVisiblePanelList($ql, '.queue-item', document.getElementById('playlist-panel'), '.queue-item.now');
   renderMiniQueuePanel({ scrollCurrent: window.miniQueueOpen });
 }
 window.refreshUserPlaylists = async function(force) {

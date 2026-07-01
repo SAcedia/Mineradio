@@ -251,14 +251,14 @@ var localDetailSongs = []; // 当前详情面板的歌曲（标准格式）
 var localDetailPlaylistId = ''; // 当前详情面板打开的歌单 id
 
 window.hideLocalPlaylistDetail = function() {
-  var panel = document.getElementById('window.playlist-detail-panel');
+  var panel = document.getElementById('playlist-detail-panel');
   if (panel) panel.classList.remove('show');
   localDetailSongs = [];
   localDetailPlaylistId = '';
 }
 
 window.showLocalPlaylistDetail = function(playlistId) {
-  var $panel = document.getElementById('window.playlist-detail-panel');
+  var $panel = document.getElementById('playlist-detail-panel');
   var $title = document.getElementById('detail-panel-title');
   var $list = document.getElementById('detail-panel-list');
   if (!$panel || !$title || !$list) return;
@@ -315,7 +315,7 @@ window.renderLocalPlaylistsIntoView = function() {
 
 // 详情面板事件绑定
 ;(function(){
-  var panel = document.getElementById('window.playlist-detail-panel');
+  var panel = document.getElementById('playlist-detail-panel');
   if (!panel) return;
   // 关闭
   var closeBtn = document.getElementById('detail-panel-close');
@@ -397,13 +397,13 @@ window.renderPlaylistPanelDetailState = function() {
   window.renderUserPlaylistsList();
 }
 window.scrollPlaylistPanelToTop = function() {
-  var panel = document.getElementById('window.playlist-panel');
+  var panel = document.getElementById('playlist-panel');
   if (!panel) return;
   try { panel.scrollTo({ top: 0, behavior: 'smooth' }); }
   catch (e) { panel.scrollTop = 0; }
 }
 window.scrollPlaylistPanelDetailIntoView = function(key) {
-  var panel = document.getElementById('window.playlist-panel');
+  var panel = document.getElementById('playlist-panel');
   if (!panel || !key) return;
   requestAnimationFrame(function(){
     var detail = null;
@@ -487,7 +487,7 @@ window.growPlaylistPanelDetailRenderLimit = function(amount) {
   var current = Math.max(PLAYLIST_DETAIL_INITIAL_RENDER, st.renderLimit || PLAYLIST_DETAIL_INITIAL_RENDER);
   var next = Math.min(total, current + (amount || PLAYLIST_DETAIL_BATCH_SIZE));
   if (next <= current) return false;
-  var panel = document.getElementById('window.playlist-panel');
+  var panel = document.getElementById('playlist-panel');
   var keepTop = panel ? panel.scrollTop : 0;
   st.renderLimit = next;
   renderPlaylistPanelDetailState();
@@ -495,7 +495,7 @@ window.growPlaylistPanelDetailRenderLimit = function(amount) {
   return true;
 }
 window.maybeGrowPlaylistPanelDetailRenderLimit = function() {
-  var panel = document.getElementById('window.playlist-panel');
+  var panel = document.getElementById('playlist-panel');
   var st = window.playlistPanelDetailState;
   if (!panel || !st || st.loading || !st.key || !st.tracks || st.renderLimit >= st.tracks.length) return;
   if (panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 240) {
@@ -513,7 +513,7 @@ window.growPlaylistPanelRenderLimit = function() {
   window.renderUserPlaylistsList({ animate: true });
 }
 window.bindPlaylistPanelLazyRender = function() {
-  var panel = document.getElementById('window.playlist-panel');
+  var panel = document.getElementById('playlist-panel');
   if (!panel || window.playlistPanelLazyBound) return;
   playlistPanelLazyBound = true;
   panel.addEventListener('scroll', function(){
@@ -565,7 +565,7 @@ window.renderUserPlaylistsList = function(opts) {
   if (window.userPlaylists.length > renderedCount) {
     $pl.insertAdjacentHTML('beforeend', '<button type="button" class="fx-mini-btn ghost pl-load-more" data-pl-load-more="1">加载更多 ' + renderedCount + '/' + window.userPlaylists.length + '</button>');
   }
-  if (opts.animate && seq === playlistRenderSeq) animateVisiblePanelList($pl, '.pl-card', document.getElementById('window.playlist-panel'));
+  if (opts.animate && seq === playlistRenderSeq) animateVisiblePanelList($pl, '.pl-card', document.getElementById('playlist-panel'));
 }
 window.renderMyPodcastCollections = function(opts) {
   opts = opts || {};
@@ -588,7 +588,7 @@ window.renderMyPodcastCollections = function(opts) {
       '<div style="flex:1;min-width:0"><div class="pl-name">' + window.escHtml(pc.title || '') + '</div><div class="pl-sub">' + (pc.count || 0) + ' 项 · ' + window.escHtml(pc.sub || '') + '</div></div>' +
     '</div>';
   }).join('');
-  if (opts.animate) animateVisiblePanelList($pod, '.pl-card', document.getElementById('window.playlist-panel'));
+  if (opts.animate) animateVisiblePanelList($pod, '.pl-card', document.getElementById('playlist-panel'));
 }
 document.getElementById('pl-list').addEventListener('click', function(e){
   var loadMore = e.target && e.target.closest ? e.target.closest('[data-pl-load-more]') : null;
@@ -673,7 +673,7 @@ window.renderMyPodcastRadioItems = function(key, title, items) {
         '<div style="flex:1;min-width:0"><div class="pl-name">' + window.escHtml(r.name || '') + '</div><div class="pl-sub">' + window.escHtml((r.djName || r.artist || 'Podcast') + (r.programCount ? (' · ' + r.programCount + ' 集') : '')) + '</div></div>' +
       '</div>';
     }).join('');
-  animateVisiblePanelList($pod, '.pl-card', document.getElementById('window.playlist-panel'));
+  animateVisiblePanelList($pod, '.pl-card', document.getElementById('playlist-panel'));
 }
 window.openMyPodcastCollection = async function(key, title) {
   if (!key) return;

@@ -1160,7 +1160,7 @@ window.safeShelfCloseContent = function(reason) {
   }
 }
 window.isPlaylistPanelVisibleForRender = function() {
-  var panel = document.getElementById('window.playlist-panel');
+  var panel = document.getElementById('playlist-panel');
   var panelOpen = panel && (panel.classList.contains('show') || panel.classList.contains('peek') || panel.classList.contains('pinned'));
   return !!(panelOpen || window.miniQueueOpen);
 }
