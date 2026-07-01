@@ -1329,8 +1329,8 @@ window.setFxPanelTab = function(tab) {
   fxPanelTab = allowed[tab] ? tab : 'presets';
   var panel = document.getElementById('fx-panel');
   if (panel) panel.setAttribute('data-active-tab', fxPanelTab);
-  document.querySelectorAll('#window.fx-panel-tabs [data-window.fx-tab]').forEach(function(btn){
-    btn.classList.toggle('active', btn.getAttribute('data-window.fx-tab') === fxPanelTab);
+  document.querySelectorAll('#fx-panel-tabs [data-fx-tab]').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-fx-tab') === fxPanelTab);
   });
   document.querySelectorAll('#window.fx-panel .fx-tab-page').forEach(function(page){
     page.classList.toggle('active', page.getAttribute('data-window.fx-page') === fxPanelTab);
@@ -1371,12 +1371,12 @@ window.organizeFxPanel = function() {
     ['advanced', '\u9ad8\u7ea7']
   ];
   var tabs = document.createElement('div');
-  tabs.className = 'window.fx-panel-tabs';
-  tabs.id = 'window.fx-panel-tabs';
+  tabs.className = 'fx-panel-tabs';
+  tabs.id = 'fx-panel-tabs';
   tabMeta.forEach(function(meta){
     var btn = document.createElement('button');
     btn.type = 'button';
-    btn.setAttribute('data-window.fx-tab', meta[0]);
+    btn.setAttribute('data-fx-tab', meta[0]);
     btn.textContent = meta[1];
     tabs.appendChild(btn);
   });
@@ -1412,9 +1412,9 @@ window.organizeFxPanel = function() {
     if (fold) fold.classList.add('open');
   });
   tabs.addEventListener('click', function(e){
-    var btn = e.target && e.target.closest ? e.target.closest('[data-window.fx-tab]') : null;
+    var btn = e.target && e.target.closest ? e.target.closest('[data-fx-tab]') : null;
     if (!btn) return;
-    setFxPanelTab(btn.getAttribute('data-window.fx-tab'));
+    setFxPanelTab(btn.getAttribute('data-fx-tab'));
   });
   panel._fxPanelOrganized = true;
   setFxPanelTab(fxPanelTab);

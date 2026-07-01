@@ -626,3 +626,16 @@ window.avatarSrc = function(url) {
   if (typeof window.coverProxySrc === 'function') return window.coverProxySrc(url, true);
   return url;
 };
+
+window.isHiddenForBackgroundOptimization = function() {
+  return !!(document.hidden && !window.isLiveBackgroundKeepMode());
+};
+
+window.maybeTrimRuntimeCaches = function(now) {
+  now = now || performance.now();
+  var deep = window.isDeepBackgroundMode();
+  var gap = deep ? (window.isBackgroundReleaseMode() ? 3600 : 7000) : 45000;
+  if (!deep && now < 30000) return;
+  if (now - window.runtimePerfState.lastCacheTrimAt < gap) return;
+  window.trimRuntimeCaches(deep ? (window.isBackgroundReleaseMode() ? 'release-frame' : 'deep-frame') : 'active-frame', deep);
+};

@@ -2015,3 +2015,44 @@ window.applyShelfCameraDefaultAngle = function(force) {
     window.fx.shelfAngleY = Math.round(window.clampRange(Number(window.fx.shelfAngleY) || 0, -30, 30));
   }
 };
+
+window.placeFxFloatingPanel = function(pop, anchor, opts) {
+  if (!pop || !anchor || !anchor.getBoundingClientRect) return;
+  opts = opts || {};
+  var gap = opts.gap == null ? 12 : opts.gap;
+  var pad = opts.pad == null ? 14 : opts.pad;
+  var rect = anchor.getBoundingClientRect();
+  var vw = Math.max(320, window.innerWidth || document.documentElement.clientWidth || 320);
+  var vh = Math.max(320, window.innerHeight || document.documentElement.clientHeight || 320);
+  var pw = Math.min(pop.offsetWidth || pop.getBoundingClientRect().width || 330, vw - pad * 2);
+  var ph = Math.min(pop.offsetHeight || pop.getBoundingClientRect().height || 260, vh - pad * 2);
+  var left;
+  var top;
+  if (vw < 760) {
+    left = Math.max(pad, Math.min(vw - pw - pad, rect.left + rect.width / 2 - pw / 2));
+    top = rect.bottom + gap;
+    if (top + ph > vh - pad) top = Math.max(pad, rect.top - ph - gap);
+  } else {
+    var roomRight = vw - rect.right - pad;
+    var roomLeft = rect.left - pad;
+    if (roomRight >= pw + gap || roomRight >= roomLeft) left = rect.right + gap;
+    else left = rect.left - pw - gap;
+    left = Math.max(pad, Math.min(vw - pw - pad, left));
+    top = rect.top + rect.height / 2 - ph / 2;
+    top = Math.max(pad, Math.min(vh - ph - pad, top));
+  }
+  pop.style.left = Math.round(left) + 'px';
+  pop.style.top = Math.round(top) + 'px';
+  pop.style.transform = 'none';
+};
+
+window.repositionFxFloatingPanels = function() {
+  var colorPop = document.getElementById('color-lab-pop');
+  if (colorPop && colorPop.classList.contains('show') && colorLabState.picker) {
+    window.placeFxFloatingPanel(colorPop, colorLabState.picker.closest('.lyric-color-row') || colorLabState.picker, { gap: 12, pad: 14 });
+  }
+  var coverPop = document.getElementById('cover-color-pop');
+  if (coverPop && coverPop.classList.contains('show')) {
+    window.placeFxFloatingPanel(coverPop, document.getElementById('visual-tint-auto-btn') || document.getElementById('visual-tint-picker') || coverPop, { gap: 12, pad: 14 });
+  }
+};
