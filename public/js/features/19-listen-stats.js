@@ -126,7 +126,7 @@ window.mostPlayedSong = function() {
   return list[0] || null;
 }
 window.topListenArtist = function() {
-  var list = Object.keys(window.listenStatsState.artists || {}).map(function(key){ return window.listenStatsState.artists[key]; });
+  var list = Object.keys((window.listenStatsState || {}).artists || {}).map(function(key){ return window.listenStatsState.artists[key]; });
   list.sort(function(a, b){ return (b.plays - a.plays) || (b.listenMs - a.listenMs) || (b.lastPlayedAt - a.lastPlayedAt); });
   return list[0] || null;
 }

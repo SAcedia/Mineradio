@@ -671,3 +671,5 @@ window.updateFullscreenDiyPeekFromPointer = function(x, y) {
 };
 
 window.customBgApplyToken = 0;
+
+window.customBgObjectUrl = null;
