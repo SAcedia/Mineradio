@@ -390,13 +390,6 @@ function avatarSrc(url) {
   return coverProxySrc(url, true);
 }
 
-function escHtml(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
-function cloneLyricLine(line) {
-  var copy = Object.assign({}, line || {});
-  if (line && Array.isArray(line.words)) copy.words = line.words.map(function(w){ return Object.assign({}, w); });
-  return copy;
-}
 function cloneLyricLines(lines) {
   return (Array.isArray(lines) ? lines : []).map(cloneLyricLine);
 }
@@ -426,12 +419,6 @@ function hasCustomLyricForSong(song) {
   return !!(entry && String(entry.text || '').trim());
 }
 
-function setOriginalLyricsState(lines, hasNativeKaraoke, timingSource) {
-  window.originalLyricsState = window.originalLyricsState || {};
-  if (lines !== undefined) window.originalLyricsState.lines = lines;
-  if (hasNativeKaraoke !== undefined) window.originalLyricsState.hasNativeKaraoke = !!hasNativeKaraoke;
-  if (timingSource !== undefined) window.originalLyricsState.timingSource = timingSource;
-}
 function applyLyricsState(lines, hasNativeKaraoke, timingSource) {
   if (lines) window.lyricsLines = lines;
   if (hasNativeKaraoke !== undefined) window.lyricsHasNativeKaraoke = !!hasNativeKaraoke;
