@@ -4,9 +4,10 @@
 
 安装后，歌词粒子特效、歌单面板、DIY 面板、底部控制栏等可以直接显示在电脑桌面上，不影响正常使用电脑（打开文件、软件等）。
 
-## 方案：electron-wallpaper
+## 方案：Windows 原生 API（ffi-napi）
 
-用 `@phoeshow/electron-wallpaper` 将 Electron 窗口插入 Windows 壁纸层与桌面图标层之间。
+不依赖第三方壁纸模块。用 `ffi-napi` 直接调用 Windows 内置 `user32.dll`，
+将 Electron 窗口插入壁纸层与桌面图标层之间。
 
 ### 架构
 
@@ -21,45 +22,40 @@ Windows 壁纸层
 #### 1. 安装依赖
 
 ```bash
-npm install @phoeshow/electron-wallpaper
+npm install ffi-napi
 ```
 
-只在 Windows 下有效，需加 `optionalDependencies` 或运行时检测平台。
+`ffi-napi` 是通用 FFI 库，活跃维护，不依赖老旧的原生模块。
 
-#### 2. 创建壁纸窗口（desktop/main.js）
+#### 2. 核心：将窗口插入壁纸层（desktop/wallpaper.js）
 
 ```javascript
-const { app, BrowserWindow, Tray, Menu } = require('electron');
+const ffi = require('ffi-napi');
+const { BrowserWindow, app, Tray, Menu, globalShortcut } = require('electron');
 const path = require('path');
 
-let wallpaperWin = null;
-let tray = null;
+// Windows API 绑定
+const user32 = ffi.Library('user32.dll', {
+  'FindWindowW': ['long', ['string', 'string']],
+  'FindWindowExW': ['long', ['long', 'long', 'string', 'string']],
+  'SetParent': ['long', ['long', 'long']],
+  'ShowWindow': ['bool', ['long', 'int']],
+  'SendMessageW': ['long', ['long', 'long', 'long']]
+});
 
-function createWallpaperWindow() {
-  wallpaperWin = new BrowserWindow({
-    width: 1920,
-    height: 1080,
-    transparent: true,
-    frame: false,
-    resizable: false,
-    focusable: false,     // 不获取焦点，不干扰正常操作
-    skipTaskbar: true,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
-    }
-  });
-
-  // 加载现有前端页面
-  wallpaperWin.loadURL(`file://${path.join(__dirname, '../public/index.html')}`);
-
-  // 插入壁纸层
-  const electronWallpaper = require('@phoeshow/electron-wallpaper');
-  electronWallpaper.attachWindow(wallpaperWin);
-
-  // 鼠标穿透（让点击透过窗口到桌面）
-  wallpaperWin.setIgnoreMouseEvents(true, { forward: true });
+// 将窗口插入桌面壁纸层
+function attachToWallpaper(hwnd) {
+  // 1. 找到 Progman 窗口（桌面）
+  const progman = user32.FindWindowW('Progman', null);
+  // 2. 发送消息让 Progman 创建 WorkerW
+  user32.SendMessageW(progman, 0x052C, 0, 0);
+  // 3. 找到 WorkerW（壁纸和图标之间的层）
+  let workerw = 0;
+  // 遍历查找
+  // 4. 将我们的窗口设为 WorkerW 的子窗口
+  user32.SetParent(hwnd, workerw);
 }
+```
 
 // 系统托盘：交互入口
 function createTray() {
@@ -120,7 +116,8 @@ app.whenReady().then(() => {
 
 ### 注意事项
 
-- Windows only（electron-wallpaper 不支持 Mac/Linux）
+- Windows only（user32.dll 是 Windows 特有）
+- `ffi-napi` 需要 `node-gyp` 编译，需安装 Windows Build Tools
 - `setIgnoreMouseEvents(true, { forward: true })` 确保鼠标事件穿透到桌面图标
 - 需要在 `package.json` 的 `build.win` 配置中包含原生模块
 
