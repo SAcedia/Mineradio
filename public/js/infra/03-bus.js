@@ -6,6 +6,10 @@ window.Mineradio.bus = {
   on: function(name, fn) {
     (this._listeners[name] = this._listeners[name] || []).push(fn);
   },
+  off: function(name, fn) {
+    var list = this._listeners[name];
+    if (list) this._listeners[name] = list.filter(function(f) { return f !== fn; });
+  },
   emit: function(name, data) {
     if (window.Mineradio.debug) console.log('[bus]', name, data);
     this._log.push({ name: name, data: data, at: Date.now() });

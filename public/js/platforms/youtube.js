@@ -33,15 +33,11 @@ window.Mineradio.platforms.youtube = {};
 
 for (var i = 0; i < youtubeAPIList.length; i++) {
   (function(entry) {
-    var fnName = 'youtube' + entry.name;
-    var fn = window[fnName];
-    if (!fn) {
-      fn = function() {
-        var args = {};
-        for (var ai = 0; ai < entry.params.length; ai++) args[entry.params[ai]] = arguments[ai];
-        return youtubeApi(entry.path, youtubeQs(entry.params, args));
-      };
-    }
+    var fn = function() {
+      var args = {};
+      for (var ai = 0; ai < entry.params.length; ai++) args[entry.params[ai]] = arguments[ai];
+      return youtubeApi(entry.path, youtubeQs(entry.params, args));
+    };
     var key = entry.name.charAt(0).toLowerCase() + entry.name.slice(1);
     window.Mineradio.platforms.youtube[key] = fn;
   })(youtubeAPIList[i]);

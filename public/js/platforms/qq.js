@@ -32,15 +32,11 @@ window.Mineradio.platforms.qq = {};
 
 for (var i = 0; i < qqAPIList.length; i++) {
   (function(entry) {
-    var fnName = 'qq' + entry.name;
-    var fn = window[fnName];
-    if (!fn) {
-      fn = function() {
-        var args = {};
-        for (var ai = 0; ai < entry.params.length; ai++) args[entry.params[ai]] = arguments[ai];
-        return qqApi(entry.path, qqQs(entry.params, args));
-      };
-    }
+    var fn = function() {
+      var args = {};
+      for (var ai = 0; ai < entry.params.length; ai++) args[entry.params[ai]] = arguments[ai];
+      return qqApi(entry.path, qqQs(entry.params, args));
+    };
     var key = entry.name.charAt(0).toLowerCase() + entry.name.slice(1);
     window.Mineradio.platforms.qq[key] = fn;
   })(qqAPIList[i]);
