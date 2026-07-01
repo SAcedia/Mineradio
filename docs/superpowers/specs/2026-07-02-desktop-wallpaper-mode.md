@@ -196,7 +196,9 @@ module.exports = { createTray };
 
 ```javascript
 (function() {
-  if (!window.__wallpaperMode) return;
+  // 检测壁纸模式：URL 参数 ?mode=wallpaper 或 window.__wallpaperMode
+  var isWP = window.__wallpaperMode || location.search.indexOf('mode=wallpaper') >= 0;
+  if (!isWP) return;
 
   var ctrlPanelVisible = false;
   var ipc = null;
@@ -335,6 +337,7 @@ Progman (桌面根窗口)
 ### 前端检测
 
 前端通过 URL 参数 `?mode=wallpaper` 或 `window.__wallpaperMode` 判断当前模式：
+`desktop-wallpaper.js` 启动时自动检测这两者。
 - 壁纸模式：控制栏初始隐藏，hover 显示
 - 普通模式：控制栏正常显示
 - 其余 UI 逻辑完全一致
