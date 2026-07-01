@@ -3,6 +3,7 @@
 window.Mineradio.bus.on('player:trackchange', function(data) {
   // cover already handles song changes directly — future hook
 });
+var customCoverMap = {};
 function readCustomCoverMap() {
   try {
     var raw = localStorage.getItem(CUSTOM_COVER_STORE_KEY);
@@ -138,3 +139,24 @@ function clearCustomCoverForCurrent() {
   updateCustomCoverButton();
   showToast('已恢复默认封面');
 }
+
+// ============================================================
+//  Namespace Exports — Mineradio.cover
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.cover = {
+  readCustomCoverMap: readCustomCoverMap,
+  saveCustomCoverMap: saveCustomCoverMap,
+  isInlineCoverSrc: isInlineCoverSrc,
+  isProxyableCoverUrl: isProxyableCoverUrl,
+  coverProxySrc: coverProxySrc,
+  coverUrlWithSize: coverUrlWithSize,
+  songCustomCoverKey: songCustomCoverKey,
+  getCustomCoverForSong: getCustomCoverForSong,
+  hydrateCustomCover: hydrateCustomCover,
+  songCoverSrc: songCoverSrc,
+  cssImageUrl: cssImageUrl,
+  setCustomCoverForCurrent: setCustomCoverForCurrent,
+  updateCustomCoverButton: updateCustomCoverButton,
+  clearCustomCoverForCurrent: clearCustomCoverForCurrent
+};

@@ -21,7 +21,7 @@ function songSourceLabel(song) {
 }
 function detailRow(label, value) {
   value = value == null || value === '' ? '未知' : value;
-  return '<div class="detail-k">' + escHtml(label) + '</div><div class="detail-v">' + escHtml(String(value)) + '</div>';
+  return '<div class="detail-k">' + Mineradio.util.escHtml(label) + '</div><div class="detail-v">' + Mineradio.util.escHtml(String(value)) + '</div>';
 }
 function currentArtistNames(song) {
   var text = String((song && song.artist) || '').trim();
@@ -55,7 +55,7 @@ function currentArtistId(song) {
   return '';
 }
 function currentQQArtistMid(song) {
-  if (!song || songProviderKey(song) !== 'qq') return '';
+  if (!song || Mineradio.util.songProviderKey(song) !== 'qq') return '';
   if (song.artistMid) return String(song.artistMid);
   if (song.singerMid) return String(song.singerMid);
   if (song.artistId && !/^\d+$/.test(String(song.artistId))) return String(song.artistId);
@@ -82,8 +82,8 @@ function renderDetailComments(comments) {
     var avatar = user.avatar ? coverUrlWithSize(user.avatar, 64) : '';
     return '<div class="comment-item">' +
       (avatar ? '<img class="comment-avatar" src="' + avatar + '" alt="">' : '<div class="comment-avatar"></div>') +
-      '<div class="comment-main"><div class="comment-meta">' + escHtml(user.nickname || '音乐用户') + (c.likedCount ? (' · ' + c.likedCount + ' 赞') : '') + (c.time ? (' · ' + escHtml(commentTimeLabel(c.time))) : '') + '</div>' +
-      '<div class="comment-text">' + escHtml(c.content || '') + '</div></div>' +
+      '<div class="comment-main"><div class="comment-meta">' + Mineradio.util.escHtml(user.nickname || '音乐用户') + (c.likedCount ? (' · ' + c.likedCount + ' 赞') : '') + (c.time ? (' · ' + Mineradio.util.escHtml(commentTimeLabel(c.time))) : '') + '</div>' +
+      '<div class="comment-text">' + Mineradio.util.escHtml(c.content || '') + '</div></div>' +
     '</div>';
   }).join('') + '</div>';
 }
@@ -92,7 +92,7 @@ function renderArtistSongList(songs) {
   if (!detailArtistSongs.length) return '<div class="detail-empty">暂无热门歌曲</div>';
   return '<div class="detail-scroll">' + detailArtistSongs.map(function(s, i){
     var cover = songCoverSrc(s, 80);
-    var coverHtml = cover ? '<img class="artist-song-cover" src="' + escHtml(cover) + '" alt="" onerror="this.style.opacity=0.18">' : '<div class="artist-song-cover"></div>';
+    var coverHtml = cover ? '<img class="artist-song-cover" src="' + Mineradio.util.escHtml(cover) + '" alt="" onerror="this.style.opacity=0.18">' : '<div class="artist-song-cover"></div>';
     var actionsHtml = '<div class="artist-song-actions">' +
       '<button class="artist-song-action collect" type="button" title="收藏到歌单" aria-label="收藏到歌单" onclick="event.stopPropagation();collectArtistDetailSong(' + i + ')">' + artistCollectTrayIconSvg() + '</button>' +
       '<button class="artist-song-action next" type="button" title="下一首播放" aria-label="下一首播放" onclick="event.stopPropagation();queueArtistDetailSongNext(' + i + ')">' + artistNextPlusIconSvg() + '</button>' +
@@ -100,8 +100,8 @@ function renderArtistSongList(songs) {
     return '<div class="artist-song-item" onclick="playArtistDetailSong(' + i + ')">' +
       '<div class="artist-song-rank">' + String(i + 1).padStart(2, '0') + '</div>' +
       coverHtml +
-      '<div class="artist-song-main"><div class="artist-song-name">' + escHtml(s.name || '') + '</div>' +
-      '<div class="artist-song-meta">' + escHtml((s.album || '未知专辑') + (s.duration ? (' · ' + songDurationLabel(s)) : '')) + '</div></div>' +
+      '<div class="artist-song-main"><div class="artist-song-name">' + Mineradio.util.escHtml(s.name || '') + '</div>' +
+      '<div class="artist-song-meta">' + Mineradio.util.escHtml((s.album || '未知专辑') + (s.duration ? (' · ' + songDurationLabel(s)) : '')) + '</div></div>' +
       actionsHtml +
     '</div>';
   }).join('') + '</div>';
@@ -132,7 +132,7 @@ function bindTrackDetailScrollers() {
   if (body) body.querySelectorAll('.detail-scroll').forEach(bindSmoothWheelScroll);
 }
 function closeTrackDetailModal() {
-  closeGsapModal(document.getElementById('track-detail-modal'));
+  Mineradio.util.closeGsapModal(document.getElementById('track-detail-modal'));
 }
 function openTrackDetailModal(type, songOverride) {
   var song = songOverride || currentCoverSong();
@@ -149,7 +149,7 @@ function openTrackDetailModal(type, songOverride) {
   if (type === 'artist') {
     var artistId = currentArtistId(song);
     var qqArtistMid = currentQQArtistMid(song);
-    var isYT = songProviderKey(song) === 'youtube';
+    var isYT = Mineradio.util.songProviderKey(song) === 'youtube';
     var artistDetailUrl = artistId
       ? ('/api/artist/detail?id=' + encodeURIComponent(artistId) + '&limit=36')
       : (qqArtistMid ? ('/api/qq/artist/detail?mid=' + encodeURIComponent(qqArtistMid) + '&limit=36') : '');
@@ -159,16 +159,16 @@ function openTrackDetailModal(type, songOverride) {
     var artistName = artists.join(' / ') || song.artist || '未知歌手';
     var artistNamesForMatch = artists.length ? artists : (song.artist ? [song.artist] : []);
     var artistInitial = artistName && artistName !== '未知歌手' ? artistName.slice(0, 1) : '歌';
-    var artistCoverHtml = '<div id="artist-detail-cover" class="detail-cover detail-artist-avatar">' + escHtml(artistInitial) + '</div>';
-    var artistEmptyText = songProviderKey(song) === 'qq'
+    var artistCoverHtml = '<div id="artist-detail-cover" class="detail-cover detail-artist-avatar">' + Mineradio.util.escHtml(artistInitial) + '</div>';
+    var artistEmptyText = Mineradio.util.songProviderKey(song) === 'qq'
       ? '当前 QQ 歌曲缺少 singerMid，无法打开 QQ 歌手主页。'
       : '当前歌曲缺少可用的歌手主页信息';
-    var artistLoadingText = songProviderKey(song) === 'qq' ? '正在载入 QQ 歌手主页...' : '正在载入歌手主页...';
+    var artistLoadingText = Mineradio.util.songProviderKey(song) === 'qq' ? '正在载入 QQ 歌手主页...' : '正在载入歌手主页...';
     heading.textContent = '歌手详情';
     body.innerHTML =
       '<div class="detail-hero">' + artistCoverHtml +
-        '<div style="min-width:0;flex:1"><div class="detail-title">' + escHtml(artistName) + '</div>' +
-        '<div class="detail-sub">来自当前播放 · ' + escHtml(title) + '</div></div>' +
+        '<div style="min-width:0;flex:1"><div class="detail-title">' + Mineradio.util.escHtml(artistName) + '</div>' +
+        '<div class="detail-sub">来自当前播放 · ' + Mineradio.util.escHtml(title) + '</div></div>' +
       '</div>' +
       '<div class="detail-grid">' +
         detailRow('当前歌曲', title) +
@@ -176,10 +176,10 @@ function openTrackDetailModal(type, songOverride) {
         detailRow('所属专辑', song.album || (song.type === 'podcast' ? (song.radioName || 'Podcast') : '未知')) +
         detailRow('来源', songSourceLabel(song)) +
       '</div>' +
-      '<div class="detail-chip-row">' + (artists.length ? artists.map(function(name){ return '<span class="detail-chip">' + escHtml(name) + '</span>'; }).join('') : '<span class="detail-chip">未知歌手</span>') + '</div>' +
-      '<div class="detail-section"><div class="detail-section-head"><div class="detail-section-title">热门歌曲</div></div><div id="artist-hot-songs">' + (artistDetailUrl ? '<div class="detail-loading">' + escHtml(artistLoadingText) + '</div>' : '<div class="detail-empty">' + escHtml(artistEmptyText) + '</div>') + '</div></div>';
+      '<div class="detail-chip-row">' + (artists.length ? artists.map(function(name){ return '<span class="detail-chip">' + Mineradio.util.escHtml(name) + '</span>'; }).join('') : '<span class="detail-chip">未知歌手</span>') + '</div>' +
+      '<div class="detail-section"><div class="detail-section-head"><div class="detail-section-title">热门歌曲</div></div><div id="artist-hot-songs">' + (artistDetailUrl ? '<div class="detail-loading">' + Mineradio.util.escHtml(artistLoadingText) + '</div>' : '<div class="detail-empty">' + Mineradio.util.escHtml(artistEmptyText) + '</div>') + '</div></div>';
     if (artistDetailUrl) {
-      apiJson(artistDetailUrl).then(function(r){
+      Mineradio.util.apiJson(artistDetailUrl).then(function(r){
         if (seq !== trackDetailSeq) return;
         var returnedName = r && r.artist && r.artist.name;
         var target = document.getElementById('artist-hot-songs');
@@ -211,15 +211,15 @@ function openTrackDetailModal(type, songOverride) {
     }
   } else {
     heading.textContent = '歌曲详情';
-    var detailIsQQ = songProviderKey(song) === 'qq';
-    var detailIsYT = songProviderKey(song) === 'youtube';
+    var detailIsQQ = Mineradio.util.songProviderKey(song) === 'qq';
+    var detailIsYT = Mineradio.util.songProviderKey(song) === 'youtube';
     var detailCanLoadComments = isCloudSong(song) || detailIsQQ;
     var detailCommentTitle = detailIsQQ ? 'QQ 音乐评论' : (detailIsYT ? 'YouTube' : '网易云评论');
     var detailEmptyText = detailIsQQ ? '当前 QQ 歌曲暂无评论' : (detailIsYT ? 'YouTube 歌曲暂不支持评论查看' : '本地文件暂无网易云评论');
     body.innerHTML =
       '<div class="detail-hero">' + coverHtml +
-        '<div style="min-width:0;flex:1"><div class="detail-title">' + escHtml(title) + '</div>' +
-        '<div class="detail-sub">' + escHtml(song.artist || (song.type === 'local' ? '本地文件' : '未知歌手')) + '</div></div>' +
+        '<div style="min-width:0;flex:1"><div class="detail-title">' + Mineradio.util.escHtml(title) + '</div>' +
+        '<div class="detail-sub">' + Mineradio.util.escHtml(song.artist || (song.type === 'local' ? '本地文件' : '未知歌手')) + '</div></div>' +
       '</div>' +
       '<div class="detail-grid">' +
         detailRow('歌曲名', title) +
@@ -230,7 +230,7 @@ function openTrackDetailModal(type, songOverride) {
         detailRow('歌词源', lyricSourceMode === 'custom' ? '自定义歌词' : (lyricsTimingSource === 'fallback' ? '占位歌词' : '原词')) +
       '</div>' +
       '<div class="detail-chip-row">' +
-        '<span class="detail-chip">' + escHtml(songSourceLabel(song)) + '</span>' +
+        '<span class="detail-chip">' + Mineradio.util.escHtml(songSourceLabel(song)) + '</span>' +
         (isSongLiked(song) ? '<span class="detail-chip">红心喜欢</span>' : '') +
         (getCustomCoverForSong(song) ? '<span class="detail-chip">自定义封面</span>' : '') +
         (hasCustomLyricForSong(song) ? '<span class="detail-chip">自定义歌词</span>' : '') +
@@ -240,7 +240,7 @@ function openTrackDetailModal(type, songOverride) {
       var commentUrl = detailIsQQ
         ? ('/api/qq/song/comments?id=' + encodeURIComponent(song.qqId || '') + '&mid=' + encodeURIComponent(song.mid || song.songmid || song.id || '') + '&limit=18')
         : ('/api/song/comments?id=' + encodeURIComponent(song.id) + '&limit=18');
-      apiJson(commentUrl).then(function(r){
+      Mineradio.util.apiJson(commentUrl).then(function(r){
         if (seq !== trackDetailSeq) return;
         var target = document.getElementById('song-comments');
         if (target) target.innerHTML = r && !r.error ? renderDetailComments(r.comments || []) : '<div class="detail-empty">评论加载失败</div>';
@@ -253,7 +253,7 @@ function openTrackDetailModal(type, songOverride) {
     }
   }
   bindTrackDetailScrollers();
-  openGsapModal(document.getElementById('track-detail-modal'));
+  Mineradio.util.openGsapModal(document.getElementById('track-detail-modal'));
 }
 function openArtistDetailForSong(song) {
   if (!song) { showToast('未找到歌手信息'); return; }
@@ -274,13 +274,13 @@ function openArtistDetailForSong(song) {
   }
 }
 function resolveArtistSongForDetail(song, artist) {
-  var provider = songProviderKey(song) === 'qq' ? 'qq' : (songProviderKey(song) === 'youtube' ? 'youtube' : 'netease');
+  var provider = Mineradio.util.songProviderKey(song) === 'qq' ? 'qq' : (Mineradio.util.songProviderKey(song) === 'youtube' ? 'youtube' : 'netease');
   var url = provider === 'qq'
     ? '/api/qq/search?keywords=' + encodeURIComponent(artist) + '&limit=8'
     : provider === 'youtube'
     ? '/api/youtube/search?keywords=' + encodeURIComponent(artist) + '&limit=10'
     : '/api/search?keywords=' + encodeURIComponent(artist) + '&limit=10';
-  return apiJson(url).then(function(r){
+  return Mineradio.util.apiJson(url).then(function(r){
     var songs = (r && r.songs) || [];
     for (var i = 0; i < songs.length; i++) {
       var candidate = songs[i];
@@ -329,11 +329,11 @@ function openCustomLyricModal() {
   if (sub) sub.textContent = (song.artist || (song.type === 'podcast' ? 'Podcast' : '')) + (entry ? ' · 已保存自定义歌词' : ' · 可粘贴 LRC 或逐行输入');
   if (input) input.value = entry ? (entry.text || '') : '';
   setCustomLyricStatus(entry ? '已读取本地自定义歌词' : '提示：带 [00:12.00] 时间轴会更精准；纯文本会自动铺开', entry ? 'good' : '');
-  openGsapModal(document.getElementById('custom-lyric-modal'));
+  Mineradio.util.openGsapModal(document.getElementById('custom-lyric-modal'));
   setTimeout(function(){ if (input) input.focus(); }, 120);
 }
 function closeCustomLyricModal() {
-  closeGsapModal(document.getElementById('custom-lyric-modal'));
+  Mineradio.util.closeGsapModal(document.getElementById('custom-lyric-modal'));
 }
 function saveCustomLyricForCurrent() {
   var song = currentLyricSong();
@@ -408,7 +408,7 @@ function saveCustomLyricPrefs() {
 }
 function songCustomLyricKey(song) {
   if (!song) return '';
-  return (song.id || song.mid || song.songmid || '') + '@' + (song.provider || songProviderKey(song));
+  return (song.id || song.mid || song.songmid || '') + '@' + (song.provider || Mineradio.util.songProviderKey(song));
 }
 function getCustomLyricEntry(song) {
   var key = songCustomLyricKey(song);
@@ -473,4 +473,52 @@ function applyPreferredLyricsForCurrent(silent) {
   applyOriginalLyricsState();
   if (!silent && typeof window.updateCustomLyricControls === 'function') window.updateCustomLyricControls();
 }
+
+// ============================================================
+//  Namespace Exports — Mineradio.detail
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.detail = {
+  currentCoverSong: currentCoverSong,
+  songDurationLabel: songDurationLabel,
+  songSourceLabel: songSourceLabel,
+  detailRow: detailRow,
+  currentArtistNames: currentArtistNames,
+  normalizeArtistNameForMatch: normalizeArtistNameForMatch,
+  artistNameMatches: artistNameMatches,
+  currentArtistId: currentArtistId,
+  currentQQArtistMid: currentQQArtistMid,
+  commentTimeLabel: commentTimeLabel,
+  renderDetailComments: renderDetailComments,
+  renderArtistSongList: renderArtistSongList,
+  playArtistDetailSong: playArtistDetailSong,
+  collectArtistDetailSong: collectArtistDetailSong,
+  queueArtistDetailSongNext: queueArtistDetailSongNext,
+  bindTrackDetailScrollers: bindTrackDetailScrollers,
+  closeTrackDetailModal: closeTrackDetailModal,
+  openTrackDetailModal: openTrackDetailModal,
+  openArtistDetailForSong: openArtistDetailForSong,
+  resolveArtistSongForDetail: resolveArtistSongForDetail,
+  updateCustomLyricControls: updateCustomLyricControls,
+  setCustomLyricStatus: setCustomLyricStatus,
+  openCustomLyricModal: openCustomLyricModal,
+  closeCustomLyricModal: closeCustomLyricModal,
+  saveCustomLyricForCurrent: saveCustomLyricForCurrent,
+  deleteCustomLyricForCurrent: deleteCustomLyricForCurrent,
+  cloneSong: cloneSong,
+  avatarSrc: avatarSrc,
+  cloneLyricLines: cloneLyricLines,
+  readCustomLyricMap: readCustomLyricMap,
+  saveCustomLyricMap: saveCustomLyricMap,
+  readCustomLyricPrefs: readCustomLyricPrefs,
+  saveCustomLyricPrefs: saveCustomLyricPrefs,
+  songCustomLyricKey: songCustomLyricKey,
+  getCustomLyricEntry: getCustomLyricEntry,
+  hasCustomLyricForSong: hasCustomLyricForSong,
+  applyLyricsState: applyLyricsState,
+  parseCustomLyricText: parseCustomLyricText,
+  applyCustomLyricState: applyCustomLyricState,
+  preferredLyricSourceForSong: preferredLyricSourceForSong,
+  applyPreferredLyricsForCurrent: applyPreferredLyricsForCurrent
+};
 

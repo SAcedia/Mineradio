@@ -2368,3 +2368,49 @@ window.addEventListener('blur', function(){
   if (freeCamera && freeCamera.keys) freeCamera.keys = {};
 });
 
+// ============================================================
+//  Namespace Exports — Mineradio.shelf
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.shelf = {
+  isPortraitShelfViewport: isPortraitShelfViewport,
+  shelfLayoutProfile: shelfLayoutProfile,
+  shelfHotZoneWidth: shelfHotZoneWidth,
+  shelfPreviewUseZoneWidth: shelfPreviewUseZoneWidth,
+  shelfWheelZoneWidth: shelfWheelZoneWidth,
+  isShelfClickZone: isShelfClickZone,
+  isShelfPreviewUseZone: isShelfPreviewUseZone,
+  isShelfWheelZone: isShelfWheelZone,
+  canUseSideShelfWithoutPinnedOpen: canUseSideShelfWithoutPinnedOpen,
+  shelfPreviewIsVisible: shelfPreviewIsVisible,
+  shelfAutoHiddenInputReady: shelfAutoHiddenInputReady,
+  canShowShelfHoverCueAt: canShowShelfHoverCueAt,
+  shelfCueRect: shelfCueRect,
+  shelfCueCenter: shelfCueCenter,
+  setShelfGuideCueActive: setShelfGuideCueActive,
+  updateShelfHoverCueFromPointer: updateShelfHoverCueFromPointer,
+  tickShelfHoverCue: tickShelfHoverCue,
+  setShelfPinnedOpen: setShelfPinnedOpen,
+  clearShelfPreviewOnPointerExit: clearShelfPreviewOnPointerExit,
+  suppressShelfPreviewForPlaybackSwitch: suppressShelfPreviewForPlaybackSwitch,
+  makeShelfManager: makeShelfManager,
+  safeShelfRebuild: safeShelfRebuild,
+  scheduleShelfRebuild: scheduleShelfRebuild,
+  safeShelfCloseContent: safeShelfCloseContent,
+  isPlaylistPanelVisibleForRender: isPlaylistPanelVisibleForRender,
+  safeRenderQueuePanel: safeRenderQueuePanel,
+  flushDeferredQueuePanel: flushDeferredQueuePanel,
+  safeSwitchPlaylistTab: safeSwitchPlaylistTab,
+  makeContentListManager: makeContentListManager,
+  compactCount: compactCount,
+  drawCanvasHeart: drawCanvasHeart,
+  requestPlaylistCover: requestPlaylistCover,
+  raycasterFromPointerEvent: raycasterFromPointerEvent,
+  pointerCardHit: pointerCardHit,
+  isSideShelfFocusHit: isSideShelfFocusHit,
+  updateShelfCardHoverSelection: updateShelfCardHoverSelection,
+  isShelfPlaylistPlayHit: isShelfPlaylistPlayHit,
+  isFreeCameraControlCode: isFreeCameraControlCode,
+  consumeFreeCameraKeyEvent: consumeFreeCameraKeyEvent
+};
+

@@ -20,3 +20,14 @@ function songFromListenRecord(record) {
   if (!record) return null;
   return { id: record.id, name: record.name, artist: record.artist, album: record.album, duration: record.duration, provider: record.provider, cover: record.cover };
 }
+loadListenStatsState();
+
+// ============================================================
+//  Namespace Exports — Mineradio.listenStats
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.listenStats = {
+  loadListenStatsState: loadListenStatsState,
+  saveListenStatsState: saveListenStatsState,
+  songFromListenRecord: songFromListenRecord
+};

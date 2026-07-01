@@ -1,5 +1,8 @@
 // Event Bus — fire-and-forget cross-module notifications
 window.Mineradio = window.Mineradio || {};
+window.Mineradio.state = window.Mineradio.state || {};
+window.Mineradio.fx = window.Mineradio.fx || {};
+window.Mineradio.gesture = window.Mineradio.gesture || {};
 window.Mineradio.bus = {
   _listeners: {},
   _log: [],

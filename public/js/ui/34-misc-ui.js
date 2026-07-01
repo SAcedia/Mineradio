@@ -832,6 +832,47 @@ function clampParticleSpinVelocity(v) {
   return Math.max(-PARTICLE_SPIN_MAX, Math.min(PARTICLE_SPIN_MAX, v));
 }
 
+// --- Namespace exports ---
+Mineradio.miscUI = {
+  setIdleGuideVisible: setIdleGuideVisible,
+  shouldShowIdleGuide: shouldShowIdleGuide,
+  shouldShowShelfHoverCue: shouldShowShelfHoverCue,
+  shouldHandleIdleGuidePointer: shouldHandleIdleGuidePointer,
+  clampIdleGuideSpin: clampIdleGuideSpin,
+  idleGuidePointerDown: idleGuidePointerDown,
+  idleGuidePointerMove: idleGuidePointerMove,
+  idleGuidePointerUp: idleGuidePointerUp,
+  idleGuidePointerLeave: idleGuidePointerLeave,
+  idleGuideWheel: idleGuideWheel,
+  resizeIdleGuideCanvas: resizeIdleGuideCanvas,
+  projectIdleGuidePoint: projectIdleGuidePoint,
+  resetIdleGuideTrails: resetIdleGuideTrails,
+  pushIdleGuideTrail: pushIdleGuideTrail,
+  drawIdleGuideTrail: drawIdleGuideTrail,
+  scheduleIdleGuideFrame: scheduleIdleGuideFrame,
+  drawIdleGuideFrame: drawIdleGuideFrame,
+  idleRoundRect: idleRoundRect,
+  drawShelfGuideCue: drawShelfGuideCue,
+  initIdleGuideCanvas: initIdleGuideCanvas,
+  showToast: showToast,
+  activeVisualGuideSteps: activeVisualGuideSteps,
+  visualGuideWasSeen: visualGuideWasSeen,
+  markVisualGuideSeen: markVisualGuideSeen,
+  maybeRunStartupVisualGuide: maybeRunStartupVisualGuide,
+  startVisualGuide: startVisualGuide,
+  prepareVisualGuideStep: prepareVisualGuideStep,
+  scheduleVisualGuidePositioning: scheduleVisualGuidePositioning,
+  showVisualGuideStep: showVisualGuideStep,
+  guideTargetRect: guideTargetRect,
+  positionVisualGuideStep: positionVisualGuideStep,
+  nextVisualGuideStep: nextVisualGuideStep,
+  closeVisualGuide: closeVisualGuide,
+  handleVisualGuideSurfaceClick: handleVisualGuideSurfaceClick,
+  loadScriptOnce: loadScriptOnce,
+  startHeadTracking: startHeadTracking,
+  stopHeadTracking: stopHeadTracking,
+  clampParticleSpinVelocity: clampParticleSpinVelocity
+};
 
 // ============================================================
 //  Resize / 快捷键

@@ -168,6 +168,16 @@ function animate() {
 
   renderer.render(scene, camera);
 }
+
+// --- Namespace exports ---
+Mineradio.app = {
+  isMainSceneCoveredBySplash: isMainSceneCoveredBySplash,
+  getAdaptiveRenderFps: getAdaptiveRenderFps,
+  shouldSkipAdaptiveRenderFrame: shouldSkipAdaptiveRenderFrame,
+  sampleRenderPerf: sampleRenderPerf,
+  animate: animate
+};
+
 bindPlaylistPanelLazyRender();
 bindModalBackdropClose();
 animate();

@@ -51,7 +51,7 @@ function hasPlatformLogin(provider) {
   return !!(st && st.loggedIn);
 }
 function hasAnyPlatformLogin() {
-  return hasPlatformLogin('netease') || hasPlatformLogin('qq');
+  return hasPlatformLogin('netease') || hasPlatformLogin('qq') || hasPlatformLogin('youtube');
 }
 function firstLoggedProvider() {
   if (hasPlatformLogin(activeAccountProvider)) return activeAccountProvider;
@@ -741,5 +741,51 @@ function maybeRunStartupLoginGuide(source) {
     runLoginGuideParticles(function(){ showLoginModal({ guided: true, source: source || 'startup' }); });
   }, source === 'splash' ? 6200 : 2600);
 }
+
+// --- Namespace exports ---
+Mineradio.login = {
+  onUserBtnClick: onUserBtnClick,
+  platformMeta: platformMeta,
+  platformStatus: platformStatus,
+  providerVipType: providerVipType,
+  providerVipLevel: providerVipLevel,
+  hasProviderVip: hasProviderVip,
+  hasProviderSvip: hasProviderSvip,
+  providerVipBadge: providerVipBadge,
+  hasPlatformLogin: hasPlatformLogin,
+  hasAnyPlatformLogin: hasAnyPlatformLogin,
+  firstLoggedProvider: firstLoggedProvider,
+  providerAvatarSrc: providerAvatarSrc,
+  renderTopAccountPill: renderTopAccountPill,
+  refreshLoginStatus: refreshLoginStatus,
+  normalizeQQLoginStatus: normalizeQQLoginStatus,
+  refreshQQLoginStatus: refreshQQLoginStatus,
+  startQQLoginStatusAutoRefresh: startQQLoginStatusAutoRefresh,
+  renderUserBtn: renderUserBtn,
+  showLoginModal: showLoginModal,
+  closeLoginModal: closeLoginModal,
+  setLoginProvider: setLoginProvider,
+  updateLoginProviderUi: updateLoginProviderUi,
+  refreshQr: refreshQr,
+  startQrPoll: startQrPoll,
+  stopQrPoll: stopQrPoll,
+  toggleQQCookiePanel: toggleQQCookiePanel,
+  openProviderWebLogin: openProviderWebLogin,
+  openNeteaseWebLogin: openNeteaseWebLogin,
+  openQQWebLogin: openQQWebLogin,
+  submitQQCookieLogin: submitQQCookieLogin,
+  checkQr: checkQr,
+  updateUserModalUi: updateUserModalUi,
+  showUserModal: showUserModal,
+  closeUserModal: closeUserModal,
+  setActiveAccountProvider: setActiveAccountProvider,
+  enableDualAccountView: enableDualAccountView,
+  requestDualLoginMode: requestDualLoginMode,
+  openProviderLogin: openProviderLogin,
+  logoutActiveAccount: logoutActiveAccount,
+  doLogout: doLogout,
+  runLoginGuideParticles: runLoginGuideParticles,
+  maybeRunStartupLoginGuide: maybeRunStartupLoginGuide
+};
 
 // ============================================================

@@ -1,20 +1,20 @@
 //  Collect / playlist helpers
 // ============================================================
 function openCollectModal(song) {
-  if (!isCloudSong(song) && songProviderKey(song) !== 'youtube') {
-    showToast(songProviderKey(song) === 'qq' ? 'QQ 音乐收藏到歌单待登录接口接入' : '本地文件暂不支持收藏到网易云歌单');
+  if (!isCloudSong(song) && Mineradio.util.songProviderKey(song) !== 'youtube') {
+    showToast(Mineradio.util.songProviderKey(song) === 'qq' ? 'QQ 音乐收藏到歌单待登录接口接入' : '本地文件暂不支持收藏到网易云歌单');
     return;
   }
-  if (songProviderKey(song) === 'youtube') {
+  if (Mineradio.util.songProviderKey(song) === 'youtube') {
     collectTargetSong = song;
     renderCollectModal();
-    openGsapModal(document.getElementById('collect-modal'));
+    Mineradio.util.openGsapModal(document.getElementById('collect-modal'));
     return;
   }
   if (!ensureLoggedInForAction()) return;
   collectTargetSong = song;
   renderCollectModal();
-  openGsapModal(document.getElementById('collect-modal'));
+  Mineradio.util.openGsapModal(document.getElementById('collect-modal'));
   refreshUserPlaylists(true).then(function(){ renderCollectModal(); }).catch(function(){ renderCollectModal(); });
 }
 function openCollectModalForCurrent() { openCollectModal(currentCoverSong()); }
@@ -22,7 +22,7 @@ function collectSearchResult(i) { if (playlist[i]) openCollectModal(playlist[i])
 function collectQueueIndex(i) { if (playQueue[i]) openCollectModal(playQueue[i]); }
 function collectDetailSong(song) { openCollectModal(song); }
 function closeCollectModal() {
-  closeGsapModal(document.getElementById('collect-modal'), function(){
+  Mineradio.util.closeGsapModal(document.getElementById('collect-modal'), function(){
     collectTargetSong = null;
     var input = document.getElementById('collect-new-name');
     if (input) input.value = '';
@@ -35,7 +35,7 @@ function renderCollectModal() {
   var song = collectTargetSong || {};
   var cover = songCoverSrc(song, 80);
   current.innerHTML = (cover ? '<img src="' + cover + '" alt="">' : '<div class="cover-placeholder"></div>') +
-    '<div style="min-width:0"><div class="collect-title">' + escHtml(song.name || '当前歌曲') + '</div><div class="collect-sub">' + escHtml(song.artist || '') + '</div></div>';
+    '<div style="min-width:0"><div class="collect-title">' + Mineradio.util.escHtml(song.name || '当前歌曲') + '</div><div class="collect-sub">' + Mineradio.util.escHtml(song.artist || '') + '</div></div>';
   if (!loginStatus.loggedIn) {
     list.innerHTML = '<div class="collect-empty">登录后显示你的歌单</div>';
     return;
@@ -51,9 +51,9 @@ function renderCollectModal() {
   }
   list.innerHTML = mine.map(function(pl){
     var thumb = pl.cover ? coverUrlWithSize(pl.cover, 80) : '';
-    return '<div class="collect-item" data-collect-pid="' + escHtml(String(pl.id || '')) + '" onclick="addCollectTargetToPlaylist(this.getAttribute(\'data-collect-pid\'))">' +
+    return '<div class="collect-item" data-collect-pid="' + Mineradio.util.escHtml(String(pl.id || '')) + '" onclick="addCollectTargetToPlaylist(this.getAttribute(\'data-collect-pid\'))">' +
       (thumb ? '<img src="' + thumb + '" alt="">' : '<div class="cover-placeholder"></div>') +
-      '<div style="min-width:0"><div class="collect-title">' + escHtml(pl.name || '') + '</div><div class="collect-sub">' + (pl.trackCount || 0) + ' 首</div></div>' +
+      '<div style="min-width:0"><div class="collect-title">' + Mineradio.util.escHtml(pl.name || '') + '</div><div class="collect-sub">' + (pl.trackCount || 0) + ' 首</div></div>' +
     '</div>';
   }).join('');
   if (window.gsap) animateListItems(list, '.collect-item', { x: 0, y: 6, stagger: 0.012, duration: 0.18, limit: 18 });
@@ -118,7 +118,7 @@ async function addCollectTargetToPlaylist(pid) {
   showToast('正在收藏到歌单...');
   try {
     var songId = String(collectTargetSong.id || '');
-    var r = await apiJson('/api/playlist/add-song', {
+    var r = await Mineradio.util.apiJson('/api/playlist/add-song', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pid: pid, id: songId })
@@ -140,3 +140,22 @@ async function addCollectTargetToPlaylist(pid) {
     updateLikeButtons();
   }
 }
+
+// ============================================================
+//  Namespace Exports — Mineradio.collect
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.collect = {
+  openCollectModal: openCollectModal,
+  openCollectModalForCurrent: openCollectModalForCurrent,
+  collectSearchResult: collectSearchResult,
+  collectQueueIndex: collectQueueIndex,
+  collectDetailSong: collectDetailSong,
+  closeCollectModal: closeCollectModal,
+  renderCollectModal: renderCollectModal,
+  setCollectBusyPid: setCollectBusyPid,
+  createPlaylistFromCollect: createPlaylistFromCollect,
+  collectResultMessage: collectResultMessage,
+  verifySongInPlaylist: verifySongInPlaylist,
+  addCollectTargetToPlaylist: addCollectTargetToPlaylist
+};

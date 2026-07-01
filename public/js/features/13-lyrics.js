@@ -1,6 +1,7 @@
 // ============================================================
 //  歌词
 // ============================================================
+var _prefetchAudioEls = {}; // 预取音频元素缓存, 由 _prefetchAdjacent / playQueueAt 共享
 window.Mineradio.bus.on('player:trackchange', function(data) {
   // lyrics already handles song changes directly — this is a future hook
   // Currently lyrics loadSongLyrics is called directly from playback.js
@@ -14,7 +15,7 @@ async function fetchLyric(songOrId, token, preferSource) {
       if (srcBtn) srcBtn.textContent = '源·' + (_lyricSourceLabels[_lyricSources[0]] || 'A');
     }
     var song = (songOrId && typeof songOrId === 'object') ? songOrId : null;
-    var provider = songProviderKey(song);
+    var provider = Mineradio.util.songProviderKey(song);
     var endpoint;
     if (provider === 'qq') {
       var mid = song.mid || song.songmid || song.id || '';
@@ -43,7 +44,7 @@ async function fetchLyric(songOrId, token, preferSource) {
       }
     } catch (e) {}
     if (!r) {
-      r = await apiJson(endpoint);
+      r = await Mineradio.util.apiJson(endpoint);
       try { localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: r })); } catch (e) {}
     }
     if (token !== trackSwitchToken) return;
@@ -181,7 +182,7 @@ function _prefetchAdjacent(centerIdx) {
     (function(idx){
       var s = playQueue[idx];
       if (!s) return;
-      var key = _cacheKeyForSong(s);
+      var key = Mineradio.util._cacheKeyForSong(s);
       if (_audioUrlCache[key]) return; // 已有缓存
       var p = s.provider;
       var isYT = p === 'youtube';
@@ -189,7 +190,7 @@ function _prefetchAdjacent(centerIdx) {
       if (!isYT && !isQQ) return; // 仅缓存流媒体源
       var url = isYT ? '/api/youtube/song/url?id=' + encodeURIComponent(s.id)
              : '/api/qq/song/url?mid=' + encodeURIComponent(s.mid || s.songmid || s.id || '') + '&mediaMid=' + encodeURIComponent(s.mediaMid || s.media_mid || '');
-      apiJson(url).then(function(data){
+      Mineradio.util.apiJson(url).then(function(data){
         if (tok !== _prefetchToken) return;
         if (data && data.url) {
           _audioUrlCache[key] = data.url;
@@ -222,7 +223,7 @@ function _loadLyricOffset() {
 function updateLyricOffsetVisibility() {
   // 只在 YouTube 歌曲 + 歌词开启时显示
   var song = playQueue && currentIdx >= 0 ? playQueue[currentIdx] : null;
-  var isYT = song && songProviderKey(song) === 'youtube';
+  var isYT = song && Mineradio.util.songProviderKey(song) === 'youtube';
   var lyricsOn = !!(fx && fx.particleLyrics);
   var ind = document.getElementById('lyric-offset-indicator');
   if (!ind) return;
@@ -259,7 +260,7 @@ function cycleLyricSource() {
   if (btn) btn.textContent = '源·' + (_lyricSourceLabels[src] || src);
   // 重新获取当前歌曲歌词
   var song = playQueue && currentIdx >= 0 ? playQueue[currentIdx] : null;
-  if (song && songProviderKey(song) === 'youtube') {
+  if (song && Mineradio.util.songProviderKey(song) === 'youtube') {
     fetchLyric(song, trackSwitchToken, src);
   }
   showToast('歌词来源: ' + (_lyricSourceLabels[src] || src));
@@ -304,7 +305,7 @@ function setLyricSource(source) {
 }
 function _songPrefKey(song) {
   if (!song || !song.id) return '';
-  return 'mineradio-song-pref:' + songProviderKey(song) + ':' + song.id;
+  return 'mineradio-song-pref:' + Mineradio.util.songProviderKey(song) + ':' + song.id;
 }
 function _saveSongPref(song) {
   var key = _songPrefKey(song);
@@ -380,7 +381,7 @@ function updateMiniSourceBar() {
   var bar = document.getElementById('mini-source-bar');
   if (!bar) return;
   var song = currentCoverSong();
-  var provider = song ? songProviderKey(song) : '';
+  var provider = song ? Mineradio.util.songProviderKey(song) : '';
   bar.classList.toggle('show', provider === 'youtube' || provider === 'local' || (!provider && song));
   updateMiniSourceButtons();
 }
@@ -401,4 +402,39 @@ function applyOriginalLyricsState() {
   window.lyricsTimingSource = window.originalLyricsState.timingSource || 'fallback';
   if (typeof window.renderLyrics === 'function') window.renderLyrics();
 }
+
+// ============================================================
+//  Namespace Exports — Mineradio.lyrics
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.lyrics = {
+  fetchLyric: fetchLyric,
+  currentLyricFallbackText: currentLyricFallbackText,
+  isNoLyricText: isNoLyricText,
+  withLyricFallback: withLyricFallback,
+  lyricTagTimeToSeconds: lyricTagTimeToSeconds,
+  finalizeLyricLineDurations: finalizeLyricLineDurations,
+  parseLyricText: parseLyricText,
+  parseYrcText: parseYrcText,
+  _prefetchAdjacent: _prefetchAdjacent,
+  _saveLyricOffset: _saveLyricOffset,
+  _loadLyricOffset: _loadLyricOffset,
+  updateLyricOffsetVisibility: updateLyricOffsetVisibility,
+  showLyricOffsetToast: showLyricOffsetToast,
+  cycleLyricSource: cycleLyricSource,
+  renderLyrics: renderLyrics,
+  toggleLyricsPanel: toggleLyricsPanel,
+  updateLyricsHighlight: updateLyricsHighlight,
+  setLyricSource: setLyricSource,
+  _songPrefKey: _songPrefKey,
+  _saveSongPref: _saveSongPref,
+  _loadSongPref: _loadSongPref,
+  adjustLyricOffset: adjustLyricOffset,
+  adjustPlaybackSpeed: adjustPlaybackSpeed,
+  updateMiniSourceButtons: updateMiniSourceButtons,
+  updateMiniSourceBar: updateMiniSourceBar,
+  currentLyricSong: currentLyricSong,
+  setOriginalLyricsState: setOriginalLyricsState,
+  applyOriginalLyricsState: applyOriginalLyricsState
+};
 

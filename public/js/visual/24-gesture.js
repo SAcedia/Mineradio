@@ -48,6 +48,24 @@ function stopGestureControl() {
   }
 }
 
+function rebaseParticleRotationAxis(axis) {
+  var limit = Math.PI * 10;
+  if (Math.abs(gestureRotation[axis]) < limit) return;
+  var offset = Math.round(gestureRotation[axis] / (Math.PI * 2)) * Math.PI * 2;
+  gestureRotation[axis] -= offset;
+  if (particles) particles.rotation[axis] -= offset;
+  if (bloomParticles) bloomParticles.rotation[axis] -= offset;
+  if (floatGroup) floatGroup.rotation[axis] -= offset;
+  if (backCoverGroup) backCoverGroup.rotation[axis] -= offset;
+  if (skullParticleGroup) skullParticleGroup.rotation[axis] -= offset;
+  if (window.stageLyrics && window.stageLyrics.group) window.stageLyrics.group.rotation[axis] -= offset;
+}
+function rebaseParticleRotationIfNeeded() {
+  rebaseParticleRotationAxis('x');
+  rebaseParticleRotationAxis('y');
+}
+Mineradio.gesture.rebaseParticleRotationAxis = rebaseParticleRotationAxis;
+Mineradio.gesture.rebaseParticleRotationIfNeeded = rebaseParticleRotationIfNeeded;
 function tickGestureRotation(dt) {
   if (Math.abs(particleSpin.vx) > 0.0001 || Math.abs(particleSpin.vy) > 0.0001) {
     var rx = particleSpin.vx * dt;
@@ -460,4 +478,32 @@ window.addEventListener('mousemove', function(e){
 });
 
 // ============================================================
+//  Namespace Exports — Mineradio.gesture (continued)
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Object.assign(Mineradio.gesture, {
+  applyParticleSpinDrag: applyParticleSpinDrag,
+  resetParticleRotationTarget: resetParticleRotationTarget,
+  stopGestureControl: stopGestureControl,
+  tickGestureRotation: tickGestureRotation,
+  showGestureHUD: showGestureHUD,
+  showGestureCursor: showGestureCursor,
+  hideGestureCursor: hideGestureCursor,
+  refreshMainRendererViewport: refreshMainRendererViewport,
+  scheduleMainRendererViewportRefresh: scheduleMainRendererViewportRefresh,
+  setPeek: setPeek,
+  uploadTipWasSeen: uploadTipWasSeen,
+  markUploadTipSeen: markUploadTipSeen,
+  closeUploadTip: closeUploadTip,
+  maybeShowUploadTipOnce: maybeShowUploadTipOnce,
+  isSecondaryLeftDisplaySeamGuardActive: isSecondaryLeftDisplaySeamGuardActive,
+  resetSecondaryPlaylistEdgeGuard: resetSecondaryPlaylistEdgeGuard,
+  isSecondaryPlaylistSafeBandPoint: isSecondaryPlaylistSafeBandPoint,
+  armSecondaryPlaylistEdgeDwell: armSecondaryPlaylistEdgeDwell,
+  isPlaylistEdgeTrigger: isPlaylistEdgeTrigger,
+  playlistPanelExitPadding: playlistPanelExitPadding,
+  playlistPanelFocusPadding: playlistPanelFocusPadding,
+  shouldClosePlaylistPanelFromPointer: shouldClosePlaylistPanelFromPointer,
+  isPlaylistPanelFocusActive: isPlaylistPanelFocusActive
+});
 

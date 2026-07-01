@@ -2,7 +2,7 @@
 //  音频上下文 & 频谱分析
 // ============================================================
 function initAudio() {
-  if (audioReady) return;
+  if (Mineradio.state.audioReady) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   source = audioCtx.createMediaElementSource(audio);
   analyser = audioCtx.createAnalyser();
@@ -21,7 +21,7 @@ function initAudio() {
   beatFrequencyData.fill(0);
   beatTimeDomainData.fill(128);
   resetRealtimeBeatEngine();
-  audioReady = true;
+  Mineradio.state.audioReady = true;
 }
 function resumeAudioAnalysis() {
   if (audioCtx && audioCtx.state === 'suspended') return audioCtx.resume().catch(function(e){ console.warn('audio context resume failed:', e); });
@@ -117,15 +117,15 @@ function clearAudioFadeTimers() {
   }
 }
 function currentAudioOutputGain() {
-  if (gainNode && gainNode.gain && isFinite(gainNode.gain.value)) return clampRange(Number(gainNode.gain.value), 0, 1);
-  if (audio && isFinite(audio.volume)) return clampRange(Number(audio.volume), 0, 1);
-  return clampRange(targetVolume, 0, 1);
+  if (gainNode && gainNode.gain && isFinite(gainNode.gain.value)) return Mineradio.util.clampRange(Number(gainNode.gain.value), 0, 1);
+  if (audio && isFinite(audio.volume)) return Mineradio.util.clampRange(Number(audio.volume), 0, 1);
+  return Mineradio.util.clampRange(targetVolume, 0, 1);
 }
 function audioSilentFloor() {
   return targetVolume > 0.001 ? AUDIO_SILENCE_GAIN : 0;
 }
 function normalizeAudioFadeTarget(value) {
-  value = clampRange(Number(value) || 0, 0, 1);
+  value = Mineradio.util.clampRange(Number(value) || 0, 0, 1);
   return value <= 0.001 ? audioSilentFloor() : value;
 }
 function holdAudioOutputGain(now) {
@@ -178,7 +178,7 @@ function rampAudioOutputGain(value, durationMs) {
   var started = performance.now();
   function tickAudioFade(nowMs) {
     if (serial !== audioFadeSerial || !audio) return;
-    var t = durationMs ? clampRange((nowMs - started) / durationMs, 0, 1) : 1;
+    var t = durationMs ? Mineradio.util.clampRange((nowMs - started) / durationMs, 0, 1) : 1;
     var eased = 1 - Math.pow(1 - t, 3);
     audio.volume = from + (value - from) * eased;
     if (t < 1) audioElementFadeFrame = requestAnimationFrame(tickAudioFade);
@@ -262,7 +262,7 @@ function setVolume(value, silent) {
 function adjustVolumeByKeyboard(delta) {
   var step = Number(delta) || 0;
   if (!step) return;
-  setVolume(clampRange(targetVolume + step, 0, 1), false);
+  setVolume(Mineradio.util.clampRange(targetVolume + step, 0, 1), false);
 }
 
 function toggleVolumePanel(e) {
@@ -314,4 +314,33 @@ function bindVolumeControls() {
   updateVolumeUi();
   applyVolumeToAudio();
 }
+
+// ============================================================
+//  Namespace Exports — Mineradio.audio
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.audio = {
+  initAudio: initAudio,
+  resumeAudioAnalysis: resumeAudioAnalysis,
+  ensureUiSfxContext: ensureUiSfxContext,
+  playShelfSelectTick: playShelfSelectTick,
+  clearAudioFadeTimers: clearAudioFadeTimers,
+  currentAudioOutputGain: currentAudioOutputGain,
+  audioSilentFloor: audioSilentFloor,
+  normalizeAudioFadeTarget: normalizeAudioFadeTarget,
+  holdAudioOutputGain: holdAudioOutputGain,
+  setAudioOutputGainImmediate: setAudioOutputGainImmediate,
+  rampAudioOutputGain: rampAudioOutputGain,
+  preparePlaybackFadeIn: preparePlaybackFadeIn,
+  startPlaybackFadeIn: startPlaybackFadeIn,
+  restorePlaybackGain: restorePlaybackGain,
+  fadeOutAndPauseAudio: fadeOutAndPauseAudio,
+  applyVolumeToAudio: applyVolumeToAudio,
+  updateVolumeUi: updateVolumeUi,
+  setVolume: setVolume,
+  adjustVolumeByKeyboard: adjustVolumeByKeyboard,
+  toggleVolumePanel: toggleVolumePanel,
+  toggleMute: toggleMute,
+  bindVolumeControls: bindVolumeControls
+};
 

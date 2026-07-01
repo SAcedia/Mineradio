@@ -268,6 +268,30 @@ function toggleFullscreen() {
   }
 }
 
+// --- Namespace exports ---
+Mineradio.desktopOverlay = {
+  getDesktopWindowApi: getDesktopWindowApi,
+  currentDesktopSongMeta: currentDesktopSongMeta,
+  normalizeDesktopLyricText: normalizeDesktopLyricText,
+  currentDesktopLyricSnapshot: currentDesktopLyricSnapshot,
+  desktopOverlayColorValue: desktopOverlayColorValue,
+  desktopOverlayColors: desktopOverlayColors,
+  desktopLyricsMotionPayload: desktopLyricsMotionPayload,
+  desktopLyricsPlaybackPayload: desktopLyricsPlaybackPayload,
+  desktopLyricsActiveBeatMap: desktopLyricsActiveBeatMap,
+  desktopLyricsBeatMapPayload: desktopLyricsBeatMapPayload,
+  notifyDesktopLyricsBeatMapReady: notifyDesktopLyricsBeatMapReady,
+  desktopLyricsPushInterval: desktopLyricsPushInterval,
+  desktopLyricsPayload: desktopLyricsPayload,
+  wallpaperPayload: wallpaperPayload,
+  pushDesktopLyricsState: pushDesktopLyricsState,
+  applyDesktopLyricsState: applyDesktopLyricsState,
+  pushWallpaperState: pushWallpaperState,
+  applyWallpaperModeState: applyWallpaperModeState,
+  syncDesktopOverlayState: syncDesktopOverlayState,
+  toggleFullscreen: toggleFullscreen
+};
+
 (function initDesktopWindowShell(){
   var api = window.desktopWindow;
   if (!api || !api.isDesktop) return;

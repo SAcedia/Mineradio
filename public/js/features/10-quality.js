@@ -67,7 +67,7 @@ function updatePlaybackQualityUi() {
   var btn = document.getElementById('quality-btn');
   var wrap = document.getElementById('quality-control');
   var song = currentCoverSong();
-  var isYT = song && songProviderKey(song) === 'youtube';
+  var isYT = song && Mineradio.util.songProviderKey(song) === 'youtube';
   if (wrap) wrap.style.display = isYT ? 'none' : '';
   if (isYT) return;
   var canUseSvip = hasProviderSvip('netease', loginStatus);
@@ -104,7 +104,7 @@ function canReloadCurrentTrackForQuality() {
   if (!audio || !audio.src || audio.paused || audio.ended) return false;
   var song = playQueue[currentIdx];
   if (!song || song.type === 'local' || song.source === 'local') return false;
-  return songProviderKey(song) === 'netease' || songProviderKey(song) === 'qq';
+  return Mineradio.util.songProviderKey(song) === 'netease' || Mineradio.util.songProviderKey(song) === 'qq';
 }
 function applyPlaybackQualityToCurrentTrack(nextQuality) {
   var label = playbackQualityLabel(nextQuality || playbackQuality);
@@ -147,3 +147,26 @@ function isTypingTarget(target) {
   return !!(target.isContentEditable || (target.closest && target.closest('[contenteditable="true"]')));
 }
 // loadListenStatsState is in 19-listen-stats.js
+
+// ============================================================
+//  Namespace Exports — Mineradio.quality
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.quality = {
+  normalizePlaybackQuality: normalizePlaybackQuality,
+  playbackQualityLabel: playbackQualityLabel,
+  playbackQualityShortLabel: playbackQualityShortLabel,
+  playbackQualityRank: playbackQualityRank,
+  playbackQualityWasDowngraded: playbackQualityWasDowngraded,
+  playbackBitrateLabel: playbackBitrateLabel,
+  playbackResolvedQualityText: playbackResolvedQualityText,
+  readPlaybackQualityPreference: readPlaybackQualityPreference,
+  savePlaybackQualityPreference: savePlaybackQualityPreference,
+  updatePlaybackQualityUi: updatePlaybackQualityUi,
+  setPlaybackQuality: setPlaybackQuality,
+  canReloadCurrentTrackForQuality: canReloadCurrentTrackForQuality,
+  applyPlaybackQualityToCurrentTrack: applyPlaybackQualityToCurrentTrack,
+  toggleQualityPanel: toggleQualityPanel,
+  bindQualityControl: bindQualityControl,
+  isTypingTarget: isTypingTarget
+};

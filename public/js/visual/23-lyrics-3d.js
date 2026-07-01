@@ -296,30 +296,12 @@ function rgbCss(c, a) {
   if (a == null) return 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
   return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + a + ')';
 }
-function normalizeCoverResolution(v) {
-  return clampRange(Number(v) || 1, 0.75, 1.55);
-}
-function normalizePerformanceBackgroundMode(v, liveKeepFallback) {
-  var value = String(v || '');
-  if (value === 'keep' || liveKeepFallback === true) return 'keep';
-  if (value === 'release') return 'release';
-  return 'auto';
-}
-function normalizePerformanceQuality(v) {
-  var value = String(v || '');
-  return /^(eco|balanced|high|ultra)$/.test(value) ? value : fxDefaults.performanceQuality;
-}
-function coverParticleGridForResolution(v) {
-  var grid = Math.round(118 * normalizeCoverResolution(v));
-  grid = Math.max(88, Math.min(183, grid));
-  return grid % 2 ? grid : grid + 1;
-}
 function coverParticleCountLabel(v) {
-  var grid = coverParticleGridForResolution(v);
+  var grid = Mineradio.fx.coverParticleGridForResolution(v);
   return grid + 'x' + grid;
 }
 function coverTextureSizeForResolution(v) {
-  v = normalizeCoverResolution(v);
+  v = Mineradio.fx.normalizeCoverResolution(v);
   if (v >= 1.32) return 512;
   if (v >= 1.10) return 384;
   return 256;
@@ -402,12 +384,12 @@ function readSavedLyricLayout() {
       desktopLyricsCinema: desktopLyricsSchemaReady ? raw.desktopLyricsCinema !== false : fxDefaults.desktopLyricsCinema,
       desktopLyricsHighlight: desktopLyricsSchemaReady ? raw.desktopLyricsHighlight === true : fxDefaults.desktopLyricsHighlight,
       desktopLyricsFps: desktopLyricsSchemaReady ? normalizeDesktopLyricsFps(raw.desktopLyricsFps) : fxDefaults.desktopLyricsFps,
-      performanceBackground: normalizePerformanceBackgroundMode(raw.performanceBackground, raw.liveBackgroundKeep === true),
-      performanceQuality: normalizePerformanceQuality(raw.performanceQuality),
-      liveBackgroundKeep: normalizePerformanceBackgroundMode(raw.performanceBackground, raw.liveBackgroundKeep === true) === 'keep',
+      performanceBackground: Mineradio.fx.normalizePerformanceBackgroundMode(raw.performanceBackground, raw.liveBackgroundKeep === true),
+      performanceQuality: Mineradio.fx.normalizePerformanceQuality(raw.performanceQuality),
+      liveBackgroundKeep: Mineradio.fx.normalizePerformanceBackgroundMode(raw.performanceBackground, raw.liveBackgroundKeep === true) === 'keep',
       wallpaperMode: false,
       wallpaperOpacity: clampRange(raw.wallpaperOpacity == null ? fxDefaults.wallpaperOpacity : Number(raw.wallpaperOpacity), 0.35, 1),
-      coverResolution: normalizeCoverResolution(raw.coverResolution),
+      coverResolution: Mineradio.fx.normalizeCoverResolution(raw.coverResolution),
       shelf: /^(off|side|stage)$/.test(String(raw.shelf || '')) ? raw.shelf : fxDefaults.shelf,
       shelfCameraMode: savedShelfCameraMode,
       shelfPresence: normalizeShelfPresence(raw.shelfPresence || fxDefaults.shelfPresence),
@@ -495,12 +477,12 @@ function saveLyricLayout() {
       desktopLyricsCinema: fx.desktopLyricsCinema !== false,
       desktopLyricsHighlight: fx.desktopLyricsHighlight === true,
       desktopLyricsFps: normalizeDesktopLyricsFps(fx.desktopLyricsFps),
-      performanceBackground: normalizePerformanceBackgroundMode(fx.performanceBackground, fx.liveBackgroundKeep === true),
-      performanceQuality: normalizePerformanceQuality(fx.performanceQuality),
-      liveBackgroundKeep: normalizePerformanceBackgroundMode(fx.performanceBackground, fx.liveBackgroundKeep === true) === 'keep',
+      performanceBackground: Mineradio.fx.normalizePerformanceBackgroundMode(fx.performanceBackground, fx.liveBackgroundKeep === true),
+      performanceQuality: Mineradio.fx.normalizePerformanceQuality(fx.performanceQuality),
+      liveBackgroundKeep: Mineradio.fx.normalizePerformanceBackgroundMode(fx.performanceBackground, fx.liveBackgroundKeep === true) === 'keep',
       wallpaperMode: false,
       wallpaperOpacity: clampRange(fx.wallpaperOpacity == null ? fxDefaults.wallpaperOpacity : Number(fx.wallpaperOpacity), 0.35, 1),
-      coverResolution: normalizeCoverResolution(fx.coverResolution),
+      coverResolution: Mineradio.fx.normalizeCoverResolution(fx.coverResolution),
       shelf: /^(off|side|stage)$/.test(String(fx.shelf || '')) ? fx.shelf : fxDefaults.shelf,
       shelfCameraMode: normalizeShelfCameraMode(fx.shelfCameraMode || fxDefaults.shelfCameraMode),
       shelfPresence: normalizeShelfPresence(fx.shelfPresence || fxDefaults.shelfPresence),
@@ -2156,3 +2138,108 @@ function disposeLyricsParticles() {
     stageLyrics.group = null;
   }
 }
+function applySavedLyricPaletteState() {
+  if (fx && fx.lyricColorMode === 'custom' && fx.lyricColor) {
+    setStageLyricPalette(lyricPaletteFromHex(fx.lyricColor));
+  }
+}
+
+// ============================================================
+//  Namespace Exports — Mineradio.lyrics3d
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.lyrics3d = {
+  setStageLyricViewBasisFromCameraOrQuaternion: setStageLyricViewBasisFromCameraOrQuaternion,
+  applyStageLyricLayoutOffset: applyStageLyricLayoutOffset,
+  stageLyricTargetQuaternion: stageLyricTargetQuaternion,
+  getStageLyricLockBounds: getStageLyricLockBounds,
+  lyricCameraLockFit: lyricCameraLockFit,
+  createLyricsParticles: createLyricsParticles,
+  ensureLyricStarRiver: ensureLyricStarRiver,
+  updateLyricStarRiver: updateLyricStarRiver,
+  disposeLyricMesh: disposeLyricMesh,
+  rgbToHsl: rgbToHsl,
+  hslToRgb: hslToRgb,
+  rgbCss: rgbCss,
+  coverParticleCountLabel: coverParticleCountLabel,
+  coverTextureSizeForResolution: coverTextureSizeForResolution,
+  readSavedLyricLayout: readSavedLyricLayout,
+  saveLyricLayout: saveLyricLayout,
+  normalizeHexColor: normalizeHexColor,
+  normalizeDesktopLyricsFps: normalizeDesktopLyricsFps,
+  normalizeShelfCameraMode: normalizeShelfCameraMode,
+  shelfDefaultAngleForCameraMode: shelfDefaultAngleForCameraMode,
+  applyShelfCameraDefaultAngle: applyShelfCameraDefaultAngle,
+  normalizeShelfPresence: normalizeShelfPresence,
+  normalizedShelfNumber: normalizedShelfNumber,
+  shelfSettings: shelfSettings,
+  shelfAlwaysVisible: shelfAlwaysVisible,
+  shouldUseShelfDynamicCamera: shouldUseShelfDynamicCamera,
+  shelfAccentHex: shelfAccentHex,
+  shelfAccentRgba: shelfAccentRgba,
+  rgbToHexColor: rgbToHexColor,
+  normalizeLyricFontKey: normalizeLyricFontKey,
+  lyricFontStackForKey: lyricFontStackForKey,
+  lyricFontWeightValue: lyricFontWeightValue,
+  lyricFontCss: lyricFontCss,
+  lyricLetterSpacingPx: lyricLetterSpacingPx,
+  lyricLineHeightFactor: lyricLineHeightFactor,
+  measureTextWithLetterSpacing: measureTextWithLetterSpacing,
+  lyricMeasureText: lyricMeasureText,
+  drawTextWithLetterSpacing: drawTextWithLetterSpacing,
+  lyricFillText: lyricFillText,
+  lyricStrokeText: lyricStrokeText,
+  applyStonePrintTexture: applyStonePrintTexture,
+  hexToRgb: hexToRgb,
+  normalizeCustomBackgroundImage: normalizeCustomBackgroundImage,
+  normalizeCustomBackgroundMedia: normalizeCustomBackgroundMedia,
+  customBackgroundMediaLabel: customBackgroundMediaLabel,
+  openCustomBackgroundDb: openCustomBackgroundDb,
+  putCustomBackgroundBlob: putCustomBackgroundBlob,
+  getCustomBackgroundBlob: getCustomBackgroundBlob,
+  rgbToHsv: rgbToHsv,
+  hsvToHex: hsvToHex,
+  applyColorLabValue: applyColorLabValue,
+  syncColorLabUi: syncColorLabUi,
+  closeColorLab: closeColorLab,
+  placeFxFloatingPanel: placeFxFloatingPanel,
+  openColorLabForPicker: openColorLabForPicker,
+  updateColorLabFromSv: updateColorLabFromSv,
+  bindColorLabPicker: bindColorLabPicker,
+  liftFxFloatingPopups: liftFxFloatingPopups,
+  bindColorLabRows: bindColorLabRows,
+  repositionFxFloatingPanels: repositionFxFloatingPanels,
+  uiAccentHex: uiAccentHex,
+  uiAccentRgba: uiAccentRgba,
+  readableInkForHex: readableInkForHex,
+  lyricPaletteFromHex: lyricPaletteFromHex,
+  silverBlueLyricPalette: silverBlueLyricPalette,
+  setLyricSparkOpacity: setLyricSparkOpacity,
+  getLyricSparkOpacity: getLyricSparkOpacity,
+  setLyricSparkSize: setLyricSparkSize,
+  getLyricSparkSize: getLyricSparkSize,
+  setLyricSparkColor: setLyricSparkColor,
+  applyLyricPaletteToMesh: applyLyricPaletteToMesh,
+  effectiveLyricPalette: effectiveLyricPalette,
+  setStageLyricPalette: setStageLyricPalette,
+  lyricTextPaletteFromHsl: lyricTextPaletteFromHsl,
+  updateLyricPaletteFromCover: updateLyricPaletteFromCover,
+  wrapLyricText: wrapLyricText,
+  cssColorToThreeColor: cssColorToThreeColor,
+  lyricThreeColor: lyricThreeColor,
+  makeLyricMask: makeLyricMask,
+  makeLyricReadabilityTexture: makeLyricReadabilityTexture,
+  makeLyricGlowTexture: makeLyricGlowTexture,
+  getLyricSunBloomTexture: getLyricSunBloomTexture,
+  makeLyricShaderMaterial: makeLyricShaderMaterial,
+  buildLyricMesh: buildLyricMesh,
+  updateLyricMeshProgress: updateLyricMeshProgress,
+  showStageLine: showStageLine,
+  refreshCurrentLyricStyle: refreshCurrentLyricStyle,
+  clearStageLyrics: clearStageLyrics,
+  updateStageLyrics3D: updateStageLyrics3D,
+  getLyricLineProgress: getLyricLineProgress,
+  tickLyricsParticles: tickLyricsParticles,
+  disposeLyricsParticles: disposeLyricsParticles,
+  applySavedLyricPaletteState: applySavedLyricPaletteState
+};

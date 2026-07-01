@@ -30,10 +30,23 @@ function readSavedPlaybackVisualPreset() {
   try {
     var raw = JSON.parse(localStorage.getItem(LYRIC_LAYOUT_STORE_KEY) || '{}') || {};
     if (!Object.prototype.hasOwnProperty.call(raw, 'preset')) return fxDefaults.preset;
-    var savedPreset = clampRange(Number(raw.preset) || 0, 0, 6);
+    var savedPreset = Mineradio.util.clampRange(Number(raw.preset) || 0, 0, 6);
     if (savedPreset === 3 && raw.visualPresetSchema !== VISUAL_PRESET_SCHEMA) savedPreset = 5;
     return savedPreset;
   } catch (e) {
     return fxDefaults.preset;
   }
 }
+
+// ============================================================
+//  Namespace Exports
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.storage = {
+  readDiyModePreference: readDiyModePreference,
+  readBooleanPreference: readBooleanPreference,
+  readSavedVolume: readSavedVolume,
+  saveDiyModePreference: saveDiyModePreference,
+  saveBooleanPreference: saveBooleanPreference,
+  readSavedPlaybackVisualPreset: readSavedPlaybackVisualPreset
+};

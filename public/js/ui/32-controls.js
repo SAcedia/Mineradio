@@ -319,5 +319,28 @@ async function refreshUserPlaylists(force) {
   } catch (e) { console.warn(e); }
 }
 
+// --- Namespace exports ---
+Mineradio.controls = {
+  animateListItems: animateListItems,
+  smoothScrollToItem: smoothScrollToItem,
+  bindSmoothWheelScroll: bindSmoothWheelScroll,
+  bindSmoothQueueScrolling: bindSmoothQueueScrolling,
+  animateVisiblePanelList: animateVisiblePanelList,
+  miniQueueSkeleton: miniQueueSkeleton,
+  togglePlaylistPanel: togglePlaylistPanel,
+  applyPlaylistPanelPinState: applyPlaylistPanelPinState,
+  setPlaylistPanelPinned: setPlaylistPanelPinned,
+  togglePlaylistPanelPinned: togglePlaylistPanelPinned,
+  scrollPlaylistPanelToCurrent: scrollPlaylistPanelToCurrent,
+  switchPlaylistTab: switchPlaylistTab,
+  setMiniQueueOpen: setMiniQueueOpen,
+  toggleMiniQueue: toggleMiniQueue,
+  closeMiniQueue: closeMiniQueue,
+  openPlaylistPanelTab: openPlaylistPanelTab,
+  renderMiniQueuePanel: renderMiniQueuePanel,
+  renderQueuePanel: renderQueuePanel,
+  refreshUserPlaylists: refreshUserPlaylists
+};
+
 // ============================================================
 

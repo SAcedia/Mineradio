@@ -67,9 +67,9 @@ function updateListenStatsTick(force) {
 }
 function finalizeListenSession(completed) {
   if (!listenSession) return;
-  updateListenStatsTick(true);
   var session = listenSession;
   listenSession = null;
+  updateListenStatsTick(true);
   var effective = completed || session.listenMs >= 45000 || session.maxProgress >= 0.5 || (!audio || !audio.duration ? session.listenMs >= 30000 : false);
   if (!effective) return;
   var now = Date.now();
@@ -114,16 +114,19 @@ function finalizeListenSession(completed) {
   if (emptyHomeActive) renderHomeDiscover();
 }
 function mostPlayedSong() {
+  if (!listenStatsState) return null;
   var list = Object.keys(listenStatsState.songs || {}).map(function(key){ return listenStatsState.songs[key]; });
   list.sort(function(a, b){ return (b.plays - a.plays) || (b.listenMs - a.listenMs) || (b.lastPlayedAt - a.lastPlayedAt); });
   return list[0] || null;
 }
 function topListenArtist() {
+  if (!listenStatsState) return null;
   var list = Object.keys(listenStatsState.artists || {}).map(function(key){ return listenStatsState.artists[key]; });
   list.sort(function(a, b){ return (b.plays - a.plays) || (b.listenMs - a.listenMs) || (b.lastPlayedAt - a.lastPlayedAt); });
   return list[0] || null;
 }
 function homeListenSummary() {
+  if (!listenStatsState) return { recent: null, topSong: null, topArtist: null, totalPlays: 0 };
   var recent = (listenStatsState && listenStatsState.history || [])[0] || null;
   var topSong = mostPlayedSong();
   var topArtist = topListenArtist();
@@ -218,10 +221,10 @@ function renderHomeTiles() {
     var cover = homeTileCover(item);
     var tone = homeToneForItem(item, i);
     var coverClass = 'home-tile-cover' + (cover ? ' has-cover' : '');
-    return '<button class="home-tile' + (!cover && homeDiscoverState.loading ? ' home-skeleton' : '') + '" data-home-tone="' + escHtml(tone) + '" type="button" onclick="handleHomeTileClick(' + i + ')">' +
-      '<div class="' + coverClass + '" style="' + (cover ? 'background-image:url(&quot;' + escHtml(cssImageUrl(cover)) + '&quot;)' : '') + '"></div>' +
-      '<div class="home-tile-title">' + escHtml(item.title || '') + '</div>' +
-      '<div class="home-tile-sub">' + escHtml(item.sub || '') + '</div>' +
+    return '<button class="home-tile' + (!cover && homeDiscoverState.loading ? ' home-skeleton' : '') + '" data-home-tone="' + Mineradio.util.escHtml(tone) + '" type="button" onclick="handleHomeTileClick(' + i + ')">' +
+      '<div class="' + coverClass + '" style="' + (cover ? 'background-image:url(&quot;' + Mineradio.util.escHtml(cssImageUrl(cover)) + '&quot;)' : '') + '"></div>' +
+      '<div class="home-tile-title">' + Mineradio.util.escHtml(item.title || '') + '</div>' +
+      '<div class="home-tile-sub">' + Mineradio.util.escHtml(item.sub || '') + '</div>' +
     '</button>';
   }).join('');
   row._homeTiles = tiles;
@@ -253,7 +256,7 @@ function renderHomeDiscover() {
       meta.push(weatherLocation);
       meta.push(homeWeatherRadioState.error ? '天气暂不可用' : '正在整理天气');
     }
-    weatherMeta.innerHTML = meta.map(function(text){ return '<span class="home-weather-pill">' + escHtml(text) + '</span>'; }).join('');
+    weatherMeta.innerHTML = meta.map(function(text){ return '<span class="home-weather-pill">' + Mineradio.util.escHtml(text) + '</span>'; }).join('');
   }
   var daily = homeDiscoverState.songs[0] || null;
   var cardSongB = homeDiscoverState.songs[1] || null;
@@ -364,7 +367,7 @@ async function loadHomeWeatherRadio(force, opts) {
   renderHomeDiscover();
   var loadPromise = (async function(){
     try {
-      var data = await apiJson(homeWeatherRadioUrl(opts), { timeoutMs: 14000 });
+      var data = await Mineradio.util.apiJson(homeWeatherRadioUrl(opts), { timeoutMs: 14000 });
       if (token !== homeWeatherToken) return homeWeatherRadioState;
       homeWeatherRadioState.weather = data && data.weather || null;
       homeWeatherRadioState.radio = data && data.radio || null;
@@ -842,6 +845,7 @@ function dismissHomePage(opts) {
   updateEmptyHomeVisibility({ forceLoad: false });
   setPeek(document.getElementById('search-area'), false, 'search');
   if (typeof setFocusZone === 'function') setFocusZone(null, true);
+  if (!opts.silent) revealBottomControls(900);
 }
 function isPointInsideRectWithPad(x, y, rect, pad) {
   if (!rect || rect.width <= 0 || rect.height <= 0) return false;
@@ -942,4 +946,68 @@ async function playHomeRecent(record) {
   if (!r) { if (typeof window.playHomeDaily === 'function') { window.playHomeDaily(); return; } }
   if (r && typeof window.playFromListenRecord === 'function') { window.homeSuppressed = false; window.playFromListenRecord(r); }
 }
+
+// ============================================================
+//  Namespace Exports — Mineradio.discover
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.discover = {
+  setHomeArt: setHomeArt,
+  compactHomeCount: compactHomeCount,
+  listenSongSnapshot: listenSongSnapshot,
+  beginListenSession: beginListenSession,
+  updateListenStatsTick: updateListenStatsTick,
+  finalizeListenSession: finalizeListenSession,
+  mostPlayedSong: mostPlayedSong,
+  topListenArtist: topListenArtist,
+  homeListenSummary: homeListenSummary,
+  fallbackHomeTiles: fallbackHomeTiles,
+  homeTileCover: homeTileCover,
+  homeToneForItem: homeToneForItem,
+  renderHomeMosaic: renderHomeMosaic,
+  renderHomeTiles: renderHomeTiles,
+  renderHomeDiscover: renderHomeDiscover,
+  loadHomeDiscover: loadHomeDiscover,
+  homeWeatherRadioUrl: homeWeatherRadioUrl,
+  loadHomeWeatherRadio: loadHomeWeatherRadio,
+  scheduleHomeWeatherLoad: scheduleHomeWeatherLoad,
+  weatherRadioContext: weatherRadioContext,
+  startWeatherRadio: startWeatherRadio,
+  locateWeatherRadio: locateWeatherRadio,
+  changeWeatherCity: changeWeatherCity,
+  shouldShowEmptyHomeCore: shouldShowEmptyHomeCore,
+  shouldShowEmptyHome: shouldShowEmptyHome,
+  shouldShowEmptyHomeAfterSplash: shouldShowEmptyHomeAfterSplash,
+  shouldForceEmptyHomeAfterSplash: shouldForceEmptyHomeAfterSplash,
+  shouldUseIdleWallpaperPreview: shouldUseIdleWallpaperPreview,
+  setHomeControlsLocked: setHomeControlsLocked,
+  openHomePlayerConsole: openHomePlayerConsole,
+  ensureHomeWallpaperParticles: ensureHomeWallpaperParticles,
+  activateHomeWallpaperPreview: activateHomeWallpaperPreview,
+  prewarmHomeWallpaperPreview: prewarmHomeWallpaperPreview,
+  deactivateHomeWallpaperPreview: deactivateHomeWallpaperPreview,
+  switchPlaybackVisualToEmily: switchPlaybackVisualToEmily,
+  applyStartupStarfieldPreset: applyStartupStarfieldPreset,
+  updateEmptyHomeVisibility: updateEmptyHomeVisibility,
+  runHomeSearch: runHomeSearch,
+  skipLoginAndFocusSearch: skipLoginAndFocusSearch,
+  openHomeLocalImport: openHomeLocalImport,
+  openHomeProductGuide: openHomeProductGuide,
+  waitForHomeDiscoverIdle: waitForHomeDiscoverIdle,
+  playHomeDaily: playHomeDaily,
+  playHomePrivateRadio: playHomePrivateRadio,
+  playHomeSong: playHomeSong,
+  openHomePlaylist: openHomePlaylist,
+  openHomePodcast: openHomePodcast,
+  openHomeThirdCard: openHomeThirdCard,
+  openHomeLibrary: openHomeLibrary,
+  goHome: goHome,
+  dismissHomePage: dismissHomePage,
+  isPointInsideRectWithPad: isPointInsideRectWithPad,
+  isPointNearHomeContent: isPointNearHomeContent,
+  isHomeBlankDismissClick: isHomeBlankDismissClick,
+  handleHomeTileClick: handleHomeTileClick,
+  openHomeInsight: openHomeInsight,
+  playHomeRecent: playHomeRecent
+};
 

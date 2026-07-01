@@ -1,5 +1,6 @@
 //  播放队列
 // ============================================================
+var _audioUrlCache = {};
 function queueItemKey(song) {
   if (!song) return '';
   if (song.provider === 'qq' || song.source === 'qq' || song.type === 'qq') return 'qq:' + (song.mid || song.songmid || song.id || (song.name + '|' + song.artist));
@@ -92,12 +93,12 @@ function playSearchResult(i) {
 var firstPlayDone = false;
 
 function playbackProviderLabel(song) {
-  var key = songProviderKey(song);
+  var key = Mineradio.util.songProviderKey(song);
   if (key === 'youtube') return 'YouTube';
   return key === 'qq' ? 'QQ 音乐' : '网易云';
 }
 function playbackLoginProvider(song) {
-  var key = songProviderKey(song);
+  var key = Mineradio.util.songProviderKey(song);
   return key === 'qq' ? 'qq' : 'netease';
 }
 function playbackRestrictionMessage(song, data) {
@@ -191,7 +192,7 @@ function isSameTitleArtist(source, candidate) {
   return a.some(function(name){ return b.indexOf(name) >= 0; });
 }
 function alternatePlaybackProvider(song) {
-  return songProviderKey(song) === 'qq' ? 'netease' : 'qq';
+  return Mineradio.util.songProviderKey(song) === 'qq' ? 'netease' : 'qq';
 }
 async function searchAlternatePlatformSong(song) {
   var target = alternatePlaybackProvider(song);
@@ -201,7 +202,7 @@ async function searchAlternatePlatformSong(song) {
   var url = target === 'qq'
     ? '/api/qq/search?keywords=' + encodeURIComponent(query) + '&limit=8'
     : '/api/search?keywords=' + encodeURIComponent(query) + '&limit=12';
-  var data = await apiJson(url);
+  var data = await Mineradio.util.apiJson(url);
   var list = data && (data.songs || data.result || []);
   for (var i = 0; i < list.length; i++) {
     if (isSameTitleArtist(song, list[i])) return cloneSong(list[i]);
@@ -257,7 +258,7 @@ async function tryAutoPlaybackFallback(song, data, idx, token, opts) {
       skipFailedQueueItem(idx, token, '没有找到同名同歌手的 ' + targetLabel + ' 版本，正在播放下一首。');
       return true;
     }
-    alternate.autoFallbackFrom = songProviderKey(song);
+    alternate.autoFallbackFrom = Mineradio.util.songProviderKey(song);
     playQueue[idx] = hydrateCustomCover(alternate);
     safeRenderQueuePanel('source-fallback', { scrollCurrent: miniQueueOpen });
     safeShelfRebuild('source-fallback');
@@ -366,7 +367,7 @@ async function playQueueAt(idx, opts) {
   cancelBeatAnalysisTimer();
   cancelBeatPrefetchTimer();
   if (localBeatAnalysis.active) cancelLocalBeatAnalysis();
-  closeGsapModal(document.getElementById('local-beat-modal'));
+  Mineradio.util.closeGsapModal(document.getElementById('local-beat-modal'));
   beatMapToken++;
   var token = trackSwitchToken;
   var firstVisualPlay = !firstPlayDone;
@@ -427,15 +428,15 @@ async function playQueueAt(idx, opts) {
 
   try {
     markPlayPhase('source-url');
-    var isQQPlayback = songProviderKey(song) === 'qq';
-    var isYouTubePlayback = songProviderKey(song) === 'youtube';
+    var isQQPlayback = Mineradio.util.songProviderKey(song) === 'qq';
+    var isYouTubePlayback = Mineradio.util.songProviderKey(song) === 'youtube';
     var requestedQuality = normalizePlaybackQuality(opts.qualityOverride || playbackQuality);
     if (!isQQPlayback && requestedQuality === 'jymaster' && !hasProviderSvip('netease', loginStatus)) requestedQuality = 'hires';
     if (isQQPlayback && qqPlaybackQualityCeiling && (requestedQuality === 'jymaster' || requestedQuality === 'hires' || requestedQuality === 'lossless')) {
       requestedQuality = qqPlaybackQualityCeiling;
     }
     var qualityParam = '&quality=' + encodeURIComponent(requestedQuality);
-    var cacheKey = _cacheKeyForSong(song);
+    var cacheKey = Mineradio.util._cacheKeyForSong(song);
     var cachedUrl = _audioUrlCache[cacheKey];
     var data;
     if (cachedUrl) {
@@ -643,7 +644,7 @@ async function attemptAudioPlay(opts) {
   opts = opts || {};
   try {
       if (!audio) return false;
-      if (!audioReady) initAudio();
+      if (!Mineradio.state.audioReady) initAudio();
       if (opts.fade !== false) preparePlaybackFadeIn();
       if (opts.manual) {
         var manualPlay = audio.play();
@@ -691,8 +692,8 @@ async function togglePlay() {
       if (!playOk && playQueue.length && currentIdx >= 0) {
         var curSong = playQueue[currentIdx];
         // YT 音频 URL 过期时，清除缓存并重新走 playQueueAt 获取新 URL
-        if (curSong && songProviderKey(curSong) === 'youtube') {
-          var ck = _cacheKeyForSong(curSong);
+        if (curSong && Mineradio.util.songProviderKey(curSong) === 'youtube') {
+          var ck = Mineradio.util._cacheKeyForSong(curSong);
           if (_audioUrlCache[ck]) delete _audioUrlCache[ck];
           if (audio) { audio.src = ''; audio.removeAttribute('src'); }
           await playQueueAt(currentIdx, { manual: true, _ytRetried: true });
@@ -831,7 +832,7 @@ var controlGlassState = { key: '', searchBoxKey: '', searchPillKey: '' };
 function normalizeControlGlassChromaticOffset(value) {
   var n = Number(value);
   if (!isFinite(n)) n = fxDefaults.controlGlassChromaticOffset;
-  return clampRange(n, 0, 140);
+  return Mineradio.util.clampRange(n, 0, 140);
 }
 function applyControlGlassChromaticOffset() {
   if (!fx) return;
@@ -1039,3 +1040,65 @@ function clearPlayerControlFocusState(reason) {
 }
 
 // ============================================================
+//  Namespace Exports — Mineradio.playback
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.playback = {
+  queueItemKey: queueItemKey,
+  queueSong: queueSong,
+  queueSongNext: queueSongNext,
+  queueSearchResult: queueSearchResult,
+  queueDetailSongNext: queueDetailSongNext,
+  queueIndexNext: queueIndexNext,
+  openQueueArtist: openQueueArtist,
+  moveQueueIndexToTop: moveQueueIndexToTop,
+  playSearchResult: playSearchResult,
+  playbackProviderLabel: playbackProviderLabel,
+  playbackLoginProvider: playbackLoginProvider,
+  playbackRestrictionMessage: playbackRestrictionMessage,
+  qqPlaybackRetryQualities: qqPlaybackRetryQualities,
+  retryQQPlaybackWithCompatibleQuality: retryQQPlaybackWithCompatibleQuality,
+  closeSourceFallbackNotice: closeSourceFallbackNotice,
+  showSourceFallbackNotice: showSourceFallbackNotice,
+  normalizeMatchText: normalizeMatchText,
+  artistNameParts: artistNameParts,
+  isSameTitleArtist: isSameTitleArtist,
+  alternatePlaybackProvider: alternatePlaybackProvider,
+  searchAlternatePlatformSong: searchAlternatePlatformSong,
+  markQueueItemPlaybackFailed: markQueueItemPlaybackFailed,
+  nextUnblockedQueueIndex: nextUnblockedQueueIndex,
+  skipFailedQueueItem: skipFailedQueueItem,
+  tryAutoPlaybackFallback: tryAutoPlaybackFallback,
+  handlePlaybackUnavailable: handlePlaybackUnavailable,
+  pauseCurrentAudioForTrackSwitch: pauseCurrentAudioForTrackSwitch,
+  syncPlaybackStateFromAudioEvent: syncPlaybackStateFromAudioEvent,
+  isPlaybackRecursionError: isPlaybackRecursionError,
+  safePlaybackStep: safePlaybackStep,
+  playbackFailureToastText: playbackFailureToastText,
+  scheduleAudioResumePosition: scheduleAudioResumePosition,
+  playQueueAt: playQueueAt,
+  attemptAudioPlay: attemptAudioPlay,
+  playAudio: playAudio,
+  togglePlay: togglePlay,
+  setPlayIcon: setPlayIcon,
+  nextTrack: nextTrack,
+  prevTrack: prevTrack,
+  shuffleQueue: shuffleQueue,
+  clearQueue: clearQueue,
+  removeFromQueue: removeFromQueue,
+  playModeLabel: playModeLabel,
+  playModeIconMarkup: playModeIconMarkup,
+  updatePlayModeButton: updatePlayModeButton,
+  cyclePlayMode: cyclePlayMode,
+  normalizeControlGlassChromaticOffset: normalizeControlGlassChromaticOffset,
+  applyControlGlassChromaticOffset: applyControlGlassChromaticOffset,
+  supportsControlGlassSvgFilter: supportsControlGlassSvgFilter,
+  generateControlGlassDisplacementMap: generateControlGlassDisplacementMap,
+  updateGlassDisplacementMapForElement: updateGlassDisplacementMapForElement,
+  updateControlGlassDisplacementMap: updateControlGlassDisplacementMap,
+  updateSearchBoxGlassDisplacementMap: updateSearchBoxGlassDisplacementMap,
+  updateSearchPillGlassDisplacementMap: updateSearchPillGlassDisplacementMap,
+  initControlGlassSurface: initControlGlassSurface,
+  bindPlayerControlAnimations: bindPlayerControlAnimations,
+  clearPlayerControlFocusState: clearPlayerControlFocusState
+};

@@ -1,5 +1,9 @@
 //  控制台 — 预设卡片 + 主滑块 + 开关 + 三态
 // ============================================================
+// Forward-decl: hotkeyCaptureState is set by startHotkeyCapture/closeHotkeySettings, read by renderHotkeySettings
+var hotkeyCaptureState = null;
+// Forward-decl: real impl in 41-desktop-overlay.js (app layer, loads after ui)
+function getDesktopWindowApi() { return null; }
 var presetMeta = [
   { name: 'emily专辑封面',  desc: '封面粒子 · 快速入场' },
   { name: '滚筒', desc: '隧道 · 沉浸感' },
@@ -69,7 +73,7 @@ function normalizeFxArchiveSnapshot(raw) {
     intensity: archiveNumber(raw, 'intensity', fxDefaults.intensity, 0.2, 1.6),
     cinemaShake: archiveNumber(raw, 'cinemaShake', fxDefaults.cinemaShake, 0, 1.8),
     depth: archiveNumber(raw, 'depth', fxDefaults.depth, 0.2, 1.8),
-    coverResolution: normalizeCoverResolution(raw.coverResolution),
+    coverResolution: Mineradio.fx.normalizeCoverResolution(raw.coverResolution),
     point: archiveNumber(raw, 'point', fxDefaults.point, 0.5, 2.2),
     speed: archiveNumber(raw, 'speed', fxDefaults.speed, 0.2, 2.5),
     twist: archiveNumber(raw, 'twist', fxDefaults.twist, 0, 0.6),
@@ -122,9 +126,9 @@ function normalizeFxArchiveSnapshot(raw) {
     desktopLyricsCinema: raw.desktopLyricsCinema !== false,
     desktopLyricsHighlight: raw.desktopLyricsHighlight === true,
     desktopLyricsFps: normalizeDesktopLyricsFps(Object.prototype.hasOwnProperty.call(raw, 'desktopLyricsFps') ? raw.desktopLyricsFps : fxDefaults.desktopLyricsFps),
-    performanceBackground: normalizePerformanceBackgroundMode(raw.performanceBackground, raw.liveBackgroundKeep === true),
-    performanceQuality: normalizePerformanceQuality(raw.performanceQuality),
-    liveBackgroundKeep: normalizePerformanceBackgroundMode(raw.performanceBackground, raw.liveBackgroundKeep === true) === 'keep',
+    performanceBackground: Mineradio.fx.normalizePerformanceBackgroundMode(raw.performanceBackground, raw.liveBackgroundKeep === true),
+    performanceQuality: Mineradio.fx.normalizePerformanceQuality(raw.performanceQuality),
+    liveBackgroundKeep: Mineradio.fx.normalizePerformanceBackgroundMode(raw.performanceBackground, raw.liveBackgroundKeep === true) === 'keep',
     particleLyrics: raw.particleLyrics !== false,
     backCover: !!raw.backCover,
     shelf: archiveMode(raw, 'shelf', /^(off|side|stage)$/, fxDefaults.shelf),
@@ -156,6 +160,9 @@ function readUserFxArchives() {
 }
 function hasStoredUserFxArchives() {
   try { return localStorage.getItem(USER_FX_ARCHIVE_STORE_KEY) != null; } catch(e) { return true; }
+}
+function saveUserFxArchives() {
+  try { localStorage.setItem(USER_FX_ARCHIVE_STORE_KEY, JSON.stringify(userFxArchives)); } catch(e) { console.warn('[saveUserFxArchives]', e); }
 }
 function createPackagedDefaultUserFxArchiveSlot() {
   return { name: normalizeUserFxArchiveName(PACKAGED_DEFAULT_USER_FX_ARCHIVE_NAME, 0), createdAt: PACKAGED_DEFAULT_USER_FX_ARCHIVE_EXPORTED_AT, savedAt: PACKAGED_DEFAULT_USER_FX_ARCHIVE_SAVED_AT, snapshot: normalizeFxArchiveSnapshot(clonePackagedDefaultFxSnapshot()) };
@@ -1058,7 +1065,7 @@ function syncFxUniforms() {
   uniforms.uTwist.value = fx.twist;
   uniforms.uColorBoost.value = fx.color;
   uniforms.uScatter.value = fx.scatter;
-  uniforms.uCoverRes.value = normalizeCoverResolution(fx.coverResolution);
+  uniforms.uCoverRes.value = Mineradio.fx.normalizeCoverResolution(fx.coverResolution);
   uniforms.uBgFade.value = fx.bgFade;
   uniforms.uBloomStrength.value = fx.bloom ? fx.bloomStrength : 0;
   if (bloomParticles) bloomParticles.visible = fx.bloom && fx.bloomStrength > 0.01;
@@ -1107,7 +1114,7 @@ function setRange(id, value) {
   var el = document.getElementById(id);
   if (!el) return;
   if (id === 'fx-lyricglow') value = Math.min(0.85, Math.max(0, value));
-  if (id === 'fx-coverres') value = normalizeCoverResolution(value);
+  if (id === 'fx-coverres') value = Mineradio.fx.normalizeCoverResolution(value);
   if (id === 'fx-glassaberration') value = normalizeControlGlassChromaticOffset(value);
   el.value = value;
   var out = el.parentElement.querySelector('output');
@@ -1157,9 +1164,9 @@ function updateDesktopLyricsFpsControls() {
   });
 }
 function updatePerformanceControls() {
-  fx.performanceBackground = normalizePerformanceBackgroundMode(fx.performanceBackground, fx.liveBackgroundKeep === true);
+  fx.performanceBackground = Mineradio.fx.normalizePerformanceBackgroundMode(fx.performanceBackground, fx.liveBackgroundKeep === true);
   fx.liveBackgroundKeep = fx.performanceBackground === 'keep';
-  fx.performanceQuality = normalizePerformanceQuality(fx.performanceQuality);
+  fx.performanceQuality = Mineradio.fx.normalizePerformanceQuality(fx.performanceQuality);
   document.querySelectorAll('#performance-background-seg [data-performance-background]').forEach(function(btn){
     btn.classList.toggle('active', btn.getAttribute('data-performance-background') === fx.performanceBackground);
   });
@@ -1170,7 +1177,7 @@ function updatePerformanceControls() {
   if (liveBackgroundKeepToggle) liveBackgroundKeepToggle.classList.toggle('on', fx.liveBackgroundKeep === true);
 }
 function setPerformanceBackgroundMode(mode, silent) {
-  var next = normalizePerformanceBackgroundMode(mode, false);
+  var next = Mineradio.fx.normalizePerformanceBackgroundMode(mode, false);
   fx.performanceBackground = next;
   fx.liveBackgroundKeep = next === 'keep';
   updatePerformanceControls();
@@ -1184,7 +1191,7 @@ function setPerformanceBackgroundMode(mode, silent) {
   }
 }
 function setPerformanceQualityMode(mode, silent) {
-  var next = normalizePerformanceQuality(mode);
+  var next = Mineradio.fx.normalizePerformanceQuality(mode);
   fx.performanceQuality = next;
   updatePerformanceControls();
   applyRendererPowerMode();
@@ -1899,7 +1906,7 @@ function bindFxPanel() {
       fx[pair[1]] = parseFloat(el.value);
       var out = el.parentElement.querySelector('output');
       if (pair[1] === 'coverResolution') {
-        fx.coverResolution = normalizeCoverResolution(fx.coverResolution);
+        fx.coverResolution = Mineradio.fx.normalizeCoverResolution(fx.coverResolution);
         applyCoverParticleResolution(fx.coverResolution, { reload: true });
       }
       if (pair[1] === 'lyricWeight') fx.lyricWeight = Math.round(clampRange(fx.lyricWeight, 500, 900) / 50) * 50;
@@ -2374,5 +2381,162 @@ function setCamMode(m) {
 }
 
 bindFxPanel();
+
+// --- Namespace exports ---
+Mineradio.console = {
+  defaultUserFxArchiveName: defaultUserFxArchiveName,
+  normalizeUserFxArchiveName: normalizeUserFxArchiveName,
+  archiveNumber: archiveNumber,
+  archiveMode: archiveMode,
+  normalizeFxArchiveSnapshot: normalizeFxArchiveSnapshot,
+  readUserFxArchives: readUserFxArchives,
+  hasStoredUserFxArchives: hasStoredUserFxArchives,
+  createPackagedDefaultUserFxArchiveSlot: createPackagedDefaultUserFxArchiveSlot,
+  formatUserArchiveTime: formatUserArchiveTime,
+  userFxArchiveAt: userFxArchiveAt,
+  renderUserFxArchives: renderUserFxArchives,
+  createUserFxArchive: createUserFxArchive,
+  saveUserFxArchive: saveUserFxArchive,
+  applyUserFxArchive: applyUserFxArchive,
+  renameUserFxArchive: renameUserFxArchive,
+  commitUserFxArchiveRename: commitUserFxArchiveRename,
+  cancelUserFxArchiveRename: cancelUserFxArchiveRename,
+  removeUserFxArchive: removeUserFxArchive,
+  userFxArchiveExportPayload: userFxArchiveExportPayload,
+  safeArchiveFileName: safeArchiveFileName,
+  exportUserFxArchive: exportUserFxArchive,
+  normalizeImportedFxArchivePayload: normalizeImportedFxArchivePayload,
+  importUserFxArchiveText: importUserFxArchiveText,
+  importUserFxArchiveFromDialog: importUserFxArchiveFromDialog,
+  readUserFxArchiveImportFile: readUserFxArchiveImportFile,
+  bindUserFxArchiveDrop: bindUserFxArchiveDrop,
+  buildLyricColorControls: buildLyricColorControls,
+  updateLyricColorControls: updateLyricColorControls,
+  updateLyricHighlightControls: updateLyricHighlightControls,
+  updateLyricGlowControls: updateLyricGlowControls,
+  applyHomeAccentColor: applyHomeAccentColor,
+  updateHomeAccentControls: updateHomeAccentControls,
+  setHomeAccentColor: setHomeAccentColor,
+  resetHomeAccentColor: resetHomeAccentColor,
+  applyIconAccentColors: applyIconAccentColors,
+  updateIconAccentControls: updateIconAccentControls,
+  setHomeIconColor: setHomeIconColor,
+  resetHomeIconColor: resetHomeIconColor,
+  setVisualIconColor: setVisualIconColor,
+  resetVisualIconColor: resetVisualIconColor,
+  applyCustomBackground: applyCustomBackground,
+  updateCustomBackgroundControls: updateCustomBackgroundControls,
+  setCustomBackgroundColor: setCustomBackgroundColor,
+  setCustomBackgroundCoverMode: setCustomBackgroundCoverMode,
+  resetCustomBackgroundColor: resetCustomBackgroundColor,
+  setCustomBackgroundOpacity: setCustomBackgroundOpacity,
+  setCustomBackgroundImage: setCustomBackgroundImage,
+  clearCustomBackgroundImage: clearCustomBackgroundImage,
+  setCustomBackgroundMedia: setCustomBackgroundMedia,
+  readBackgroundImageFile: readBackgroundImageFile,
+  readBackgroundVideoFile: readBackgroundVideoFile,
+  readBackgroundMediaFile: readBackgroundMediaFile,
+  applyUiAccentColor: applyUiAccentColor,
+  updateUiAccentControls: updateUiAccentControls,
+  setUiAccentColor: setUiAccentColor,
+  resetUiAccentColor: resetUiAccentColor,
+  updateVisualTintControls: updateVisualTintControls,
+  setVisualTintAuto: setVisualTintAuto,
+  resetVisualTintColor: resetVisualTintColor,
+  setVisualTintCustom: setVisualTintCustom,
+  currentCoverPickerCanvas: currentCoverPickerCanvas,
+  coverPickerSwatchColors: coverPickerSwatchColors,
+  setCoverPickerPreview: setCoverPickerPreview,
+  renderCoverPickerSwatches: renderCoverPickerSwatches,
+  openCoverColorPicker: openCoverColorPicker,
+  closeCoverColorPicker: closeCoverColorPicker,
+  applyCoverPickerColor: applyCoverPickerColor,
+  moveCoverColorLoupe: moveCoverColorLoupe,
+  hideCoverColorLoupe: hideCoverColorLoupe,
+  pickCoverColorFromArt: pickCoverColorFromArt,
+  updateLyricFontControls: updateLyricFontControls,
+  setLyricFont: setLyricFont,
+  setLyricGlowLinked: setLyricGlowLinked,
+  toggleLyricGlowLink: toggleLyricGlowLink,
+  handleLyricGlowRowClick: handleLyricGlowRowClick,
+  setLyricGlowCustom: setLyricGlowCustom,
+  setLyricColorAuto: setLyricColorAuto,
+  setLyricColorCustom: setLyricColorCustom,
+  setLyricColorPreset: setLyricColorPreset,
+  setLyricHighlightAuto: setLyricHighlightAuto,
+  setLyricHighlightCustom: setLyricHighlightCustom,
+  buildPresetGrid: buildPresetGrid,
+  refreshPresetGrid: refreshPresetGrid,
+  triggerPresetParticleTransition: triggerPresetParticleTransition,
+  tickPresetTransition: tickPresetTransition,
+  setPreset: setPreset,
+  syncFxUniforms: syncFxUniforms,
+  ensureHomeWaveTrackBars: ensureHomeWaveTrackBars,
+  updateHomeAudioVisual: updateHomeAudioVisual,
+  setRange: setRange,
+  updateDevelopmentFxControls: updateDevelopmentFxControls,
+  updateDesktopLyricsFpsControls: updateDesktopLyricsFpsControls,
+  updatePerformanceControls: updatePerformanceControls,
+  setPerformanceBackgroundMode: setPerformanceBackgroundMode,
+  setPerformanceQualityMode: setPerformanceQualityMode,
+  updateFxInputs: updateFxInputs,
+  animateFxResetButton: animateFxResetButton,
+  resetFxSliderValue: resetFxSliderValue,
+  ensureFxSliderResetButton: ensureFxSliderResetButton,
+  setFxPanelTab: setFxPanelTab,
+  fxPanelInputId: fxPanelInputId,
+  fxPanelTargetForNode: fxPanelTargetForNode,
+  organizeFxPanel: organizeFxPanel,
+  fxControlBlock: fxControlBlock,
+  setFxSectionBefore: setFxSectionBefore,
+  setFxSliderLabel: setFxSliderLabel,
+  setFxSectionBeforeNode: setFxSectionBeforeNode,
+  moveToggleToGrid: moveToggleToGrid,
+  ensureLyricPrimaryControls: ensureLyricPrimaryControls,
+  applyBackgroundMediaHint: applyBackgroundMediaHint,
+  relabelFxPanelControls: relabelFxPanelControls,
+  saveHotkeySettings: saveHotkeySettings,
+  hotkeyActionMeta: hotkeyActionMeta,
+  isModifierKeyCode: isModifierKeyCode,
+  normalizeHotkeyEvent: normalizeHotkeyEvent,
+  hotkeyDisplayPart: hotkeyDisplayPart,
+  formatHotkey: formatHotkey,
+  hotkeyToAccelerator: hotkeyToAccelerator,
+  hotkeyDuplicateMap: hotkeyDuplicateMap,
+  executeHotkeyAction: executeHotkeyAction,
+  handleConfiguredLocalHotkey: handleConfiguredLocalHotkey,
+  shouldSuppressDefaultConfiguredHotkey: shouldSuppressDefaultConfiguredHotkey,
+  ensureHotkeySettingsButton: ensureHotkeySettingsButton,
+  ensureHotkeyModal: ensureHotkeyModal,
+  hotkeyStatusMarkup: hotkeyStatusMarkup,
+  renderHotkeyScope: renderHotkeyScope,
+  renderHotkeySettings: renderHotkeySettings,
+  setHotkeyModalScope: setHotkeyModalScope,
+  openHotkeySettings: openHotkeySettings,
+  closeHotkeySettings: closeHotkeySettings,
+  startHotkeyCapture: startHotkeyCapture,
+  setHotkeyBinding: setHotkeyBinding,
+  resetHotkeyBinding: resetHotkeyBinding,
+  registerGlobalHotkeys: registerGlobalHotkeys,
+  bindHotkeySettings: bindHotkeySettings,
+  bindFxPanel: bindFxPanel,
+  toggleFx: toggleFx,
+  toggleFxPanel: toggleFxPanel,
+  resetFx: resetFx,
+  setShelfMode: setShelfMode,
+  updateShelfControlUi: updateShelfControlUi,
+  refreshShelfVisuals: refreshShelfVisuals,
+  setShelfCameraMode: setShelfCameraMode,
+  setShelfPresence: setShelfPresence,
+  setShelfAccentColor: setShelfAccentColor,
+  resetShelfAccentColor: resetShelfAccentColor,
+  syncControlsAutoHideButton: syncControlsAutoHideButton,
+  setParticleLyricsSilently: setParticleLyricsSilently,
+  updateImmersiveButton: updateImmersiveButton,
+  closeImmersiveInterference: closeImmersiveInterference,
+  setImmersiveMode: setImmersiveMode,
+  toggleImmersiveMode: toggleImmersiveMode,
+  setCamMode: setCamMode
+};
 
 // ============================================================

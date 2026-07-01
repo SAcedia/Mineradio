@@ -16,7 +16,7 @@ var RENDER_INTERACTION_HOLD_MS = 900;
 var renderInteractionBoostUntil = 0;
 var renderInteractionReason = '';
 function renderQualityProfile() {
-  var quality = normalizePerformanceQuality(fx && fx.performanceQuality);
+  var quality = Mineradio.fx.normalizePerformanceQuality(fx && fx.performanceQuality);
   if (quality === 'eco') return { cap: 0.95, min: 0.56, budget: 2400000 };
   if (quality === 'balanced') return { cap: 1.12, min: 0.66, budget: 3800000 };
   if (quality === 'ultra') return { cap: 1.75, min: 0.85, budget: 7800000 };
@@ -1955,4 +1955,96 @@ renderer.domElement.addEventListener('dblclick', function(e){
   }
   recenterCamera();
 });
+
+// ============================================================
+//  Namespace Exports — Mineradio.three
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.three = {
+  renderQualityProfile: renderQualityProfile,
+  getRenderPixelRatio: getRenderPixelRatio,
+  getRenderPixelLoad: getRenderPixelLoad,
+  markRenderInteraction: markRenderInteraction,
+  isRenderInteractionActive: isRenderInteractionActive,
+  getRenderLoadTier: getRenderLoadTier,
+  defaultFreeCameraState: defaultFreeCameraState,
+  readFreeCameraState: readFreeCameraState,
+  saveFreeCameraState: saveFreeCameraState,
+  scheduleFreeCameraStateSave: scheduleFreeCameraStateSave,
+  easeOutCubic01: easeOutCubic01,
+  shortestAngleDelta: shortestAngleDelta,
+  getDefaultFreeCameraResetPose: getDefaultFreeCameraResetPose,
+  captureFreeCameraFromCurrent: captureFreeCameraFromCurrent,
+  applyFreeCameraToCamera: applyFreeCameraToCamera,
+  updateFreeCameraHint: updateFreeCameraHint,
+  resetFreeCameraToDefault: resetFreeCameraToDefault,
+  toggleFreeCamera: toggleFreeCamera,
+  updateFreeCamera: updateFreeCamera,
+  flushPersistentVisualState: flushPersistentVisualState,
+  resetBeatCameraSync: resetBeatCameraSync,
+  syncBeatCameraToTime: syncBeatCameraToTime,
+  alignBeatCameraCursorToTime: alignBeatCameraCursorToTime,
+  easeBeatCamera: easeBeatCamera,
+  updateCinemaDynamics: updateCinemaDynamics,
+  cameraDynamicsScale: cameraDynamicsScale,
+  cinemaTrackNameHint: cinemaTrackNameHint,
+  cinemaAnalysisProfileForSong: cinemaAnalysisProfileForSong,
+  resetCinemaTrackProfile: resetCinemaTrackProfile,
+  updateCinemaTrackProfile: updateCinemaTrackProfile,
+  applyCinemaProfileFromBeatMap: applyCinemaProfileFromBeatMap,
+  resetRealtimeBeatEngine: resetRealtimeBeatEngine,
+  resetAudioVisualState: resetAudioVisualState,
+  beatEventTime: beatEventTime,
+  yieldToPaint: yieldToPaint,
+  yieldToIdle: yieldToIdle,
+  scheduleAnalysisTask: scheduleAnalysisTask,
+  scheduleVisualApply: scheduleVisualApply,
+  scheduleUiWarmTask: scheduleUiWarmTask,
+  cancelBeatAnalysisTimer: cancelBeatAnalysisTimer,
+  cancelBeatPrefetchTimer: cancelBeatPrefetchTimer,
+  beatAnalysisYieldMs: beatAnalysisYieldMs,
+  beatBandRms: beatBandRms,
+  processRealtimeBeatEngine: processRealtimeBeatEngine,
+  mergeRealtimeBeatCamera: mergeRealtimeBeatCamera,
+  scheduleBeatCamera: scheduleBeatCamera,
+  updateBeatCamera: updateBeatCamera,
+  unlockCenteredView: unlockCenteredView,
+  clearCenteredViewOffsets: clearCenteredViewOffsets,
+  updateCamera: updateCamera,
+  shouldUseWallpaperSafeShelfCamera: shouldUseWallpaperSafeShelfCamera,
+  shouldUseSkullSafeShelfCamera: shouldUseSkullSafeShelfCamera,
+  shouldUseWallpaperLyricCameraLock: shouldUseWallpaperLyricCameraLock,
+  requestStageLyricCameraSnap: requestStageLyricCameraSnap,
+  shouldDimWallpaperForShelf: shouldDimWallpaperForShelf,
+  shouldOffsetLyricsForShelfDetail: shouldOffsetLyricsForShelfDetail,
+  shouldAvoidStageLyricsForShelf: shouldAvoidStageLyricsForShelf,
+  activateFocusZone: activateFocusZone,
+  setFocusZone: setFocusZone,
+  updateCinema: updateCinema,
+  recenterCamera: recenterCamera,
+  hasActivePlaybackControls: hasActivePlaybackControls,
+  setControlsHidden: setControlsHidden,
+  isBottomControlsSuppressedForShelf: isBottomControlsSuppressedForShelf,
+  suppressBottomControlsForShelf: suppressBottomControlsForShelf,
+  scheduleControlsHide: scheduleControlsHide,
+  revealBottomControls: revealBottomControls,
+  updateControlsChromeState: updateControlsChromeState,
+  wakeBottomHandle: wakeBottomHandle,
+  forcePlaybackControlsInteractive: forcePlaybackControlsInteractive,
+  toggleBottomControlsFromHandle: toggleBottomControlsFromHandle,
+  updateControlsAutoHideFromPointer: updateControlsAutoHideFromPointer,
+  toggleControlsAutoHide: toggleControlsAutoHide,
+  applyControlsAutoHidePreference: applyControlsAutoHidePreference,
+  isCursorAutoHideMode: isCursorAutoHideMode,
+  clearCursorAutoHideTimer: clearCursorAutoHideTimer,
+  setCursorHidden: setCursorHidden,
+  scheduleCursorHide: scheduleCursorHide,
+  revealCursorForActivity: revealCursorForActivity,
+  syncCursorAutoHideMode: syncCursorAutoHideMode,
+  isPointerOverUi: isPointerOverUi,
+  particleLocalPointFromNdc: particleLocalPointFromNdc,
+  queueParticlePointerFrame: queueParticlePointerFrame,
+  updateParticlePointerFrame: updateParticlePointerFrame,
+  beginParticlePointerDrag: beginParticlePointerDrag
+};
 

@@ -9,9 +9,6 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Inter:wght@200;300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=UnifrakturCook:wght@700&display=swap"
     rel="stylesheet">
-  <script src="vendor/three.r128.min.js"></script>
-  <script src="vendor/music-tempo.min.js"></script>
-  <script src="vendor/gsap.min.js"></script>
   <script>
     try {
       document.documentElement.classList.add(localStorage.getItem('mineradio-diy-player-mode-v1') === '1' ? 'diy-mode-preload' : 'simple-mode-preload');
@@ -23,6 +20,9 @@
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/desktop-shell.css">
   <link rel="stylesheet" href="css/components.css">
+  <link rel="preload" href="js/app/40-splash.js" as="script">
+  <link rel="preload" href="vendor/three.r128.min.js" as="script">
+  <link rel="preload" href="vendor/gsap.min.js" as="script">
 </head>
 
 <body>
@@ -93,6 +93,8 @@
         <div class="splash-enter" aria-hidden="true">点击进入</div>
       </div>
     </div>
+
+    <script src="js/app/40-splash.js"></script>
 
     <div id="hint" aria-hidden="true"></div>
 
@@ -922,8 +924,8 @@
           <button id="login-provider-netease" class="netease active" type="button"
             onclick="setLoginProvider('netease')">网易云</button>
           <button id="login-provider-qq" class="qq" type="button" onclick="setLoginProvider('qq')">QQ 音乐</button>
-          <button id="login-youtube-toggle" type="button"
-            onclick="toggleSearchSource('youtube')" style="height:32px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:rgba(255,255,255,.48);font-family:inherit;font-size:11.5px;font-weight:700;letter-spacing:.45px;cursor:pointer">YouTube</button>
+          <button id="login-youtube-toggle" class="youtube" type="button"
+            onclick="toggleSearchSource('youtube')">YouTube</button>
         </div>
         <div class="login-intro">
           <div class="login-intro-kicker">Mineradio</div>
@@ -1156,42 +1158,45 @@
 
 
 
-  <script src="js/infra/00-utils.js?v=15"></script>
-  <script src="js/infra/01-constants.js?v=15"></script>
-  <script src="js/infra/02-storage.js?v=15"></script>
-  <script src="js/infra/03-bus.js?v=1"></script>
-  <script src="js/state/04-state.js?v=15"></script>
-  <script src="js/state/05-audio-engine.js?v=15"></script>
-  <script src="js/state/06-beat-analysis.js?v=15"></script>
-  <script src="js/state/07-audio-analyzer.js?v=1"></script>
-  <script src="js/platforms/netease.js?v=15" onerror="console.error('[load] netease.js FAILED')"></script>
-  <script src="js/platforms/qq.js?v=15" onerror="console.error('[load] qq.js FAILED')"></script>
-  <script src="js/platforms/youtube.js?v=15" onerror="console.error('[load] youtube.js FAILED')"></script>
-  <script src="js/platforms/youtube-ui.js?v=15"></script>
-  <script src="js/features/10-quality.js?v=15"></script>
-  <script src="js/features/11-search.js?v=15"></script>
-  <script src="js/features/12-playback.js?v=15"></script>
-  <script src="js/features/13-lyrics.js?v=15"></script>
-  <script src="js/features/14-discover.js?v=15"></script>
-  <script src="js/features/15-like.js?v=15"></script>
-  <script src="js/features/16-collect.js?v=15"></script>
-  <script src="js/features/17-cover.js?v=15"></script>
-  <script src="js/features/18-detail.js?v=15"></script>
-  <script src="js/features/19-listen-stats.js?v=15"></script>
-  <script src="js/visual/20-three-core.js?v=15"></script>
-  <script src="js/visual/21-particles.js?v=15"></script>
-  <script src="js/visual/22-shelf.js?v=15"></script>
-  <script src="js/visual/23-lyrics-3d.js?v=15"></script>
-  <script src="js/visual/24-gesture.js?v=15"></script>
-  <script src="js/visual/25-music-sync.js?v=1"></script>
-  <script src="js/ui/30-login.js?v=15"></script>
-  <script src="js/ui/31-console.js?v=15"></script>
-  <script src="js/ui/32-controls.js?v=15"></script>
-  <script src="js/ui/33-playlists.js?v=15"></script>
-  <script src="js/ui/34-misc-ui.js?v=15"></script>
-  <script src="js/app/40-splash.js?v=15"></script>
-  <script src="js/app/41-desktop-overlay.js?v=15"></script>
-  <script src="js/app/42-app.js?v=15"></script>
+
+  <script defer src="vendor/three.r128.min.js"></script>
+  <script defer src="vendor/gsap.min.js"></script>
+  <script defer src="vendor/music-tempo.min.js"></script>
+  <script defer src="js/infra/00-utils.js"></script>
+  <script defer src="js/infra/01-constants.js"></script>
+  <script defer src="js/infra/02-storage.js"></script>
+  <script defer src="js/infra/03-bus.js?v=1"></script>
+  <script defer src="js/state/04-state.js"></script>
+  <script defer src="js/state/05-audio-engine.js"></script>
+  <script defer src="js/state/06-beat-analysis.js"></script>
+  <script defer src="js/state/07-audio-analyzer.js?v=1"></script>
+  <script defer src="js/platforms/netease.js" onerror="console.error('[load] netease.js FAILED')"></script>
+  <script defer src="js/platforms/qq.js" onerror="console.error('[load] qq.js FAILED')"></script>
+  <script defer src="js/platforms/youtube.js" onerror="console.error('[load] youtube.js FAILED')"></script>
+  <script defer src="js/platforms/youtube-ui.js"></script>
+  <script defer src="js/features/10-quality.js"></script>
+  <script defer src="js/features/11-search.js"></script>
+  <script defer src="js/features/12-playback.js"></script>
+  <script defer src="js/features/13-lyrics.js"></script>
+  <script defer src="js/features/14-discover.js"></script>
+  <script defer src="js/features/15-like.js"></script>
+  <script defer src="js/features/16-collect.js"></script>
+  <script defer src="js/features/17-cover.js"></script>
+  <script defer src="js/features/18-detail.js"></script>
+  <script defer src="js/features/19-listen-stats.js"></script>
+  <script defer src="js/visual/20-three-core.js"></script>
+  <script defer src="js/visual/21-particles.js"></script>
+  <script defer src="js/visual/22-shelf.js"></script>
+  <script defer src="js/visual/23-lyrics-3d.js"></script>
+  <script defer src="js/visual/24-gesture.js"></script>
+  <script defer src="js/visual/25-music-sync.js?v=1"></script>
+  <script defer src="js/ui/30-login.js"></script>
+  <script defer src="js/ui/31-console.js"></script>
+  <script defer src="js/ui/32-controls.js"></script>
+  <script defer src="js/ui/33-playlists.js"></script>
+  <script defer src="js/ui/34-misc-ui.js"></script>
+  <script defer src="js/app/41-desktop-overlay.js"></script>
+  <script defer src="js/app/42-app.js"></script>
 </body>
 
 </html>

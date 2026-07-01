@@ -24,6 +24,12 @@ var dotTexture = makeDotTexture();
 var PLANE_SIZE = 4.8;
 var RIPPLE_MAX = 12;
 
+function coverParticleGridForResolution(v) {
+  var grid = Math.round(118 * Mineradio.fx.normalizeCoverResolution(v));
+  grid = Math.max(88, Math.min(183, grid));
+  return grid % 2 ? grid : grid + 1;
+}
+Mineradio.fx.coverParticleGridForResolution = coverParticleGridForResolution;
 var GRID_X = coverParticleGridForResolution((typeof fx !== 'undefined' && fx) ? fx.coverResolution : 1.55), GRID_Y = GRID_X;
 var PCOUNT = GRID_X * GRID_Y;
 var positions = null, uvs = null, aRand = null;
@@ -65,7 +71,7 @@ var geo = buildCoverParticleGeometry(GRID_X);
 
 function applyCoverParticleResolution(value, opts) {
   opts = opts || {};
-  fx.coverResolution = normalizeCoverResolution(value);
+  fx.coverResolution = Mineradio.fx.normalizeCoverResolution(value);
   var grid = coverParticleGridForResolution(fx.coverResolution);
   if (grid === GRID_X && geo && geo.userData && geo.userData.grid === grid) return;
   var oldGeo = geo;
@@ -2109,4 +2115,64 @@ function applyCoverCanvas(cv, thumbSrc, opts) {
   var heavyTimeout = opts.deferHeavy ? (opts.timeout || 1800) : (opts.timeout || 900);
   scheduleVisualApply(runHeavyCoverWork, heavyDelay, heavyTimeout);
 }
+
+// ============================================================
+//  Namespace Exports — Mineradio.particles
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.particles = {
+  makeDotTexture: makeDotTexture,
+  buildCoverParticleGeometry: buildCoverParticleGeometry,
+  applyCoverParticleResolution: applyCoverParticleResolution,
+  scheduleCoverResolutionReload: scheduleCoverResolutionReload,
+  createFloatLayer: createFloatLayer,
+  destroyFloatLayer: destroyFloatLayer,
+  effectiveSkullVisualTint: effectiveSkullVisualTint,
+  syncSkullParticleColors: syncSkullParticleColors,
+  buildSkullParticleGeometryFromAsset: buildSkullParticleGeometryFromAsset,
+  loadSkullParticleAsset: loadSkullParticleAsset,
+  skullPushPoint: skullPushPoint,
+  skullPushCurve: skullPushCurve,
+  createSkullParticleLayer: createSkullParticleLayer,
+  isSkullShelfCompositionActive: isSkullShelfCompositionActive,
+  clearSkullPresetResidue: clearSkullPresetResidue,
+  resetSkullPresetView: resetSkullPresetView,
+  skullBreathOffset: skullBreathOffset,
+  setSkullCameraTargetVectors: setSkullCameraTargetVectors,
+  applySkullCameraPose: applySkullCameraPose,
+  updateSkullParticleLayer: updateSkullParticleLayer,
+  createBackCoverLayer: createBackCoverLayer,
+  destroyBackCoverLayer: destroyBackCoverLayer,
+  refreshBackCoverColorsFromCanvas: refreshBackCoverColorsFromCanvas,
+  updateFloatLayer: updateFloatLayer,
+  refreshFloatColorsFromCover: refreshFloatColorsFromCover,
+  resetFloatColorsToIdle: resetFloatColorsToIdle,
+  triggerRipple: triggerRipple,
+  updateRipples: updateRipples,
+  coverDepthCacheId: coverDepthCacheId,
+  getCoverDepthCache: getCoverDepthCache,
+  setCoverDepthCache: setCoverDepthCache,
+  buildEdgeAndDepth: buildEdgeAndDepth,
+  ensureAIDepthPipeline: ensureAIDepthPipeline,
+  makeAIDepthInputCanvas: makeAIDepthInputCanvas,
+  estimateAIDepth: estimateAIDepth,
+  mergeAIDepthIntoEdgeTexture: mergeAIDepthIntoEdgeTexture,
+  queueAIDepthForCover: queueAIDepthForCover,
+  queueAIDepthForCurrentCover: queueAIDepthForCurrentCover,
+  startColorMixTween: startColorMixTween,
+  tweenParticleAlpha: tweenParticleAlpha,
+  tweenFloatAlpha: tweenFloatAlpha,
+  revealIdleParticles: revealIdleParticles,
+  visualEase: visualEase,
+  tweenLoading: tweenLoading,
+  showLoading: showLoading,
+  hideLoading: hideLoading,
+  forceLoadingSettled: forceLoadingSettled,
+  recoverVisualsAfterBackground: recoverVisualsAfterBackground,
+  setCoverDepthState: setCoverDepthState,
+  coverApplyStillCurrent: coverApplyStillCurrent,
+  setControlCoverSrc: setControlCoverSrc,
+  updateControlTrackInfo: updateControlTrackInfo,
+  applyCoverCanvas: applyCoverCanvas
+};
 

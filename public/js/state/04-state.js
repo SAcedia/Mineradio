@@ -2,6 +2,8 @@ var uiSfxCtx = null, lastShelfSelectSfxAt = 0;
 var FFT_SIZE = 2048;
 var frequencyData = new Uint8Array(FFT_SIZE / 2);
 var timeDomainData = new Uint8Array(FFT_SIZE);
+var analyser = null;                    // set by 05-audio-engine.js initAudio(); declared here for early refs in 07-audio-analyzer.js
+var gainNode = null;                    // set by 05-audio-engine.js initAudio(); declared here for early refs in applyVolumeToAudio()
 var BEAT_FFT_SIZE = 2048;
 var beatFrequencyData = new Uint8Array(BEAT_FFT_SIZE / 2);
 var beatTimeDomainData = new Uint8Array(BEAT_FFT_SIZE);
@@ -13,6 +15,7 @@ var beatOnsetFlag = false;        // beat 上升沿瞬时标志,每帧消费一�
 var lastStrongDrop = 0;           // 用于 burst 预设的强 drop 时刻
 var diyPlayerMode;                // DIY 玩家模式,在 applyDiyMode 中赋值
 var audio;                        // Audio 元素,在 playback/playlists 中延迟创建
+Mineradio.state.audioReady = false; // 音频上下文就绪标志,由 05-audio-engine.js initAudio() 设置
 
 var lyricsLines = [], lyricsVisible = false, lyricsHasNativeKaraoke = false, lyricsTimingSource = 'none';
 var playlist = [], playQueue = [], currentIdx = -1, playing = false, playToggleBusy = false;
@@ -494,7 +497,7 @@ var playlistPanelPinned = readBooleanPreference(PLAYLIST_PANEL_PIN_STORE_KEY, fa
 var userCapsuleAutoHide = readBooleanPreference(USER_CAPSULE_AUTO_HIDE_STORE_KEY, false);
 var fxFabAutoHide = readBooleanPreference(FX_FAB_AUTO_HIDE_STORE_KEY, false);
 var fxFabAutoHideRevealArmed = true;
-var hotkeySettings = readHotkeySettings();
+var hotkeySettings = Mineradio.util.readHotkeySettings();
 var immersiveMode = false;
 var immersiveState = {
   shelfMode: null,
@@ -540,6 +543,22 @@ var runtimePerfState = {
   heapMB: 0,
   cacheCounts: {}
 };
+function normalizeCoverResolution(v) {
+  return Mineradio.util.clampRange(Number(v) || 1, 0.75, 1.55);
+}
+function normalizePerformanceBackgroundMode(v, liveKeepFallback) {
+  var value = String(v || '');
+  if (value === 'keep' || liveKeepFallback === true) return 'keep';
+  if (value === 'release') return 'release';
+  return 'auto';
+}
+function normalizePerformanceQuality(v) {
+  var value = String(v || '');
+  return /^(eco|balanced|high|ultra)$/.test(value) ? value : fxDefaults.performanceQuality;
+}
+Mineradio.fx.normalizeCoverResolution = normalizeCoverResolution;
+Mineradio.fx.normalizePerformanceBackgroundMode = normalizePerformanceBackgroundMode;
+Mineradio.fx.normalizePerformanceQuality = normalizePerformanceQuality;
 function isDeepBackgroundMode() {
   if (isLiveBackgroundKeepMode()) return false;
   var ds = desktopRuntimeState || {};
@@ -813,4 +832,59 @@ function installRenderPowerHooks() {
     }
   }
 }
+
+// ============================================================
+//  Namespace Exports — Mineradio.state (core state + diy + fx presets)
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.state = Mineradio.state || {};
+Object.assign(Mineradio.state, {
+  markAppPerf: markAppPerf,
+  installStartupLongTaskObserver: installStartupLongTaskObserver,
+  applyUserCapsuleAutoHideState: applyUserCapsuleAutoHideState,
+  toggleUserCapsuleAutoHide: toggleUserCapsuleAutoHide,
+  updateUserCapsuleAutoHideFromPointer: updateUserCapsuleAutoHideFromPointer,
+  applyFxFabAutoHideState: applyFxFabAutoHideState,
+  toggleFxFabAutoHide: toggleFxFabAutoHide,
+  updateFxFabAutoHideFromPointer: updateFxFabAutoHideFromPointer,
+  layoutFullscreenDiyZone: layoutFullscreenDiyZone,
+  shouldSuppressFullscreenDiyPeek: shouldSuppressFullscreenDiyPeek,
+  updateFullscreenDiyPeekFromPointer: updateFullscreenDiyPeekFromPointer,
+  isDiyMode: isDiyMode,
+  syncDiyModeButton: syncDiyModeButton,
+  applyDiyMode: applyDiyMode,
+  toggleDiyMode: toggleDiyMode,
+  isPodcastSong: isPodcastSong,
+  djSongKey: djSongKey,
+  resetDjModeMeter: resetDjModeMeter,
+  resetDjBeatMapState: resetDjBeatMapState,
+  cancelDjBeatAnalysisTimer: cancelDjBeatAnalysisTimer,
+  setDjModeActive: setDjModeActive,
+  maybeAnnounceDjMode: maybeAnnounceDjMode,
+  isDevelopmentLockedFx: isDevelopmentLockedFx,
+  normalizeDevelopmentLockedFxState: normalizeDevelopmentLockedFxState,
+  pulseObjectValue: pulseObjectValue,
+  isDeepBackgroundMode: isDeepBackgroundMode,
+  currentPerformanceBackgroundMode: currentPerformanceBackgroundMode,
+  isLiveBackgroundKeepMode: isLiveBackgroundKeepMode,
+  isBackgroundReleaseMode: isBackgroundReleaseMode,
+  isHiddenForBackgroundOptimization: isHiddenForBackgroundOptimization,
+  isVisibleBackgroundMode: isVisibleBackgroundMode,
+  updateRenderPowerClasses: updateRenderPowerClasses,
+  safeObjectKeys: safeObjectKeys,
+  markProtectedKey: markProtectedKey,
+  collectProtectedCoverUrls: collectProtectedCoverUrls,
+  collectProtectedBeatMapKeys: collectProtectedBeatMapKeys,
+  collectProtectedCoverDepthIds: collectProtectedCoverDepthIds,
+  trimObjectCache: trimObjectCache,
+  trimCoverDepthCache: trimCoverDepthCache,
+  collectRuntimePerfSnapshot: collectRuntimePerfSnapshot,
+  trimRuntimeCaches: trimRuntimeCaches,
+  trimVisualCachesForBackground: trimVisualCachesForBackground,
+  scheduleBackgroundCacheTrim: scheduleBackgroundCacheTrim,
+  maybeTrimRuntimeCaches: maybeTrimRuntimeCaches,
+  applyRendererPowerMode: applyRendererPowerMode,
+  updateDesktopRuntimeState: updateDesktopRuntimeState,
+  installRenderPowerHooks: installRenderPowerHooks
+});
 

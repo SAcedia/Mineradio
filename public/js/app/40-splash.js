@@ -593,6 +593,21 @@ function markSplashReadyToEnter() {
   s.setAttribute('aria-label', '点击进入 Mineradio');
 }
 
+// --- Namespace exports ---
+var Mineradio = window.Mineradio || {};
+Mineradio.splash = {
+  splashClamp01: splashClamp01,
+  splashSmoothstep: splashSmoothstep,
+  splashEaseOutCubic: splashEaseOutCubic,
+  initMineradioSplashWebgl: initMineradioSplashWebgl,
+  drawMineradioSplashWebgl: drawMineradioSplashWebgl,
+  drawMineradioSplash: drawMineradioSplash,
+  playMineradioIntroSound: playMineradioIntroSound,
+  armSplashSoundFallback: armSplashSoundFallback,
+  dismissSplash: dismissSplash,
+  markSplashReadyToEnter: markSplashReadyToEnter
+};
+
 document.addEventListener('DOMContentLoaded', function(){
   var s = document.getElementById('splash');
   if (!s) return;

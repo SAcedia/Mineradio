@@ -123,3 +123,44 @@ function packagedDefaultLyricLayoutRaw() {
   return Object.assign({ desktopLyricsSchema: 'desktop-lyrics-v3' }, clonePackagedDefaultFxSnapshot());
 }
 function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ============================================================
+//  API — async fetch wrapper
+// ============================================================
+window.apiJson = async function(url, opts) {
+  opts = opts || {};
+  var timeoutMs = Number(opts.timeoutMs) || 0;
+  var fetchOpts = Object.assign({}, opts);
+  delete fetchOpts.timeoutMs;
+  var timer = null;
+  if (timeoutMs && window.AbortController && !fetchOpts.signal) {
+    var controller = new AbortController();
+    fetchOpts.signal = controller.signal;
+    timer = setTimeout(function() { controller.abort(); }, timeoutMs);
+  }
+  try {
+    return (await fetch(url, fetchOpts)).json();
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+};
+
+// ============================================================
+//  Namespace Exports
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.util = {
+  clamp01: clamp01,
+  clampRange: clampRange,
+  songProviderKey: songProviderKey,
+  openGsapModal: openGsapModal,
+  closeGsapModal: closeGsapModal,
+  bindModalBackdropClose: bindModalBackdropClose,
+  getHotkeyDefaults: getHotkeyDefaults,
+  readHotkeySettings: readHotkeySettings,
+  _cacheKeyForSong: _cacheKeyForSong,
+  clonePackagedDefaultFxSnapshot: clonePackagedDefaultFxSnapshot,
+  packagedDefaultLyricLayoutRaw: packagedDefaultLyricLayoutRaw,
+  escHtml: escHtml,
+  apiJson: apiJson
+};

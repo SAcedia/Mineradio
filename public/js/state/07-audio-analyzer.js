@@ -107,7 +107,7 @@ window.Mineradio.audio.analyzer = (function() {
               mass: realtimeBeat.mass,
               sharpness: realtimeBeat.sharpness,
               combo: realtimeBeat.combo,
-              impact: clamp01(realtimeBeat.strength * 0.46 + realtimeBeat.confidence * 0.20 + realtimeBeat.low * 0.28),
+              impact: Mineradio.util.clamp01(realtimeBeat.strength * 0.46 + realtimeBeat.confidence * 0.20 + realtimeBeat.low * 0.28),
               preview: waitingForBeatMap,
               primary: true,
               dj: dj
@@ -147,19 +147,19 @@ window.Mineradio.audio.analyzer = (function() {
         smoothEnergy= env(smoothEnergy, Math.min(0.72, re), 0.16, 0.055);
 
         // 歌词阳光溢光: 独立于律动强度, 看持续能量 + 中高频抬升, 更像副歌/高音段落而不是单个鼓点.
-        var sunEnergy = clamp01((smoothEnergy - 0.18) / 0.38);
-        var sunVoice = clamp01((voc - 0.11) / 0.34);
-        var sunMelody = clamp01((smoothMid - 0.16) / 0.27);
-        var sunAir = clamp01((smoothTreb - 0.105) / 0.17);
-        var sunRaw = clamp01(sunEnergy * 0.36 + sunVoice * 0.18 + sunMelody * 0.26 + sunAir * 0.20);
+        var sunEnergy = Mineradio.util.clamp01((smoothEnergy - 0.18) / 0.38);
+        var sunVoice = Mineradio.util.clamp01((voc - 0.11) / 0.34);
+        var sunMelody = Mineradio.util.clamp01((smoothMid - 0.16) / 0.27);
+        var sunAir = Mineradio.util.clamp01((smoothTreb - 0.105) / 0.17);
+        var sunRaw = Mineradio.util.clamp01(sunEnergy * 0.36 + sunVoice * 0.18 + sunMelody * 0.26 + sunAir * 0.20);
         sunRaw = sunRaw * sunRaw * (3 - 2 * sunRaw);
         lyricSunAvg += (sunRaw - lyricSunAvg) * 0.006;
         lyricSunPeak = Math.max(0.48, lyricSunPeak * 0.9985, sunRaw);
         var sunThreshold = Math.max(0.78, lyricSunAvg + 0.20, lyricSunPeak * 0.74);
-        var sunGate = clamp01((sunRaw - sunThreshold) / Math.max(0.08, 1.0 - sunThreshold));
+        var sunGate = Mineradio.util.clamp01((sunRaw - sunThreshold) / Math.max(0.08, 1.0 - sunThreshold));
         sunGate = sunGate * sunGate * (3 - 2 * sunGate);
         lyricSunHold += (sunGate - lyricSunHold) * (sunGate > lyricSunHold ? 0.035 : 0.014);
-        lyricSunTarget = lyricSunHold > 0.16 ? clamp01((lyricSunHold - 0.16) / 0.84) : 0;
+        lyricSunTarget = lyricSunHold > 0.16 ? Mineradio.util.clamp01((lyricSunHold - 0.16) / 0.84) : 0;
         lyricSunEnergy += (lyricSunTarget - lyricSunEnergy) * (lyricSunTarget > lyricSunEnergy ? 0.075 : 0.030);
       } else {
         smoothBass *= 0.91; smoothMid *= 0.91; smoothTreb *= 0.91; smoothEnergy *= 0.91; beatPulse *= 0.82;

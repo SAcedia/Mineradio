@@ -9,7 +9,7 @@ function isCloudSong(song) {
 function isSongLiked(song) {
   if (!song || !song.id) return false;
   if (likedSongMap[String(song.id)]) return true;
-  if (songProviderKey(song) === 'youtube') {
+  if (Mineradio.util.songProviderKey(song) === 'youtube') {
     try { return localStorage.getItem('mineradio-local-like-youtube:' + String(song.id)) !== null; } catch(e) { return false; }
   }
   return false;
@@ -97,7 +97,7 @@ function refreshSearchResultActionStates() {
 async function toggleLikeSong(song) {
   if (!song || !song.id) return;
   var id = String(song.id);
-  if (songProviderKey(song) === 'youtube') {
+  if (Mineradio.util.songProviderKey(song) === 'youtube') {
     var key = 'mineradio-local-like-youtube:' + id;
     var next = !likedSongMap[id];
     likeBusyMap[id] = true;
@@ -119,7 +119,7 @@ async function toggleLikeSong(song) {
     return;
   }
   if (!isCloudSong(song)) {
-    showToast(songProviderKey(song) === 'qq' ? 'QQ 音乐红心同步待登录接口接入' : '本地文件暂不支持红心同步');
+    showToast(Mineradio.util.songProviderKey(song) === 'qq' ? 'QQ 音乐红心同步待登录接口接入' : '本地文件暂不支持红心同步');
     return;
   }
   if (!ensureLoggedInForAction()) return;
@@ -152,3 +152,29 @@ function toggleLikeCurrent() { toggleLikeSong(currentCoverSong()); }
 function toggleLikeSearchResult(i) { if (playlist[i]) toggleLikeSong(playlist[i]); }
 function toggleLikeQueueIndex(i) { if (playQueue[i]) toggleLikeSong(playQueue[i]); }
 function toggleLikeDetailSong(song) { toggleLikeSong(song); }
+
+// ============================================================
+//  Namespace Exports — Mineradio.like
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.like = {
+  isCloudSong: isCloudSong,
+  isSongLiked: isSongLiked,
+  ensureLoggedInForAction: ensureLoggedInForAction,
+  updateLikeButtons: updateLikeButtons,
+  heartIconSvg: heartIconSvg,
+  playlistPlusIconSvg: playlistPlusIconSvg,
+  artistCollectTrayIconSvg: artistCollectTrayIconSvg,
+  artistNextPlusIconSvg: artistNextPlusIconSvg,
+  songActionHtml: songActionHtml,
+  syncLikeStatusForSongs: syncLikeStatusForSongs,
+  syncLikeStatusForSong: syncLikeStatusForSong,
+  isLikedPlaylistContext: isLikedPlaylistContext,
+  markSongsLiked: markSongsLiked,
+  refreshSearchResultActionStates: refreshSearchResultActionStates,
+  toggleLikeSong: toggleLikeSong,
+  toggleLikeCurrent: toggleLikeCurrent,
+  toggleLikeSearchResult: toggleLikeSearchResult,
+  toggleLikeQueueIndex: toggleLikeQueueIndex,
+  toggleLikeDetailSong: toggleLikeDetailSong
+};

@@ -243,7 +243,7 @@ function scheduleBeatAnalysis(songId, audioUrl, token, song) {
         if (token !== beatMapToken) return;
         if (!map) {
           // 分析未产生结果，写入负面缓存避免重复尝试
-          if (song && songProviderKey(song) === 'youtube' && songId) {
+          if (song && Mineradio.util.songProviderKey(song) === 'youtube' && songId) {
             writeBeatDiskFailCache(songId, song);
           }
           return;
@@ -252,7 +252,7 @@ function scheduleBeatAnalysis(songId, audioUrl, token, song) {
       }).catch(function(err){
         console.warn('scheduled beat analysis failed:', err);
         hideBeatChip();
-        if (song && songProviderKey(song) === 'youtube' && songId) {
+        if (song && Mineradio.util.songProviderKey(song) === 'youtube' && songId) {
           writeBeatDiskFailCache(songId, song);
         }
       });
@@ -264,7 +264,7 @@ function scheduleBeatAnalysis(songId, audioUrl, token, song) {
 function beatMapSongKey(song) {
   if (!song) return '';
   if (song.type === 'local' && song.localKey) return 'local:' + song.localKey;
-  if (songProviderKey(song) === 'qq') return 'qq:' + (song.mid || song.songmid || song.id || (song.name + '|' + song.artist));
+  if (Mineradio.util.songProviderKey(song) === 'qq') return 'qq:' + (song.mid || song.songmid || song.id || (song.name + '|' + song.artist));
   if (song.id != null && song.id !== '') return 'song:' + song.id;
   return '';
 }
@@ -332,13 +332,13 @@ async function writeBeatDiskCache(key, map, song, mode) {
   try {
     var packed = packLocalBeatMap(map);
     if (!packed) return false;
-    var r = await apiJson('/api/beatmap/cache', {
+    var r = await Mineradio.util.apiJson('/api/beatmap/cache', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         key: key,
         mode: mode || 'mr',
-        provider: songProviderKey(song),
+        provider: Mineradio.util.songProviderKey(song),
         title: song && song.name,
         artist: song && song.artist,
         map: packed
@@ -358,14 +358,14 @@ async function writeBeatDiskFailCache(key, song) {
   var st = await ensureBeatDiskCacheStatus();
   if (!st.enabled) return false;
   try {
-    var r = await apiJson('/api/beatmap/cache', {
+    var r = await Mineradio.util.apiJson('/api/beatmap/cache', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         key: key,
         mode: 'mr',
         failed: true,
-        provider: songProviderKey(song),
+        provider: Mineradio.util.songProviderKey(song),
         title: song && song.name,
         artist: song && song.artist,
       })
@@ -409,7 +409,7 @@ function normalizeBeatPrefetchState(state) {
 
 async function fetchBeatPrefetchAudioUrl(song) {
   if (!song) return null;
-  var isQQ = songProviderKey(song) === 'qq';
+  var isQQ = Mineradio.util.songProviderKey(song) === 'qq';
   var requestedQuality = normalizePlaybackQuality(playbackQuality);
   if (!isQQ && requestedQuality === 'jymaster' && !hasProviderSvip('netease', loginStatus)) requestedQuality = 'hires';
   if (isQQ && qqPlaybackQualityCeiling && (requestedQuality === 'jymaster' || requestedQuality === 'hires' || requestedQuality === 'lossless')) requestedQuality = qqPlaybackQualityCeiling;
@@ -494,7 +494,7 @@ async function runQueueBeatPrefetch(fromIdx, token, seq, state) {
 async function analyzeAudioBeats(audioUrl, durationSec, token, options) {
   options = options || {};
   // YT/SP 歌曲不显示分析提示（静默分析，失败也不卡界面）
-  var isNonNativeSource = options.song && songProviderKey(options.song) === 'youtube';
+  var isNonNativeSource = options.song && Mineradio.util.songProviderKey(options.song) === 'youtube';
   if (isNonNativeSource) {
     options.background = true;
   }
@@ -743,10 +743,10 @@ async function analyzeAudioBeats(audioUrl, durationSec, token, options) {
         out.pulse = true;
         out.sparse = true;
         out.tone = tag || 'sunset-groove';
-        out.impact = clampRange((out.impact || out.strength || 0.30) * (accent ? 0.76 : 0.66) + score * 0.07, 0.18, accent ? 0.58 : 0.50);
-        out.strength = clampRange((out.strength || 0.34) * (accent ? 0.76 : 0.68) + score * 0.055, 0.30, accent ? 0.64 : 0.56);
-        out.mass = clampRange((out.mass || 0.48) * 0.78, 0.28, 0.60);
-        out.sharpness = clampRange((out.sharpness || 0.10) * 0.66, 0.05, 0.32);
+        out.impact = Mineradio.util.clampRange((out.impact || out.strength || 0.30) * (accent ? 0.76 : 0.66) + score * 0.07, 0.18, accent ? 0.58 : 0.50);
+        out.strength = Mineradio.util.clampRange((out.strength || 0.34) * (accent ? 0.76 : 0.68) + score * 0.055, 0.30, accent ? 0.64 : 0.56);
+        out.mass = Mineradio.util.clampRange((out.mass || 0.48) * 0.78, 0.28, 0.60);
+        out.sharpness = Mineradio.util.clampRange((out.sharpness || 0.10) * 0.66, 0.05, 0.32);
         out._sparseScore = score;
         return out;
       }
@@ -778,14 +778,14 @@ async function analyzeAudioBeats(audioUrl, durationSec, token, options) {
         var snapMix = (snapTone * 0.58) / toneTotal;
         return {
           time: time,
-          strength: clampRange(0.30 + score * 0.055, 0.30, 0.52),
-          confidence: clampRange(0.46 + score * 0.08, 0.46, 0.66),
+          strength: Mineradio.util.clampRange(0.30 + score * 0.055, 0.30, 0.52),
+          confidence: Mineradio.util.clampRange(0.46 + score * 0.08, 0.46, 0.66),
           primary: true,
           camera: true,
           pulse: true,
           sparse: true,
           tone: tag || 'sunset-pattern',
-          impact: clampRange(0.18 + score * 0.060, 0.18, 0.48),
+          impact: Mineradio.util.clampRange(0.18 + score * 0.060, 0.18, 0.48),
           low: Math.max(0.22, Math.min(0.74, lowMix)),
           body: bodyMix,
           snap: snapMix,
@@ -828,9 +828,9 @@ async function analyzeAudioBeats(audioUrl, durationSec, token, options) {
         var oddGap = medianNumber(oddGaps);
         var patternGaps;
         if (evenGap && oddGap && Math.abs(evenGap - oddGap) > 0.16) {
-          patternGaps = [evenGap, oddGap].map(function(v){ return clampRange(v, 1.30, 2.22); });
+          patternGaps = [evenGap, oddGap].map(function(v){ return Mineradio.util.clampRange(v, 1.30, 2.22); });
         } else {
-          patternGaps = [clampRange(medianNumber(firstGaps), 1.42, 2.12)];
+          patternGaps = [Mineradio.util.clampRange(medianNumber(firstGaps), 1.42, 2.12)];
         }
         var refScore = Math.max(0.35, eventPercentile(hits, 0.50));
         return {
@@ -875,7 +875,7 @@ async function analyzeAudioBeats(audioUrl, durationSec, token, options) {
 
       var railStep = step;
       while (railStep < 1.35) railStep *= 2;
-      railStep = clampRange(railStep, 1.42, 2.12);
+      railStep = Mineradio.util.clampRange(railStep, 1.42, 2.12);
       var railMultiple = Math.max(1, Math.round(railStep / step));
       if (railMultiple < 2 && step < 1.20) railMultiple = 2;
       var phaseScores = new Array(railMultiple);
@@ -1164,17 +1164,17 @@ async function analyzeAudioBeats(audioUrl, durationSec, token, options) {
       for (var tm = 0; tm < tempoMetrics.length; tm++) {
         var m = tempoMetrics[tm];
         var mtSlot = m.index % 4;
-        var powerRel = clamp01((m.power - powerFloor) / (powerCeil - powerFloor));
-        var lowRel = clamp01((m.lowTone - lowFloor) / (lowCeil - lowFloor));
-        var bodyRel = clamp01((m.bodyTone - bodyFloor) / (bodyCeil - bodyFloor));
-        var snapRel = clamp01((m.snapTone - snapFloor) / (snapCeil - snapFloor));
-        var lowRiseRel = clamp01(((m.lowRise || 0) - lowRiseFloor) / (lowRiseCeil - lowRiseFloor));
-        var bodyRiseRel = clamp01(((m.bodyRise || 0) - bodyRiseFloor) / (bodyRiseCeil - bodyRiseFloor));
-        var snapRiseRel = clamp01(((m.snapRise || 0) - snapRiseFloor) / (snapRiseCeil - snapRiseFloor));
-        var mtImpact = clamp01(powerRel * 0.50 + lowRel * 0.24 + bodyRel * 0.18 + snapRel * 0.08);
+        var powerRel = Mineradio.util.clamp01((m.power - powerFloor) / (powerCeil - powerFloor));
+        var lowRel = Mineradio.util.clamp01((m.lowTone - lowFloor) / (lowCeil - lowFloor));
+        var bodyRel = Mineradio.util.clamp01((m.bodyTone - bodyFloor) / (bodyCeil - bodyFloor));
+        var snapRel = Mineradio.util.clamp01((m.snapTone - snapFloor) / (snapCeil - snapFloor));
+        var lowRiseRel = Mineradio.util.clamp01(((m.lowRise || 0) - lowRiseFloor) / (lowRiseCeil - lowRiseFloor));
+        var bodyRiseRel = Mineradio.util.clamp01(((m.bodyRise || 0) - bodyRiseFloor) / (bodyRiseCeil - bodyRiseFloor));
+        var snapRiseRel = Mineradio.util.clamp01(((m.snapRise || 0) - snapRiseFloor) / (snapRiseCeil - snapRiseFloor));
+        var mtImpact = Mineradio.util.clamp01(powerRel * 0.50 + lowRel * 0.24 + bodyRel * 0.18 + snapRel * 0.08);
         if (m.nearest) mtImpact = Math.max(mtImpact, Math.min(1, m.nearest.strength * 0.58 + (m.nearest.primary ? 0.08 : 0)));
         if (softGrooveAnalysis) {
-          mtImpact = clamp01(powerRel * 0.34 + lowRel * 0.18 + bodyRel * 0.18 + lowRiseRel * 0.24 + bodyRiseRel * 0.24 + snapRiseRel * 0.04);
+          mtImpact = Mineradio.util.clamp01(powerRel * 0.34 + lowRel * 0.18 + bodyRel * 0.18 + lowRiseRel * 0.24 + bodyRiseRel * 0.24 + snapRiseRel * 0.04);
           if (m.nearest) mtImpact = Math.max(mtImpact, Math.min(0.72, m.nearest.strength * 0.42 + (m.nearest.primary ? 0.06 : 0)));
         }
         var activeCamera = mtImpact >= 0.20 || (mtSlot === 0 && mtImpact >= 0.15 && (lowRel > 0.20 || bodyRel > 0.26));
@@ -1448,7 +1448,7 @@ async function buildPodcastDjLowOnlyBeatMap(buffer, token) {
       }
       var lowTone = Math.min(2.6, bandAt(lowEnergy, peakF) / lowRef);
       var hitTone = Math.min(2.6, bandAt(hitEnergy, peakF) / hitRef);
-      var lowRel = clamp01((bandAt(lowEnergy, peakF) - lowFloor) / Math.max(0.0001, lowCeil - lowFloor));
+      var lowRel = Mineradio.util.clamp01((bandAt(lowEnergy, peakF) - lowFloor) / Math.max(0.0001, lowCeil - lowFloor));
       var score = (o - th) / Math.max(0.0006, std + mean * 0.38 + lowRef * 0.012);
       if (score > 0.16 && (lowTone > 0.32 || lowRel > 0.22 || hitTone > 0.52)) {
         var cand = {
@@ -1460,7 +1460,7 @@ async function buildPodcastDjLowOnlyBeatMap(buffer, token) {
           lowRel: lowRel,
           raw: o
         };
-        cand.power = cand.score * 0.56 + Math.pow(clamp01((cand.lowTone - 0.22) / 1.42), 0.82) * 0.34 + Math.min(1.5, cand.hitTone) * 0.08 + cand.lowRel * 0.10;
+        cand.power = cand.score * 0.56 + Math.pow(Mineradio.util.clamp01((cand.lowTone - 0.22) / 1.42), 0.82) * 0.34 + Math.min(1.5, cand.hitTone) * 0.08 + cand.lowRel * 0.10;
         var last = candidates[candidates.length - 1];
         if (last && cand.frame - last.frame < minFrameGap) {
           if (cand.power > last.power) candidates[candidates.length - 1] = cand;
@@ -1522,7 +1522,7 @@ async function buildPodcastDjLowOnlyBeatMap(buffer, token) {
     return median(medGaps);
   }
   var globalStep = estimateStep(strong) || estimateStep(candidates) || 0.50;
-  globalStep = clampRange(globalStep, 0.32, 0.86);
+  globalStep = Mineradio.util.clampRange(globalStep, 0.32, 0.86);
 
   function nearestCandidate(center, windowSec, startIdx) {
     var best = null;
@@ -1579,8 +1579,8 @@ async function buildPodcastDjLowOnlyBeatMap(buffer, token) {
     var seg = strong.filter(function(c){ return c.time >= t0 && c.time < t1; });
     var prevStep = sectionSteps.length ? sectionSteps[sectionSteps.length - 1] : globalStep;
     var localStep = estimateStep(seg) || prevStep || globalStep;
-    if (prevStep) localStep = clampRange(localStep, prevStep * 0.94, prevStep * 1.06);
-    if (globalStep) localStep = clampRange(localStep, globalStep * 0.86, globalStep * 1.14);
+    if (prevStep) localStep = Mineradio.util.clampRange(localStep, prevStep * 0.94, prevStep * 1.06);
+    if (globalStep) localStep = Mineradio.util.clampRange(localStep, globalStep * 0.86, globalStep * 1.14);
     var blended = prevStep ? (localStep * 0.30 + prevStep * 0.70) : localStep;
     sectionSteps.push(blended || globalStep);
   }
@@ -1606,16 +1606,16 @@ async function buildPodcastDjLowOnlyBeatMap(buffer, token) {
     var hitTone2 = bestCand ? Math.max(gridHitTone * 0.62, bestCand.hitTone) : gridHitTone;
     var distPenalty = bestCand ? (1 - Math.min(1, Math.abs(bestCand.time - gridT) / winSec) * 0.26) : 0.54;
     var basePower = bestCand ? bestCand.power * distPenalty : (gridLowTone * 0.25 + gridHitTone * 0.06);
-    var powerRel = clamp01((basePower - p30 * 0.78) / Math.max(0.001, p96 - p30 * 0.78));
-    var lowRel2 = clamp01((gridLow - lowFloor) / Math.max(0.0001, lowCeil - lowFloor));
-    var kickRel = clamp01(powerRel * 0.74 + lowRel2 * 0.22 + clamp01((hitTone2 - 0.26) / 1.70) * 0.04);
+    var powerRel = Mineradio.util.clamp01((basePower - p30 * 0.78) / Math.max(0.001, p96 - p30 * 0.78));
+    var lowRel2 = Mineradio.util.clamp01((gridLow - lowFloor) / Math.max(0.0001, lowCeil - lowFloor));
+    var kickRel = Mineradio.util.clamp01(powerRel * 0.74 + lowRel2 * 0.22 + Mineradio.util.clamp01((hitTone2 - 0.26) / 1.70) * 0.04);
     var softGrid = (!bestCand && lowRel2 < 0.20) || kickRel < 0.16;
     var slot = gridIndex % 4;
     var combo = slot === 0 ? 'downbeat' : (slot === 1 ? 'push' : (slot === 2 ? 'drop' : 'rebound'));
     if (kickRel > 0.84 && combo !== 'downbeat') combo = 'accent';
     var visualRel = kickRel > 0.76 ? 0.76 + (kickRel - 0.76) * 0.52 : kickRel;
     var downLift = combo === 'downbeat' ? (visualRel > 0.18 ? (0.016 + visualRel * 0.036) : visualRel * 0.028) : 0;
-    var sectionGate = clamp01((kickRel - 0.10) / 0.58);
+    var sectionGate = Mineradio.util.clamp01((kickRel - 0.10) / 0.58);
     var impact = Math.max(0.020, Math.min(0.88, 0.022 + Math.pow(visualRel, 1.62) * 0.86 + downLift));
     var strength = Math.max(0.12, Math.min(0.93, 0.13 + Math.pow(visualRel, 1.12) * 0.68 + downLift * 0.70));
     if (softGrid) {
@@ -1623,7 +1623,7 @@ async function buildPodcastDjLowOnlyBeatMap(buffer, token) {
       impact *= softMul;
       strength *= 0.58 + sectionGate * 0.22;
     }
-    var timingPull = bestCand ? (0.24 + clamp01((kickRel - 0.25) / 0.65) * 0.46) : 0;
+    var timingPull = bestCand ? (0.24 + Mineradio.util.clamp01((kickRel - 0.25) / 0.65) * 0.46) : 0;
     var sourceTime = bestCand ? (gridT * (1 - timingPull) + bestCand.time * timingPull) : gridT;
     var cameraActive = impact >= 0.13 || (combo === 'downbeat' && kickRel >= 0.14) || (bestCand && kickRel >= 0.18);
     var lowMix = Math.max(0.42, Math.min(0.90, 0.52 + visualRel * 0.32 + lowTone2 * 0.035 - (combo === 'accent' ? 0.10 : 0)));
@@ -1880,7 +1880,7 @@ async function analyzePodcastDjBeats(audioUrl, token, durationSec) {
       }
       var prevSectionStep = sectionSteps.length ? sectionSteps[sectionSteps.length - 1] : globalStep;
       var step = median(gaps) || prevSectionStep || globalStep;
-      if (globalStep) step = clampRange(step, globalStep * 0.90, globalStep * 1.10);
+      if (globalStep) step = Mineradio.util.clampRange(step, globalStep * 0.90, globalStep * 1.10);
       if (prevSectionStep && Math.abs(step - prevSectionStep) / prevSectionStep > 0.08) {
         step = step * 0.28 + prevSectionStep * 0.72;
       } else if (prevSectionStep) {
@@ -1966,7 +1966,7 @@ async function analyzePodcastDjBeats(audioUrl, token, durationSec) {
       var sourceTime = bestCand ? (gridT * 0.38 + bestCand.time * 0.62) : gridT;
       var powerBase = bestCand ? bestCand.power : (gridLowTone * 0.22 + gridBodyTone * 0.04 + gridSnapTone * 0.02);
       var distPenalty = bestCand ? (1 - Math.min(1, Math.abs(bestCand.time - gridT) / winSec) * 0.30) : 0.58;
-      var powerRel = clamp01(((powerBase * distPenalty) - p35 * 0.78) / Math.max(0.001, p90 - p35 * 0.78));
+      var powerRel = Mineradio.util.clamp01(((powerBase * distPenalty) - p35 * 0.78) / Math.max(0.001, p90 - p35 * 0.78));
       var lowTone2 = bestCand ? Math.max(gridLowTone * 0.55, bestCand.lowTone) : gridLowTone;
       var bodyTone2 = bestCand ? Math.max(gridBodyTone * 0.50, bestCand.bodyTone) : gridBodyTone;
       var snapTone2 = bestCand ? Math.max(gridSnapTone * 0.50, bestCand.snapTone) : gridSnapTone;
@@ -2041,8 +2041,8 @@ function applyPodcastDjProfileFromMap(map) {
   if (!map || !djMode.active) return;
   var density = (map.cameraBeats || []).length / Math.max(20, map.duration || 20);
   cinemaTrackProfile.density = density;
-  var target = 0.82 + clamp01((density - 1.25) / 1.8) * 0.16;
-  target = clampRange(target, 0.76, 1.10);
+  var target = 0.82 + Mineradio.util.clamp01((density - 1.25) / 1.8) * 0.16;
+  target = Mineradio.util.clampRange(target, 0.76, 1.10);
   cinemaTrackProfile.target = target;
   cinemaTrackProfile.scale += (target - cinemaTrackProfile.scale) * 0.34;
 }
@@ -2325,11 +2325,11 @@ function openLocalBeatModal(song, audioUrl) {
   localBeatAnalysis.active = false;
   setLocalBeatStatus('', '');
   updateLocalBeatModal();
-  openGsapModal(document.getElementById('local-beat-modal'));
+  Mineradio.util.openGsapModal(document.getElementById('local-beat-modal'));
 }
 function closeLocalBeatModal() {
   if (localBeatAnalysis.active) return;
-  closeGsapModal(document.getElementById('local-beat-modal'));
+  Mineradio.util.closeGsapModal(document.getElementById('local-beat-modal'));
 }
 function selectLocalBeatMode(mode) {
   if (localBeatAnalysis.active) return;
@@ -2395,7 +2395,7 @@ async function startLocalBeatAnalysis(mode) {
   var cached = getLocalBeatEntry(song.localKey, mode);
   if (cached) {
     applyLocalBeatMap(song, mode, cached, true);
-    closeGsapModal(document.getElementById('local-beat-modal'));
+    Mineradio.util.closeGsapModal(document.getElementById('local-beat-modal'));
     return;
   }
   localBeatAnalysis.active = true;
@@ -2434,7 +2434,7 @@ async function startLocalBeatAnalysis(mode) {
     updateLocalBeatModal();
     showToast((mode === 'dj' ? 'DJ' : 'MR') + ' 本地节奏分析完成');
     setTimeout(function(){
-      if (!localBeatAnalysis.active) closeGsapModal(document.getElementById('local-beat-modal'));
+      if (!localBeatAnalysis.active) Mineradio.util.closeGsapModal(document.getElementById('local-beat-modal'));
     }, 900);
   } catch (err) {
     console.warn('local beat analysis failed:', err);
@@ -2564,7 +2564,7 @@ function triggerScheduledBeat(beat) {
   var dynScale = cameraDynamicsScale(0.88 + impact * 0.16);
   var djPulse = beat && beat.dj;
   var pulse = (0.14 + strength * 0.46 + impact * 0.18 + body * 0.08 + comboLift) * dynScale;
-  if (djPulse) pulse = (0.12 + strength * 0.50 + impact * 0.28 + comboLift * 0.70) * clampRange(dynScale, 0.78, 1.18);
+  if (djPulse) pulse = (0.12 + strength * 0.50 + impact * 0.28 + comboLift * 0.70) * Mineradio.util.clampRange(dynScale, 0.78, 1.18);
   pulse = Math.min(djPulse ? 0.92 : 0.78, pulse);
   scheduledBeatPulse = Math.max(scheduledBeatPulse, pulse);
   scheduledBeatFlag = true;
@@ -2782,7 +2782,7 @@ function openCoverCropModal(img, dataUrl) {
     lastX: 0,
     lastY: 0
   };
-  openGsapModal(modal);
+  Mineradio.util.openGsapModal(modal);
   requestAnimationFrame(function(){
     initCoverCropGeometry();
     pulseCoverCropStage();
@@ -2858,7 +2858,7 @@ function pulseCoverCropStage() {
 
 function closeCoverCropModal() {
   var modal = document.getElementById('cover-crop-modal');
-  closeGsapModal(modal, function(){
+  Mineradio.util.closeGsapModal(modal, function(){
     var imgEl = document.getElementById('cover-crop-img');
     if (imgEl) imgEl.removeAttribute('src');
     coverCropState = null;
@@ -2873,4 +2873,90 @@ function commitCoverCrop() {
   commitCustomCoverCanvas(cv);
   closeCoverCropModal();
 }
+
+// ============================================================
+//  Namespace Exports — Mineradio.beat
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.beat = {
+  medianGap: medianGap,
+  normalizeMusicTempoBeats: normalizeMusicTempoBeats,
+  estimateTempoPhaseOffset: estimateTempoPhaseOffset,
+  ensureMusicTempo: ensureMusicTempo,
+  getMusicTempoWorkerUrl: getMusicTempoWorkerUrl,
+  analyzeMusicTempoInWorker: analyzeMusicTempoInWorker,
+  scheduleBeatAnalysis: scheduleBeatAnalysis,
+  beatMapSongKey: beatMapSongKey,
+  localBeatDiskKey: localBeatDiskKey,
+  updateBeatDiskCacheStatus: updateBeatDiskCacheStatus,
+  ensureBeatDiskCacheStatus: ensureBeatDiskCacheStatus,
+  readBeatDiskCache: readBeatDiskCache,
+  writeBeatDiskCache: writeBeatDiskCache,
+  writeBeatDiskFailCache: writeBeatDiskFailCache,
+  isBeatPrefetchCandidate: isBeatPrefetchCandidate,
+  findNextBeatPrefetchIndex: findNextBeatPrefetchIndex,
+  normalizeBeatPrefetchState: normalizeBeatPrefetchState,
+  fetchBeatPrefetchAudioUrl: fetchBeatPrefetchAudioUrl,
+  scheduleQueueBeatPrefetch: scheduleQueueBeatPrefetch,
+  runQueueBeatPrefetch: runQueueBeatPrefetch,
+  analyzeAudioBeats: analyzeAudioBeats,
+  schedulePodcastDjAnalysis: schedulePodcastDjAnalysis,
+  analyzePodcastDjIntroBeats: analyzePodcastDjIntroBeats,
+  buildPodcastDjLowOnlyBeatMap: buildPodcastDjLowOnlyBeatMap,
+  analyzePodcastDjBeats: analyzePodcastDjBeats,
+  applyPodcastDjProfileFromMap: applyPodcastDjProfileFromMap,
+  smoothPodcastDjMapHandoff: smoothPodcastDjMapHandoff,
+  smoothPodcastDjIntroHandoff: smoothPodcastDjIntroHandoff,
+  showBeatChip: showBeatChip,
+  hideBeatChip: hideBeatChip,
+  localBeatRound: localBeatRound,
+  packLocalBeatEvent: packLocalBeatEvent,
+  unpackLocalBeatEvent: unpackLocalBeatEvent,
+  packLocalBeatMap: packLocalBeatMap,
+  unpackLocalBeatMap: unpackLocalBeatMap,
+  readLocalBeatPrefs: readLocalBeatPrefs,
+  saveLocalBeatPrefs: saveLocalBeatPrefs,
+  readLocalBeatMapCache: readLocalBeatMapCache,
+  packLocalBeatCache: packLocalBeatCache,
+  saveLocalBeatMapCache: saveLocalBeatMapCache,
+  getLocalBeatEntry: getLocalBeatEntry,
+  storeLocalBeatEntry: storeLocalBeatEntry,
+  setLocalBeatStatus: setLocalBeatStatus,
+  localBeatVisualCount: localBeatVisualCount,
+  setLocalBeatPreference: setLocalBeatPreference,
+  applyLocalBeatMap: applyLocalBeatMap,
+  prepareLocalBeatAnalysis: prepareLocalBeatAnalysis,
+  openLocalBeatModal: openLocalBeatModal,
+  closeLocalBeatModal: closeLocalBeatModal,
+  selectLocalBeatMode: selectLocalBeatMode,
+  updateLocalBeatModal: updateLocalBeatModal,
+  cancelLocalBeatAnalysis: cancelLocalBeatAnalysis,
+  startLocalBeatAnalysis: startLocalBeatAnalysis,
+  smoothBeatMapHandoff: smoothBeatMapHandoff,
+  applyBeatMapCacheForCurrent: applyBeatMapCacheForCurrent,
+  syncBeatMapPlaybackCursor: syncBeatMapPlaybackCursor,
+  syncPodcastDjMapCursor: syncPodcastDjMapCursor,
+  tickPodcastDjBeatMap: tickPodcastDjBeatMap,
+  tickBeatMap: tickBeatMap,
+  triggerScheduledBeat: triggerScheduledBeat,
+  showAIDepthChip: showAIDepthChip,
+  hideAIDepthChip: hideAIDepthChip,
+  loadCoverFromUrl: loadCoverFromUrl,
+  setAlbumBackground: setAlbumBackground,
+  makeSquareCoverCanvas: makeSquareCoverCanvas,
+  coverCanvasToDataUrl: coverCanvasToDataUrl,
+  applyCoverDataUrl: applyCoverDataUrl,
+  commitCustomCoverCanvas: commitCustomCoverCanvas,
+  loadCoverFromFile: loadCoverFromFile,
+  bindCoverCropModal: bindCoverCropModal,
+  openCoverCropModal: openCoverCropModal,
+  initCoverCropGeometry: initCoverCropGeometry,
+  clampCoverCropPan: clampCoverCropPan,
+  updateCoverCropTransform: updateCoverCropTransform,
+  currentCoverCropRect: currentCoverCropRect,
+  drawCoverCropPreview: drawCoverCropPreview,
+  pulseCoverCropStage: pulseCoverCropStage,
+  closeCoverCropModal: closeCoverCropModal,
+  commitCoverCrop: commitCoverCrop
+};
 

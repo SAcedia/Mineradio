@@ -4,6 +4,8 @@
 // ============================================================
 //  搜索
 // ============================================================
+// Forward-decl: real impl in 12-playback.js (loads after this file)
+function updateSearchPillGlassDisplacementMap() {}
 window.Mineradio.bus.on('like:toggle', function(data) {
   refreshSearchResultActionStates();
 });
@@ -70,7 +72,7 @@ function renderSearchHistory() {
     '<div class="search-history">' +
       '<div class="search-history-head"><span>搜索历史</span><button class="search-history-clear" type="button" data-clear-history="1">清空</button></div>' +
       '<div class="search-history-list">' +
-        items.map(function(q){ return '<button class="search-history-chip" type="button" data-history-query="' + escHtml(q) + '">' + escHtml(q) + '</button>'; }).join('') +
+        items.map(function(q){ return '<button class="search-history-chip" type="button" data-history-query="' + Mineradio.util.escHtml(q) + '">' + Mineradio.util.escHtml(q) + '</button>'; }).join('') +
       '</div>' +
     '</div>';
   $results.classList.add('show');
@@ -189,8 +191,8 @@ function renderPodcastRadios(items, label) {
       '<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0" onclick="openPodcastPrograms(' + i + ')">' +
         searchThumbHtml(p.cover) +
         '<div class="search-result-info">' +
-          '<div class="search-result-title">' + escHtml(p.name || '') + '<span class="tag-podcast">Podcast</span></div>' +
-          '<div class="search-result-meta">' + escHtml(podcastMetaText(p) || label || 'NetEase Radio') + '</div>' +
+          '<div class="search-result-title">' + Mineradio.util.escHtml(p.name || '') + '<span class="tag-podcast">Podcast</span></div>' +
+          '<div class="search-result-meta">' + Mineradio.util.escHtml(podcastMetaText(p) || label || 'NetEase Radio') + '</div>' +
         '</div>' +
       '</div>' +
       '<button class="add-btn" title="Open" onclick="event.stopPropagation();openPodcastPrograms(' + i + ')">›</button>' +
@@ -243,7 +245,7 @@ async function openPodcastPrograms(i) {
 function renderPodcastPrograms() {
   var radio = podcastCurrentRadio || {};
   if (!podcastPrograms.length) {
-    $results.innerHTML = '<div class="podcast-result-head"><button class="podcast-back-btn" onclick="event.stopPropagation();renderPodcastRadios(podcastResults)">‹</button><div class="search-result-info"><div class="search-result-title">' + escHtml(radio.name || 'Podcast') + '</div><div class="search-result-meta">No playable episodes</div></div></div>';
+    $results.innerHTML = '<div class="podcast-result-head"><button class="podcast-back-btn" onclick="event.stopPropagation();renderPodcastRadios(podcastResults)">‹</button><div class="search-result-info"><div class="search-result-title">' + Mineradio.util.escHtml(radio.name || 'Podcast') + '</div><div class="search-result-meta">No playable episodes</div></div></div>';
     $results.classList.add('show');
     return;
   }
@@ -251,15 +253,15 @@ function renderPodcastPrograms() {
     '<div class="podcast-result-head">' +
       '<button class="podcast-back-btn" onclick="event.stopPropagation();renderPodcastRadios(podcastResults)">‹</button>' +
       searchThumbHtml(radio.cover) +
-      '<div class="search-result-info"><div class="search-result-title">' + escHtml(radio.name || 'Podcast') + '<span class="tag-podcast">Podcast</span></div><div class="search-result-meta">' + escHtml(radio.djName || (podcastPrograms.length + ' episodes')) + '</div></div>' +
+      '<div class="search-result-info"><div class="search-result-title">' + Mineradio.util.escHtml(radio.name || 'Podcast') + '<span class="tag-podcast">Podcast</span></div><div class="search-result-meta">' + Mineradio.util.escHtml(radio.djName || (podcastPrograms.length + ' episodes')) + '</div></div>' +
     '</div>' +
     podcastPrograms.map(function(p, i){
       return '<div class="search-result">' +
         '<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0" onclick="playPodcastProgram(' + i + ')">' +
           searchThumbHtml(p.cover) +
           '<div class="search-result-info">' +
-            '<div class="search-result-title">' + escHtml(p.name || '') + '</div>' +
-            '<div class="search-result-meta">' + escHtml(programMetaText(p)) + '</div>' +
+            '<div class="search-result-title">' + Mineradio.util.escHtml(p.name || '') + '</div>' +
+            '<div class="search-result-meta">' + Mineradio.util.escHtml(programMetaText(p)) + '</div>' +
           '</div>' +
         '</div>' +
         '<button class="add-btn" title="下一首播放" onclick="event.stopPropagation();queuePodcastProgram(' + i + ')">+</button>' +
@@ -287,7 +289,7 @@ $input.addEventListener('input', function(){
     return;
   }
   if (isMusicSearchMode(searchMode)) {
-    $results.innerHTML = '<div class="search-empty">正在搜索 “' + escHtml(q) + '”…</div>';
+    $results.innerHTML = '<div class="search-empty">正在搜索 “' + Mineradio.util.escHtml(q) + '”…</div>';
     $results.classList.add('show');
   }
   searchTimer = setTimeout(function(){ doSearch(q); }, 180);
@@ -303,6 +305,11 @@ var searchBoxEl = document.getElementById('search-box');
 if (searchBoxEl) {
   searchBoxEl.addEventListener('click', function(){
     if ($input) $input.focus();
+    var area = document.getElementById('search-area');
+    if (area && !area.classList.contains('peek')) {
+      setPeek(area, true, 'search');
+      if (typeof markRenderInteraction === 'function') markRenderInteraction('search-click', 600);
+    }
   });
 }
 $input.addEventListener('keydown', function(e){
@@ -344,7 +351,7 @@ document.addEventListener('click', function(e){
 updateSearchModeTabs();
 
 function songSourceTagHtml(song) {
-  var key = songProviderKey(song);
+  var key = Mineradio.util.songProviderKey(song);
   var label = ({ netease: 'NE', qq: 'QQ', youtube: 'YT' })[key] || key.toUpperCase();
   return '<span class="tag-source ' + key + '">' + label + '</span>';
 }
@@ -352,7 +359,7 @@ function searchResultMetaText(song) {
   var bits = [];
   if (song.artist) bits.push(song.artist);
   if (song.album) bits.push(song.album);
-  if (songProviderKey(song) === 'qq' && !song.playable) bits.push('QQ 播放需会话/授权');
+  if (Mineradio.util.songProviderKey(song) === 'qq' && !song.playable) bits.push('QQ 播放需会话/授权');
   return bits.join('  ·  ') || songSourceLabel(song);
 }
 function searchResultMetaHtml(song, index) {
@@ -360,10 +367,10 @@ function searchResultMetaHtml(song, index) {
   var artist = String(song.artist || '').trim();
   var bits = [];
   if (song.album) bits.push(song.album);
-  if (songProviderKey(song) === 'qq' && !song.playable) bits.push('QQ 播放需会话/授权');
-  var tail = bits.length ? (' · ' + escHtml(bits.join('  ·  '))) : '';
-  if (!artist) return escHtml(searchResultMetaText(song));
-  return '<button class="search-artist-link" type="button" onclick="event.stopPropagation();openSearchResultArtist(' + index + ')">' + escHtml(artist) + '</button>' + tail;
+  if (Mineradio.util.songProviderKey(song) === 'qq' && !song.playable) bits.push('QQ 播放需会话/授权');
+  var tail = bits.length ? (' · ' + Mineradio.util.escHtml(bits.join('  ·  '))) : '';
+  if (!artist) return Mineradio.util.escHtml(searchResultMetaText(song));
+  return '<button class="search-artist-link" type="button" onclick="event.stopPropagation();openSearchResultArtist(' + index + ')">' + Mineradio.util.escHtml(artist) + '</button>' + tail;
 }
 function openSearchResultArtist(index) {
   var song = playlist && playlist[index];
@@ -453,7 +460,7 @@ function scoreSongSearchResult(song, q, sourceIndex) {
   if (artistMentioned && name && nq.indexOf(name) >= 0) score += 34;
   if (/周杰伦|周杰倫|jay\s*chou/i.test(String(q || '')) && !artistMentioned) score -= 28;
   if (album && nq && (album.indexOf(nq) >= 0 || nq.indexOf(album) >= 0)) score += 8;
-  if (songProviderKey(song) === 'qq') score += searchIntentPrefersQQ(q) ? 48 : 4;
+  if (Mineradio.util.songProviderKey(song) === 'qq') score += searchIntentPrefersQQ(q) ? 48 : 4;
   if (song && song.playable === false) score -= 12;
   if (!qAsksDerivative) {
     if (derivative) score -= artistMentioned ? 76 : 96;
@@ -468,7 +475,7 @@ function mergeSongSearchResults(neteaseSongs, qqSongs, limit, q, youtubeSongs) {
   var seen = {};
   function push(song, sourceIndex) {
     if (!song || !song.name) return;
-    var key = songProviderKey(song) + ':' + (song.mid || song.id || (song.name + '|' + song.artist));
+    var key = Mineradio.util.songProviderKey(song) + ':' + (song.mid || song.id || (song.name + '|' + song.artist));
     if (seen[key]) return;
     seen[key] = true;
     song._searchScore = scoreSongSearchResult(song, q, sourceIndex);
@@ -516,7 +523,7 @@ function renderSongSearchResults(songs) {
   $results.innerHTML = playlist.map(function(s, i){
     var vipTag = (s.fee === 1) ? '<span class="tag-vip">VIP</span>' : '';
     var sourceTag = songSourceTagHtml(s);
-    var sourceClass = songProviderKey(s) + '-source';
+    var sourceClass = Mineradio.util.songProviderKey(s) + '-source';
     var thumb = songCoverSrc(s, 80);
     var imgTag = thumb
       ? '<img src="' + thumb + '" alt="" loading="lazy" onerror="this.style.opacity=0.2">'
@@ -525,7 +532,7 @@ function renderSongSearchResults(songs) {
       '<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0" onclick="playSearchResult(' + i + ')">' +
         imgTag +
         '<div class="search-result-info">' +
-          '<div class="search-result-title">' + escHtml(s.name) + sourceTag + vipTag + '</div>' +
+          '<div class="search-result-title">' + Mineradio.util.escHtml(s.name) + sourceTag + vipTag + '</div>' +
           '<div class="search-result-meta">' + searchResultMetaHtml(s, i) + '</div>' +
         '</div>' +
       '</div>' +
@@ -570,3 +577,50 @@ async function doSearch(q, opts) {
     if (opts.autoPlayFirst) playSearchResult(0);
   } catch (err) { console.error('Search:', err); }
 }
+
+// ============================================================
+//  Namespace Exports — Mineradio.search
+// ============================================================
+window.Mineradio = window.Mineradio || {};
+Mineradio.search = {
+  updateSearchPillGlassDisplacementMap: updateSearchPillGlassDisplacementMap,
+  syncSearchAreaResultState: syncSearchAreaResultState,
+  isMusicSearchMode: isMusicSearchMode,
+  searchResultKey: searchResultKey,
+  clearSearchResults: clearSearchResults,
+  readSearchHistory: readSearchHistory,
+  writeSearchHistory: writeSearchHistory,
+  rememberSearchQuery: rememberSearchQuery,
+  renderSearchHistory: renderSearchHistory,
+  clearSearchHistory: clearSearchHistory,
+  runSearchHistory: runSearchHistory,
+  updateSearchModeTabs: updateSearchModeTabs,
+  setSearchMode: setSearchMode,
+  podcastMetaText: podcastMetaText,
+  formatProgramTime: formatProgramTime,
+  programMetaText: programMetaText,
+  searchThumbHtml: searchThumbHtml,
+  renderPodcastRadios: renderPodcastRadios,
+  loadPodcastHot: loadPodcastHot,
+  doPodcastSearch: doPodcastSearch,
+  openPodcastPrograms: openPodcastPrograms,
+  renderPodcastPrograms: renderPodcastPrograms,
+  queuePodcastProgram: queuePodcastProgram,
+  playPodcastProgram: playPodcastProgram,
+  songSourceTagHtml: songSourceTagHtml,
+  searchResultMetaText: searchResultMetaText,
+  searchResultMetaHtml: searchResultMetaHtml,
+  openSearchResultArtist: openSearchResultArtist,
+  searchIntentPrefersQQ: searchIntentPrefersQQ,
+  simpleSearchNorm: simpleSearchNorm,
+  searchMentionsKnownArtist: searchMentionsKnownArtist,
+  searchLooksLikeDerivative: searchLooksLikeDerivative,
+  canonicalOriginalArtistsForSearch: canonicalOriginalArtistsForSearch,
+  songArtistMatchesAny: songArtistMatchesAny,
+  searchLooksLikeSameTitleCover: searchLooksLikeSameTitleCover,
+  scoreSongSearchResult: scoreSongSearchResult,
+  mergeSongSearchResults: mergeSongSearchResults,
+  fetchMusicSearchResults: fetchMusicSearchResults,
+  renderSongSearchResults: renderSongSearchResults,
+  doSearch: doSearch
+};
