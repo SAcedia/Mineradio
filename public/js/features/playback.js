@@ -1041,6 +1041,32 @@ function clearPlayerControlFocusState(reason) {
 }
 
 // ============================================================
+//  统一播放调度 — 按歌曲来源决定直接播放 / 登录 / 试听
+// ============================================================
+function tryPlaySong(song) {
+  if (!song) return;
+  var provider = song.provider || song.source || '';
+  // YouTube 无需登录
+  if (provider === 'youtube') {
+    playQueue = [song];
+    currentIdx = 0;
+    safeRenderQueuePanel('try-play');
+    safeShelfRebuild('try-play', true);
+    forcePlaybackControlsInteractive();
+    playQueueAt(0).catch(function(e){ console.warn('[TryPlay]', e); });
+    return true;
+  }
+  // QQ / 网易云：有登录直接播，没登录也尝试（后端返回试听片段）
+  playQueue = [song];
+  currentIdx = 0;
+  safeRenderQueuePanel('try-play');
+  safeShelfRebuild('try-play', true);
+  forcePlaybackControlsInteractive();
+  playQueueAt(0).catch(function(e){ console.warn('[TryPlay]', e); });
+  return true;
+}
+
+// ============================================================
 //  Namespace Exports — Mineradio.playback
 // ============================================================
 window.Mineradio = window.Mineradio || {};
@@ -1101,5 +1127,6 @@ Mineradio.playback = {
   updateSearchPillGlassDisplacementMap: updateSearchPillGlassDisplacementMap,
   initControlGlassSurface: initControlGlassSurface,
   bindPlayerControlAnimations: bindPlayerControlAnimations,
-  clearPlayerControlFocusState: clearPlayerControlFocusState
+  clearPlayerControlFocusState: clearPlayerControlFocusState,
+  tryPlaySong: tryPlaySong
 };

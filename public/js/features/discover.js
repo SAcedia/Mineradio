@@ -916,7 +916,7 @@ function handleHomeTileClick(index) {
   if (item.kind === 'weatherSong' && typeof window.playWeatherSong === 'function') window.playWeatherSong(item.index);
   else if (item.kind === 'recent' && typeof window.playHomeRecent === 'function') window.playHomeRecent(item.record);
   else if (item.kind === 'profile' && typeof window.openHomeInsight === 'function') window.openHomeInsight();
-  else if (item.kind === 'song' && typeof window.playHomeSong === 'function') window.playHomeSong(item.index);
+  else if (item.kind === 'song' && typeof window.tryPlaySong === 'function') window.tryPlaySong(item.song);
   else if (item.kind === 'login' && typeof window.showLoginModal === 'function') window.showLoginModal({ source: 'home-tile' });
   else if (item.kind === 'local' && typeof window.openHomeLocalImport === 'function') window.openHomeLocalImport();
   else if (item.kind === 'guide' && typeof window.openHomeProductGuide === 'function') window.openHomeProductGuide();
