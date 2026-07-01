@@ -74,10 +74,10 @@ window.closeGsapModal = function(mask, afterClose) {
 }
 window.bindModalBackdropClose = function() {
   [
-    ['track-detail-modal', closeTrackDetailModal],
-    ['login-modal', closeLoginModal],
-    ['user-modal', closeUserModal],
-    ['custom-lyric-modal', closeCustomLyricModal],
+    ['track-detail-modal', window.closeTrackDetailModal],
+    ['login-modal', window.closeLoginModal],
+    ['user-modal', window.closeUserModal],
+    ['custom-lyric-modal', window.closeCustomLyricModal],
     ['update-modal', closeUpdatePanel]
   ].forEach(function(pair){
     var mask = document.getElementById(pair[0]);
@@ -98,37 +98,37 @@ window.VISUAL_PRESET_SCHEMA = 'skull-preset-v2';
 window.PLAYBACK_QUALITY_STORE_KEY = 'mineradio-playback-quality-v1';
 window.UPLOAD_TIP_STORE_KEY = 'mineradio-upload-tip-seen';
 window.DIY_MODE_STORE_KEY = 'mineradio-diy-player-mode-v1';
-window.PLAYLIST_PANEL_PIN_STORE_KEY = 'mineradio-playlist-panel-pinned-v1';
+window.PLAYLIST_PANEL_PIN_STORE_KEY = 'mineradio-window.playlist-panel-pinned-v1';
 window.USER_CAPSULE_AUTO_HIDE_STORE_KEY = 'mineradio-user-capsule-auto-hide-v1';
-window.FX_FAB_AUTO_HIDE_STORE_KEY = 'mineradio-fx-fab-auto-hide-v1';
+window.FX_FAB_AUTO_HIDE_STORE_KEY = 'mineradio-window.fx-fab-auto-hide-v1';
 window.CONTROLS_AUTO_HIDE_STORE_KEY = 'mineradio-controls-auto-hide-v1';
-window.FREE_CAMERA_STORE_KEY = 'mineradio-free-camera-v1';
+window.FREE_CAMERA_STORE_KEY = 'mineradio-free-window.camera-v1';
 window.HOTKEY_SETTINGS_STORE_KEY = 'mineradio-hotkey-settings-v1';
 window.VISUAL_GUIDE_SEEN_STORE_KEY = 'mineradio-visual-guide-seen-v2';
 window.LOCAL_BEATMAP_STORE_KEY = 'mineradio-local-beatmaps-v1';
 window.LOCAL_BEAT_PREF_STORE_KEY = 'mineradio-local-beatmap-prefs-v1';
 window.LOCAL_BEAT_COMBOS = ['', 'downbeat', 'push', 'drop', 'rebound', 'accent'];
 var HOTKEY_ACTIONS = [
-  { key:'togglePlay', label:'播放 / 暂停', category:'播放', local:'Space', global:'Ctrl+Alt+Space' },
-  { key:'prevTrack', label:'上一首', category:'播放', local:'ArrowLeft', global:'Ctrl+Alt+ArrowLeft' },
-  { key:'nextTrack', label:'下一首', category:'播放', local:'ArrowRight', global:'Ctrl+Alt+ArrowRight' },
+  { key:'window.togglePlay', label:'播放 / 暂停', category:'播放', local:'Space', global:'Ctrl+Alt+Space' },
+  { key:'window.prevTrack', label:'上一首', category:'播放', local:'ArrowLeft', global:'Ctrl+Alt+ArrowLeft' },
+  { key:'window.nextTrack', label:'下一首', category:'播放', local:'ArrowRight', global:'Ctrl+Alt+ArrowRight' },
   { key:'volumeUp', label:'音量增加', category:'音量', local:'ArrowUp', global:'Ctrl+Alt+ArrowUp' },
   { key:'volumeDown', label:'音量降低', category:'音量', local:'ArrowDown', global:'Ctrl+Alt+ArrowDown' },
-  { key:'toggleFullscreen', label:'全屏', category:'窗口', local:'KeyF', global:'Ctrl+Alt+KeyF' },
+  { key:'window.toggleFullscreen', label:'全屏', category:'窗口', local:'KeyF', global:'Ctrl+Alt+KeyF' },
   { key:'toggleDesktopLyrics', label:'桌面歌词', category:'歌词', local:'Alt+KeyL', global:'Ctrl+Alt+KeyL' }
 ];
 window.getHotkeyDefaults = function() {
   var defaults = { local: {}, global: {} };
-  HOTKEY_ACTIONS.forEach(function(action){
+  window.HOTKEY_ACTIONS.forEach(function(action){
     defaults.local[action.key] = action.local || '';
     defaults.global[action.key] = action.global || '';
   });
   return defaults;
 }
 window.readHotkeySettings = function() {
-  var defaults = getHotkeyDefaults();
+  var defaults = window.getHotkeyDefaults();
   try {
-    var raw = JSON.parse(localStorage.getItem(HOTKEY_SETTINGS_STORE_KEY) || '{}') || {};
+    var raw = JSON.parse(localStorage.getItem(window.HOTKEY_SETTINGS_STORE_KEY) || '{}') || {};
     return {
       local: Object.assign({}, defaults.local, raw.local || {}),
       global: Object.assign({}, defaults.global, raw.global || {})
@@ -142,12 +142,12 @@ window.playlistPanelLazyBound = false;
 window.hotkeyCaptureState = null;
 window.hotkeyGlobalStatus = {};
 window.readDiyModePreference = function() {
-  try { return localStorage.getItem(DIY_MODE_STORE_KEY) === '1'; } catch (e) { return false; }
+  try { return localStorage.getItem(window.DIY_MODE_STORE_KEY) === '1'; } catch (e) { return false; }
 }
 window.readBooleanPreference = function(key, fallback) {
   try { var v = localStorage.getItem(key); return v == null ? !!fallback : (v === 'true' || v === '1'); } catch (e) { return !!fallback; }
 }
-window.diyPlayerMode = readDiyModePreference();
+window.diyPlayerMode = window.readDiyModePreference();
 var customCoverMap = null;      // initialized by api-helper.js on load
 var customLyricMap = null;      // initialized by api-helper.js on load
 var customLyricPrefs = null;    // initialized by api-helper.js on load
@@ -155,7 +155,7 @@ var customLyricPrefs = null;    // initialized by api-helper.js on load
 window._audioUrlCache = {};
 window._prefetchAudioEls = {};
 window._cacheKeyForSong = function(song) {
-  var provider = songProviderKey(song);
+  var provider = window.songProviderKey(song);
   return provider + ':' + (song.id || song.mid || song.songmid || (song.name + '|' + song.artist));
 }
 
@@ -236,7 +236,7 @@ window.PACKAGED_DEFAULT_USER_FX_ARCHIVE_NAME = '默认测试';
 window.PACKAGED_DEFAULT_USER_FX_ARCHIVE_EXPORTED_AT = 1782276031784;
 window.PACKAGED_DEFAULT_USER_FX_ARCHIVE_SAVED_AT = 1782273019045;
 var PACKAGED_DEFAULT_FX_SNAPSHOT = Object.freeze({
-  visualPresetSchema: VISUAL_PRESET_SCHEMA,
+  visualPresetSchema: window.VISUAL_PRESET_SCHEMA,
   preset: 0,
   intensity: 0.85,
   cinemaShake: 0.5,
@@ -316,9 +316,9 @@ var PACKAGED_DEFAULT_FX_SNAPSHOT = Object.freeze({
   cam: 'off'
 });
 window.clonePackagedDefaultFxSnapshot = function() {
-  return Object.assign({}, PACKAGED_DEFAULT_FX_SNAPSHOT);
+  return Object.assign({}, window.PACKAGED_DEFAULT_FX_SNAPSHOT);
 }
 window.packagedDefaultLyricLayoutRaw = function() {
-  return Object.assign({ desktopLyricsSchema: 'desktop-lyrics-v3' }, clonePackagedDefaultFxSnapshot());
+  return Object.assign({ desktopLyricsSchema: 'desktop-lyrics-v3' }, window.clonePackagedDefaultFxSnapshot());
 }
 

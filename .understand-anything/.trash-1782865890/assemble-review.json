@@ -1,0 +1,97 @@
+{
+  "description": "Assembly review of 5 knowledge graph batches (batch-0 through batch-4) covering 28 JS files of Mineradio music player. Two distinct ID schemes: batch 0 uses qualified IDs (file:/function:/data: prefixes), batches 1-4 use flat unqualified IDs. Cross-batch edges rely on flat IDs and resolve correctly across batches 1-4. Batch 0 edges are self-contained within its own qualified namespace.",
+  "issues": [],
+  "warnings": [
+    "ID SCHEME MISMATCH: Batch 0 uses qualified IDs (e.g. 'file:public/js/api-helper.js', 'function:public/js/shared.js:songProviderKey') while batches 1-4 use flat IDs (e.g. 'api-helper.js', 'songProviderKey'). These are structurally distinct IDs → no literal collisions, but the same conceptual entities have duplicate representations.",
+    "FILE NODE DUPLICATION: 4 physical files appear in both batch 0 (qualified) and later batches (flat): public/js/api-helper.js (batch 0+1), public/js/login.js (batch 0+4), public/js/playlists.js (batch 0+4), public/js/core/three-lyrics.js (batch 0+3). Each should be merged into one node during assembly.",
+    "FUNCTION DUPLICATION: 5 function/data nodes have both a qualified ID in batch 0 and a flat ID in later batches: songProviderKey (batch 0+1), fxDefaults (batch 0+4), applyDiyMode (batch 0+4), openGsapModal (batch 0+4), closeGsapModal (batch 0+4). These are the same functions — will need deduplication during assembly.",
+    "DANGLING EDGE SOURCES/TARGETS: 26 dangling references detected across batches 1-4 (no matching node ID exists in any batch). These reference functions/filenames that were not captured as nodes in any batch.",
+    "CROSS-BATCH EDGE HOPPING: All edges from batch 0 stay within the qualified ID namespace. All edges from batches 1-4 use flat IDs and freely reference nodes across batches 1-4 (e.g. batch 2 edges target batch 1 nodes). This is functional but means the graph is split into two weakly-connected subgraphs via the ID scheme boundary."
+  ],
+  "danglingReferences": [
+    {"batch": 1, "source": "setLyricSourceMode", "target": "applyOriginalLyricsState", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 1, "source": "setLyricSourceMode", "target": "applyCustomLyricState", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 2, "source": "playQueueAt", "target": "applyPreferredLyricsForCurrent", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 2, "source": "playQueueAt", "target": "syncLikeStatusForSong", "type": "calls", "problem": "target node not found; closest match is 'syncLikeStatusForSongs' (plural) in batch 1"},
+    {"batch": 2, "source": "playQueueAt", "target": "preparePlaybackFadeIn", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 2, "source": "playQueueAt", "target": "attemptAudioPlay", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 2, "source": "playQueueAt", "target": "youtubeSongUrl", "type": "calls", "problem": "target node not found; likely lives in platforms/youtube.js outside scope"},
+    {"batch": 2, "source": "playQueueAt", "target": "qqSongUrl", "type": "calls", "problem": "target node not found; likely lives in platforms/qq.js outside scope"},
+    {"batch": 2, "source": "playQueueAt", "target": "neteaseSongUrl", "type": "calls", "problem": "target node not found; likely lives in platforms/netease.js outside scope"},
+    {"batch": 2, "source": "togglePlay", "target": "attemptAudioPlay", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 2, "source": "fetchBeatPrefetchAudioUrl", "target": "neteaseSongUrl", "type": "calls", "problem": "both source and target nodes not found in any batch"},
+    {"batch": 2, "source": "fetchBeatPrefetchAudioUrl", "target": "qqSongUrl", "type": "calls", "problem": "both source and target nodes not found in any batch"},
+    {"batch": 2, "source": "scheduleQueueBeatPrefetch", "target": "fetchBeatPrefetchAudioUrl", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 2, "source": "fetchLyric", "target": "applyPreferredLyricsForCurrent", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 2, "source": "fetchLyric", "target": "setOriginalLyricsState", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 3, "source": "setShelfPinnedOpen", "target": "shelfHoverCue", "type": "resets", "problem": "target node not found in any batch"},
+    {"batch": 3, "source": "processRealtimeBeatEngine", "target": "beatAnalyser", "type": "reads", "problem": "target node not found in any batch; likely a variable in audio-engine.js"},
+    {"batch": 3, "source": "scheduleBeatCamera", "target": "cameraDynamicsScale", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 4, "source": "doSearch", "target": "neteaseSearch", "type": "calls", "problem": "target node not found; likely lives in platforms/netease.js"},
+    {"batch": 4, "source": "doSearch", "target": "qqSearch", "type": "calls", "problem": "target node not found; likely lives in platforms/qq.js"},
+    {"batch": 4, "source": "doSearch", "target": "youtubeSearch", "type": "calls", "problem": "target node not found; likely lives in platforms/youtube.js"},
+    {"batch": 4, "source": "renderQueuePanel", "target": "toggleLikeQueueIndex", "type": "calls", "problem": "target node not found in any batch"},
+    {"batch": 4, "source": "loadYouTubeTrending", "target": "youtubeTrending", "type": "calls", "problem": "target node not found; likely lives in platforms/youtube.js"},
+    {"batch": 4, "source": "loadYouTubeTrending", "target": "renderSearchResults", "type": "calls", "problem": "target node not found; likely in controls.js but not captured"}
+  ],
+  "duplicateConceptGroups": [
+    {
+      "concept": "api-helper.js file node",
+      "ids": ["file:public/js/api-helper.js (batch 0)", "api-helper.js (batch 1)"]
+    },
+    {
+      "concept": "login.js file node",
+      "ids": ["file:public/js/login.js (batch 0)", "login.js (batch 4)"]
+    },
+    {
+      "concept": "playlists.js file node",
+      "ids": ["file:public/js/playlists.js (batch 0)", "playlists.js (batch 4)"]
+    },
+    {
+      "concept": "three-lyrics.js file node",
+      "ids": ["file:public/js/core/three-lyrics.js (batch 0)", "three-lyrics.js (batch 3)"]
+    },
+    {
+      "concept": "songProviderKey function",
+      "ids": ["function:public/js/shared.js:songProviderKey (batch 0)", "songProviderKey (batch 1)"]
+    },
+    {
+      "concept": "fxDefaults data/variable",
+      "ids": ["data:public/js/shared.js:fxDefaults (batch 0)", "fxDefaults (batch 4)"]
+    },
+    {
+      "concept": "applyDiyMode function",
+      "ids": ["function:public/js/core/state.js:applyDiyMode (batch 0)", "applyDiyMode (batch 4, file: misc.js)"]
+    },
+    {
+      "concept": "openGsapModal function",
+      "ids": ["function:public/js/shared.js:openGsapModal (batch 0)", "openGsapModal (batch 4)"]
+    },
+    {
+      "concept": "closeGsapModal function",
+      "ids": ["function:public/js/shared.js:closeGsapModal (batch 0)", "closeGsapModal (batch 4)"]
+    }
+  ],
+  "stats": {
+    "totalNodes": 302,
+    "uniqueNodeIds": 302,
+    "totalEdges": 239,
+    "uniqueFilePaths": 27,
+    "danglingReferences": 26,
+    "duplicateConceptGroups": 9,
+    "nodesByBatch": {
+      "batch-0": 72,
+      "batch-1": 65,
+      "batch-2": 55,
+      "batch-3": 50,
+      "batch-4": 58
+    },
+    "edgesByBatch": {
+      "batch-0": 55,
+      "batch-1": 55,
+      "batch-2": 51,
+      "batch-3": 28,
+      "batch-4": 50
+    }
+  }
+}

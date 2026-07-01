@@ -1,8 +1,8 @@
 //  登录系统
 // ============================================================
 window.onUserBtnClick = function() {
-  if (hasAnyPlatformLogin()) showUserModal();
-  else showLoginModal();
+  if (window.hasAnyPlatformLogin()) window.showUserModal();
+  else window.showLoginModal();
 }
 window.platformMeta = function(provider) {
   if (provider === 'qq') return { key: 'qq', short: 'QQ', label: 'QQ 音乐', app: 'QQ 音乐 App', dot: 'qq' };
@@ -10,15 +10,15 @@ window.platformMeta = function(provider) {
   return { key: 'netease', short: 'NE', label: '网易云音乐', app: '网易云音乐 App', dot: 'netease' };
 }
 window.platformStatus = function(provider) {
-  if (provider === 'qq') return qqLoginStatus;
-  return loginStatus;
+  if (provider === 'qq') return window.qqLoginStatus;
+  return window.loginStatus;
 }
 window.providerVipType = function(provider, status) {
-  status = status || platformStatus(provider) || {};
+  status = status || window.platformStatus(provider) || {};
   return Number(status.vipType || status.vip_type || status.vip || status.isVip || status.is_vip || 0) || 0;
 }
 window.providerVipLevel = function(provider, status) {
-  status = status || platformStatus(provider) || {};
+  status = status || window.platformStatus(provider) || {};
   var raw = String(status.vipLevel || status.vip_level || '').toLowerCase();
   if (raw === 'svip' || raw === 'vip' || raw === 'none') return raw;
   var vip = providerVipType(provider, status);
@@ -44,59 +44,59 @@ window.providerVipBadge = function(provider, status, idAttr) {
   return '<span' + id + ' class="' + cls + '">' + label + '</span>';
 }
 window.hasPlatformLogin = function(provider) {
-  var st = platformStatus(provider);
+  var st = window.platformStatus(provider);
   return !!(st && st.loggedIn);
 }
 window.hasAnyPlatformLogin = function() {
-  return hasPlatformLogin('netease') || hasPlatformLogin('qq');
+  return window.hasPlatformLogin('netease') || window.hasPlatformLogin('qq');
 }
 window.firstLoggedProvider = function() {
-  if (hasPlatformLogin(activeAccountProvider)) return activeAccountProvider;
-  if (hasPlatformLogin('netease')) return 'netease';
-  if (hasPlatformLogin('qq')) return 'qq';
+  if (window.hasPlatformLogin(window.activeAccountProvider)) return window.activeAccountProvider;
+  if (window.hasPlatformLogin('netease')) return 'netease';
+  if (window.hasPlatformLogin('qq')) return 'qq';
   return 'netease';
 }
 window.providerAvatarSrc = function(provider, status) {
-  status = status || platformStatus(provider) || {};
-  if (status.avatar) return avatarSrc(status.avatar);
-  var meta = platformMeta(provider);
+  status = status || window.platformStatus(provider) || {};
+  if (status.avatar) return window.avatarSrc(status.avatar);
+  var meta = window.platformMeta(provider);
   var fill = provider === 'qq' ? '#bfd66b' : (provider === 'youtube' ? '#FF0000' : '#d95b67');
   var bg = provider === 'qq' ? '#11150b' : (provider === 'youtube' ? '#1A0808' : '#180b0f');
   var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><rect width="96" height="96" rx="48" fill="' + bg + '"/><circle cx="48" cy="48" r="34" fill="' + fill + '" opacity=".16"/><text x="48" y="56" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="' + fill + '">' + meta.short + '</text></svg>';
   return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
 }
 window.renderTopAccountPill = function(provider) {
-  var st = platformStatus(provider);
+  var st = window.platformStatus(provider);
   if (!st || !st.loggedIn) return '';
-  var meta = platformMeta(provider);
+  var meta = window.platformMeta(provider);
   var displayName = (provider === 'qq' && st.preview) ? '待接入' : (st.nickname || meta.label);
   var vipTag = provider === 'qq' ? providerVipBadge(provider, st) : '';
   return '<span class="top-account-pill">' +
     '<img src="' + providerAvatarSrc(provider, st) + '" alt="">' +
-    '<span class="top-account-name">' + escHtml(displayName) + '</span>' +
+    '<span class="top-account-name">' + window.escHtml(displayName) + '</span>' +
     vipTag +
   '</span>';
 }
 window.refreshLoginStatus = async function(force) {
   try {
-    var info = await neteaseLoginStatus();
+    var info = await window.neteaseLoginStatus();
     loginStatusChecked = true;
     loginStatusCheckFailed = false;
     loginStatus = info || { loggedIn: false };
-    if (loginStatus.loggedIn && !hasPlatformLogin(activeAccountProvider)) activeAccountProvider = 'netease';
+    if (window.loginStatus.loggedIn && !window.hasPlatformLogin(window.activeAccountProvider)) activeAccountProvider = 'netease';
     renderUserBtn();
     if (info && info.loggedIn) {
       homeDiscoverState.loaded = false;
       homeDiscoverState.loggedIn = true;
-      refreshUserPlaylists(true);
+      window.refreshUserPlaylists(true);
       loadHomeDiscover(true);
-      syncLikeStatusForSongs(playQueue.concat(playlist || []));
+      window.syncLikeStatusForSongs(window.playQueue.concat(window.playlist || []));
     } else {
-      userPlaylists = qqPlaylists.slice();
+      userPlaylists = window.qqPlaylists.slice();
       myPodcastCollections = [];
       myPodcastItems = {};
       likedSongMap = {};
-      updateLikeButtons();
+      window.updateLikeButtons();
     }
     return info;
   } catch (e) {
@@ -131,86 +131,86 @@ window.normalizeQQLoginStatus = function(info) {
 }
 window.refreshQQLoginStatus = async function() {
   try {
-    var info = await qqLoginStatus();
-    var prevLogged = !!qqLoginStatus.loggedIn;
+    var info = await window.qqLoginStatus();
+    var prevLogged = !!window.qqLoginStatus.loggedIn;
     qqLoginStatus = normalizeQQLoginStatus(info);
-    if (!qqLoginStatus.loggedIn) {
-      if (prevLogged || qqLoginWasLoggedIn) showToast(qqLoginStatus.stale ? 'QQ 音乐登录已失效' : 'QQ 音乐已掉登录');
+    if (!window.qqLoginStatus.loggedIn) {
+      if (prevLogged || qqLoginWasLoggedIn) window.showToast(window.qqLoginStatus.stale ? 'QQ 音乐登录已失效' : 'QQ 音乐已掉登录');
       qqPlaylists = [];
-      userPlaylists = userPlaylists.filter(function(pl){ return pl.provider !== 'qq'; });
+      userPlaylists = window.userPlaylists.filter(function(pl){ return pl.provider !== 'qq'; });
       homeDiscoverState.loaded = false;
-    } else if (!userPlaylists.some(function(pl){ return pl && pl.provider === 'qq'; })) {
+    } else if (!window.userPlaylists.some(function(pl){ return pl && pl.provider === 'qq'; })) {
       homeDiscoverState.loaded = false;
       homeDiscoverState.loggedIn = true;
       loadHomeDiscover(true);
-      refreshUserPlaylists(true);
-    } else if (qqLoginStatus.stale) {
-      showToast('QQ 音乐登录状态可能已失效');
+      window.refreshUserPlaylists(true);
+    } else if (window.qqLoginStatus.stale) {
+      window.showToast('QQ 音乐登录状态可能已失效');
     }
-    qqLoginWasLoggedIn = !!qqLoginStatus.loggedIn;
-    if (!hasPlatformLogin(activeAccountProvider)) activeAccountProvider = firstLoggedProvider();
+    qqLoginWasLoggedIn = !!window.qqLoginStatus.loggedIn;
+    if (!window.hasPlatformLogin(window.activeAccountProvider)) activeAccountProvider = firstLoggedProvider();
     renderUserBtn();
-    return qqLoginStatus;
+    return window.qqLoginStatus;
   } catch (e) {
     console.warn('QQ login status failed:', e);
     qqLoginStatus = normalizeQQLoginStatus(null);
     renderUserBtn();
-    return qqLoginStatus;
+    return window.qqLoginStatus;
   }
 }
 window.startQQLoginStatusAutoRefresh = function() {
   if (qqLoginAutoRefreshTimer) clearInterval(qqLoginAutoRefreshTimer);
   qqLoginAutoRefreshTimer = setInterval(function(){
-    refreshQQLoginStatus().catch(function(e){ console.warn('QQ login auto refresh failed:', e); });
+    window.refreshQQLoginStatus().catch(function(e){ console.warn('QQ login auto refresh failed:', e); });
   }, 45000);
 }
 window.renderUserBtn = function() {
   var btn = document.getElementById('user-btn');
   if (!btn) return;
   btn.classList.remove('multi-account');
-  if (dualAccountMode && hasAnyPlatformLogin()) {
+  if (window.dualAccountMode && window.hasAnyPlatformLogin()) {
     activeAccountProvider = firstLoggedProvider();
     btn.classList.add('logged-in', 'multi-account');
     btn.classList.remove('logged-out');
     btn.title = '账号信息 · 双平台登录状态';
     btn.innerHTML = renderTopAccountPill('netease') + renderTopAccountPill('qq');
-  } else if (hasAnyPlatformLogin()) {
+  } else if (window.hasAnyPlatformLogin()) {
     activeAccountProvider = firstLoggedProvider();
-    var st = platformStatus(activeAccountProvider);
-    var meta = platformMeta(activeAccountProvider);
+    var st = window.platformStatus(window.activeAccountProvider);
+    var meta = window.platformMeta(window.activeAccountProvider);
     btn.classList.add('logged-in');
     btn.classList.remove('logged-out');
-    btn.title = dualAccountMode ? '账号信息 · 已启用双平台展示' : ((st.nickname || meta.label) + ' · 账号信息');
-    btn.innerHTML = '<img id="user-avatar" src="' + providerAvatarSrc(activeAccountProvider, st) + '">' +
-                    '<span>' + escHtml(st.nickname || meta.label) + '</span>' +
-                    providerVipBadge(activeAccountProvider, st, 'user-vip-tag');
+    btn.title = window.dualAccountMode ? '账号信息 · 已启用双平台展示' : ((st.nickname || meta.label) + ' · 账号信息');
+    btn.innerHTML = '<img id="user-avatar" src="' + providerAvatarSrc(window.activeAccountProvider, st) + '">' +
+                    '<span>' + window.escHtml(st.nickname || meta.label) + '</span>' +
+                    providerVipBadge(window.activeAccountProvider, st, 'user-vip-tag');
   } else {
     btn.classList.remove('logged-in');
     btn.classList.add('logged-out');
     btn.title = '登录账号';
     btn.innerHTML = '<span class="login-word">登录</span>';
   }
-  updatePlaybackQualityUi();
+  window.updatePlaybackQualityUi();
 }
 window.showLoginModal = async function(opts) {
   opts = opts || {};
   if (opts.provider) loginProvider = opts.provider === 'qq' ? 'qq' : 'netease';
   var modal = document.getElementById('login-modal');
-  openGsapModal(modal);
-  updateLoginProviderUi();
+  window.openGsapModal(modal);
+  window.updateLoginProviderUi();
   await refreshQr();
 }
 window.closeLoginModal = function() {
   stopQrPoll();
-  closeGsapModal(document.getElementById('login-modal'));
+  window.closeGsapModal(document.getElementById('login-modal'));
 }
 window.setLoginProvider = function(provider, silent) {
   loginProvider = provider === 'qq' ? 'qq' : 'netease';
-  updateLoginProviderUi();
+  window.updateLoginProviderUi();
   if (!silent && document.getElementById('login-modal').classList.contains('show')) refreshQr();
 }
 window.updateLoginProviderUi = function() {
-  var meta = platformMeta(loginProvider);
+  var meta = window.platformMeta(window.loginProvider);
   var isQQ = loginProvider === 'qq';
   var title = document.getElementById('login-modal-title');
   var desc = document.getElementById('login-modal-desc');
@@ -243,44 +243,44 @@ window.updateLoginProviderUi = function() {
     shell.classList.toggle('qq-preview', isQQ);
     shell.classList.toggle('netease-preview', !isQQ && canOpenNeteaseWeb);
   }
-  if (qqPanel) qqPanel.classList.toggle('show', isQQ && qqManualCookieOpen);
+  if (qqPanel) qqPanel.classList.toggle('show', isQQ && window.qqManualCookieOpen);
   if (qqCookieToggle) {
     qqCookieToggle.classList.toggle('show', isQQ);
-    qqCookieToggle.textContent = qqManualCookieOpen ? '收起导入' : '手动导入';
+    qqCookieToggle.textContent = window.qqManualCookieOpen ? '收起导入' : '手动导入';
   }
   if (qqCard) {
-    qqCard.disabled = isQQ ? !!qqWebLoginBusy : !!neteaseWebLoginBusy;
+    qqCard.disabled = isQQ ? !!qqWebLoginBusy : !!window.neteaseWebLoginBusy;
     var cardMark = qqCard.querySelector('b');
     var cardLabel = qqCard.querySelector('span');
     if (cardMark) cardMark.textContent = isQQ ? 'QQ' : 'NE';
     if (cardLabel) cardLabel.textContent = isQQ
-      ? (qqWebLoginBusy ? '等待扫码确认' : '打开官方扫码窗口')
-      : (neteaseWebLoginBusy ? '等待扫码确认' : '打开官方登录窗口');
+      ? (window.qqWebLoginBusy ? '等待扫码确认' : '打开官方扫码窗口')
+      : (window.neteaseWebLoginBusy ? '等待扫码确认' : '打开官方登录窗口');
   }
   if (st) {
     if (isQQ) {
       st.className = 'preview';
-      st.textContent = qqLoginStatus.loggedIn ? ('已保存 QQ 音乐会话 · ' + (qqLoginStatus.nickname || '')) : '点击"扫码登录"打开 QQ 音乐官方窗口';
+      st.textContent = window.qqLoginStatus.loggedIn ? ('已保存 QQ 音乐会话 · ' + (window.qqLoginStatus.nickname || '')) : '点击"扫码登录"打开 QQ 音乐官方窗口';
     } else {
       st.className = '';
       st.textContent = canOpenNeteaseWeb ? '点击"网页登录"打开网易云官方窗口' : '正在生成二维码…';
     }
   }
   if (refreshBtn) {
-      refreshBtn.disabled = !!neteaseWebLoginBusy;
-      refreshBtn.textContent = canOpenNeteaseWeb ? (neteaseWebLoginBusy ? '等待扫码…' : '网页登录') : '刷新二维码';
+      refreshBtn.disabled = !!window.neteaseWebLoginBusy;
+      refreshBtn.textContent = canOpenNeteaseWeb ? (window.neteaseWebLoginBusy ? '等待扫码…' : '网页登录') : '刷新二维码';
       refreshBtn.onclick = canOpenNeteaseWeb ? openNeteaseWebLogin : refreshQr;
     }
 }
 window.refreshQr = async function() {
   stopQrPoll();
-  updateLoginProviderUi();
+  window.updateLoginProviderUi();
   if (loginProvider === 'qq') {
     qrKey = null;
     var qqStatus = document.getElementById('qr-status');
     var qqImg = document.getElementById('qr-img');
     if (qqImg) qqImg.src = '';
-    var info = await refreshQQLoginStatus();
+    var info = await window.refreshQQLoginStatus();
     if (qqStatus) {
       qqStatus.textContent = info && info.loggedIn ? ('已保存 QQ 音乐会话 · ' + (info.nickname || '')) : '点击“扫码登录”打开 QQ 音乐官方窗口';
       qqStatus.className = 'preview';
@@ -293,16 +293,16 @@ window.refreshQr = async function() {
     var neStatus = document.getElementById('qr-status');
     if (neImg) neImg.src = '';
     if (neStatus) {
-      neStatus.textContent = loginStatus.loggedIn ? ('已保存网易云会话 · ' + (loginStatus.nickname || '')) : '点击“网页登录”打开网易云官方窗口';
+      neStatus.textContent = window.loginStatus.loggedIn ? ('已保存网易云会话 · ' + (window.loginStatus.nickname || '')) : '点击“网页登录”打开网易云官方窗口';
       neStatus.className = 'preview';
     }
     return;
   }
   try {
-    var k = await neteaseLoginQrKey();
+    var k = await window.neteaseLoginQrKey();
     if (!k.key) throw new Error('获取 key 失败');
     qrKey = k.key;
-    var q = await neteaseLoginQrCreate(qrKey);
+    var q = await window.neteaseLoginQrCreate(window.qrKey);
     if (!q.img) throw new Error('生成二维码失败');
     document.getElementById('qr-img').src = q.img;
     document.getElementById('qr-status').textContent = '请使用网易云音乐 App 扫码';
@@ -313,19 +313,19 @@ window.refreshQr = async function() {
   }
 }
 window.startQrPoll = function() {
- if (qrPollTimer) clearInterval(qrPollTimer); qrPollTimer = setInterval(checkQr, 2000); }
+ if (window.qrPollTimer) clearInterval(window.qrPollTimer); qrPollTimer = setInterval(checkQr, 2000); }
 window.stopQrPoll = function() {
- if (qrPollTimer) { clearInterval(qrPollTimer); qrPollTimer = null; } }
+ if (window.qrPollTimer) { clearInterval(window.qrPollTimer); qrPollTimer = null; } }
 window.toggleQQCookiePanel = function() {
-  qqManualCookieOpen = !qqManualCookieOpen;
-  updateLoginProviderUi();
+  qqManualCookieOpen = !window.qqManualCookieOpen;
+  window.updateLoginProviderUi();
 }
 window.openProviderWebLogin = function() {
-  if (loginProvider === 'qq') return openQQWebLogin();
-  return openNeteaseWebLogin();
+  if (loginProvider === 'qq') return window.openQQWebLogin();
+  return window.openNeteaseWebLogin();
 }
 window.openNeteaseWebLogin = async function() {
-  if (neteaseWebLoginBusy) return;
+  if (window.neteaseWebLoginBusy) return;
   var statusEl = document.getElementById('qr-status');
   var api = window.desktopWindow;
   if (!api || !api.isDesktop || typeof api.openNeteaseMusicLogin !== 'function') {
@@ -334,7 +334,7 @@ window.openNeteaseWebLogin = async function() {
   }
 
   neteaseWebLoginBusy = true;
-  updateLoginProviderUi();
+  window.updateLoginProviderUi();
   if (statusEl) { statusEl.textContent = '已打开网易云窗口，请在官方页面扫码登录…'; statusEl.className = 'preview'; }
   try {
     var result = await api.openNeteaseMusicLogin();
@@ -342,7 +342,7 @@ window.openNeteaseWebLogin = async function() {
       throw new Error((result && (result.message || result.error)) || '网易云登录未完成');
     }
     if (statusEl) { statusEl.textContent = '正在同步网易云会话…'; statusEl.className = 'preview'; }
-    var info = await apiJson('/api/login/cookie', {
+    var info = await window.apiJson('/api/login/cookie', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cookie: result.cookie })
@@ -351,37 +351,37 @@ window.openNeteaseWebLogin = async function() {
     loginStatus = info;
     activeAccountProvider = 'netease';
     renderUserBtn();
-    refreshUserPlaylists(true);
+    window.refreshUserPlaylists(true);
     loadHomeDiscover(true);
     if (statusEl) { statusEl.textContent = '网易云会话已保存'; statusEl.className = 'scan'; }
     setTimeout(function(){
-      closeLoginModal();
-      showToast('网易云已登录: ' + (info.nickname || info.userId || ''));
+      window.closeLoginModal();
+      window.showToast('网易云已登录: ' + (info.nickname || info.userId || ''));
     }, 420);
   } catch (e) {
     neteaseWebLoginBusy = false;
-    updateLoginProviderUi();
+    window.updateLoginProviderUi();
     if (statusEl) { statusEl.textContent = e && e.message ? e.message : '网易云登录失败'; statusEl.className = 'fail'; }
   } finally {
-    if (neteaseWebLoginBusy) {
+    if (window.neteaseWebLoginBusy) {
       neteaseWebLoginBusy = false;
-      updateLoginProviderUi();
+      window.updateLoginProviderUi();
     }
   }
 }
 window.openQQWebLogin = async function() {
-  if (qqWebLoginBusy) return;
+  if (window.qqWebLoginBusy) return;
   var statusEl = document.getElementById('qr-status');
   var api = window.desktopWindow;
   if (!api || !api.isDesktop || typeof api.openQQMusicLogin !== 'function') {
     qqManualCookieOpen = true;
-    updateLoginProviderUi();
+    window.updateLoginProviderUi();
     if (statusEl) { statusEl.textContent = '当前环境不支持自动网页登录，可先使用手动导入。'; statusEl.className = 'fail'; }
     return;
   }
 
   qqWebLoginBusy = true;
-  updateLoginProviderUi();
+  window.updateLoginProviderUi();
   if (statusEl) { statusEl.textContent = '已打开 QQ 音乐窗口，请扫码并确认登录…'; statusEl.className = 'preview'; }
   try {
     var result = await api.openQQMusicLogin();
@@ -389,7 +389,7 @@ window.openQQWebLogin = async function() {
       throw new Error((result && (result.message || result.error)) || 'QQ 登录未完成');
     }
     if (statusEl) { statusEl.textContent = '正在同步 QQ 音乐会话…'; statusEl.className = 'preview'; }
-    var info = await apiJson('/api/qq/login/cookie', {
+    var info = await window.apiJson('/api/qq/login/cookie', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cookie: result.cookie })
@@ -399,26 +399,26 @@ window.openQQWebLogin = async function() {
     activeAccountProvider = 'qq';
     qqManualCookieOpen = false;
     renderUserBtn();
-    refreshUserPlaylists(true);
+    window.refreshUserPlaylists(true);
     var qqPlaybackReady = !!info.playbackKeyReady && !result.partial;
     if (statusEl) { statusEl.textContent = qqPlaybackReady ? 'QQ 音乐会话已保存' : 'QQ 账号已同步，播放授权不完整，部分歌曲会自动换源'; statusEl.className = 'scan'; }
     setTimeout(function(){
-      closeLoginModal();
-      showToast((qqPlaybackReady ? 'QQ 音乐已登录: ' : 'QQ 账号已同步: ') + (info.nickname || info.userId || ''));
+      window.closeLoginModal();
+      window.showToast((qqPlaybackReady ? 'QQ 音乐已登录: ' : 'QQ 账号已同步: ') + (info.nickname || info.userId || ''));
     }, 420);
   } catch (e) {
     qqWebLoginBusy = false;
-    updateLoginProviderUi();
+    window.updateLoginProviderUi();
     if (statusEl) { statusEl.textContent = e && e.message ? e.message : 'QQ 登录失败'; statusEl.className = 'fail'; }
   } finally {
-    if (qqWebLoginBusy) {
+    if (window.qqWebLoginBusy) {
       qqWebLoginBusy = false;
-      updateLoginProviderUi();
+      window.updateLoginProviderUi();
     }
   }
 }
 window.submitQQCookieLogin = async function() {
-  if (qqCookieBusy) return;
+  if (window.qqCookieBusy) return;
   var input = document.getElementById('qq-cookie-input');
   var statusEl = document.getElementById('qr-status');
   var saveBtn = document.getElementById('qq-cookie-save-btn');
@@ -431,7 +431,7 @@ window.submitQQCookieLogin = async function() {
   if (saveBtn) saveBtn.classList.add('busy');
   if (statusEl) { statusEl.textContent = '正在保存 QQ 会话…'; statusEl.className = 'preview'; }
   try {
-    var info = await apiJson('/api/qq/login/cookie', {
+    var info = await window.apiJson('/api/qq/login/cookie', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cookie: cookie })
@@ -441,12 +441,12 @@ window.submitQQCookieLogin = async function() {
     activeAccountProvider = 'qq';
     if (input) input.value = '';
     renderUserBtn();
-    refreshUserPlaylists(true);
+    window.refreshUserPlaylists(true);
     var manualQQPlaybackReady = !!info.playbackKeyReady;
     if (statusEl) { statusEl.textContent = manualQQPlaybackReady ? 'QQ 音乐会话已保存' : 'QQ 账号已同步，播放授权不完整，部分歌曲会自动换源'; statusEl.className = 'scan'; }
     setTimeout(function(){
-      closeLoginModal();
-      showToast((manualQQPlaybackReady ? 'QQ 音乐已登录: ' : 'QQ 账号已同步: ') + (info.nickname || info.userId || ''));
+      window.closeLoginModal();
+      window.showToast((manualQQPlaybackReady ? 'QQ 音乐已登录: ' : 'QQ 账号已同步: ') + (info.nickname || info.userId || ''));
     }, 420);
   } catch (e) {
     if (statusEl) { statusEl.textContent = e && e.message ? e.message : 'QQ 会话保存失败'; statusEl.className = 'fail'; }
@@ -456,9 +456,9 @@ window.submitQQCookieLogin = async function() {
   }
 }
 window.checkQr = async function() {
-  if (!qrKey) return;
+  if (!window.qrKey) return;
   try {
-    var r = await neteaseLoginQrCheck(qrKey);
+    var r = await window.neteaseLoginQrCheck(window.qrKey);
     var $st = document.getElementById('qr-status');
     if (r.code === 800) { $st.textContent = '二维码已过期, 请刷新'; $st.className = 'fail'; stopQrPoll(); }
     else if (r.code === 801) { $st.textContent = '请在 App 中扫码'; $st.className = ''; }
@@ -472,12 +472,12 @@ window.checkQr = async function() {
       setTimeout(async function(){
         var fresh = await refreshLoginStatus(true);
         if (!fresh || !fresh.loggedIn) {
-          loginStatus = Object.assign({}, loginStatus, { loggedIn: true, pendingProfile: true });
+          loginStatus = Object.assign({}, window.loginStatus, { loggedIn: true, pendingProfile: true });
           renderUserBtn();
-          fresh = loginStatus;
+          fresh = window.loginStatus;
         }
-        closeLoginModal();
-        showToast('欢迎 ' + (fresh && fresh.nickname ? fresh.nickname : ''));
+        window.closeLoginModal();
+        window.showToast('欢迎 ' + (fresh && fresh.nickname ? fresh.nickname : ''));
       }, r.pendingProfile ? 1200 : 500);
     } else if (r.code === 803) {
       $st.textContent = '扫码已确认，但没有拿到登录凭证，请刷新二维码重试'; $st.className = 'fail';
@@ -487,8 +487,8 @@ window.checkQr = async function() {
 }
 window.updateUserModalUi = function() {
   activeAccountProvider = firstLoggedProvider();
-  var st = platformStatus(activeAccountProvider);
-  var meta = platformMeta(activeAccountProvider);
+  var st = window.platformStatus(window.activeAccountProvider);
+  var meta = window.platformMeta(window.activeAccountProvider);
   var chip = document.getElementById('account-provider-chip');
   var avatar = document.getElementById('user-modal-avatar');
   var name = document.getElementById('user-modal-name');
@@ -498,10 +498,10 @@ window.updateUserModalUi = function() {
   var addNetease = document.getElementById('account-add-netease');
   var addQQ = document.getElementById('account-add-qq');
   if (chip) {
-    chip.className = 'account-provider-chip ' + activeAccountProvider;
-    chip.innerHTML = '<span class="account-source-dot ' + meta.dot + '"></span><span>' + meta.label + '</span>';
+    chip.className = 'account-provider-chip ' + window.activeAccountProvider;
+    chip.innerHTML = '<span class="account-window.source-dot ' + meta.dot + '"></span><span>' + meta.label + '</span>';
   }
-  if (avatar) avatar.src = providerAvatarSrc(activeAccountProvider, st);
+  if (avatar) avatar.src = providerAvatarSrc(window.activeAccountProvider, st);
   if (name) name.textContent = (st && st.nickname) || meta.label;
   if (vipEl) {
     if (activeAccountProvider === 'netease') {
@@ -517,29 +517,29 @@ window.updateUserModalUi = function() {
   }
   ['netease','qq','both'].forEach(function(key){
     var btn = document.getElementById('user-provider-' + key);
-    if (btn) btn.classList.toggle('active', key === 'both' ? dualAccountMode : (!dualAccountMode && activeAccountProvider === key));
+    if (btn) btn.classList.toggle('active', key === 'both' ? dualAccountMode : (!window.dualAccountMode && activeAccountProvider === key));
   });
-  if (addNetease) addNetease.style.display = hasPlatformLogin('netease') ? 'none' : '';
-  if (addQQ) addQQ.textContent = hasPlatformLogin('qq') ? '查看 QQ 音乐' : '补登 QQ 音乐';
+  if (addNetease) addNetease.style.display = window.hasPlatformLogin('netease') ? 'none' : '';
+  if (addQQ) addQQ.textContent = window.hasPlatformLogin('qq') ? '查看 QQ 音乐' : '补登 QQ 音乐';
   if (logoutBtn) {
     if (activeAccountProvider === 'qq') logoutBtn.textContent = '退出 QQ 音乐';
     else logoutBtn.textContent = '退出网易云';
   }
-  if (hint) hint.textContent = dualAccountMode
+  if (hint) hint.textContent = window.dualAccountMode
     ? '右上角已切换为多平台并排展示。'
     : '可切换右上角展示的平台；“我两个都要”会并排放多个登录状态。';
 }
 window.showUserModal = function() {
-  if (!hasAnyPlatformLogin()) return showLoginModal();
+  if (!window.hasAnyPlatformLogin()) return window.showLoginModal();
   updateUserModalUi();
-  openGsapModal(document.getElementById('user-modal'));
+  window.openGsapModal(document.getElementById('user-modal'));
 }
 window.closeUserModal = function() {
- closeGsapModal(document.getElementById('user-modal')); }
+ window.closeGsapModal(document.getElementById('user-modal')); }
 window.setActiveAccountProvider = function(provider) {
   provider = provider === 'qq' ? 'qq' : 'netease';
-  if (!hasPlatformLogin(provider)) {
-    openProviderLogin(provider);
+  if (!window.hasPlatformLogin(provider)) {
+    window.openProviderLogin(provider);
     return;
   }
   activeAccountProvider = provider;
@@ -548,35 +548,35 @@ window.setActiveAccountProvider = function(provider) {
   updateUserModalUi();
 }
 window.enableDualAccountView = function() {
-  if (!hasPlatformLogin('netease') && !hasPlatformLogin('qq')) {
-    openProviderLogin('netease');
+  if (!window.hasPlatformLogin('netease') && !window.hasPlatformLogin('qq')) {
+    window.openProviderLogin('netease');
     return;
   }
-  if (!hasPlatformLogin('netease')) {
-    openProviderLogin('netease');
+  if (!window.hasPlatformLogin('netease')) {
+    window.openProviderLogin('netease');
     return;
   }
-  if (!hasPlatformLogin('qq')) {
-    openProviderLogin('qq');
+  if (!window.hasPlatformLogin('qq')) {
+    window.openProviderLogin('qq');
     return;
   }
   dualAccountMode = true;
   renderUserBtn();
   updateUserModalUi();
-  showToast('已启用双平台账号展示');
+  window.showToast('已启用双平台账号展示');
 }
 window.requestDualLoginMode = function() {
   enableDualAccountView();
 }
 window.openProviderLogin = function(provider) {
   provider = provider === 'qq' ? 'qq' : 'netease';
-  closeUserModal();
+  window.closeUserModal();
   loginProvider = provider;
-  showLoginModal({ provider: provider });
+  window.showLoginModal({ provider: provider });
 }
 window.logoutActiveAccount = async function() {
   if (activeAccountProvider === 'qq') {
-    try { await qqLogout(); } catch (e) {}
+    try { await window.qqLogout(); } catch (e) {}
     try {
       if (window.desktopWindow && typeof window.desktopWindow.clearQQMusicLogin === 'function') {
         await window.desktopWindow.clearQQMusicLogin();
@@ -584,38 +584,38 @@ window.logoutActiveAccount = async function() {
     } catch (e) {}
     qqLoginStatus = { provider: 'qq', loggedIn: false, preview: false, nickname: 'QQ 音乐', userId: '', avatar: '', vipType: 0 };
     qqPlaylists = [];
-    userPlaylists = userPlaylists.filter(function(pl){ return pl.provider !== 'qq'; });
+    userPlaylists = window.userPlaylists.filter(function(pl){ return pl.provider !== 'qq'; });
     dualAccountMode = false;
     activeAccountProvider = firstLoggedProvider();
     renderUserBtn();
-    if (hasAnyPlatformLogin()) updateUserModalUi();
-    else closeUserModal();
-    showToast('已退出 QQ 音乐');
+    if (window.hasAnyPlatformLogin()) updateUserModalUi();
+    else window.closeUserModal();
+    window.showToast('已退出 QQ 音乐');
     return;
   }
   doLogout();
 }
 window.doLogout = async function() {
-  await apiJson('/api/logout');
+  await window.apiJson('/api/logout');
   try {
     if (window.desktopWindow && typeof window.desktopWindow.clearNeteaseMusicLogin === 'function') {
       await window.desktopWindow.clearNeteaseMusicLogin();
     }
   } catch (e) {}
   loginStatus = { loggedIn: false };
-  if (!hasPlatformLogin('netease') || !hasPlatformLogin('qq')) dualAccountMode = false;
+  if (!window.hasPlatformLogin('netease') || !window.hasPlatformLogin('qq')) dualAccountMode = false;
   activeAccountProvider = firstLoggedProvider();
-  userPlaylists = qqPlaylists.slice();
+  userPlaylists = window.qqPlaylists.slice();
   myPodcastCollections = [];
   myPodcastItems = {};
   likedSongMap = {};
-  closeCollectModal();
-  updateLikeButtons();
-  safeRenderQueuePanel('logout', { scrollCurrent: miniQueueOpen });
+  window.closeCollectModal();
+  window.updateLikeButtons();
+  window.safeRenderQueuePanel('logout', { scrollCurrent: window.miniQueueOpen });
   renderUserBtn();
-  safeShelfRebuild('logout');
-  closeUserModal();
-  showToast('已退出登录');
+  window.safeShelfRebuild('logout');
+  window.closeUserModal();
+  window.showToast('已退出登录');
 }
 window.startupLoginGuideShown = false;
 window.loginGuideAnimating = false;
@@ -722,19 +722,19 @@ window.runLoginGuideParticles = function(done) {
   }
   loginGuideRaf = requestAnimationFrame(draw);
 }
-window.maybeRunStartupLoginGuide = function(source) {
+window.maybeRunStartupLoginGuide = function(window.source) {
   if (startupLoginGuideShown || loginGuideAnimating) return;
-  if (visualGuideActive) return;
+  if (window.visualGuideActive) return;
   if (document.body.classList.contains('splash-active')) return;
-  if (immersiveMode) return;
-  if (!loginStatusChecked || loginStatusCheckFailed || loginStatus.loggedIn || playing) return;
+  if (window.immersiveMode) return;
+  if (!window.loginStatusChecked || window.loginStatusCheckFailed || window.loginStatus.loggedIn || window.playing) return;
   var loginModal = document.getElementById('login-modal');
   var userModal = document.getElementById('user-modal');
   if ((loginModal && loginModal.classList.contains('show')) || (userModal && userModal.classList.contains('show'))) return;
   startupLoginGuideShown = true;
   setTimeout(function(){
-    if (loginStatus.loggedIn || playing || immersiveMode || document.body.classList.contains('splash-active')) return;
-    runLoginGuideParticles(function(){ showLoginModal({ guided: true, source: source || 'startup' }); });
+    if (window.loginStatus.loggedIn || window.playing || window.immersiveMode || document.body.classList.contains('splash-active')) return;
+    runLoginGuideParticles(function(){ window.showLoginModal({ guided: true, source: window.source || 'startup' }); });
   }, source === 'splash' ? 6200 : 2600);
 }
 

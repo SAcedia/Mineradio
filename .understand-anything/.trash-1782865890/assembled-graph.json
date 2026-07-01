@@ -1,0 +1,3596 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "Mineradio",
+    "languages": [
+      "JavaScript",
+      "HTML",
+      "CSS"
+    ],
+    "frameworks": [
+      "Electron",
+      "Three.js",
+      "GSAP",
+      "Vite"
+    ],
+    "description": "Immersive music player with weather radio, 3D visuals, multi-platform support",
+    "analyzedAt": "2026-07-01T00:31:16.867Z",
+    "gitCommitHash": "5d926d8c966ff8da546460bad70977ab98935dfe"
+  },
+  "nodes": [
+    {
+      "id": "file:public/js/shared.js",
+      "type": "file",
+      "name": "shared.js",
+      "filePath": "public/js/shared.js",
+      "summary": "Foundation layer — cross-file utilities, GSAP modal helpers, all STORE_KEY localStorage constants, hotkey action definitions and settings I/O, DIY mode preference, audio URL cache and song cache-key generator, fxDefaults master preset object, PACKAGED_DEFAULT_FX_SNAPSHOT frozen template. Loads first after vendors, before all module JS.",
+      "tags": [
+        "javascript",
+        "core",
+        "foundation",
+        "constants",
+        "utilities",
+        "hotkeys",
+        "fx-defaults"
+      ]
+    },
+    {
+      "id": "file:public/js/core/state.js",
+      "type": "file",
+      "name": "state.js",
+      "filePath": "public/js/core/state.js",
+      "summary": "Central mutable state for the entire application. Covers audio analysis (bass/mid/treble/FFT), playback queue and position, login/auth state (netease + QQ dual account), DIY player mode toggle with side effects, beat analysis engine state (beatMapCache, rtBeat, djMode), FX state (initialized from fxDefaults + saved lyric layout), UI auto-hide and pointer parallax, desktop runtime mode and fullscreen state, render power management (deep sleep, background cache trimming, renderer resize), and runtime performance snapshots.",
+      "tags": [
+        "javascript",
+        "core",
+        "state",
+        "audio-analysis",
+        "playback",
+        "login",
+        "beat-analysis",
+        "fx",
+        "ui-state",
+        "performance",
+        "render-power"
+      ]
+    },
+    {
+      "id": "file:public/js/api-helper.js",
+      "type": "file",
+      "name": "api-helper.js",
+      "filePath": "public/js/api-helper.js",
+      "summary": "External dependency — provides closeTrackDetailModal, closeCustomLyricModal, and initializes customCoverMap, customLyricMap, customLyricPrefs, playbackQuality on window.",
+      "tags": [
+        "javascript",
+        "external",
+        "modal",
+        "api"
+      ]
+    },
+    {
+      "id": "file:public/js/login.js",
+      "type": "file",
+      "name": "login.js",
+      "filePath": "public/js/login.js",
+      "summary": "External dependency — provides closeLoginModal and closeUserModal for the modal backdrop binding system.",
+      "tags": [
+        "javascript",
+        "external",
+        "login",
+        "modal"
+      ]
+    },
+    {
+      "id": "file:public/js/playlists.js",
+      "type": "file",
+      "name": "playlists.js",
+      "filePath": "public/js/playlists.js",
+      "summary": "External dependency — provides closeUpdatePanel for the update modal backdrop binding.",
+      "tags": [
+        "javascript",
+        "external",
+        "playlists",
+        "update"
+      ]
+    },
+    {
+      "id": "file:public/js/prefs.js",
+      "type": "file",
+      "name": "prefs.js",
+      "filePath": "public/js/prefs.js",
+      "summary": "External dependency — provides readSavedVolume, readSavedPlaybackVisualPreset, saveBooleanPreference and similar preference I/O functions referenced by state.js.",
+      "tags": [
+        "javascript",
+        "external",
+        "preferences",
+        "localStorage"
+      ]
+    },
+    {
+      "id": "file:public/js/core/three-lyrics.js",
+      "type": "file",
+      "name": "three-lyrics.js",
+      "filePath": "public/js/core/three-lyrics.js",
+      "summary": "External dependency — provides readSavedLyricLayout() used by state.js to initialize the fx object with persisted lyric layout overrides.",
+      "tags": [
+        "javascript",
+        "external",
+        "lyrics",
+        "layout",
+        "threejs"
+      ]
+    },
+    {
+      "id": "file:vendor/gsap",
+      "type": "file",
+      "name": "gsap",
+      "filePath": "vendor/gsap",
+      "summary": "External vendor dependency — GSAP animation library used for modal open/close animations and value pulsing.",
+      "tags": [
+        "javascript",
+        "vendor",
+        "animation",
+        "gsap"
+      ]
+    },
+    {
+      "id": "function:public/js/shared.js:clamp01",
+      "type": "function",
+      "name": "clamp01",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Math clamp value between 0 and 1 via Math.max(0, Math.min(1, v))."
+    },
+    {
+      "id": "function:public/js/shared.js:clampRange",
+      "type": "function",
+      "name": "clampRange",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Math clamp value between arbitrary min and max via Math.max(min, Math.min(max, v))."
+    },
+    {
+      "id": "function:public/js/shared.js:songProviderKey",
+      "type": "function",
+      "name": "songProviderKey",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Extracts provider identifier from song object — returns 'qq', 'youtube', or 'netease' based on song.provider/song.source/song.type."
+    },
+    {
+      "id": "function:public/js/shared.js:openGsapModal",
+      "type": "function",
+      "name": "openGsapModal",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Opens a modal overlay with GSAP animation: mask autoAlpha fade-in (0.38s power2.out), panel scale+blur reveal (0.68s expo.out). Falls back to direct CSS when GSAP unavailable."
+    },
+    {
+      "id": "function:public/js/shared.js:closeGsapModal",
+      "type": "function",
+      "name": "closeGsapModal",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Closes a modal with GSAP animation: panel autoAlpha out with blur (0.28s power2.in), mask autoAlpha out (0.34s power2.inOut), then clears GSAP props and fires optional afterClose callback."
+    },
+    {
+      "id": "function:public/js/shared.js:bindModalBackdropClose",
+      "type": "function",
+      "name": "bindModalBackdropClose",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Binds click-to-close on modal backdrops. Wires 5 modals (track-detail, login, user, custom-lyric, update) to their respective close functions. Uses __backdropCloseBound guard to prevent duplicate binding."
+    },
+    {
+      "id": "function:public/js/shared.js:getHotkeyDefaults",
+      "type": "function",
+      "name": "getHotkeyDefaults",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Builds default hotkey map from HOTKEY_ACTIONS array, producing { local: {}, global: {} } keyed by action key (e.g. window.togglePlay)."
+    },
+    {
+      "id": "function:public/js/shared.js:readHotkeySettings",
+      "type": "function",
+      "name": "readHotkeySettings",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Reads hotkey settings from localStorage via HOTKEY_SETTINGS_STORE_KEY, merges with defaults via Object.assign for both local and global keymaps."
+    },
+    {
+      "id": "function:public/js/shared.js:readDiyModePreference",
+      "type": "function",
+      "name": "readDiyModePreference",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Reads DIY player mode boolean from localStorage via DIY_MODE_STORE_KEY. Returns true if value is '1'."
+    },
+    {
+      "id": "function:public/js/shared.js:readBooleanPreference",
+      "type": "function",
+      "name": "readBooleanPreference",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Generic boolean localStorage reader. Returns stored value if set (truthy for 'true' or '1'), otherwise returns the provided fallback."
+    },
+    {
+      "id": "function:public/js/shared.js:_cacheKeyForSong",
+      "type": "function",
+      "name": "_cacheKeyForSong",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Generates a unique cache key string for a song in format '{provider}:{id}' using songProviderKey and song.id/mid/songmid/name+artist fallback."
+    },
+    {
+      "id": "function:public/js/shared.js:clonePackagedDefaultFxSnapshot",
+      "type": "function",
+      "name": "clonePackagedDefaultFxSnapshot",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Returns a shallow clone of the frozen PACKAGED_DEFAULT_FX_SNAPSHOT via Object.assign({}, ...)."
+    },
+    {
+      "id": "function:public/js/shared.js:packagedDefaultLyricLayoutRaw",
+      "type": "function",
+      "name": "packagedDefaultLyricLayoutRaw",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Returns the packaged default FX snapshot merged with desktopLyricsSchema marker ('desktop-lyrics-v3')."
+    },
+    {
+      "id": "data:public/js/shared.js:fxDefaults",
+      "type": "data",
+      "name": "fxDefaults",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Master FX preset defaults object (~70 properties). Covers preset selection, intensity, cinema shake, depth, cover resolution, bloom, lyric styling (color, glow, font, weight, offsets), visual tint, UI accent colors, background mode, desktop lyrics, shelf parameters, performance quality, and camera mode.",
+      "tags": [
+        "fx",
+        "preset",
+        "defaults",
+        "visual"
+      ]
+    },
+    {
+      "id": "data:public/js/shared.js:PACKAGED_DEFAULT_FX_SNAPSHOT",
+      "type": "data",
+      "name": "PACKAGED_DEFAULT_FX_SNAPSHOT",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Frozen object (Object.freeze) representing the packaged default FX snapshot. Structurally mirrors fxDefaults with identical properties. Used as a reset/fallback template.",
+      "tags": [
+        "fx",
+        "snapshot",
+        "frozen",
+        "default"
+      ]
+    },
+    {
+      "id": "data:public/js/shared.js:HOTKEY_ACTIONS",
+      "type": "data",
+      "name": "HOTKEY_ACTIONS",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Array of 7 hotkey action definitions. Each entry has key (event name), label, category, local keybind, and global keybind. Covers play/pause, prev/next track, volume up/down, fullscreen toggle, desktop lyrics toggle.",
+      "tags": [
+        "hotkeys",
+        "actions",
+        "keybindings"
+      ]
+    },
+    {
+      "id": "data:public/js/shared.js:STORE_KEYS",
+      "type": "data",
+      "name": "STORE_KEYS",
+      "parentId": "file:public/js/shared.js",
+      "summary": "All 17 localStorage store key constants: CUSTOM_COVER, CUSTOM_LYRIC, CUSTOM_LYRIC_PREF, LYRIC_LAYOUT, VISUAL_PRESET_SCHEMA, PLAYBACK_QUALITY, UPLOAD_TIP, DIY_MODE, PLAYLIST_PANEL_PIN, USER_CAPSULE_AUTO_HIDE, FX_FAB_AUTO_HIDE, CONTROLS_AUTO_HIDE, FREE_CAMERA, HOTKEY_SETTINGS, VISUAL_GUIDE_SEEN, LOCAL_BEATMAP, LOCAL_BEAT_PREF.",
+      "tags": [
+        "localStorage",
+        "constants",
+        "store-keys"
+      ]
+    },
+    {
+      "id": "function:public/js/core/state.js:markAppPerf",
+      "type": "function",
+      "name": "markAppPerf",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Records an app performance mark with name and timestamp (performance.now()). Pushes to appPerfMarks array, calls performance.mark(), logs to console.debug for first 16 marks."
+    },
+    {
+      "id": "function:public/js/core/state.js:installStartupLongTaskObserver",
+      "type": "function",
+      "name": "installStartupLongTaskObserver",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Installs PerformanceObserver for 'longtask' entries during first 15 seconds of startup. Disconnects after 16s. Logs long task duration via console.debug."
+    },
+    {
+      "id": "function:public/js/core/state.js:applyUserCapsuleAutoHideState",
+      "type": "function",
+      "name": "applyUserCapsuleAutoHideState",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Toggles 'user-capsule-auto-hide' CSS class on body and updates the hide-btn button text/title based on window.userCapsuleAutoHide state."
+    },
+    {
+      "id": "function:public/js/core/state.js:toggleUserCapsuleAutoHide",
+      "type": "function",
+      "name": "toggleUserCapsuleAutoHide",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Toggles window.userCapsuleAutoHide boolean, persists via saveBooleanPreference, applies CSS state, and shows a toast notification."
+    },
+    {
+      "id": "function:public/js/core/state.js:updateUserCapsuleAutoHideFromPointer",
+      "type": "function",
+      "name": "updateUserCapsuleAutoHideFromPointer",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Updates 'user-capsule-peek' CSS class based on pointer proximity to top-right corner (within 112px x 126px), when auto-hide is active and not in immersive mode."
+    },
+    {
+      "id": "function:public/js/core/state.js:applyFxFabAutoHideState",
+      "type": "function",
+      "name": "applyFxFabAutoHideState",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Toggles 'fx-fab-auto-hide' and 'fx-fab-peek' CSS classes on body based on window.fxFabAutoHide. Optionally forces hidden state. Updates the hide-btn button state."
+    },
+    {
+      "id": "function:public/js/core/state.js:toggleFxFabAutoHide",
+      "type": "function",
+      "name": "toggleFxFabAutoHide",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Toggles window.fxFabAutoHide boolean, persists via saveBooleanPreference, applies CSS state with forceHidden, and shows a toast notification."
+    },
+    {
+      "id": "function:public/js/core/state.js:updateFxFabAutoHideFromPointer",
+      "type": "function",
+      "name": "updateFxFabAutoHideFromPointer",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Updates 'fx-fab-peek' CSS class based on pointer proximity to bottom-right corner, FX panel open state, and reveal arm state. Skips when DIY mode or immersive mode is off."
+    },
+    {
+      "id": "function:public/js/core/state.js:layoutFullscreenDiyZone",
+      "type": "function",
+      "name": "layoutFullscreenDiyZone",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Calculates position and size for the fullscreen DIY zone button relative to the top-right account pill or user button. Sets CSS custom properties (--fullscreen-diy-*) on root element. Returns { left, top, width, height }."
+    },
+    {
+      "id": "function:public/js/core/state.js:shouldSuppressFullscreenDiyPeek",
+      "type": "function",
+      "name": "shouldSuppressFullscreenDiyPeek",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true if fullscreen DIY peek should be suppressed due to active visual guide, open FX panel, or open hotkey modal."
+    },
+    {
+      "id": "function:public/js/core/state.js:updateFullscreenDiyPeekFromPointer",
+      "type": "function",
+      "name": "updateFullscreenDiyPeekFromPointer",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Updates 'fullscreen-diy-peek' CSS class based on pointer proximity to the DIY zone near top-right. Considers fullscreen state, immersive mode, and peek suppression."
+    },
+    {
+      "id": "function:public/js/core/state.js:isDiyMode",
+      "type": "function",
+      "name": "isDiyMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns boolean value of window.diyPlayerMode."
+    },
+    {
+      "id": "function:public/js/core/state.js:syncDiyModeButton",
+      "type": "function",
+      "name": "syncDiyModeButton",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Syncs the 'on' class, 'aria-pressed', and 'title' attributes for both diy-mode-btn and fullscreen-diy-btn elements based on window.diyPlayerMode."
+    },
+    {
+      "id": "function:public/js/core/state.js:applyDiyMode",
+      "type": "function",
+      "name": "applyDiyMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Applies DIY or simple mode by toggling CSS classes ('diy-mode'/'simple-mode' on body, 'diy-mode-preload'/'simple-mode-preload' on html). Optionally saves preference, closes panels when leaving DIY mode, shows toast, and animates buttons with GSAP back.out."
+    },
+    {
+      "id": "function:public/js/core/state.js:toggleDiyMode",
+      "type": "function",
+      "name": "toggleDiyMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Toggles DIY mode via applyDiyMode with save+toast+animate options. Updates visual guide state if active."
+    },
+    {
+      "id": "function:public/js/core/state.js:isPodcastSong",
+      "type": "function",
+      "name": "isPodcastSong",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true if song.type === 'podcast'."
+    },
+    {
+      "id": "function:public/js/core/state.js:djSongKey",
+      "type": "function",
+      "name": "djSongKey",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Generates DJ mode song key string: 'local:{localKey}' for local songs, 'podcast:{id}' for podcast songs, empty string for null songs."
+    },
+    {
+      "id": "function:public/js/core/state.js:resetDjModeMeter",
+      "type": "function",
+      "name": "resetDjModeMeter",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Resets all DJ mode meter values (tempoGap, tempoConfidence, sectionEnergy, sectionLow, sectionChange, visualPulse, lastBeatAt) to zero or -10."
+    },
+    {
+      "id": "function:public/js/core/state.js:resetDjBeatMapState",
+      "type": "function",
+      "name": "resetDjBeatMapState",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Resets DJ beat map state: clears currentDjBeatMap, resets djBeatMapNextIdx and djBeatPulseNextIdx to 0."
+    },
+    {
+      "id": "function:public/js/core/state.js:cancelDjBeatAnalysisTimer",
+      "type": "function",
+      "name": "cancelDjBeatAnalysisTimer",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Clears the DJ beat analysis timeout and nulls the timer reference."
+    },
+    {
+      "id": "function:public/js/core/state.js:setDjModeActive",
+      "type": "function",
+      "name": "setDjModeActive",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Sets DJ mode active state and song key. On activation: clears beatMapCache and cancels normal beat analysis. On deactivation: increments djBeatMapToken, cancels DJ analysis timer, resets DJ beat map state."
+    },
+    {
+      "id": "function:public/js/core/state.js:maybeAnnounceDjMode",
+      "type": "function",
+      "name": "maybeAnnounceDjMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Shows a toast notification 'DJ Mode · 离线锁拍' at most every 8 seconds while DJ mode is active."
+    },
+    {
+      "id": "function:public/js/core/state.js:isDevelopmentLockedFx",
+      "type": "function",
+      "name": "isDevelopmentLockedFx",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Checks if a given FX key is locked for development via the DEVELOPMENT_LOCKED_FX map (currently only wallpaperMode locked)."
+    },
+    {
+      "id": "function:public/js/core/state.js:normalizeDevelopmentLockedFxState",
+      "type": "function",
+      "name": "normalizeDevelopmentLockedFxState",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Ensures locked FX properties are forced to their disabled state. Currently sets fx.wallpaperMode = false."
+    },
+    {
+      "id": "function:public/js/core/state.js:pulseObjectValue",
+      "type": "function",
+      "name": "pulseObjectValue",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Pulses a numeric property on any object to a peak value, then GSAP-animates it back to 0 with power3.out easing. Falls back to setTimeout when GSAP unavailable."
+    },
+    {
+      "id": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "type": "function",
+      "name": "isDeepBackgroundMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true when deep background optimization should activate: document hidden OR desktop minimized OR desktop not visible, unless live background keep mode is active."
+    },
+    {
+      "id": "function:public/js/core/state.js:currentPerformanceBackgroundMode",
+      "type": "function",
+      "name": "currentPerformanceBackgroundMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Normalizes the performance background mode string from fx.performanceBackground and fx.liveBackgroundKeep flag."
+    },
+    {
+      "id": "function:public/js/core/state.js:isLiveBackgroundKeepMode",
+      "type": "function",
+      "name": "isLiveBackgroundKeepMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true if current performance background mode is 'keep' (live background remains active when minimized/hidden)."
+    },
+    {
+      "id": "function:public/js/core/state.js:isBackgroundReleaseMode",
+      "type": "function",
+      "name": "isBackgroundReleaseMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true if current performance background mode is 'release' (aggressive resource release when backgrounded)."
+    },
+    {
+      "id": "function:public/js/core/state.js:isHiddenForBackgroundOptimization",
+      "type": "function",
+      "name": "isHiddenForBackgroundOptimization",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true when document is hidden AND live background keep mode is NOT active."
+    },
+    {
+      "id": "function:public/js/core/state.js:isVisibleBackgroundMode",
+      "type": "function",
+      "name": "isVisibleBackgroundMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Always returns false (stub for visible background eco mode)."
+    },
+    {
+      "id": "function:public/js/core/state.js:updateRenderPowerClasses",
+      "type": "function",
+      "name": "updateRenderPowerClasses",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Sets 'render-deep-sleep' and 'render-background-eco' CSS classes on document.body based on current background power state."
+    },
+    {
+      "id": "function:public/js/core/state.js:safeObjectKeys",
+      "type": "function",
+      "name": "safeObjectKeys",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Safe wrapper around Object.keys — returns [] for null/undefined and catches any exceptions."
+    },
+    {
+      "id": "function:public/js/core/state.js:markProtectedKey",
+      "type": "function",
+      "name": "markProtectedKey",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Marks a key as protected by setting map[String(key)] = true. Used to prevent cache eviction of in-use entries."
+    },
+    {
+      "id": "function:public/js/core/state.js:collectProtectedCoverUrls",
+      "type": "function",
+      "name": "collectProtectedCoverUrls",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Collects all cover URLs that must be protected from cache eviction: current song cover (60/360/400 sizes), currentCoverSource, playlist panel detail cover, and shelfManager card covers."
+    },
+    {
+      "id": "function:public/js/core/state.js:collectProtectedBeatMapKeys",
+      "type": "function",
+      "name": "collectProtectedBeatMapKeys",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Collects beat map cache keys to protect: songs within ±5 of currentIdx, beatPrefetchLastKey, active djMode.songKey, and localBeatAnalysis song key."
+    },
+    {
+      "id": "function:public/js/core/state.js:collectProtectedCoverDepthIds",
+      "type": "function",
+      "name": "collectProtectedCoverDepthIds",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Collects cover depth AI cache IDs to protect: currentCoverSource.src and current song covers at 360/400 sizes combined with tex dimensions."
+    },
+    {
+      "id": "function:public/js/core/state.js:trimObjectCache",
+      "type": "function",
+      "name": "trimObjectCache",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Generic object cache trimmer. Iterates keys in insertion order, deletes non-protected entries until cache size drops to 'keep' limit. Optionally skips entries via skipRecord callback. Returns number of dropped entries."
+    },
+    {
+      "id": "function:public/js/core/state.js:trimCoverDepthCache",
+      "type": "function",
+      "name": "trimCoverDepthCache",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Specialized trim for coverDepthCache using ordered key list. Protects latest 'keep' entries plus protectedKeys set. Rebuilds coverDepthCacheKeys from remaining entries. Returns dropped count."
+    },
+    {
+      "id": "function:public/js/core/state.js:collectRuntimePerfSnapshot",
+      "type": "function",
+      "name": "collectRuntimePerfSnapshot",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Collects comprehensive runtime performance snapshot: render state (mode, fps, skipped, longFrames), cache counts (playlist covers, depth, beatMaps), heap memory sample, renderer info (geometries, textures, calls, triangles), viewport dimensions and pixel ratio, and deep sleep status."
+    },
+    {
+      "id": "function:public/js/core/state.js:trimRuntimeCaches",
+      "type": "function",
+      "name": "trimRuntimeCaches",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Trims all runtime caches (playlist covers, cover depth, beat maps, DJ beat maps) using their respective trim functions. In aggressive mode: uses tighter keep limits and disposes renderer render lists. Returns total dropped count."
+    },
+    {
+      "id": "function:public/js/core/state.js:trimVisualCachesForBackground",
+      "type": "function",
+      "name": "trimVisualCachesForBackground",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Trims runtime caches aggressively when deep background mode is active, via trimRuntimeCaches('deep-background', true)."
+    },
+    {
+      "id": "function:public/js/core/state.js:scheduleBackgroundCacheTrim",
+      "type": "function",
+      "name": "scheduleBackgroundCacheTrim",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Schedules a trimVisualCachesForBackground call after 900ms delay, if deep background mode is active. Debounces via clearTimeout on backgroundCacheTrimTimer."
+    },
+    {
+      "id": "function:public/js/core/state.js:maybeTrimRuntimeCaches",
+      "type": "function",
+      "name": "maybeTrimRuntimeCaches",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Conditional cache trimmer. Skips if not in deep background and less than 30s since startup. Applies different intervals: release mode (3.6s), deep (7s), active (45s)."
+    },
+    {
+      "id": "function:public/js/core/state.js:applyRendererPowerMode",
+      "type": "function",
+      "name": "applyRendererPowerMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Applies renderer power mode: in deep sleep, shrinks renderer to 4x4 with adaptive pixel ratio; in active mode, sets to full viewport. Disposes render lists in sleep mode and schedules cache trim."
+    },
+    {
+      "id": "function:public/js/core/state.js:updateDesktopRuntimeState",
+      "type": "function",
+      "name": "updateDesktopRuntimeState",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Updates desktop runtime state (minimized, visible, focused, fullscreen) from Electron IPC state. Calls updateRenderPowerClasses, applyRendererPowerMode, syncs desktop overlay state, recovers visuals if leaving deep background, and refreshes main renderer viewport on fullscreen change."
+    },
+    {
+      "id": "function:public/js/core/state.js:installRenderPowerHooks",
+      "type": "function",
+      "name": "installRenderPowerHooks",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Installs all render power lifecycle hooks: visibilitychange listener (update power + recover visuals), window focus/blur listeners, and desktopWindow.onStateChange hook for Electron desktop state."
+    },
+    {
+      "id": "api-helper.js",
+      "label": "api-helper.js",
+      "type": "file",
+      "description": "Core API/utility helpers: fetch wrapper, HTML escaping, playback quality normalization, listen stats, song cloning, track detail modal, custom lyric system, artist resolution"
+    },
+    {
+      "id": "apiJson",
+      "label": "apiJson(url, opts)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Fetch wrapper with optional AbortController timeout. Returns parsed JSON. Used extensively across all modules."
+    },
+    {
+      "id": "escHtml",
+      "label": "escHtml(s)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "HTML-escape a string using innerText/textContent pattern"
+    },
+    {
+      "id": "normalizePlaybackQuality",
+      "label": "normalizePlaybackQuality(value)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Normalizes quality labels (jymaster, hires, lossless, exhigh, standard) to canonical values"
+    },
+    {
+      "id": "playbackQualityLabel",
+      "label": "playbackQualityLabel(value)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Chinese label for playback quality tier"
+    },
+    {
+      "id": "playbackQualityRank",
+      "label": "playbackQualityRank(value)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Numeric rank 1-5 for quality comparison"
+    },
+    {
+      "id": "readPlaybackQualityPreference",
+      "label": "readPlaybackQualityPreference()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Reads quality preference from localStorage, defaults to hires"
+    },
+    {
+      "id": "savePlaybackQualityPreference",
+      "label": "savePlaybackQualityPreference()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Saves current quality preference to localStorage"
+    },
+    {
+      "id": "updatePlaybackQualityUi",
+      "label": "updatePlaybackQualityUi()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Updates DOM elements for quality button, label, options; hides for YouTube tracks"
+    },
+    {
+      "id": "setPlaybackQuality",
+      "label": "setPlaybackQuality(value)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Sets playback quality, triggers SVIP check, updates UI and current track"
+    },
+    {
+      "id": "applyPlaybackQualityToCurrentTrack",
+      "label": "applyPlaybackQualityToCurrentTrack(nextQuality)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Reloads current track at new quality using playQueueAt with qualitySwitch"
+    },
+    {
+      "id": "loadListenStatsState",
+      "label": "loadListenStatsState()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Loads listen history/stats from localStorage, returns {history, songs, artists, updatedAt}"
+    },
+    {
+      "id": "saveListenStatsState",
+      "label": "saveListenStatsState()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Saves listenStatsState to localStorage with updatedAt timestamp"
+    },
+    {
+      "id": "currentCoverSong",
+      "label": "currentCoverSong()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Returns the current song from playQueue[currentIdx] or currentLocalSong. Central accessor used by many modules."
+    },
+    {
+      "id": "songSourceLabel",
+      "label": "songSourceLabel(song)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Returns Chinese label for song source (QQ音乐, YouTube, 本地上传, 网易云播客, 网易云音乐)"
+    },
+    {
+      "id": "cloneSong",
+      "label": "cloneSong(song)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Clones a song object and hydrates custom cover. Central cloning utility."
+    },
+    {
+      "id": "closeTrackDetailModal",
+      "label": "closeTrackDetailModal()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Closes track detail modal via GSAP closeGsapModal"
+    },
+    {
+      "id": "openTrackDetailModal",
+      "label": "openTrackDetailModal(type, songOverride)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Opens track detail modal with artist info or song comments, fetches data via apiJson"
+    },
+    {
+      "id": "resolveArtistSongForDetail",
+      "label": "resolveArtistSongForDetail(song, artist)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Searches for artist song across netease/qq/youtube to open artist detail modal"
+    },
+    {
+      "id": "setLyricSourceMode",
+      "label": "setLyricSourceMode(mode, silent)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Switches between original and custom lyrics, saves preference per-song"
+    },
+    {
+      "id": "readCustomLyricMap",
+      "label": "readCustomLyricMap()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Reads custom lyric map from localStorage"
+    },
+    {
+      "id": "saveCustomLyricMap",
+      "label": "saveCustomLyricMap()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Persists custom lyric map to localStorage"
+    },
+    {
+      "id": "currentLyricSong",
+      "label": "currentLyricSong()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Returns current song for lyrics (similar to currentCoverSong)"
+    },
+    {
+      "id": "customLyricMap",
+      "label": "customLyricMap",
+      "type": "variable",
+      "file": "api-helper.js",
+      "description": "Global variable storing custom lyrics keyed by song key, initialized at load"
+    },
+    {
+      "id": "customLyricPrefs",
+      "label": "customLyricPrefs",
+      "type": "variable",
+      "file": "api-helper.js",
+      "description": "Per-song preference for custom vs original lyrics"
+    },
+    {
+      "id": "like.js",
+      "label": "like.js",
+      "type": "file",
+      "description": "Like/heart system: cloud song detection, like toggling, YouTube local like storage, sync with Netease"
+    },
+    {
+      "id": "isCloudSong",
+      "label": "isCloudSong(song)",
+      "type": "function",
+      "file": "like.js",
+      "description": "Checks if song is a netease cloud song (not QQ, local, podcast, YouTube)"
+    },
+    {
+      "id": "isSongLiked",
+      "label": "isSongLiked(song)",
+      "type": "function",
+      "file": "like.js",
+      "description": "Checks likedSongMap or localStorage for YouTube likes"
+    },
+    {
+      "id": "ensureLoggedInForAction",
+      "label": "ensureLoggedInForAction()",
+      "type": "function",
+      "file": "like.js",
+      "description": "Returns true if logged in, otherwise shows login modal and toast"
+    },
+    {
+      "id": "updateLikeButtons",
+      "label": "updateLikeButtons(song)",
+      "type": "function",
+      "file": "like.js",
+      "description": "Updates DOM heart-btn and collect-btn liked/busy state"
+    },
+    {
+      "id": "toggleLikeSong",
+      "label": "toggleLikeSong(song)",
+      "type": "function",
+      "file": "like.js",
+      "description": "Toggles like for a song. YouTube: localStorage. Netease: API call with optimistic UI."
+    },
+    {
+      "id": "toggleLikeCurrent",
+      "label": "toggleLikeCurrent()",
+      "type": "function",
+      "file": "like.js",
+      "description": "Toggles like for the current cover song"
+    },
+    {
+      "id": "syncLikeStatusForSongs",
+      "label": "syncLikeStatusForSongs(songs)",
+      "type": "function",
+      "file": "like.js",
+      "description": "Batch checks like status with Netease API to sync likedSongMap"
+    },
+    {
+      "id": "likedSongMap",
+      "label": "likedSongMap",
+      "type": "variable",
+      "file": "like.js",
+      "description": "Global map of song id -> boolean for liked status"
+    },
+    {
+      "id": "likeBusyMap",
+      "label": "likeBusyMap",
+      "type": "variable",
+      "file": "like.js",
+      "description": "Per-song lock to prevent concurrent like toggles"
+    },
+    {
+      "id": "collect.js",
+      "label": "collect.js",
+      "type": "file",
+      "description": "Collect/playlist modal: open/close collect modal, render playlist targets, add song to playlist"
+    },
+    {
+      "id": "openCollectModal",
+      "label": "openCollectModal(song)",
+      "type": "function",
+      "file": "collect.js",
+      "description": "Opens collect modal for a song. Supports YouTube (local only) and Netease (logged-in required)"
+    },
+    {
+      "id": "closeCollectModal",
+      "label": "closeCollectModal()",
+      "type": "function",
+      "file": "collect.js",
+      "description": "Closes collect modal and resets state"
+    },
+    {
+      "id": "renderCollectModal",
+      "label": "renderCollectModal()",
+      "type": "function",
+      "file": "collect.js",
+      "description": "Renders the collect modal with song info and user playlist list"
+    },
+    {
+      "id": "createPlaylistFromCollect",
+      "label": "createPlaylistFromCollect()",
+      "type": "function",
+      "file": "collect.js",
+      "description": "Creates new Netease playlist from collect modal, then adds target song"
+    },
+    {
+      "id": "addCollectTargetToPlaylist",
+      "label": "addCollectTargetToPlaylist(pid)",
+      "type": "function",
+      "file": "collect.js",
+      "description": "Adds currently targeted song to specified playlist via API"
+    },
+    {
+      "id": "collectTargetSong",
+      "label": "collectTargetSong",
+      "type": "variable",
+      "file": "collect.js",
+      "description": "Global reference to the song being collected"
+    },
+    {
+      "id": "collectBusy",
+      "label": "collectBusy",
+      "type": "variable",
+      "file": "collect.js",
+      "description": "Lock flag for collect operation"
+    },
+    {
+      "id": "cover.js",
+      "label": "cover.js",
+      "type": "file",
+      "description": "Cover/image system: custom covers, cover proxy, URL sizing, cover caching for songs"
+    },
+    {
+      "id": "readCustomCoverMap",
+      "label": "readCustomCoverMap()",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Reads custom cover map from localStorage"
+    },
+    {
+      "id": "saveCustomCoverMap",
+      "label": "saveCustomCoverMap()",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Persists custom cover map to localStorage"
+    },
+    {
+      "id": "customCoverMap",
+      "label": "customCoverMap",
+      "type": "variable",
+      "file": "cover.js",
+      "description": "Global map of song keys to custom cover data URLs"
+    },
+    {
+      "id": "songCustomCoverKey",
+      "label": "songCustomCoverKey(song)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Generates unique key for a song for custom cover lookup (qq/id/local/podcast/meta)"
+    },
+    {
+      "id": "getCustomCoverForSong",
+      "label": "getCustomCoverForSong(song)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Returns custom cover if set, checking song.customCover first then customCoverMap"
+    },
+    {
+      "id": "hydrateCustomCover",
+      "label": "hydrateCustomCover(song)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Attaches customCover property to song if custom cover exists. Used in cloneSong."
+    },
+    {
+      "id": "songCoverSrc",
+      "label": "songCoverSrc(song, size)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Returns cover URL: custom cover if set, else song.cover with size param. Central cover accessor."
+    },
+    {
+      "id": "coverProxySrc",
+      "label": "coverProxySrc(url, cacheBust)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Proxies external cover URLs through /api/cover for CORS"
+    },
+    {
+      "id": "coverUrlWithSize",
+      "label": "coverUrlWithSize(url, size)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Appends size parameter to cover URLs (param=320y320)"
+    },
+    {
+      "id": "setCustomCoverForCurrent",
+      "label": "setCustomCoverForCurrent(dataUrl, opts)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Sets custom cover for current song, saves to map, updates UI and shelf rebuild"
+    },
+    {
+      "id": "discover.js",
+      "label": "discover.js",
+      "type": "file",
+      "description": "Home/discover page: listen stats tracking, daily recommendations, weather radio, home tiles/mosaic"
+    },
+    {
+      "id": "homeListenSummary",
+      "label": "homeListenSummary()",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Returns {recent, topSong, topArtist, totalPlays} from listenStatsState"
+    },
+    {
+      "id": "goHome",
+      "label": "goHome()",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Navigates to home page, sets forced state, loads weather and discover data"
+    },
+    {
+      "id": "renderHomeDiscover",
+      "label": "renderHomeDiscover()",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Renders full home page: weather, daily songs, playlists, podcasts, tiles, mosaic backdrop"
+    },
+    {
+      "id": "playHomeDaily",
+      "label": "playHomeDaily()",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Plays daily recommended songs from homeDiscoverState"
+    },
+    {
+      "id": "loadHomeWeatherRadio",
+      "label": "loadHomeWeatherRadio(force, opts)",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Fetches weather radio data (songs matched to local weather) via apiJson"
+    },
+    {
+      "id": "loadHomeDiscover",
+      "label": "loadHomeDiscover(force)",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Loads daily recommendations, playlists, and podcasts from netease API"
+    },
+    {
+      "id": "listenStatsState",
+      "label": "listenStatsState",
+      "type": "variable",
+      "file": "discover.js",
+      "description": "Global state for listen tracking: history[], songs{}, artists{}"
+    },
+    {
+      "id": "homeDiscoverState",
+      "label": "homeDiscoverState",
+      "type": "variable",
+      "file": "discover.js",
+      "description": "Global state for home page: loading, loggedIn, songs[], playlists[], podcasts[]"
+    },
+    {
+      "id": "homeWeatherRadioState",
+      "label": "homeWeatherRadioState",
+      "type": "variable",
+      "file": "discover.js",
+      "description": "Global state for weather radio: weather, radio data, loading, city"
+    },
+    {
+      "id": "listenSession",
+      "label": "listenSession",
+      "type": "variable",
+      "file": "discover.js",
+      "description": "Current listening session tracker (key, song, startedAt, listenMs, progress)"
+    },
+    {
+      "id": "songProviderKey",
+      "label": "songProviderKey(song)",
+      "type": "function",
+      "description": "Returns normalized provider key for a song (youtube/qq/netease). Defined in index.html"
+    },
+    {
+      "id": "audio-engine.js",
+      "label": "audio-engine.js",
+      "type": "file",
+      "description": "Audio context init, Web Audio API setup (analyser, gain), volume controls, fade in/out, UI sound effects"
+    },
+    {
+      "id": "initAudio",
+      "label": "initAudio()",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Creates AudioContext, connects source->analyser->beatAnalyser->gainNode->destination"
+    },
+    {
+      "id": "resumeAudioAnalysis",
+      "label": "resumeAudioAnalysis()",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Resumes suspended AudioContext"
+    },
+    {
+      "id": "fadeOutAndPauseAudio",
+      "label": "fadeOutAndPauseAudio()",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Ramps gain to 0 over AUDIO_FADE_OUT_MS, then pauses HTMLAudioElement"
+    },
+    {
+      "id": "applyVolumeToAudio",
+      "label": "applyVolumeToAudio()",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Syncs targetVolume to gainNode and audio element volume"
+    },
+    {
+      "id": "setVolume",
+      "label": "setVolume(value, silent)",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Sets target volume, persists to localStorage, updates UI"
+    },
+    {
+      "id": "bindVolumeControls",
+      "label": "bindVolumeControls()",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Binds volume slider, button events, mouse hover panel open/close"
+    },
+    {
+      "id": "rampAudioOutputGain",
+      "label": "rampAudioOutputGain(value, durationMs)",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Smooth gain ramp using AudioParam linearRampToValueAtTime or requestAnimationFrame fallback"
+    },
+    {
+      "id": "audioCtx",
+      "label": "audioCtx",
+      "type": "variable",
+      "file": "audio-engine.js",
+      "description": "Web Audio API AudioContext instance"
+    },
+    {
+      "id": "analyser",
+      "label": "analyser",
+      "type": "variable",
+      "file": "audio-engine.js",
+      "description": "Primary AnalyserNode for FFT audio visualization"
+    },
+    {
+      "id": "gainNode",
+      "label": "gainNode",
+      "type": "variable",
+      "file": "audio-engine.js",
+      "description": "GainNode for volume control"
+    },
+    {
+      "id": "targetVolume",
+      "label": "targetVolume",
+      "type": "variable",
+      "file": "audio-engine.js",
+      "description": "Current target volume (0-1)"
+    },
+    {
+      "id": "beat-analysis.js",
+      "label": "beat-analysis.js",
+      "type": "file",
+      "description": "Offline beat detection using frequency band energy analysis, MusicTempo library via Web Worker, disk caching"
+    },
+    {
+      "id": "analyzeAudioBeats",
+      "label": "analyzeAudioBeats(audioUrl, durationSec, token, options)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Main offline beat analysis: fetches audio, decodes, filters into 4 bands, detects onset peaks, produces beat map with strength/confidence/primary/camera flags"
+    },
+    {
+      "id": "beatMapSongKey",
+      "label": "beatMapSongKey(song)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Generates unique key for song beat map (local/qq/song prefix)"
+    },
+    {
+      "id": "scheduleBeatAnalysis",
+      "label": "scheduleBeatAnalysis(songId, audioUrl, token, song)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Schedules delayed beat analysis after playback starts with idle timeout and disk cache check"
+    },
+    {
+      "id": "scheduleQueueBeatPrefetch",
+      "label": "scheduleQueueBeatPrefetch(fromIdx, delayMs, state)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Prefetches beat maps for upcoming queue items in background"
+    },
+    {
+      "id": "analyzeMusicTempoInWorker",
+      "label": "analyzeMusicTempoInWorker(buffer, token)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Runs MusicTempo analysis in a Web Worker for BPM detection"
+    },
+    {
+      "id": "readBeatDiskCache",
+      "label": "readBeatDiskCache(key)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Reads beat map from server-side disk cache"
+    },
+    {
+      "id": "writeBeatDiskCache",
+      "label": "writeBeatDiskCache(key, map, song, mode)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Writes beat map to server-side disk cache"
+    },
+    {
+      "id": "beatMapCache",
+      "label": "beatMapCache",
+      "type": "variable",
+      "file": "beat-analysis.js",
+      "description": "In-memory cache for beat maps keyed by beatMapSongKey"
+    },
+    {
+      "id": "beatMapToken",
+      "label": "beatMapToken",
+      "type": "variable",
+      "file": "beat-analysis.js",
+      "description": "Token incremented on each track switch to cancel stale analysis"
+    },
+    {
+      "id": "currentBeatMap",
+      "label": "currentBeatMap",
+      "type": "variable",
+      "description": "Active beat map for the currently playing song (declared in index.html, written by playback.js)"
+    },
+    {
+      "id": "playback.js",
+      "label": "playback.js",
+      "type": "file",
+      "description": "Core playback queue controller: play at index, next/prev, toggle play, shuffle, queue management, auto-fallback, glass effect controls"
+    },
+    {
+      "id": "playQueueAt",
+      "label": "playQueueAt(idx, opts)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Central playback function: sets up audio, handles quality/SVIP, beat analysis scheduling, lyric fetch, cross-platform source fallback (netease/qq/youtube)"
+    },
+    {
+      "id": "togglePlay",
+      "label": "togglePlay()",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Toggle play/pause with fade transitions, YT URL expiry retry"
+    },
+    {
+      "id": "nextTrack",
+      "label": "nextTrack()",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Advances to next track (shuffle or sequential)"
+    },
+    {
+      "id": "prevTrack",
+      "label": "prevTrack()",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Goes to previous track"
+    },
+    {
+      "id": "queueSong",
+      "label": "queueSong(song, opts)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Adds song to play queue (end or next position), deduplicates"
+    },
+    {
+      "id": "shuffleQueue",
+      "label": "shuffleQueue()",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Fisher-Yates shuffle of playQueue"
+    },
+    {
+      "id": "tryAutoPlaybackFallback",
+      "label": "tryAutoPlaybackFallback(song, data, idx, token, opts)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "When a song fails to play, searches alternate platform (netease<->qq) for same title+artist"
+    },
+    {
+      "id": "skipFailedQueueItem",
+      "label": "skipFailedQueueItem(idx, token, message)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Marks item as failed and skips to next playable queue item"
+    },
+    {
+      "id": "safePlaybackStep",
+      "label": "safePlaybackStep(label, fn)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Wraps playback setup step in try/catch for resilience"
+    },
+    {
+      "id": "bindPlayerControlAnimations",
+      "label": "bindPlayerControlAnimations()",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Binds GSAP hover/press/release animations to all bottom-bar control buttons"
+    },
+    {
+      "id": "queueItemKey",
+      "label": "queueItemKey(song)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Unique key for a song in the queue (qq/song/local/podcast prefix)"
+    },
+    {
+      "id": "playQueue",
+      "label": "playQueue",
+      "type": "variable",
+      "description": "Global play queue array (defined in index.html)"
+    },
+    {
+      "id": "currentIdx",
+      "label": "currentIdx",
+      "type": "variable",
+      "description": "Global index into playQueue (defined in index.html)"
+    },
+    {
+      "id": "lyrics.js",
+      "label": "lyrics.js",
+      "type": "file",
+      "description": "Lyric fetching, parsing (LRC/YRC), rendering trigger, source cycling, offset/speed adjustment, mini source bar"
+    },
+    {
+      "id": "fetchLyric",
+      "label": "fetchLyric(songOrId, token, preferSource)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Fetches lyrics from API with caching, parses YRC/LRC, applies preferred source"
+    },
+    {
+      "id": "renderLyrics",
+      "label": "renderLyrics()",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Triggers clearStageLyrics() - actual rendering done by stageLyrics in three-lyrics.js"
+    },
+    {
+      "id": "toggleLyricsPanel",
+      "label": "toggleLyricsPanel(force)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Toggles particleLyrics FX flag, creates or clears lyrics particles"
+    },
+    {
+      "id": "cycleLyricSource",
+      "label": "cycleLyricSource()",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Cycles through lyric sources (lrclib/music-kit/netease/kugou/yt-captions) for YT songs"
+    },
+    {
+      "id": "setLyricSource",
+      "label": "setLyricSource(source)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Sets specific lyric source by name"
+    },
+    {
+      "id": "adjustLyricOffset",
+      "label": "adjustLyricOffset(delta)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Adjusts lyric sync offset (+/- seconds), saves per-song preference"
+    },
+    {
+      "id": "adjustPlaybackSpeed",
+      "label": "adjustPlaybackSpeed(delta)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Changes audio playback rate (0.25x-3x), saves per-song preference"
+    },
+    {
+      "id": "updateMiniSourceBar",
+      "label": "updateMiniSourceBar()",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Shows/hides mini source bar based on current song provider"
+    },
+    {
+      "id": "updateMiniSourceButtons",
+      "label": "updateMiniSourceButtons()",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Updates active state of mini source buttons"
+    },
+    {
+      "id": "parseYrcText",
+      "label": "parseYrcText(text)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Parses YRC (Yun) lyrics format with word-level timing"
+    },
+    {
+      "id": "parseLyricText",
+      "label": "parseLyricText(text)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Parses standard LRC lyrics format"
+    },
+    {
+      "id": "lyricsLines",
+      "label": "lyricsLines",
+      "type": "variable",
+      "description": "Current active lyric lines (defined in index.html)"
+    },
+    {
+      "id": "lyricsTimingSource",
+      "label": "lyricsTimingSource",
+      "type": "variable",
+      "description": "Source type of current lyrics (yrc-word/yrc-line/lrc-line/fallback/custom-lrc/custom-text)"
+    },
+    {
+      "id": "lyricSourceMode",
+      "label": "lyricSourceMode",
+      "type": "variable",
+      "description": "Current lyric mode: 'original' or 'custom'"
+    },
+    {
+      "id": "playbackProviderLabel",
+      "label": "playbackProviderLabel(song)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Returns display name for playback provider (YouTube/QQ音乐/网易云)"
+    },
+    {
+      "id": "alternatePlaybackProvider",
+      "label": "alternatePlaybackProvider(song)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Returns the opposite provider for auto-fallback (netease<->qq)"
+    },
+    {
+      "id": "searchAlternatePlatformSong",
+      "label": "searchAlternatePlatformSong(song)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Searches for same song on alternate platform via apiJson"
+    },
+    {
+      "id": "three-scene.js",
+      "label": "three-scene.js",
+      "type": "file",
+      "description": "Three.js scene setup, camera system (orbit/free/beat-synced), renderer, cinema dynamics, realtime beat engine, performance adaptation"
+    },
+    {
+      "id": "scene",
+      "label": "scene",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "THREE.Scene instance (background null for alpha)"
+    },
+    {
+      "id": "camera",
+      "label": "camera",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "THREE.PerspectiveCamera (FOV 45)"
+    },
+    {
+      "id": "renderer",
+      "label": "renderer",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "THREE.WebGLRenderer with alpha, high-performance, dynamic pixel ratio"
+    },
+    {
+      "id": "orbit",
+      "label": "orbit object",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Orbital camera controller: userTheta/Phi/Radius, cineOffset, focus target, glow follow, beat glow"
+    },
+    {
+      "id": "freeCamera",
+      "label": "freeCamera state",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Free camera mode (WASD + mouse) with position/yaw/pitch/roll/fov, pointer lock, reset tween"
+    },
+    {
+      "id": "beatCam",
+      "label": "beatCam object",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Beat-synced camera state: nextIdx, events[], punch, theta/phi/radius/roll kicks, stats"
+    },
+    {
+      "id": "uniforms",
+      "label": "uniforms (global)",
+      "type": "variable",
+      "description": "Shared Three.js uniforms object (declared in particles.js, referenced globally)"
+    },
+    {
+      "id": "cinemaDynamics",
+      "label": "cinemaDynamics",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Running average/peak/scale for audio-reactive cinema camera movement"
+    },
+    {
+      "id": "cinemaTrackProfile",
+      "label": "cinemaTrackProfile",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Per-track profile: scale, energy/low/vocal averages, punch peak, density"
+    },
+    {
+      "id": "resetBeatCameraSync",
+      "label": "resetBeatCameraSync(t)",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Resets beat camera sync state to time t"
+    },
+    {
+      "id": "processRealtimeBeatEngine",
+      "label": "processRealtimeBeatEngine(dt)",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Real-time FFT beat detection: sub/low/body/vocal/snap bands, onset detection, tempo tracking, hit detection with rhythm acceptance"
+    },
+    {
+      "id": "scheduleBeatCamera",
+      "label": "scheduleBeatCamera(beat, source)",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Schedules camera movement from a beat event with strength/tone/combo-based amplitude"
+    },
+    {
+      "id": "updateCinemaDynamics",
+      "label": "updateCinemaDynamics(rawEnergy, rawLow)",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Updates cinema dynamics scale from energy/low inputs"
+    },
+    {
+      "id": "applyFreeCameraToCamera",
+      "label": "applyFreeCameraToCamera()",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Applies free camera position/rotation/shake to camera object"
+    },
+    {
+      "id": "updateFreeCamera",
+      "label": "updateFreeCamera(dt)",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Updates free camera position from WASD input, velocity, and reset tween"
+    },
+    {
+      "id": "rtBeat",
+      "label": "rtBeat object",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Realtime beat engine state: band follow values, onset avg/peak, tempo tracking, hit stats"
+    },
+    {
+      "id": "three-lyrics.js",
+      "label": "three-lyrics.js",
+      "type": "file",
+      "description": "3D lyrics rendering system: canvas-textured text planes, star river particles, lyric layout save/load, color/font management, color lab"
+    },
+    {
+      "id": "stageLyrics",
+      "label": "stageLyrics object",
+      "type": "variable",
+      "file": "three-lyrics.js",
+      "description": "Stage lyrics state: group, current/outgoing meshes, palette, starRiver, lock fit scale"
+    },
+    {
+      "id": "readSavedLyricLayout",
+      "label": "readSavedLyricLayout()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Reads all visual preset/fx parameters from localStorage, returns normalized configuration object"
+    },
+    {
+      "id": "saveLyricLayout",
+      "label": "saveLyricLayout()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Saves all visual preset/fx parameters to localStorage"
+    },
+    {
+      "id": "normalizeHexColor",
+      "label": "normalizeHexColor(value, fallback)",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Normalizes hex color string (#xxx -> #xxxxxx, validates)"
+    },
+    {
+      "id": "normalizeCoverResolution",
+      "label": "normalizeCoverResolution(v)",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Clamps cover resolution value (0.75-1.55)"
+    },
+    {
+      "id": "createLyricsParticles",
+      "label": "createLyricsParticles()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Creates stage lyrics 3D group and star river particle system"
+    },
+    {
+      "id": "ensureLyricStarRiver",
+      "label": "ensureLyricStarRiver()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Creates star river (420-point flowing particle stream below lyrics) with ShaderMaterial"
+    },
+    {
+      "id": "updateLyricStarRiver",
+      "label": "updateLyricStarRiver(dt)",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Updates star river size, opacity, position based on current lyrics and fx parameters"
+    },
+    {
+      "id": "clearStageLyrics",
+      "label": "clearStageLyrics()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Clears all lyrics meshes from stage"
+    },
+    {
+      "id": "lyricFontStackForKey",
+      "label": "lyricFontStackForKey(key)",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Returns CSS font-family stack for given font key (sans/hei/song/bold-song/stone-song/etc)"
+    },
+    {
+      "id": "updateStageLyrics3D",
+      "label": "updateStageLyrics3D()",
+      "type": "function",
+      "description": "Main 3D lyrics update loop (called from animation frame, referenced from index.html)"
+    },
+    {
+      "id": "particles.js",
+      "label": "particles.js",
+      "type": "file",
+      "description": "Main particle system: geometry, dot texture, cover texture, uniforms, vertex/fragment shaders, ripple system"
+    },
+    {
+      "id": "dotTexture",
+      "label": "dotTexture",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "Radial gradient dot canvas texture for particles"
+    },
+    {
+      "id": "geo",
+      "label": "geo (particle geometry)",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "BufferGeometry with position/aUv/aRand attributes for cover particle grid"
+    },
+    {
+      "id": "coverTex",
+      "label": "coverTex",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "THREE.Texture for cover image, updated on track change"
+    },
+    {
+      "id": "prevCoverTex",
+      "label": "prevCoverTex",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "Previous cover texture for crossfade transition"
+    },
+    {
+      "id": "coverEdgeTex",
+      "label": "coverEdgeTex",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "Edge/depth texture (R=depth, G=edge, B=fg-mask, A=lum)"
+    },
+    {
+      "id": "uniforms object",
+      "label": "uniforms (detailed)",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "Complete uniforms for particle shaders: uTime, uBass, uMid, uTreble, uBeat, uEnergy, uBurstAmt, uVinylSpin, uPreset, all FX parameters, mouse interaction, ripple, cover textures"
+    },
+    {
+      "id": "buildCoverParticleGeometry",
+      "label": "buildCoverParticleGeometry(grid)",
+      "type": "function",
+      "file": "particles.js",
+      "description": "Builds BufferGeometry from grid count with position (PLANE_SIZE) and UV coordinates"
+    },
+    {
+      "id": "applyCoverParticleResolution",
+      "label": "applyCoverParticleResolution(value, opts)",
+      "type": "function",
+      "file": "particles.js",
+      "description": "Changes particle grid resolution, rebuilds geometry, triggers cover reload"
+    },
+    {
+      "id": "rippleData",
+      "label": "rippleData/rippleTex/ripples",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "Ripple effect system: DataTexture (1xN) with x/y/age/str, array of ripple trackers"
+    },
+    {
+      "id": "floatGroup",
+      "label": "floatGroup",
+      "type": "variable",
+      "description": "Float particle layer group (declared in index.html, managed by particles.js)"
+    },
+    {
+      "id": "shelf.js",
+      "label": "shelf.js",
+      "type": "file",
+      "description": "3D shelf system: side/stage modes, card rendering, hover cue, layout profiles, pinned open state"
+    },
+    {
+      "id": "shelfManager",
+      "label": "shelfManager",
+      "type": "variable",
+      "file": "shelf.js",
+      "description": "Global shelf manager instance (created by makeShelfManager)"
+    },
+    {
+      "id": "makeShelfManager",
+      "label": "makeShelfManager()",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Factory function creating shelf manager with methods: getMode, buildOneCard, currentItems, clearSelected, closeContent, etc."
+    },
+    {
+      "id": "safeShelfRebuild",
+      "label": "safeShelfRebuild(reason, loadCover)",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Safely rebuilds shelf cards with error handling"
+    },
+    {
+      "id": "scheduleShelfRebuild",
+      "label": "scheduleShelfRebuild(reason, loadCover)",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Schedules a deferred shelf rebuild using requestAnimationFrame"
+    },
+    {
+      "id": "currentItems",
+      "label": "currentItems",
+      "type": "variable",
+      "file": "shelf.js",
+      "description": "Array of current items displayed in the shelf"
+    },
+    {
+      "id": "buildOneCard",
+      "label": "buildOneCard(song, index)",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Creates a single Three.js shelf card mesh (cover plane, glow ring, text sprite) for a song"
+    },
+    {
+      "id": "shelfSettings",
+      "label": "shelfSettings()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Returns normalized shelf position/size/opacity parameters from fx state"
+    },
+    {
+      "id": "shelfLayoutProfile",
+      "label": "shelfLayoutProfile()",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Returns shelf layout parameters (position, scale, rotation) for side/stage modes"
+    },
+    {
+      "id": "setShelfPinnedOpen",
+      "label": "setShelfPinnedOpen(open, immediate)",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Pins shelf open/closed, manages focus zone and home visibility"
+    },
+    {
+      "id": "compactCount",
+      "label": "compactCount(n)",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Formats large numbers (10000->1万, 100000000->1亿)"
+    },
+    {
+      "id": "controls.js",
+      "label": "controls.js",
+      "type": "file",
+      "description": "Search system: mode tabs, history, result rendering, podcast search, playlist panel toggling, queue panel rendering"
+    },
+    {
+      "id": "updateSearchModeTabs",
+      "label": "updateSearchModeTabs()",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Updates DOM for search mode tabs (song/netease/qq/youtube/podcast) active state and placeholders"
+    },
+    {
+      "id": "setSearchMode",
+      "label": "setSearchMode(mode)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Sets search mode, updates tabs, clears results, triggers search or history"
+    },
+    {
+      "id": "doSearch",
+      "label": "doSearch(q)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Main search function: remembers query, calls platform-specific search APIs, merges QQ/Netease results"
+    },
+    {
+      "id": "mergeSongSearchResults",
+      "label": "mergeSongSearchResults(netData, qqData, q)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Merges Netease and QQ search results, deduplicates on normalized title+artist"
+    },
+    {
+      "id": "renderQueuePanel",
+      "label": "renderQueuePanel(reason, opts)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Renders the mini queue panel with song list, current track highlight, like/collect actions"
+    },
+    {
+      "id": "safeRenderQueuePanel",
+      "label": "safeRenderQueuePanel(reason, opts)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Safely calls renderQueuePanel with error handling"
+    },
+    {
+      "id": "switchPlaylistTab",
+      "label": "switchPlaylistTab(tab)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Switches between playlists/podcasts tabs in playlist panel"
+    },
+    {
+      "id": "togglePlaylistPanel",
+      "label": "togglePlaylistPanel(force)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Toggles playlist panel visibility"
+    },
+    {
+      "id": "refreshUserPlaylists",
+      "label": "refreshUserPlaylists(force)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Fetches user playlists from Netease and QQ APIs, merges with local playlists"
+    },
+    {
+      "id": "openPlaylistPanelTab",
+      "label": "openPlaylistPanelTab(tab, force)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Opens playlist panel to specific tab, triggers refresh"
+    },
+    {
+      "id": "openProviderLogin",
+      "label": "openProviderLogin(provider)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Opens login modal for specific provider"
+    },
+    {
+      "id": "console.js",
+      "label": "console.js",
+      "type": "file",
+      "description": "Visual FX console: preset grid, sliders, toggles, user FX archives save/load/import/export"
+    },
+    {
+      "id": "presetMeta",
+      "label": "presetMeta[]",
+      "type": "variable",
+      "file": "console.js",
+      "description": "Array of 7 preset definitions with name, description, icons (emily/滚筒/星球/虚空/唱片/星河/安魂)"
+    },
+    {
+      "id": "renderUserFxArchives",
+      "label": "renderUserFxArchives()",
+      "type": "function",
+      "file": "console.js",
+      "description": "Renders the user FX archive grid (save/load presets) with rename/export/import capabilities"
+    },
+    {
+      "id": "buildPresetGrid",
+      "label": "buildPresetGrid()",
+      "type": "function",
+      "file": "console.js",
+      "description": "Renders preset selection grid cards"
+    },
+    {
+      "id": "bindFxPanel",
+      "label": "bindFxPanel()",
+      "type": "function",
+      "file": "console.js",
+      "description": "Binds all FX panel interactions: sliders, toggles, presets, color pickers, archive buttons"
+    },
+    {
+      "id": "saveUserFxArchive",
+      "label": "saveUserFxArchive(index)",
+      "type": "function",
+      "file": "console.js",
+      "description": "Saves current FX state to an archive slot"
+    },
+    {
+      "id": "applyUserFxArchive",
+      "label": "applyUserFxArchive(index)",
+      "type": "function",
+      "file": "console.js",
+      "description": "Applies FX state from an archive slot"
+    },
+    {
+      "id": "setPreset",
+      "label": "setPreset(index, opts)",
+      "type": "function",
+      "file": "console.js",
+      "description": "Sets visual preset, triggers burst animation, saves layout"
+    },
+    {
+      "id": "userFxArchives",
+      "label": "userFxArchives[]",
+      "type": "variable",
+      "file": "console.js",
+      "description": "Array of user-saved FX archive configurations"
+    },
+    {
+      "id": "fx",
+      "label": "fx (global)",
+      "type": "variable",
+      "description": "Global FX state object containing all visual parameters (preset, intensity, depth, etc.)"
+    },
+    {
+      "id": "fxDefaults",
+      "label": "fxDefaults",
+      "type": "variable",
+      "description": "Default values for all FX parameters"
+    },
+    {
+      "id": "login.js",
+      "label": "login.js",
+      "type": "file",
+      "description": "Multi-platform login system: Netease/QQ/YouTube login modals, status management, user button, account switching"
+    },
+    {
+      "id": "showLoginModal",
+      "label": "showLoginModal(opts)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Opens login modal with provider selection (netease/qq)"
+    },
+    {
+      "id": "closeLoginModal",
+      "label": "closeLoginModal()",
+      "type": "function",
+      "file": "login.js",
+      "description": "Closes login modal"
+    },
+    {
+      "id": "setLoginProvider",
+      "label": "setLoginProvider(provider)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Sets active login provider"
+    },
+    {
+      "id": "updateLoginProviderUi",
+      "label": "updateLoginProviderUi()",
+      "type": "function",
+      "file": "login.js",
+      "description": "Updates login modal UI for selected provider"
+    },
+    {
+      "id": "hasAnyPlatformLogin",
+      "label": "hasAnyPlatformLogin()",
+      "type": "function",
+      "file": "login.js",
+      "description": "Returns true if netease or qq is logged in"
+    },
+    {
+      "id": "hasPlatformLogin",
+      "label": "hasPlatformLogin(provider)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Checks if specific provider has valid login"
+    },
+    {
+      "id": "hasProviderSvip",
+      "label": "hasProviderSvip(provider, status)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Returns true if netease account has SVIP"
+    },
+    {
+      "id": "platformMeta",
+      "label": "platformMeta(provider)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Returns metadata for provider (key, short label, full label, app name, dot class)"
+    },
+    {
+      "id": "loginStatus",
+      "label": "loginStatus",
+      "type": "variable",
+      "file": "login.js",
+      "description": "Netease login status object (loggedIn, nickname, avatar, vipLevel)"
+    },
+    {
+      "id": "qqLoginStatus",
+      "label": "qqLoginStatus",
+      "type": "variable",
+      "file": "login.js",
+      "description": "QQ login status object"
+    },
+    {
+      "id": "renderUserBtn",
+      "label": "renderUserBtn()",
+      "type": "function",
+      "file": "login.js",
+      "description": "Renders the user button in top bar showing login state"
+    },
+    {
+      "id": "refreshLoginStatus",
+      "label": "refreshLoginStatus(force)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Fetches netease login status, triggers playlist/discover refresh if logged in"
+    },
+    {
+      "id": "youtube.js",
+      "label": "youtube.js",
+      "type": "file",
+      "description": "YouTube source toggle, search source enable/disable, YouTube trending loader"
+    },
+    {
+      "id": "loginYouTube",
+      "label": "loginYouTube()",
+      "type": "function",
+      "file": "youtube.js",
+      "description": "Opens YouTube login page in new window"
+    },
+    {
+      "id": "searchSourceEnabled",
+      "label": "searchSourceEnabled(provider)",
+      "type": "function",
+      "file": "youtube.js",
+      "description": "Checks if search source is enabled in localStorage (youtube defaults OFF)"
+    },
+    {
+      "id": "toggleSearchSource",
+      "label": "toggleSearchSource(provider)",
+      "type": "function",
+      "file": "youtube.js",
+      "description": "Toggles search source on/off, updates toggle buttons"
+    },
+    {
+      "id": "initSearchSourceToggles",
+      "label": "initSearchSourceToggles()",
+      "type": "function",
+      "file": "youtube.js",
+      "description": "Initializes search source toggle buttons on page load"
+    },
+    {
+      "id": "loadYouTubeTrending",
+      "label": "loadYouTubeTrending()",
+      "type": "function",
+      "file": "youtube.js",
+      "description": "Loads YouTube trending music into search results"
+    },
+    {
+      "id": "playlists.js",
+      "label": "playlists.js",
+      "type": "file",
+      "description": "Local playlist CRUD: create/delete/rename, add/remove songs, detail view, play from playlist"
+    },
+    {
+      "id": "createLocalPlaylist",
+      "label": "createLocalPlaylist(name)",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Creates a new local playlist (localStorage), shows modal for naming"
+    },
+    {
+      "id": "showLocalPlaylistDetail",
+      "label": "showLocalPlaylistDetail(id)",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Shows detail panel for a local playlist with song list"
+    },
+    {
+      "id": "hideLocalPlaylistDetail",
+      "label": "hideLocalPlaylistDetail()",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Hides local playlist detail panel"
+    },
+    {
+      "id": "getLocalLikedSongs",
+      "label": "getLocalLikedSongs()",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Returns all locally liked songs from multiple localStorage keys"
+    },
+    {
+      "id": "renderLocalPlaylistsIntoView",
+      "label": "renderLocalPlaylistsIntoView()",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Renders local playlists list in the playlist panel"
+    },
+    {
+      "id": "loadPlaylistIntoQueueById",
+      "label": "loadPlaylistIntoQueueById(id, playNow, name)",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Loads a playlist (netease/qq/local/youtube) into the play queue"
+    },
+    {
+      "id": "addSongToLocalPlaylist",
+      "label": "addSongToLocalPlaylist(playlistId, song)",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Adds a song to a local playlist"
+    },
+    {
+      "id": "misc.js",
+      "label": "misc.js",
+      "type": "file",
+      "description": "Miscellaneous: idle guide visual, toast notifications, file handling, DIY mode, visual guide"
+    },
+    {
+      "id": "showToast",
+      "label": "showToast(text, duration)",
+      "type": "function",
+      "file": "misc.js",
+      "description": "Shows a toast notification. Cross-file dependency: used everywhere."
+    },
+    {
+      "id": "closeVisualGuide",
+      "label": "closeVisualGuide()",
+      "type": "function",
+      "file": "misc.js",
+      "description": "Closes the idle visual guide"
+    },
+    {
+      "id": "idleGuidePointerMove",
+      "label": "idleGuidePointerMove(e)",
+      "type": "function",
+      "file": "misc.js",
+      "description": "Handles pointer move for idle guide interaction (rotation, tilt)"
+    },
+    {
+      "id": "handleFiles",
+      "label": "handleFiles(files)",
+      "type": "function",
+      "file": "misc.js",
+      "description": "Handles imported audio files (drag/drop or file picker) for local playback"
+    },
+    {
+      "id": "applyDiyMode",
+      "label": "applyDiyMode()",
+      "type": "function",
+      "file": "misc.js",
+      "description": "Applies DIY mode UI changes to the visual console"
+    },
+    {
+      "id": "openGsapModal",
+      "label": "openGsapModal(modal)",
+      "type": "function",
+      "description": "Opens a modal with GSAP animation (defined in shared/index.html)"
+    },
+    {
+      "id": "closeGsapModal",
+      "label": "closeGsapModal(modal, callback)",
+      "type": "function",
+      "description": "Closes a modal with GSAP animation (defined in shared/index.html)"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "file:public/js/shared.js",
+      "type": "imports",
+      "summary": "state.js depends on shared.js for fxDefaults, all STORE_KEY constants, readHotkeySettings, readBooleanPreference, readDiyModePreference, and diyPlayerMode."
+    },
+    {
+      "source": "function:public/js/core/state.js:applyDiyMode",
+      "target": "data:public/js/shared.js:fxDefaults",
+      "type": "reads",
+      "summary": "applyDiyMode reads window.diyPlayerMode (initialized from shared.js readDiyModePreference)."
+    },
+    {
+      "source": "function:public/js/core/state.js:toggleDiyMode",
+      "target": "function:public/js/core/state.js:applyDiyMode",
+      "type": "calls"
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "function:public/js/shared.js:readHotkeySettings",
+      "type": "calls",
+      "summary": "state.js line 545 calls window.readHotkeySettings() to initialize hotkeySettings."
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "function:public/js/shared.js:readBooleanPreference",
+      "type": "calls",
+      "summary": "state.js calls window.readBooleanPreference for controlsAutoHide, playlistPanelPinned, userCapsuleAutoHide, fxFabAutoHide."
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "data:public/js/shared.js:fxDefaults",
+      "type": "reads",
+      "summary": "state.js line 529: Object.assign({}, window.fxDefaults, ...) initializes window.fx."
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "data:public/js/shared.js:STORE_KEYS",
+      "type": "reads",
+      "summary": "state.js reads CONTROLS_AUTO_HIDE_STORE_KEY, PLAYLIST_PANEL_PIN_STORE_KEY, USER_CAPSULE_AUTO_HIDE_STORE_KEY, FX_FAB_AUTO_HIDE_STORE_KEY for preference I/O."
+    },
+    {
+      "source": "file:public/js/shared.js",
+      "target": "file:vendor/gsap",
+      "type": "references",
+      "summary": "openGsapModal and closeGsapModal use window.gsap for modal animations."
+    },
+    {
+      "source": "function:public/js/shared.js:bindModalBackdropClose",
+      "target": "file:public/js/api-helper.js",
+      "type": "references",
+      "summary": "bindModalBackdropClose references window.closeTrackDetailModal and window.closeCustomLyricModal (defined in api-helper.js)."
+    },
+    {
+      "source": "function:public/js/shared.js:bindModalBackdropClose",
+      "target": "file:public/js/login.js",
+      "type": "references",
+      "summary": "bindModalBackdropClose references window.closeLoginModal and window.closeUserModal (defined in login.js)."
+    },
+    {
+      "source": "function:public/js/shared.js:bindModalBackdropClose",
+      "target": "file:public/js/playlists.js",
+      "type": "references",
+      "summary": "bindModalBackdropClose references closeUpdatePanel (defined in playlists.js, unqualified)."
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "file:public/js/core/three-lyrics.js",
+      "type": "references",
+      "summary": "state.js line 529 calls window.readSavedLyricLayout() (defined in three-lyrics.js) to merge saved lyric layout into fx state."
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "file:public/js/prefs.js",
+      "type": "references",
+      "summary": "state.js calls readSavedVolume() (line 351) and readSavedPlaybackVisualPreset() (line 527) from prefs.js."
+    },
+    {
+      "source": "function:public/js/core/state.js:applyRendererPowerMode",
+      "target": "function:public/js/core/state.js:scheduleBackgroundCacheTrim",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:scheduleBackgroundCacheTrim",
+      "target": "function:public/js/core/state.js:trimVisualCachesForBackground",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimVisualCachesForBackground",
+      "target": "function:public/js/core/state.js:trimRuntimeCaches",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimRuntimeCaches",
+      "target": "function:public/js/core/state.js:collectProtectedCoverUrls",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimRuntimeCaches",
+      "target": "function:public/js/core/state.js:collectProtectedBeatMapKeys",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimRuntimeCaches",
+      "target": "function:public/js/core/state.js:trimObjectCache",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimRuntimeCaches",
+      "target": "function:public/js/core/state.js:trimCoverDepthCache",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimRuntimeCaches",
+      "target": "function:public/js/core/state.js:collectProtectedCoverDepthIds",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:maybeTrimRuntimeCaches",
+      "target": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:maybeTrimRuntimeCaches",
+      "target": "function:public/js/core/state.js:isBackgroundReleaseMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:maybeTrimRuntimeCaches",
+      "target": "function:public/js/core/state.js:trimRuntimeCaches",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "target": "function:public/js/core/state.js:isLiveBackgroundKeepMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:isLiveBackgroundKeepMode",
+      "target": "function:public/js/core/state.js:currentPerformanceBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:isBackgroundReleaseMode",
+      "target": "function:public/js/core/state.js:currentPerformanceBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:updateDesktopRuntimeState",
+      "target": "function:public/js/core/state.js:updateRenderPowerClasses",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:updateDesktopRuntimeState",
+      "target": "function:public/js/core/state.js:applyRendererPowerMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:updateDesktopRuntimeState",
+      "target": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:installRenderPowerHooks",
+      "target": "function:public/js/core/state.js:updateRenderPowerClasses",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:installRenderPowerHooks",
+      "target": "function:public/js/core/state.js:applyRendererPowerMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:installRenderPowerHooks",
+      "target": "function:public/js/core/state.js:updateDesktopRuntimeState",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:updateFullscreenDiyPeekFromPointer",
+      "target": "function:public/js/core/state.js:layoutFullscreenDiyZone",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:updateFullscreenDiyPeekFromPointer",
+      "target": "function:public/js/core/state.js:shouldSuppressFullscreenDiyPeek",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:applyDiyMode",
+      "target": "function:public/js/core/state.js:syncDiyModeButton",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:applyDiyMode",
+      "target": "function:public/js/core/state.js:isDiyMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:collectProtectedCoverUrls",
+      "target": "function:public/js/shared.js:songProviderKey",
+      "type": "references",
+      "summary": "collectProtectedCoverUrls implicitly uses song provider key patterns via window.songCoverSrc."
+    },
+    {
+      "source": "function:public/js/core/state.js:collectRuntimePerfSnapshot",
+      "target": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:collectRuntimePerfSnapshot",
+      "target": "function:public/js/core/state.js:safeObjectKeys",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimObjectCache",
+      "target": "function:public/js/core/state.js:safeObjectKeys",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimCoverDepthCache",
+      "target": "function:public/js/core/state.js:safeObjectKeys",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:collectProtectedBeatMapKeys",
+      "target": "function:public/js/core/state.js:markProtectedKey",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:collectProtectedCoverDepthIds",
+      "target": "function:public/js/core/state.js:markProtectedKey",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:applyRendererPowerMode",
+      "target": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:setDjModeActive",
+      "target": "function:public/js/core/state.js:resetDjModeMeter",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:setDjModeActive",
+      "target": "function:public/js/core/state.js:resetDjBeatMapState",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:setDjModeActive",
+      "target": "function:public/js/core/state.js:cancelDjBeatAnalysisTimer",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:setDjModeActive",
+      "target": "function:public/js/core/state.js:djSongKey",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:toggleUserCapsuleAutoHide",
+      "target": "function:public/js/core/state.js:applyUserCapsuleAutoHideState",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:toggleFxFabAutoHide",
+      "target": "function:public/js/core/state.js:applyFxFabAutoHideState",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/shared.js:_cacheKeyForSong",
+      "target": "function:public/js/shared.js:songProviderKey",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/shared.js:readHotkeySettings",
+      "target": "function:public/js/shared.js:getHotkeyDefaults",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/shared.js:packagedDefaultLyricLayoutRaw",
+      "target": "function:public/js/shared.js:clonePackagedDefaultFxSnapshot",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/shared.js:closeGsapModal",
+      "target": "function:public/js/shared.js:openGsapModal",
+      "type": "references",
+      "summary": "closeGsapModal mirrors the GSAP animation pattern of openGsapModal in reverse."
+    },
+    {
+      "source": "cloneSong",
+      "target": "hydrateCustomCover",
+      "label": "calls"
+    },
+    {
+      "source": "toggleLikeSong",
+      "target": "isCloudSong",
+      "label": "depends_on"
+    },
+    {
+      "source": "toggleLikeSong",
+      "target": "isSongLiked",
+      "label": "depends_on"
+    },
+    {
+      "source": "toggleLikeSong",
+      "target": "ensureLoggedInForAction",
+      "label": "depends_on"
+    },
+    {
+      "source": "toggleLikeSong",
+      "target": "updateLikeButtons",
+      "label": "calls"
+    },
+    {
+      "source": "toggleLikeSong",
+      "target": "songProviderKey",
+      "label": "depends_on"
+    },
+    {
+      "source": "toggleLikeCurrent",
+      "target": "currentCoverSong",
+      "label": "calls"
+    },
+    {
+      "source": "toggleLikeCurrent",
+      "target": "toggleLikeSong",
+      "label": "calls"
+    },
+    {
+      "source": "updateLikeButtons",
+      "target": "currentCoverSong",
+      "label": "calls"
+    },
+    {
+      "source": "updateLikeButtons",
+      "target": "isSongLiked",
+      "label": "depends_on"
+    },
+    {
+      "source": "openCollectModal",
+      "target": "isCloudSong",
+      "label": "depends_on"
+    },
+    {
+      "source": "openCollectModal",
+      "target": "songProviderKey",
+      "label": "depends_on"
+    },
+    {
+      "source": "openCollectModal",
+      "target": "ensureLoggedInForAction",
+      "label": "depends_on"
+    },
+    {
+      "source": "openCollectModal",
+      "target": "renderCollectModal",
+      "label": "calls"
+    },
+    {
+      "source": "openCollectModal",
+      "target": "songCoverSrc",
+      "label": "depends_on"
+    },
+    {
+      "source": "renderCollectModal",
+      "target": "songCoverSrc",
+      "label": "depends_on"
+    },
+    {
+      "source": "addCollectTargetToPlaylist",
+      "target": "apiJson",
+      "label": "calls"
+    },
+    {
+      "source": "createPlaylistFromCollect",
+      "target": "addCollectTargetToPlaylist",
+      "label": "calls"
+    },
+    {
+      "source": "songCoverSrc",
+      "target": "getCustomCoverForSong",
+      "label": "calls"
+    },
+    {
+      "source": "songCoverSrc",
+      "target": "coverUrlWithSize",
+      "label": "calls"
+    },
+    {
+      "source": "getCustomCoverForSong",
+      "target": "songCustomCoverKey",
+      "label": "depends_on"
+    },
+    {
+      "source": "getCustomCoverForSong",
+      "target": "customCoverMap",
+      "label": "reads"
+    },
+    {
+      "source": "hydrateCustomCover",
+      "target": "getCustomCoverForSong",
+      "label": "calls"
+    },
+    {
+      "source": "readCustomCoverMap",
+      "target": "customCoverMap",
+      "label": "writes"
+    },
+    {
+      "source": "setCustomCoverForCurrent",
+      "target": "currentCoverSong",
+      "label": "calls"
+    },
+    {
+      "source": "setCustomCoverForCurrent",
+      "target": "songCustomCoverKey",
+      "label": "depends_on"
+    },
+    {
+      "source": "setCustomCoverForCurrent",
+      "target": "saveCustomCoverMap",
+      "label": "calls"
+    },
+    {
+      "source": "updatePlaybackQualityUi",
+      "target": "currentCoverSong",
+      "label": "calls"
+    },
+    {
+      "source": "updatePlaybackQualityUi",
+      "target": "songProviderKey",
+      "label": "calls"
+    },
+    {
+      "source": "setPlaybackQuality",
+      "target": "updatePlaybackQualityUi",
+      "label": "calls"
+    },
+    {
+      "source": "setPlaybackQuality",
+      "target": "applyPlaybackQualityToCurrentTrack",
+      "label": "calls"
+    },
+    {
+      "source": "applyPlaybackQualityToCurrentTrack",
+      "target": "playQueueAt",
+      "label": "calls (cross-file to playback.js)"
+    },
+    {
+      "source": "openTrackDetailModal",
+      "target": "currentCoverSong",
+      "label": "calls"
+    },
+    {
+      "source": "openTrackDetailModal",
+      "target": "apiJson",
+      "label": "calls"
+    },
+    {
+      "source": "openTrackDetailModal",
+      "target": "songCoverSrc",
+      "label": "calls"
+    },
+    {
+      "source": "openTrackDetailModal",
+      "target": "songSourceLabel",
+      "label": "calls"
+    },
+    {
+      "source": "openTrackDetailModal",
+      "target": "isSongLiked",
+      "label": "calls (cross-file to like.js)"
+    },
+    {
+      "source": "openTrackDetailModal",
+      "target": "getCustomCoverForSong",
+      "label": "calls (cross-file to cover.js)"
+    },
+    {
+      "source": "openTrackDetailModal",
+      "target": "songProviderKey",
+      "label": "calls"
+    },
+    {
+      "source": "resolveArtistSongForDetail",
+      "target": "apiJson",
+      "label": "calls"
+    },
+    {
+      "source": "resolveArtistSongForDetail",
+      "target": "songProviderKey",
+      "label": "depends_on"
+    },
+    {
+      "source": "renderHomeDiscover",
+      "target": "homeListenSummary",
+      "label": "calls"
+    },
+    {
+      "source": "renderHomeDiscover",
+      "target": "songCoverSrc",
+      "label": "calls (cross-file to cover.js)"
+    },
+    {
+      "source": "renderHomeDiscover",
+      "target": "currentCoverSong",
+      "label": "calls (cross-file to api-helper.js)"
+    },
+    {
+      "source": "loadHomeWeatherRadio",
+      "target": "apiJson",
+      "label": "calls (cross-file to api-helper.js)"
+    },
+    {
+      "source": "loadHomeDiscover",
+      "target": "cloneSong",
+      "label": "calls (cross-file to api-helper.js)"
+    },
+    {
+      "source": "goHome",
+      "target": "renderHomeDiscover",
+      "label": "calls"
+    },
+    {
+      "source": "goHome",
+      "target": "loadHomeWeatherRadio",
+      "label": "calls"
+    },
+    {
+      "source": "goHome",
+      "target": "loadHomeDiscover",
+      "label": "calls"
+    },
+    {
+      "source": "playHomeDaily",
+      "target": "cloneSong",
+      "label": "calls (cross-file to api-helper.js)"
+    },
+    {
+      "source": "playHomeDaily",
+      "target": "playQueueAt",
+      "label": "calls (cross-file to playback.js)"
+    },
+    {
+      "source": "saveListenStatsState",
+      "target": "listenStatsState",
+      "label": "writes"
+    },
+    {
+      "source": "loadListenStatsState",
+      "target": "listenStatsState",
+      "label": "writes (initializes)"
+    },
+    {
+      "source": "setLyricSourceMode",
+      "target": "applyOriginalLyricsState",
+      "label": "calls"
+    },
+    {
+      "source": "setLyricSourceMode",
+      "target": "applyCustomLyricState",
+      "label": "calls"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "cloneSong",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "updatePlaybackQualityUi",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "currentCoverSong",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "applyPreferredLyricsForCurrent",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "getCustomCoverForSong",
+      "label": "calls (cross-file: cover.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "coverUrlWithSize",
+      "label": "calls (cross-file: cover.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "hydrateCustomCover",
+      "label": "calls (cross-file: cover.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "songProviderKey",
+      "label": "depends_on"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "updateLikeButtons",
+      "label": "calls (cross-file: like.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "syncLikeStatusForSong",
+      "label": "calls (cross-file: like.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "updateMiniSourceBar",
+      "label": "calls (cross-file: lyrics.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "fetchLyric",
+      "label": "calls (cross-file: lyrics.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "scheduleBeatAnalysis",
+      "label": "calls (cross-file: beat-analysis.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "scheduleQueueBeatPrefetch",
+      "label": "calls (cross-file: beat-analysis.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "readBeatDiskCache",
+      "label": "calls (cross-file: beat-analysis.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "beatMapSongKey",
+      "label": "calls (cross-file: beat-analysis.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "initAudio",
+      "label": "calls (cross-file: audio-engine.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "preparePlaybackFadeIn",
+      "label": "calls (cross-file: audio-engine.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "applyVolumeToAudio",
+      "label": "calls (cross-file: audio-engine.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "resumeAudioAnalysis",
+      "label": "calls (cross-file: audio-engine.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "attemptAudioPlay",
+      "label": "calls (self)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "tryAutoPlaybackFallback",
+      "label": "calls (self)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "skipFailedQueueItem",
+      "label": "calls (self)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "youtubeSongUrl",
+      "label": "calls (platforms/youtube.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "qqSongUrl",
+      "label": "calls (platforms/qq.js)"
+    },
+    {
+      "source": "playQueueAt",
+      "target": "neteaseSongUrl",
+      "label": "calls (platforms/netease.js)"
+    },
+    {
+      "source": "togglePlay",
+      "target": "fadeOutAndPauseAudio",
+      "label": "calls (cross-file: audio-engine.js)"
+    },
+    {
+      "source": "togglePlay",
+      "target": "attemptAudioPlay",
+      "label": "calls (self)"
+    },
+    {
+      "source": "togglePlay",
+      "target": "playQueueAt",
+      "label": "calls (self)"
+    },
+    {
+      "source": "queueSong",
+      "target": "cloneSong",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "nextTrack",
+      "target": "playQueueAt",
+      "label": "calls (self)"
+    },
+    {
+      "source": "prevTrack",
+      "target": "playQueueAt",
+      "label": "calls (self)"
+    },
+    {
+      "source": "scheduleBeatAnalysis",
+      "target": "analyzeAudioBeats",
+      "label": "calls"
+    },
+    {
+      "source": "scheduleBeatAnalysis",
+      "target": "readBeatDiskCache",
+      "label": "calls"
+    },
+    {
+      "source": "scheduleQueueBeatPrefetch",
+      "target": "readBeatDiskCache",
+      "label": "calls"
+    },
+    {
+      "source": "scheduleQueueBeatPrefetch",
+      "target": "analyzeAudioBeats",
+      "label": "calls"
+    },
+    {
+      "source": "scheduleQueueBeatPrefetch",
+      "target": "fetchBeatPrefetchAudioUrl",
+      "label": "calls"
+    },
+    {
+      "source": "fetchBeatPrefetchAudioUrl",
+      "target": "neteaseSongUrl",
+      "label": "calls (platforms/netease.js)"
+    },
+    {
+      "source": "fetchBeatPrefetchAudioUrl",
+      "target": "qqSongUrl",
+      "label": "calls (platforms/qq.js)"
+    },
+    {
+      "source": "scheduleBeatAnalysis",
+      "target": "beatMapSongKey",
+      "label": "depends_on"
+    },
+    {
+      "source": "analyzeAudioBeats",
+      "target": "beatMapSongKey",
+      "label": "depends_on"
+    },
+    {
+      "source": "analyzeAudioBeats",
+      "target": "currentBeatMap",
+      "label": "writes"
+    },
+    {
+      "source": "fetchLyric",
+      "target": "apiJson",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "fetchLyric",
+      "target": "songProviderKey",
+      "label": "depends_on"
+    },
+    {
+      "source": "fetchLyric",
+      "target": "applyPreferredLyricsForCurrent",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "fetchLyric",
+      "target": "setOriginalLyricsState",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "renderLyrics",
+      "target": "clearStageLyrics",
+      "label": "calls (cross-file: three-lyrics.js)"
+    },
+    {
+      "source": "toggleLyricsPanel",
+      "target": "createLyricsParticles",
+      "label": "calls (cross-file: three-lyrics.js)"
+    },
+    {
+      "source": "toggleLyricsPanel",
+      "target": "clearStageLyrics",
+      "label": "calls (cross-file: three-lyrics.js)"
+    },
+    {
+      "source": "searchAlternatePlatformSong",
+      "target": "apiJson",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "searchAlternatePlatformSong",
+      "target": "alternatePlaybackProvider",
+      "label": "calls (self)"
+    },
+    {
+      "source": "buildOneCard",
+      "target": "songCoverSrc",
+      "label": "calls (cross-file: cover.js)"
+    },
+    {
+      "source": "buildOneCard",
+      "target": "currentCoverSong",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "safeShelfRebuild",
+      "target": "shelfManager",
+      "label": "depends_on"
+    },
+    {
+      "source": "safeShelfRebuild",
+      "target": "currentItems",
+      "label": "reads"
+    },
+    {
+      "source": "scheduleShelfRebuild",
+      "target": "safeShelfRebuild",
+      "label": "calls"
+    },
+    {
+      "source": "makeShelfManager",
+      "target": "shelfManager",
+      "label": "writes"
+    },
+    {
+      "source": "setShelfPinnedOpen",
+      "target": "orbit",
+      "label": "affects"
+    },
+    {
+      "source": "setShelfPinnedOpen",
+      "target": "shelfHoverCue",
+      "label": "resets"
+    },
+    {
+      "source": "createLyricsParticles",
+      "target": "scene",
+      "label": "mutates (adds group)"
+    },
+    {
+      "source": "createLyricsParticles",
+      "target": "stageLyrics",
+      "label": "writes"
+    },
+    {
+      "source": "ensureLyricStarRiver",
+      "target": "dotTexture",
+      "label": "uses (cross-file: particles.js)"
+    },
+    {
+      "source": "ensureLyricStarRiver",
+      "target": "uniforms",
+      "label": "reads (cross-file: particles.js)"
+    },
+    {
+      "source": "updateLyricStarRiver",
+      "target": "stageLyrics",
+      "label": "mutates"
+    },
+    {
+      "source": "readSavedLyricLayout",
+      "target": "normalizeHexColor",
+      "label": "calls (self)"
+    },
+    {
+      "source": "readSavedLyricLayout",
+      "target": "normalizeCoverResolution",
+      "label": "calls (self)"
+    },
+    {
+      "source": "processRealtimeBeatEngine",
+      "target": "beatAnalyser",
+      "label": "reads (cross-file: audio-engine)"
+    },
+    {
+      "source": "processRealtimeBeatEngine",
+      "target": "audioCtx",
+      "label": "reads (cross-file: audio-engine)"
+    },
+    {
+      "source": "scheduleBeatCamera",
+      "target": "cinemaTrackProfile",
+      "label": "reads"
+    },
+    {
+      "source": "scheduleBeatCamera",
+      "target": "cameraDynamicsScale",
+      "label": "calls (self)"
+    },
+    {
+      "source": "updateCinemaDynamics",
+      "target": "cinemaDynamics",
+      "label": "mutates"
+    },
+    {
+      "source": "resetBeatCameraSync",
+      "target": "beatCam",
+      "label": "mutates"
+    },
+    {
+      "source": "applyFreeCameraToCamera",
+      "target": "freeCamera",
+      "label": "reads"
+    },
+    {
+      "source": "applyFreeCameraToCamera",
+      "target": "camera",
+      "label": "mutates"
+    },
+    {
+      "source": "updateFreeCamera",
+      "target": "freeCamera",
+      "label": "mutates"
+    },
+    {
+      "source": "updateStageLyrics3D",
+      "target": "stageLyrics",
+      "label": "mutates"
+    },
+    {
+      "source": "updateStageLyrics3D",
+      "target": "lyricsLines",
+      "label": "reads"
+    },
+    {
+      "source": "updateStageLyrics3D",
+      "target": "lyricsTimingSource",
+      "label": "reads"
+    },
+    {
+      "source": "updateStageLyrics3D",
+      "target": "uniforms",
+      "label": "reads (cross-file: particles.js)"
+    },
+    {
+      "source": "doSearch",
+      "target": "apiJson",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "doSearch",
+      "target": "mergeSongSearchResults",
+      "label": "calls (self)"
+    },
+    {
+      "source": "doSearch",
+      "target": "searchSourceEnabled",
+      "label": "calls (cross-file: youtube.js)"
+    },
+    {
+      "source": "doSearch",
+      "target": "neteaseSearch",
+      "label": "calls (platforms/netease.js)"
+    },
+    {
+      "source": "doSearch",
+      "target": "qqSearch",
+      "label": "calls (platforms/qq.js)"
+    },
+    {
+      "source": "doSearch",
+      "target": "youtubeSearch",
+      "label": "calls (platforms/youtube.js)"
+    },
+    {
+      "source": "mergeSongSearchResults",
+      "target": "cloneSong",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "updateSearchModeTabs",
+      "target": "searchSourceEnabled",
+      "label": "calls (cross-file: youtube.js)"
+    },
+    {
+      "source": "renderQueuePanel",
+      "target": "currentCoverSong",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "renderQueuePanel",
+      "target": "isSongLiked",
+      "label": "calls (cross-file: like.js)"
+    },
+    {
+      "source": "renderQueuePanel",
+      "target": "songSourceLabel",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "renderQueuePanel",
+      "target": "songCoverSrc",
+      "label": "calls (cross-file: cover.js)"
+    },
+    {
+      "source": "renderQueuePanel",
+      "target": "playQueueAt",
+      "label": "calls (cross-file: playback.js)"
+    },
+    {
+      "source": "renderQueuePanel",
+      "target": "toggleLikeQueueIndex",
+      "label": "calls (cross-file: like.js)"
+    },
+    {
+      "source": "setSearchMode",
+      "target": "updateSearchModeTabs",
+      "label": "calls (self)"
+    },
+    {
+      "source": "playHomeDaily",
+      "target": "playQueueAt",
+      "label": "calls (cross-file: playback.js)"
+    },
+    {
+      "source": "refreshUserPlaylists",
+      "target": "apiJson",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "refreshUserPlaylists",
+      "target": "renderLocalPlaylistsIntoView",
+      "label": "calls (cross-file: playlists.js)"
+    },
+    {
+      "source": "buildPresetGrid",
+      "target": "setPreset",
+      "label": "calls (self)"
+    },
+    {
+      "source": "saveUserFxArchive",
+      "target": "fx",
+      "label": "reads"
+    },
+    {
+      "source": "applyUserFxArchive",
+      "target": "fx",
+      "label": "writes"
+    },
+    {
+      "source": "bindFxPanel",
+      "target": "setPreset",
+      "label": "calls (self)"
+    },
+    {
+      "source": "setPreset",
+      "target": "saveLyricLayout",
+      "label": "calls (cross-file: three-lyrics.js)"
+    },
+    {
+      "source": "renderUserBtn",
+      "target": "hasAnyPlatformLogin",
+      "label": "depends_on"
+    },
+    {
+      "source": "renderUserBtn",
+      "target": "platformMeta",
+      "label": "calls (self)"
+    },
+    {
+      "source": "showLoginModal",
+      "target": "openGsapModal",
+      "label": "calls"
+    },
+    {
+      "source": "closeLoginModal",
+      "target": "closeGsapModal",
+      "label": "calls"
+    },
+    {
+      "source": "closeCollectModal",
+      "target": "closeGsapModal",
+      "label": "calls (shared.js)"
+    },
+    {
+      "source": "closeTrackDetailModal",
+      "target": "closeGsapModal",
+      "label": "calls (shared.js)"
+    },
+    {
+      "source": "openTrackDetailModal",
+      "target": "openGsapModal",
+      "label": "calls (shared.js)"
+    },
+    {
+      "source": "closeTrackDetailModal",
+      "target": "closeGsapModal",
+      "label": "calls (shared.js)"
+    },
+    {
+      "source": "loadPlaylistIntoQueueById",
+      "target": "apiJson",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "loadPlaylistIntoQueueById",
+      "target": "cloneSong",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "loadPlaylistIntoQueueById",
+      "target": "playQueueAt",
+      "label": "calls (cross-file: playback.js)"
+    },
+    {
+      "source": "loadPlaylistIntoQueueById",
+      "target": "safeShelfRebuild",
+      "label": "calls (cross-file: shelf.js)"
+    },
+    {
+      "source": "loadYouTubeTrending",
+      "target": "youtubeTrending",
+      "label": "calls (platforms/youtube.js)"
+    },
+    {
+      "source": "loadYouTubeTrending",
+      "target": "renderSearchResults",
+      "label": "calls (self)"
+    },
+    {
+      "source": "handleFiles",
+      "target": "currentCoverSong",
+      "label": "calls (cross-file: api-helper.js)"
+    },
+    {
+      "source": "handleFiles",
+      "target": "playQueueAt",
+      "label": "calls (cross-file: playback.js)"
+    },
+    {
+      "source": "handleFiles",
+      "target": "safeShelfRebuild",
+      "label": "calls (cross-file: shelf.js)"
+    },
+    {
+      "source": "applyDiyMode",
+      "target": "fx",
+      "label": "reads"
+    },
+    {
+      "source": "initSearchSourceToggles",
+      "target": "searchSourceEnabled",
+      "label": "depends_on"
+    },
+    {
+      "source": "toggleSearchSource",
+      "target": "searchSourceEnabled",
+      "label": "depends_on"
+    },
+    {
+      "source": "toggleSearchSource",
+      "target": "setSearchMode",
+      "label": "calls (cross-file: controls.js)"
+    },
+    {
+      "source": "goHome",
+      "target": "loadHomeDiscover",
+      "label": "calls (cross-file: discover.js)"
+    },
+    {
+      "source": "goHome",
+      "target": "loadHomeWeatherRadio",
+      "label": "calls (cross-file: discover.js)"
+    },
+    {
+      "source": "setPlaybackQuality",
+      "target": "openProviderLogin",
+      "label": "calls (cross-file: controls.js)"
+    },
+    {
+      "source": "setPlaybackQuality",
+      "target": "showToast",
+      "label": "calls (cross-file: misc.js)"
+    },
+    {
+      "source": "setPlaybackQuality",
+      "target": "hasProviderSvip",
+      "label": "calls (cross-file: login.js)"
+    },
+    {
+      "source": "setPlaybackQuality",
+      "target": "hasPlatformLogin",
+      "label": "calls (cross-file: login.js)"
+    }
+  ],
+  "layers": [
+    {
+      "id": "foundation",
+      "name": "FOUNDATION",
+      "description": "Shared utilities, constants, STORE_KEYs, clamp functions, GSAP modal helpers, hotkey config, fxDefaults with all visual parameters, packaged default fx snapshots, song provider key detector, and localStorage read helpers. No dependencies — loaded first, before all module JS.",
+      "nodeIds": [
+        "file:public/js/shared.js"
+      ]
+    },
+    {
+      "id": "state",
+      "name": "STATE",
+      "description": "Global mutable state (playlist, playQueue, currentIdx, playing, loginStatus, beat analysis vars, fx overrides, desktop runtime state, DIY mode, performance monitoring, cache trimming), plus localStorage preference read/save helpers (volume, DIY mode, visual preset, boolean prefs). Depends on FOUNDATION for STORE_KEYs and clampRange.",
+      "nodeIds": [
+        "file:public/js/core/state.js",
+        "file:public/js/core/prefs.js"
+      ]
+    },
+    {
+      "id": "platform-api",
+      "name": "PLATFORM_API",
+      "description": "Auto-generated API wrappers for three music platforms: netease (Netease Cloud Music), qq (QQ Music), and youtube (YouTube). Each exposes apiJson-backed fetch functions (neteaseXxx, qqXxx, youtubeXxx) defined by configuration tables (neteaseAPIList, qqAPIList, youtubeAPIList). Depends on CORE_SERVICES (apiJson).",
+      "nodeIds": [
+        "file:public/js/platforms/netease.js",
+        "file:public/js/platforms/qq.js",
+        "file:public/js/platforms/youtube.js"
+      ]
+    },
+    {
+      "id": "core-services",
+      "name": "CORE_SERVICES",
+      "description": "API helper (apiJson fetch wrapper with timeout, playback quality normalization/labels, listen-stats tracking, weather/city, custom cover/lyric map initialization), cover helpers (custom cover map read/save), discover/home page helpers (art display, listen snapshot, home discover loading), like helpers (cloud song detection, like/unlike API calls, storage-backed YouTube likes), and collect helpers (collect modal, playlist creation from collect). Depends on FOUNDATION and STATE.",
+      "nodeIds": [
+        "file:public/js/core/api-helper.js",
+        "file:public/js/core/cover.js",
+        "file:public/js/core/discover.js",
+        "file:public/js/core/like.js",
+        "file:public/js/core/collect.js"
+      ]
+    },
+    {
+      "id": "audio-engine",
+      "name": "AUDIO_ENGINE",
+      "description": "AudioContext initialization (MediaElementSource → AnalyserNode chain), realtime beat detection engine (multi-band onset detection, tempo-assisted beat camera scheduling), offline beat analysis (full audio decode → low-pass kick detection → MusicTempo), playback queue management (queue/play/next/prev/skip, audio element preloading/caching, fade in/out), and lyrics (multi-source fetch, LRX/JSON parsing, custom lyrics, lyric offset). Depends on FOUNDATION, STATE, CORE_SERVICES, and PLATFORM_API.",
+      "nodeIds": [
+        "file:public/js/audio/audio-engine.js",
+        "file:public/js/audio/beat-analysis.js",
+        "file:public/js/audio/playback.js",
+        "file:public/js/audio/lyrics.js"
+      ]
+    },
+    {
+      "id": "three-engine",
+      "name": "THREE_ENGINE",
+      "description": "Three.js rendering pipeline: scene/camera/renderer setup with adaptive pixel ratio and resolution budgeting, uniform shader block (uTime, uBass, uMid, uTreble, uBeat, uEnergy, uMouseXY, etc.), particle system (5 presets: emily, tunnel, orbit, void, vinyl, wallpaper, skull — each with unique position/size/color computation from cover image sampling), 3D stage lyrics (text planes with glow, palette extraction, star river, beat-reactive bloom), and 3D playlist shelf (side/stage camera modes, card rendering, hover/selection interaction, particle shuffle animations). Depends on FOUNDATION, STATE, and Three.js (vendor).",
+      "nodeIds": [
+        "file:public/js/three/three-scene.js",
+        "file:public/js/three/three-lyrics.js",
+        "file:public/js/three/particles.js",
+        "file:public/js/three/shelf.js"
+      ]
+    },
+    {
+      "id": "ui-core",
+      "name": "UI_CORE",
+      "description": "User interface interaction layer: search box with debounced API queries across platforms and mode switching (song/podcast/qq/youtube), playback controls (play/pause/next/prev, progress bar, volume slider, quality selector, play mode toggle, queue/mini-queue panel), login system (QR code polling, cookie login, platform switching, user modal with profile/stats), local and cloud playlist management (CRUD, detail panel with batch rendering and scroll virtualization), YouTube UI (login toggle, source enable/disable), and miscellaneous UI (idle guide canvas, visual startup guide, toast notifications, track detail modal, upload tip, custom lyric modal, hotkey modal, home wallpaper preview). Depends on all lower layers.",
+      "nodeIds": [
+        "file:public/js/ui/controls.js",
+        "file:public/js/ui/login.js",
+        "file:public/js/ui/playlists.js",
+        "file:public/js/ui/youtube.js",
+        "file:public/js/ui/misc.js"
+      ]
+    },
+    {
+      "id": "console",
+      "name": "CONSOLE",
+      "description": "FX visual console: preset card grid (7 presets: emily, tunnel, orbit, void, vinyl, wallpaper, skull), master sliders (intensity, cinema shake, depth, cover resolution, point, speed, twist, color, scatter, bloom strength, lyric glow), toggle switches (float layer, cinema, edge, AI depth, bloom, lyric glow, particle lyrics, back cover), 3D shelf settings (mode, camera, presence, size, offsets, opacity), color pickers (lyric color/highlight/glow, visual tint, UI/home/visual/shelf accent, background), lyric typography controls (font, weight, letter spacing, line height), desktop lyric/wallpaper settings, performance profiles, DIY mode toggle, user fx archive save/load, and background image/media management. Depends on ALL lower layers for rendering and audio state.",
+      "nodeIds": [
+        "file:public/js/ui/console.js"
+      ]
+    },
+    {
+      "id": "splash",
+      "name": "SPLASH",
+      "description": "Splash screen animation system: WebGL shader-based intro animation (animated loop with 3 color channels, sync band, center beam, blade, flare, vignette), 2D canvas fallback (dust particles, light streaks, slit reveal with ignition flash, shard animations, wave line), intro sound synthesis (Web Audio API: noise sweep, sine/triangle tones, low oscillator), splash lifecycle (ready-to-enter marker, dismiss with CSS transition → home reveal → visual/login guide trigger), and desktop overlay sync (lyrics + wallpaper push state to Electron desktop window). Depends on FOUNDATION and STATE.",
+      "nodeIds": [
+        "file:public/js/splash.js"
+      ]
+    },
+    {
+      "id": "app-init",
+      "name": "APP_INIT",
+      "description": "Application entry point and main loop: Vite ESM import bootstrap (main.js declares side-effect import chain for all 28 modules), startup initialization (DIY mode apply, FX panel bind, lyric palette, quality/volume controls, glass surface displacement maps, user capsule/FX fab auto-hide, desktop lyrics/wallpaper state, shelf mode, starfield preset, playlist panel pin, float/lyric particle/back cover layer creation, idle guide canvas, login status refresh, update preview), animation loop (init.js — requestAnimationFrame-driven: frequency spectrum analysis with beat detection, uniform updates, particle pointer frame, preset transition tick, ripple/float/shelf/lyric particle/home audio updates, cinema/free camera, gesture rotation, skull camera pose, desktop overlay sync, thumb cover pulse, renderer.render call), and modal backdrop close binding. Depends on ALL layers.",
+      "nodeIds": [
+        "file:public/js/main.js",
+        "file:public/js/init.js"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "Foundation Layer — shared.js",
+      "description": "The bottom of the dependency pyramid. shared.js defines all cross-cutting utilities and constants: clamp/clampRange for numeric clamping, songProviderKey() for routing songs to their platform, openGsapModal/closeGsapModal for animated modal transitions, bindModalBackdropClose for backdrop-dismiss behavior, localStorage storage keys (CUSTOM_COVER_STORE_KEY, LYRIC_LAYOUT_STORE_KEY, etc.), the fxDefaults preset object with ~70 visual parameters, hotkey defaults, audio globals (audio, audioCtx, analyser), and the custom cover/lyric maps. Every other module reads from window globals set here.",
+      "nodeIds": [
+        "file:public/js/shared.js"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "State & Preferences — core/state.js, core/prefs.js",
+      "description": "Initializes global playback state: frequency data arrays (FFT_SIZE=2048), audio energy bands (bass, mid, treble, beatPulse), lyrics state (lyricsLines, lyricsVisible, lyricsHasNativeKaraoke), queue state (playlist, playQueue, currentIdx), login status objects for Netease/QQ/YouTube, and the track switch token for stale-response guarding. prefs.js adds localStorage persistence helpers: readSavedVolume, saveDiyModePreference, readSavedPlaybackVisualPreset — the thin persistence layer used by all higher modules.",
+      "nodeIds": [
+        "file:public/js/core/state.js",
+        "file:public/js/core/prefs.js"
+      ]
+    },
+    {
+      "order": 3,
+      "title": "Platform API Layer — platforms/netease.js, qq.js, youtube.js",
+      "description": "Three parallel platform API wrappers following an identical pattern: each defines a platformApi() function that wraps fetch to /api/{platform}/*, a Qs builder for URL-encoding params, and a declarative API configuration table (neteaseAPIList, qqAPIList, youtubeAPIList) from which functions like neteaseSearch(), qqSongUrl(), youtubeTrending() are auto-generated at module load. These modules depend on core/api-helper.js for apiJson(). Netease exposes ~15 endpoints (search, song URL, playlists, login QR, likes, lyrics); QQ exposes ~7 (search, song URL, login cookie); YouTube exposes ~8 (search, song URL, trending, login).",
+      "nodeIds": [
+        "file:public/js/platforms/netease.js",
+        "file:public/js/platforms/qq.js",
+        "file:public/js/platforms/youtube.js"
+      ]
+    },
+    {
+      "order": 4,
+      "title": "Core Services: API Helper — core/api-helper.js",
+      "description": "The shared networking and formatting layer. apiJson() provides a standardized async fetch wrapper with timeout via AbortController. escHtml() sanitizes text for DOM injection. The playback quality system normalizes string values (jymaster → hires → lossless → exhigh → standard), provides labels/rankings/short labels, and includes upgrade/downgrade logic for trial vs VIP accounts. Also hosts loadCustomCoverMap/loadCustomLyricMap initialization, the songCoverSrc() resolution chain (custom → proxy → direct), and quality detection on song URL responses.",
+      "nodeIds": [
+        "file:public/js/core/api-helper.js"
+      ]
+    },
+    {
+      "order": 5,
+      "title": "Core Services: Domain — core/cover.js, like.js, collect.js, discover.js",
+      "description": "Business logic for four key domains: cover.js manages custom cover maps (localStorage-backed per-song custom album art), proxy URL building, and cover size normalization. like.js handles heart/like toggle with isSongLiked/likeSong APIs, cross-platform like maps (Netease cloud or YouTube localStorage fallback), and UI button state (liked/busy). collect.js opens the collect-to-playlist modal, manages the collectTargetSong, and connects to neteaseUserPlaylists. discover.js powers the Home page — sets art backgrounds, formats play counts (万/亿), manages listen sessions (beginListenSession/finalizeListenSession) for play tracking, and renders personalized recommendations (daily/recent/private radio cards).",
+      "nodeIds": [
+        "file:public/js/core/cover.js",
+        "file:public/js/core/like.js",
+        "file:public/js/core/collect.js",
+        "file:public/js/core/discover.js"
+      ]
+    },
+    {
+      "order": 6,
+      "title": "Audio Engine — audio/audio-engine.js, audio/beat-analysis.js",
+      "description": "The Web Audio backend. audio-engine.js initializes the AudioContext (initAudio), creates the analysis chain (MediaElementSource → analyser → beatAnalyser → gainNode → destination), and provides ensureUiSfxContext for UI sound effects (shelf select ticks). beat-analysis.js is the largest module (~2876 lines) — implements the real-time beat detection engine (processRealtimeBeatEngine, tickBeatMap), offline beat pre-analysis via OfflineAudioContext (kick-frequency 60-150Hz energy curve → peak detection → camera-synchronized beat maps), tempo estimation (medianGap, estimateTempoPhaseOffset), DJ mode beat map system, and the beat cache layer (localStorage beatmap storage).",
+      "nodeIds": [
+        "file:public/js/audio/audio-engine.js",
+        "file:public/js/audio/beat-analysis.js"
+      ]
+    },
+    {
+      "order": 7,
+      "title": "Playback & Lyrics — audio/playback.js, audio/lyrics.js",
+      "description": "playback.js manages the play queue: queueItemKey() builds unique song keys, queueSong/queueSongNext enqueue with de-duplication, nextTrack/prevTrack advance position with play-mode awareness (sequential/shuffle/repeat), setPlaybackQuality negotiates quality with the server, and the play catalog maps songs to actual audio URLs. lyrics.js fetches and parses lyrics: fetchLyric uses a 7-day localStorage cache, parses YRC (syllable-timed karaoke) and LRC formats, falls back to plain text, and stores lines in lyricsLines[] for the stage/desktop lyric renderers to consume.",
+      "nodeIds": [
+        "file:public/js/audio/playback.js",
+        "file:public/js/audio/lyrics.js"
+      ]
+    },
+    {
+      "order": 8,
+      "title": "Three.js Engine — three/three-scene.js, three-lyrics.js, particles.js",
+      "description": "The 3D rendering core built on Three.js r128. three-scene.js creates scene, camera (PerspectiveCamera 45°), and renderer (WebGLRenderer, alpha, high-performance), implements adaptive DPR/render-quality based on pixel budget and viewport size, manages the Skull preset's head/eye tracking system (face tracking via camera → headParallax → particleRotation), cinema dynamics (updateCinemaDynamics), free-camera orbit, and the main frame loop's audio-to-visual uniform binding. three-lyrics.js manages the 3D stage lyrics system — TextSprite-based words that fly in/out with beat-synced glow (lyricSunEnergy, beatGlow), camera-locked layout, and palette management. particles.js builds the cover-sampled particle grid (GRID_X×GRID_Y, up to ~64K points), 7 presets (emily cover, tunnel, orbit, void, vinyl, wallpaper, skull) each with unique position/color/noise logic, ripple system, float layer, bloom particles, and cover-resolution adaptation.",
+      "nodeIds": [
+        "file:public/js/three/three-scene.js",
+        "file:public/js/three/three-lyrics.js",
+        "file:public/js/three/particles.js"
+      ]
+    },
+    {
+      "order": 9,
+      "title": "3D Shelf & UI Layer — three/shelf.js, ui/controls.js, ui/login.js, ui/playlists.js, ui/youtube.js, ui/misc.js, ui/console.js, splash.js",
+      "description": "The top of the dependency pyramid where visuals meet interaction. shelf.js creates the 3D playlist shelf — a Three.js card stack with two modes (side: angled 5-card stack; stage: centered arc with reflection + glow), dynamic layout profiles for portrait/narrow/skull-safe viewports, card selection with animated transitions, and a shelfManager update loop. controls.js handles search input/debounce, search history, result rendering, play-mode cycling, and the bottom-bar transport controls. login.js implements the multi-platform login modal — QR code polling for Netease, cookie-based for QQ and YouTube, user capsule with VIP badges, and dual-account management. playlists.js manages localStorage-based local playlists (create/rename/delete/sync) and renders the playlist panel tabs. youtube.js handles YouTube search source toggling and trending loading. misc.js provides the idle guide canvas (3D particle art shown when idle) and utility modals (track detail, custom lyric, update panel). console.js is the comprehensive FX control panel — 7 preset cards, 38 lyric color presets, color pickers (lyric, accent, shelf, background), sliders for every visual parameter, toggle grid for overlays, user archive save/load/export, and the shelf/camera/performance configuration seg controls. splash.js runs the WebGL launch animation — dust particles, streaks, shards, signal-line pulse, and the 'click to enter' transition that reveals the main scene.",
+      "nodeIds": [
+        "file:public/js/three/shelf.js",
+        "file:public/js/ui/controls.js",
+        "file:public/js/ui/login.js",
+        "file:public/js/ui/playlists.js",
+        "file:public/js/ui/youtube.js",
+        "file:public/js/ui/misc.js",
+        "file:public/js/ui/console.js",
+        "file:public/js/splash.js"
+      ]
+    },
+    {
+      "order": 10,
+      "title": "App Init — init.js, main.js, index.html",
+      "description": "The entry point wiring everything together. main.js is the Vite module entry — a flat list of 28 side-effect imports that populate window globals in strict dependency order (shared → prefs → three-lyrics → state → cover → discover → like → collect → api-helper → netease → qq → youtube → three-scene → particles → beat-analysis → shelf → audio-engine → playback → lyrics → youtube → controls → console → login → playlists → misc → splash → init). init.js starts the requestAnimationFrame render loop (animate()), implements adaptive FPS (shouldSkipAdaptiveRenderFrame based on background/load-tier/interaction mode), runs real-time spectrum analysis in the loop (5-band energy extraction: kick/vocal/mid/treble/rms with dynamic peak tracking), orchestrates beat-to-visual synchronization (scheduleBeatCamera, beatPulse, cinema dynamics, lyric sun energy), and manages the 3D camera pose (parallax, skull tracking, gesture rotation, shelf). index.html provides the complete DOM shell: splash overlay, search area with multi-source tabs, empty-home page with recommendation cards, visual FX console panel, playlist/queue side panels, gesture HUD, bottom-bar transport controls, progress bar, SVG glass texture filters, and all DOM hook IDs that init.js and the UI modules query via getElementById.",
+      "nodeIds": [
+        "file:public/js/init.js",
+        "file:public/js/main.js",
+        "file:public/index.html"
+      ]
+    }
+  ]
+}

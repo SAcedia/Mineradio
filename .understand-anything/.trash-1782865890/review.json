@@ -1,0 +1,36 @@
+{
+  "issues": [],
+  "warnings": [
+    "Edge 108 target missing: applyOriginalLyricsState",
+    "Edge 109 target missing: applyCustomLyricState",
+    "Edge 113 target missing: applyPreferredLyricsForCurrent",
+    "Edge 119 target missing: syncLikeStatusForSong",
+    "Edge 127 target missing: preparePlaybackFadeIn",
+    "Edge 130 target missing: attemptAudioPlay",
+    "Edge 133 target missing: youtubeSongUrl",
+    "Edge 134 target missing: qqSongUrl",
+    "Edge 135 target missing: neteaseSongUrl",
+    "Edge 137 target missing: attemptAudioPlay",
+    "Edge 146 target missing: fetchBeatPrefetchAudioUrl",
+    "Edge 147 source missing: fetchBeatPrefetchAudioUrl",
+    "Edge 147 target missing: neteaseSongUrl",
+    "Edge 148 source missing: fetchBeatPrefetchAudioUrl",
+    "Edge 148 target missing: qqSongUrl",
+    "Edge 154 target missing: applyPreferredLyricsForCurrent",
+    "Edge 155 target missing: setOriginalLyricsState",
+    "Edge 168 target missing: shelfHoverCue",
+    "Edge 176 target missing: beatAnalyser",
+    "Edge 179 target missing: cameraDynamicsScale",
+    "Edge 192 target missing: neteaseSearch",
+    "Edge 193 target missing: qqSearch",
+    "Edge 194 target missing: youtubeSearch",
+    "Edge 202 target missing: toggleLikeQueueIndex",
+    "Edge 224 target missing: youtubeTrending",
+    "Edge 225 target missing: renderSearchResults"
+  ],
+  "stats": {
+    "totalNodes": 302,
+    "totalEdges": 239,
+    "totalLayers": 10
+  }
+}

@@ -1,0 +1,385 @@
+{
+  "module": "three.js visual engine (three-scene, three-lyrics, particles, shelf)",
+  "nodes": [
+    {
+      "id": "three-scene.js",
+      "label": "three-scene.js",
+      "type": "file",
+      "description": "Three.js scene setup, camera system (orbit/free/beat-synced), renderer, cinema dynamics, realtime beat engine, performance adaptation"
+    },
+    {
+      "id": "scene",
+      "label": "scene",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "THREE.Scene instance (background null for alpha)"
+    },
+    {
+      "id": "camera",
+      "label": "camera",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "THREE.PerspectiveCamera (FOV 45)"
+    },
+    {
+      "id": "renderer",
+      "label": "renderer",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "THREE.WebGLRenderer with alpha, high-performance, dynamic pixel ratio"
+    },
+    {
+      "id": "orbit",
+      "label": "orbit object",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Orbital camera controller: userTheta/Phi/Radius, cineOffset, focus target, glow follow, beat glow"
+    },
+    {
+      "id": "freeCamera",
+      "label": "freeCamera state",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Free camera mode (WASD + mouse) with position/yaw/pitch/roll/fov, pointer lock, reset tween"
+    },
+    {
+      "id": "beatCam",
+      "label": "beatCam object",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Beat-synced camera state: nextIdx, events[], punch, theta/phi/radius/roll kicks, stats"
+    },
+    {
+      "id": "uniforms",
+      "label": "uniforms (global)",
+      "type": "variable",
+      "description": "Shared Three.js uniforms object (declared in particles.js, referenced globally)"
+    },
+    {
+      "id": "cinemaDynamics",
+      "label": "cinemaDynamics",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Running average/peak/scale for audio-reactive cinema camera movement"
+    },
+    {
+      "id": "cinemaTrackProfile",
+      "label": "cinemaTrackProfile",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Per-track profile: scale, energy/low/vocal averages, punch peak, density"
+    },
+    {
+      "id": "resetBeatCameraSync",
+      "label": "resetBeatCameraSync(t)",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Resets beat camera sync state to time t"
+    },
+    {
+      "id": "processRealtimeBeatEngine",
+      "label": "processRealtimeBeatEngine(dt)",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Real-time FFT beat detection: sub/low/body/vocal/snap bands, onset detection, tempo tracking, hit detection with rhythm acceptance"
+    },
+    {
+      "id": "scheduleBeatCamera",
+      "label": "scheduleBeatCamera(beat, source)",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Schedules camera movement from a beat event with strength/tone/combo-based amplitude"
+    },
+    {
+      "id": "updateCinemaDynamics",
+      "label": "updateCinemaDynamics(rawEnergy, rawLow)",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Updates cinema dynamics scale from energy/low inputs"
+    },
+    {
+      "id": "applyFreeCameraToCamera",
+      "label": "applyFreeCameraToCamera()",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Applies free camera position/rotation/shake to camera object"
+    },
+    {
+      "id": "updateFreeCamera",
+      "label": "updateFreeCamera(dt)",
+      "type": "function",
+      "file": "three-scene.js",
+      "description": "Updates free camera position from WASD input, velocity, and reset tween"
+    },
+    {
+      "id": "rtBeat",
+      "label": "rtBeat object",
+      "type": "variable",
+      "file": "three-scene.js",
+      "description": "Realtime beat engine state: band follow values, onset avg/peak, tempo tracking, hit stats"
+    },
+    {
+      "id": "three-lyrics.js",
+      "label": "three-lyrics.js",
+      "type": "file",
+      "description": "3D lyrics rendering system: canvas-textured text planes, star river particles, lyric layout save/load, color/font management, color lab"
+    },
+    {
+      "id": "stageLyrics",
+      "label": "stageLyrics object",
+      "type": "variable",
+      "file": "three-lyrics.js",
+      "description": "Stage lyrics state: group, current/outgoing meshes, palette, starRiver, lock fit scale"
+    },
+    {
+      "id": "readSavedLyricLayout",
+      "label": "readSavedLyricLayout()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Reads all visual preset/fx parameters from localStorage, returns normalized configuration object"
+    },
+    {
+      "id": "saveLyricLayout",
+      "label": "saveLyricLayout()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Saves all visual preset/fx parameters to localStorage"
+    },
+    {
+      "id": "normalizeHexColor",
+      "label": "normalizeHexColor(value, fallback)",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Normalizes hex color string (#xxx -> #xxxxxx, validates)"
+    },
+    {
+      "id": "normalizeCoverResolution",
+      "label": "normalizeCoverResolution(v)",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Clamps cover resolution value (0.75-1.55)"
+    },
+    {
+      "id": "createLyricsParticles",
+      "label": "createLyricsParticles()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Creates stage lyrics 3D group and star river particle system"
+    },
+    {
+      "id": "ensureLyricStarRiver",
+      "label": "ensureLyricStarRiver()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Creates star river (420-point flowing particle stream below lyrics) with ShaderMaterial"
+    },
+    {
+      "id": "updateLyricStarRiver",
+      "label": "updateLyricStarRiver(dt)",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Updates star river size, opacity, position based on current lyrics and fx parameters"
+    },
+    {
+      "id": "clearStageLyrics",
+      "label": "clearStageLyrics()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Clears all lyrics meshes from stage"
+    },
+    {
+      "id": "lyricFontStackForKey",
+      "label": "lyricFontStackForKey(key)",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Returns CSS font-family stack for given font key (sans/hei/song/bold-song/stone-song/etc)"
+    },
+    {
+      "id": "updateStageLyrics3D",
+      "label": "updateStageLyrics3D()",
+      "type": "function",
+      "description": "Main 3D lyrics update loop (called from animation frame, referenced from index.html)"
+    },
+    {
+      "id": "particles.js",
+      "label": "particles.js",
+      "type": "file",
+      "description": "Main particle system: geometry, dot texture, cover texture, uniforms, vertex/fragment shaders, ripple system"
+    },
+    {
+      "id": "dotTexture",
+      "label": "dotTexture",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "Radial gradient dot canvas texture for particles"
+    },
+    {
+      "id": "geo",
+      "label": "geo (particle geometry)",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "BufferGeometry with position/aUv/aRand attributes for cover particle grid"
+    },
+    {
+      "id": "coverTex",
+      "label": "coverTex",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "THREE.Texture for cover image, updated on track change"
+    },
+    {
+      "id": "prevCoverTex",
+      "label": "prevCoverTex",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "Previous cover texture for crossfade transition"
+    },
+    {
+      "id": "coverEdgeTex",
+      "label": "coverEdgeTex",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "Edge/depth texture (R=depth, G=edge, B=fg-mask, A=lum)"
+    },
+    {
+      "id": "uniforms object",
+      "label": "uniforms (detailed)",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "Complete uniforms for particle shaders: uTime, uBass, uMid, uTreble, uBeat, uEnergy, uBurstAmt, uVinylSpin, uPreset, all FX parameters, mouse interaction, ripple, cover textures"
+    },
+    {
+      "id": "buildCoverParticleGeometry",
+      "label": "buildCoverParticleGeometry(grid)",
+      "type": "function",
+      "file": "particles.js",
+      "description": "Builds BufferGeometry from grid count with position (PLANE_SIZE) and UV coordinates"
+    },
+    {
+      "id": "applyCoverParticleResolution",
+      "label": "applyCoverParticleResolution(value, opts)",
+      "type": "function",
+      "file": "particles.js",
+      "description": "Changes particle grid resolution, rebuilds geometry, triggers cover reload"
+    },
+    {
+      "id": "rippleData",
+      "label": "rippleData/rippleTex/ripples",
+      "type": "variable",
+      "file": "particles.js",
+      "description": "Ripple effect system: DataTexture (1xN) with x/y/age/str, array of ripple trackers"
+    },
+    {
+      "id": "floatGroup",
+      "label": "floatGroup",
+      "type": "variable",
+      "description": "Float particle layer group (declared in index.html, managed by particles.js)"
+    },
+    {
+      "id": "shelf.js",
+      "label": "shelf.js",
+      "type": "file",
+      "description": "3D shelf system: side/stage modes, card rendering, hover cue, layout profiles, pinned open state"
+    },
+    {
+      "id": "shelfManager",
+      "label": "shelfManager",
+      "type": "variable",
+      "file": "shelf.js",
+      "description": "Global shelf manager instance (created by makeShelfManager)"
+    },
+    {
+      "id": "makeShelfManager",
+      "label": "makeShelfManager()",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Factory function creating shelf manager with methods: getMode, buildOneCard, currentItems, clearSelected, closeContent, etc."
+    },
+    {
+      "id": "safeShelfRebuild",
+      "label": "safeShelfRebuild(reason, loadCover)",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Safely rebuilds shelf cards with error handling"
+    },
+    {
+      "id": "scheduleShelfRebuild",
+      "label": "scheduleShelfRebuild(reason, loadCover)",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Schedules a deferred shelf rebuild using requestAnimationFrame"
+    },
+    {
+      "id": "currentItems",
+      "label": "currentItems",
+      "type": "variable",
+      "file": "shelf.js",
+      "description": "Array of current items displayed in the shelf"
+    },
+    {
+      "id": "buildOneCard",
+      "label": "buildOneCard(song, index)",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Creates a single Three.js shelf card mesh (cover plane, glow ring, text sprite) for a song"
+    },
+    {
+      "id": "shelfSettings",
+      "label": "shelfSettings()",
+      "type": "function",
+      "file": "three-lyrics.js",
+      "description": "Returns normalized shelf position/size/opacity parameters from fx state"
+    },
+    {
+      "id": "shelfLayoutProfile",
+      "label": "shelfLayoutProfile()",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Returns shelf layout parameters (position, scale, rotation) for side/stage modes"
+    },
+    {
+      "id": "setShelfPinnedOpen",
+      "label": "setShelfPinnedOpen(open, immediate)",
+      "type": "function",
+      "file": "shelf.js",
+      "description": "Pins shelf open/closed, manages focus zone and home visibility"
+    },
+    {
+      "id": "compactCount",
+      "label": "compactCount(n)",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Formats large numbers (10000->1万, 100000000->1亿)"
+    }
+  ],
+  "edges": [
+    {"source": "buildOneCard", "target": "songCoverSrc", "label": "calls (cross-file: cover.js)"},
+    {"source": "buildOneCard", "target": "currentCoverSong", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "safeShelfRebuild", "target": "shelfManager", "label": "depends_on"},
+    {"source": "safeShelfRebuild", "target": "currentItems", "label": "reads"},
+    {"source": "scheduleShelfRebuild", "target": "safeShelfRebuild", "label": "calls"},
+    {"source": "makeShelfManager", "target": "shelfManager", "label": "writes"},
+    {"source": "setShelfPinnedOpen", "target": "orbit", "label": "affects"},
+    {"source": "setShelfPinnedOpen", "target": "shelfHoverCue", "label": "resets"},
+    {"source": "createLyricsParticles", "target": "scene", "label": "mutates (adds group)"},
+    {"source": "createLyricsParticles", "target": "stageLyrics", "label": "writes"},
+    {"source": "ensureLyricStarRiver", "target": "dotTexture", "label": "uses (cross-file: particles.js)"},
+    {"source": "ensureLyricStarRiver", "target": "uniforms", "label": "reads (cross-file: particles.js)"},
+    {"source": "updateLyricStarRiver", "target": "stageLyrics", "label": "mutates"},
+    {"source": "readSavedLyricLayout", "target": "normalizeHexColor", "label": "calls (self)"},
+    {"source": "readSavedLyricLayout", "target": "normalizeCoverResolution", "label": "calls (self)"},
+    {"source": "processRealtimeBeatEngine", "target": "beatAnalyser", "label": "reads (cross-file: audio-engine)"},
+    {"source": "processRealtimeBeatEngine", "target": "audioCtx", "label": "reads (cross-file: audio-engine)"},
+    {"source": "scheduleBeatCamera", "target": "cinemaTrackProfile", "label": "reads"},
+    {"source": "scheduleBeatCamera", "target": "cameraDynamicsScale", "label": "calls (self)"},
+    {"source": "updateCinemaDynamics", "target": "cinemaDynamics", "label": "mutates"},
+    {"source": "resetBeatCameraSync", "target": "beatCam", "label": "mutates"},
+    {"source": "applyFreeCameraToCamera", "target": "freeCamera", "label": "reads"},
+    {"source": "applyFreeCameraToCamera", "target": "camera", "label": "mutates"},
+    {"source": "updateFreeCamera", "target": "freeCamera", "label": "mutates"},
+    {"source": "updateStageLyrics3D", "target": "stageLyrics", "label": "mutates"},
+    {"source": "updateStageLyrics3D", "target": "lyricsLines", "label": "reads"},
+    {"source": "updateStageLyrics3D", "target": "lyricsTimingSource", "label": "reads"},
+    {"source": "updateStageLyrics3D", "target": "uniforms", "label": "reads (cross-file: particles.js)"}
+  ]
+}

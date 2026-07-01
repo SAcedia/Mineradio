@@ -1,0 +1,109 @@
+{
+  "layers": [
+    {
+      "id": "foundation",
+      "name": "FOUNDATION",
+      "description": "Shared utilities, constants, STORE_KEYs, clamp functions, GSAP modal helpers, hotkey config, fxDefaults with all visual parameters, packaged default fx snapshots, song provider key detector, and localStorage read helpers. No dependencies — loaded first, before all module JS.",
+      "nodeIds": [
+        "file:public/js/shared.js"
+      ]
+    },
+    {
+      "id": "state",
+      "name": "STATE",
+      "description": "Global mutable state (playlist, playQueue, currentIdx, playing, loginStatus, beat analysis vars, fx overrides, desktop runtime state, DIY mode, performance monitoring, cache trimming), plus localStorage preference read/save helpers (volume, DIY mode, visual preset, boolean prefs). Depends on FOUNDATION for STORE_KEYs and clampRange.",
+      "nodeIds": [
+        "file:public/js/core/state.js",
+        "file:public/js/core/prefs.js"
+      ]
+    },
+    {
+      "id": "platform-api",
+      "name": "PLATFORM_API",
+      "description": "Auto-generated API wrappers for three music platforms: netease (Netease Cloud Music), qq (QQ Music), and youtube (YouTube). Each exposes apiJson-backed fetch functions (neteaseXxx, qqXxx, youtubeXxx) defined by configuration tables (neteaseAPIList, qqAPIList, youtubeAPIList). Depends on CORE_SERVICES (apiJson).",
+      "nodeIds": [
+        "file:public/js/platforms/netease.js",
+        "file:public/js/platforms/qq.js",
+        "file:public/js/platforms/youtube.js"
+      ]
+    },
+    {
+      "id": "core-services",
+      "name": "CORE_SERVICES",
+      "description": "API helper (apiJson fetch wrapper with timeout, playback quality normalization/labels, listen-stats tracking, weather/city, custom cover/lyric map initialization), cover helpers (custom cover map read/save), discover/home page helpers (art display, listen snapshot, home discover loading), like helpers (cloud song detection, like/unlike API calls, storage-backed YouTube likes), and collect helpers (collect modal, playlist creation from collect). Depends on FOUNDATION and STATE.",
+      "nodeIds": [
+        "file:public/js/core/api-helper.js",
+        "file:public/js/core/cover.js",
+        "file:public/js/core/discover.js",
+        "file:public/js/core/like.js",
+        "file:public/js/core/collect.js"
+      ]
+    },
+    {
+      "id": "audio-engine",
+      "name": "AUDIO_ENGINE",
+      "description": "AudioContext initialization (MediaElementSource → AnalyserNode chain), realtime beat detection engine (multi-band onset detection, tempo-assisted beat camera scheduling), offline beat analysis (full audio decode → low-pass kick detection → MusicTempo), playback queue management (queue/play/next/prev/skip, audio element preloading/caching, fade in/out), and lyrics (multi-source fetch, LRX/JSON parsing, custom lyrics, lyric offset). Depends on FOUNDATION, STATE, CORE_SERVICES, and PLATFORM_API.",
+      "nodeIds": [
+        "file:public/js/audio/audio-engine.js",
+        "file:public/js/audio/beat-analysis.js",
+        "file:public/js/audio/playback.js",
+        "file:public/js/audio/lyrics.js"
+      ]
+    },
+    {
+      "id": "three-engine",
+      "name": "THREE_ENGINE",
+      "description": "Three.js rendering pipeline: scene/camera/renderer setup with adaptive pixel ratio and resolution budgeting, uniform shader block (uTime, uBass, uMid, uTreble, uBeat, uEnergy, uMouseXY, etc.), particle system (5 presets: emily, tunnel, orbit, void, vinyl, wallpaper, skull — each with unique position/size/color computation from cover image sampling), 3D stage lyrics (text planes with glow, palette extraction, star river, beat-reactive bloom), and 3D playlist shelf (side/stage camera modes, card rendering, hover/selection interaction, particle shuffle animations). Depends on FOUNDATION, STATE, and Three.js (vendor).",
+      "nodeIds": [
+        "file:public/js/three/three-scene.js",
+        "file:public/js/three/three-lyrics.js",
+        "file:public/js/three/particles.js",
+        "file:public/js/three/shelf.js"
+      ]
+    },
+    {
+      "id": "ui-core",
+      "name": "UI_CORE",
+      "description": "User interface interaction layer: search box with debounced API queries across platforms and mode switching (song/podcast/qq/youtube), playback controls (play/pause/next/prev, progress bar, volume slider, quality selector, play mode toggle, queue/mini-queue panel), login system (QR code polling, cookie login, platform switching, user modal with profile/stats), local and cloud playlist management (CRUD, detail panel with batch rendering and scroll virtualization), YouTube UI (login toggle, source enable/disable), and miscellaneous UI (idle guide canvas, visual startup guide, toast notifications, track detail modal, upload tip, custom lyric modal, hotkey modal, home wallpaper preview). Depends on all lower layers.",
+      "nodeIds": [
+        "file:public/js/ui/controls.js",
+        "file:public/js/ui/login.js",
+        "file:public/js/ui/playlists.js",
+        "file:public/js/ui/youtube.js",
+        "file:public/js/ui/misc.js"
+      ]
+    },
+    {
+      "id": "console",
+      "name": "CONSOLE",
+      "description": "FX visual console: preset card grid (7 presets: emily, tunnel, orbit, void, vinyl, wallpaper, skull), master sliders (intensity, cinema shake, depth, cover resolution, point, speed, twist, color, scatter, bloom strength, lyric glow), toggle switches (float layer, cinema, edge, AI depth, bloom, lyric glow, particle lyrics, back cover), 3D shelf settings (mode, camera, presence, size, offsets, opacity), color pickers (lyric color/highlight/glow, visual tint, UI/home/visual/shelf accent, background), lyric typography controls (font, weight, letter spacing, line height), desktop lyric/wallpaper settings, performance profiles, DIY mode toggle, user fx archive save/load, and background image/media management. Depends on ALL lower layers for rendering and audio state.",
+      "nodeIds": [
+        "file:public/js/ui/console.js"
+      ]
+    },
+    {
+      "id": "splash",
+      "name": "SPLASH",
+      "description": "Splash screen animation system: WebGL shader-based intro animation (animated loop with 3 color channels, sync band, center beam, blade, flare, vignette), 2D canvas fallback (dust particles, light streaks, slit reveal with ignition flash, shard animations, wave line), intro sound synthesis (Web Audio API: noise sweep, sine/triangle tones, low oscillator), splash lifecycle (ready-to-enter marker, dismiss with CSS transition → home reveal → visual/login guide trigger), and desktop overlay sync (lyrics + wallpaper push state to Electron desktop window). Depends on FOUNDATION and STATE.",
+      "nodeIds": [
+        "file:public/js/splash.js"
+      ]
+    },
+    {
+      "id": "app-init",
+      "name": "APP_INIT",
+      "description": "Application entry point and main loop: Vite ESM import bootstrap (main.js declares side-effect import chain for all 28 modules), startup initialization (DIY mode apply, FX panel bind, lyric palette, quality/volume controls, glass surface displacement maps, user capsule/FX fab auto-hide, desktop lyrics/wallpaper state, shelf mode, starfield preset, playlist panel pin, float/lyric particle/back cover layer creation, idle guide canvas, login status refresh, update preview), animation loop (init.js — requestAnimationFrame-driven: frequency spectrum analysis with beat detection, uniform updates, particle pointer frame, preset transition tick, ripple/float/shelf/lyric particle/home audio updates, cinema/free camera, gesture rotation, skull camera pose, desktop overlay sync, thumb cover pulse, renderer.render call), and modal backdrop close binding. Depends on ALL layers.",
+      "nodeIds": [
+        "file:public/js/main.js",
+        "file:public/js/init.js"
+      ]
+    }
+  ],
+  "meta": {
+    "totalFiles": 28,
+    "totalLayers": 10,
+    "dependencyOrder": "bottom-up (lowest first, highest last)",
+    "sourceRoot": "public/js/",
+    "importGraphSource": "public/js/main.js — Vite ESM entry point with ordered side-effect imports"
+  }
+}

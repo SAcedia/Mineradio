@@ -1,5 +1,5 @@
 window.scene = new THREE.Scene();
-scene.background = null;
+window.scene.background = null;
 window.camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
 window.RENDER_DPR_CAP = 1.35;
 window.RENDER_PIXEL_BUDGET = 5200000;
@@ -16,7 +16,7 @@ window.RENDER_INTERACTION_HOLD_MS = 900;
 window.renderInteractionBoostUntil = 0;
 window.renderInteractionReason = '';
 window.renderQualityProfile = function() {
-  var quality = normalizePerformanceQuality(fx && fx.performanceQuality);
+  var quality = window.normalizePerformanceQuality(window.fx && window.fx.performanceQuality);
   if (quality === 'eco') return { cap: 0.95, min: 0.56, budget: 2400000 };
   if (quality === 'balanced') return { cap: 1.12, min: 0.66, budget: 3800000 };
   if (quality === 'ultra') return { cap: 1.75, min: 0.85, budget: 7800000 };
@@ -53,15 +53,15 @@ window.getRenderLoadTier = function() {
   return 0;
 }
 window.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
-renderer.setClearColor(0x000000, 0);
-renderer.setPixelRatio(getRenderPixelRatio());
-renderer.setSize(innerWidth, innerHeight);
-renderer.domElement.style.background = 'transparent';
-renderer.domElement.style.display = 'block';
-renderer.domElement.style.width = '100%';
-renderer.domElement.style.height = '100%';
-renderer.domElement.tabIndex = 0;
-document.getElementById('canvas-container').appendChild(renderer.domElement);
+window.renderer.setClearColor(0x000000, 0);
+window.renderer.setPixelRatio(getRenderPixelRatio());
+window.renderer.setSize(innerWidth, innerHeight);
+window.renderer.domElement.style.background = 'transparent';
+window.renderer.domElement.style.display = 'block';
+window.renderer.domElement.style.width = '100%';
+window.renderer.domElement.style.height = '100%';
+window.renderer.domElement.tabIndex = 0;
+document.getElementById('canvas-container').appendChild(window.renderer.domElement);
 
 // ============================================================
 //  相机系统 v7.1 — 分离 user offset / cinema offset
@@ -114,18 +114,18 @@ window.defaultFreeCameraState = function() {
 window.readFreeCameraState = function() {
   var state = defaultFreeCameraState();
   try {
-    var raw = JSON.parse(localStorage.getItem(FREE_CAMERA_STORE_KEY) || '{}') || {};
+    var raw = JSON.parse(localStorage.getItem(window.FREE_CAMERA_STORE_KEY) || '{}') || {};
     if (raw.position) {
       state.position.set(
-        clampRange(Number(raw.position.x) || 0, -80, 80),
-        clampRange(Number(raw.position.y) || 0, -80, 80),
-        clampRange(Number(raw.position.z) || 6.6, -80, 80)
+        window.clampRange(Number(raw.position.x) || 0, -80, 80),
+        window.clampRange(Number(raw.position.y) || 0, -80, 80),
+        window.clampRange(Number(raw.position.z) || 6.6, -80, 80)
       );
     }
-    state.yaw = clampRange(Number(raw.yaw) || 0, -Math.PI * 8, Math.PI * 8);
-    state.pitch = clampRange(Number(raw.pitch) || 0, -Math.PI * 0.49, Math.PI * 0.49);
-    state.roll = clampRange(Number(raw.roll) || 0, -Math.PI, Math.PI);
-    state.fov = clampRange(Number(raw.fov) || BASE_FOV, 26, 72);
+    state.yaw = window.clampRange(Number(raw.yaw) || 0, -Math.PI * 8, Math.PI * 8);
+    state.pitch = window.clampRange(Number(raw.pitch) || 0, -Math.PI * 0.49, Math.PI * 0.49);
+    state.roll = window.clampRange(Number(raw.roll) || 0, -Math.PI, Math.PI);
+    state.fov = window.clampRange(Number(raw.fov) || BASE_FOV, 26, 72);
     state.locked = !!(raw.locked || raw.active);
     state.active = false;
   } catch (e) {}
@@ -142,16 +142,16 @@ window.FREE_CAMERA_UP = new THREE.Vector3(0, 1, 0);
 window.freeCameraPointer = { seen: false, x: 0, y: 0 };
 window.freeCameraDeferredSaveTimer = 0;
 window.saveFreeCameraState = function() {
-  if (!freeCamera) return;
+  if (!window.freeCamera) return;
   try {
-    localStorage.setItem(FREE_CAMERA_STORE_KEY, JSON.stringify({
-      locked: !!freeCamera.locked,
-      active: !!freeCamera.active,
-      position: { x: freeCamera.position.x, y: freeCamera.position.y, z: freeCamera.position.z },
-      yaw: freeCamera.yaw,
-      pitch: freeCamera.pitch,
-      roll: freeCamera.roll,
-      fov: freeCamera.fov
+    localStorage.setItem(window.FREE_CAMERA_STORE_KEY, JSON.stringify({
+      locked: !!window.freeCamera.locked,
+      active: !!window.freeCamera.active,
+      position: { x: window.freeCamera.position.x, y: window.freeCamera.position.y, z: window.freeCamera.position.z },
+      yaw: window.freeCamera.yaw,
+      pitch: window.freeCamera.pitch,
+      roll: window.freeCamera.roll,
+      fov: window.freeCamera.fov
     }));
   } catch (e) {}
 }
@@ -163,7 +163,7 @@ window.scheduleFreeCameraStateSave = function(delay) {
   }, delay || 720);
 }
 window.easeOutCubic01 = function(t) {
-  t = clamp01(t);
+  t = window.clamp01(t);
   return 1 - Math.pow(1 - t, 3);
 }
 window.shortestAngleDelta = function(from, to) {
@@ -177,7 +177,7 @@ window.getDefaultFreeCameraResetPose = function() {
     roll: 0,
     fov: BASE_FOV
   };
-  if (typeof SKULL_PRESET_INDEX !== 'undefined' && fx && fx.preset === SKULL_PRESET_INDEX && typeof setSkullCameraTargetVectors === 'function') {
+  if (typeof SKULL_PRESET_INDEX !== 'undefined' && window.fx && window.fx.preset === SKULL_PRESET_INDEX && typeof setSkullCameraTargetVectors === 'function') {
     var look = new THREE.Vector3();
     var shelfComposition = typeof isSkullShelfCompositionActive === 'function' && isSkullShelfCompositionActive();
     setSkullCameraTargetVectors(pose.position, look, innerHeight > innerWidth * 1.08, shelfComposition, 0);
@@ -191,57 +191,57 @@ window.getDefaultFreeCameraResetPose = function() {
   return pose;
 }
 window.captureFreeCameraFromCurrent = function() {
-  if (!freeCamera) freeCamera = defaultFreeCameraState();
-  camera.updateMatrixWorld(true);
-  freeCamera.position.copy(camera.position);
-  FREE_CAMERA_EULER.setFromQuaternion(camera.quaternion, 'YXZ');
-  freeCamera.pitch = FREE_CAMERA_EULER.x;
-  freeCamera.yaw = FREE_CAMERA_EULER.y;
-  freeCamera.roll = FREE_CAMERA_EULER.z;
-  freeCamera.fov = clampRange(camera.fov || BASE_FOV, 26, 72);
+  if (!window.freeCamera) freeCamera = defaultFreeCameraState();
+  window.camera.updateMatrixWorld(true);
+  window.freeCamera.position.copy(window.camera.position);
+  FREE_CAMERA_EULER.setFromQuaternion(window.camera.quaternion, 'YXZ');
+  window.freeCamera.pitch = FREE_CAMERA_EULER.x;
+  window.freeCamera.yaw = FREE_CAMERA_EULER.y;
+  window.freeCamera.roll = FREE_CAMERA_EULER.z;
+  window.freeCamera.fov = window.clampRange(window.camera.fov || BASE_FOV, 26, 72);
 }
 window.applyFreeCameraToCamera = function() {
-  if (!freeCamera || !(freeCamera.active || freeCamera.locked)) return false;
-  var cameraShake = clampRange(Number((typeof fx !== 'undefined' && fx) ? fx.cinemaShake : 0.5) || 0, 0, 1.8);
-  camera.position.copy(freeCamera.position);
-  camera.rotation.order = 'YXZ';
-  camera.rotation.set(
-    freeCamera.pitch + beatCam.phiKick * cameraShake * 0.45,
-    freeCamera.yaw + beatCam.thetaKick * cameraShake * 0.45,
-    freeCamera.roll + beatCam.rollKick * cameraShake
+  if (!window.freeCamera || !(window.freeCamera.active || window.freeCamera.locked)) return false;
+  var cameraShake = window.clampRange(Number((typeof window.fx !== 'undefined' && window.fx) ? window.fx.cinemaShake : 0.5) || 0, 0, 1.8);
+  window.camera.position.copy(window.freeCamera.position);
+  window.camera.rotation.order = 'YXZ';
+  window.camera.rotation.set(
+    window.freeCamera.pitch + window.beatCam.phiKick * cameraShake * 0.45,
+    window.freeCamera.yaw + window.beatCam.thetaKick * cameraShake * 0.45,
+    window.freeCamera.roll + window.beatCam.rollKick * cameraShake
   );
-  if (cameraShake > 0 && Math.abs(beatCam.radiusKick) > 0.0001) {
-    FREE_CAMERA_SHAKE_DIR.set(0, 0, -1).applyEuler(camera.rotation);
-    camera.position.addScaledVector(FREE_CAMERA_SHAKE_DIR, beatCam.radiusKick * cameraShake * 0.52);
+  if (cameraShake > 0 && Math.abs(window.beatCam.radiusKick) > 0.0001) {
+    FREE_CAMERA_SHAKE_DIR.set(0, 0, -1).applyEuler(window.camera.rotation);
+    window.camera.position.addScaledVector(FREE_CAMERA_SHAKE_DIR, window.beatCam.radiusKick * cameraShake * 0.52);
   }
-  var cameraPunch = Math.max(camPunch * 0.55, beatCam.punch * 0.54 + beatCam.radiusKick * 0.16) * cameraShake;
-  var targetFov = clampRange(freeCamera.fov || BASE_FOV, 26, 72) - cameraPunch * 1.75;
-  camera.fov += (targetFov - camera.fov) * (targetFov < camera.fov ? 0.24 : 0.12);
-  camera.updateProjectionMatrix();
+  var cameraPunch = Math.max(camPunch * 0.55, window.beatCam.punch * 0.54 + window.beatCam.radiusKick * 0.16) * cameraShake;
+  var targetFov = window.clampRange(window.freeCamera.fov || BASE_FOV, 26, 72) - cameraPunch * 1.75;
+  window.camera.fov += (targetFov - window.camera.fov) * (targetFov < window.camera.fov ? 0.24 : 0.12);
+  window.camera.updateProjectionMatrix();
   camPunch *= 0.86;
   return true;
 }
 window.updateFreeCameraHint = function() {
-  var el = document.getElementById('free-camera-hint');
-  if (el) el.classList.toggle('show', !!(freeCamera && freeCamera.active));
+  var el = document.getElementById('free-window.camera-hint');
+  if (el) el.classList.toggle('show', !!(window.freeCamera && window.freeCamera.active));
 }
 window.resetFreeCameraToDefault = function() {
-  if (!freeCamera) return;
+  if (!window.freeCamera) return;
   if (freeCameraDeferredSaveTimer) {
     clearTimeout(freeCameraDeferredSaveTimer);
     freeCameraDeferredSaveTimer = 0;
   }
-  var fromPos = freeCamera.position ? freeCamera.position.clone() : new THREE.Vector3(0, 0, 6.6);
+  var fromPos = window.freeCamera.position ? window.freeCamera.position.clone() : new THREE.Vector3(0, 0, 6.6);
   var resetPose = getDefaultFreeCameraResetPose();
-  freeCamera.resetTween = {
+  window.freeCamera.resetTween = {
     start: performance.now(),
     duration: 620,
     from: {
       position: fromPos,
-      yaw: Number(freeCamera.yaw) || 0,
-      pitch: Number(freeCamera.pitch) || 0,
-      roll: Number(freeCamera.roll) || 0,
-      fov: Number(freeCamera.fov) || BASE_FOV
+      yaw: Number(window.freeCamera.yaw) || 0,
+      pitch: Number(window.freeCamera.pitch) || 0,
+      roll: Number(window.freeCamera.roll) || 0,
+      fov: Number(window.freeCamera.fov) || BASE_FOV
     },
     to: {
       position: resetPose.position,
@@ -251,75 +251,75 @@ window.resetFreeCameraToDefault = function() {
       fov: resetPose.fov
     }
   };
-  freeCamera.active = false;
-  freeCamera.locked = true;
-  freeCamera.keys = {};
-  if (freeCamera.velocity) freeCamera.velocity.set(0, 0, 0);
-  try { if (document.pointerLockElement === renderer.domElement) document.exitPointerLock(); } catch (e) {}
+  window.freeCamera.active = false;
+  window.freeCamera.locked = true;
+  window.freeCamera.keys = {};
+  if (window.freeCamera.velocity) window.freeCamera.velocity.set(0, 0, 0);
+  try { if (document.pointerLockElement === window.renderer.domElement) document.exitPointerLock(); } catch (e) {}
   updateFreeCameraHint();
-  showToast('自由镜头正在平滑回正');
+  window.showToast('自由镜头正在平滑回正');
 }
 window.toggleFreeCamera = function() {
-  if (!freeCamera) freeCamera = defaultFreeCameraState();
-  if (freeCamera.active) {
-    freeCamera.active = false;
-    freeCamera.locked = true;
-    freeCamera.keys = {};
-    if (freeCamera.velocity) freeCamera.velocity.set(0, 0, 0);
-    try { if (document.pointerLockElement === renderer.domElement) document.exitPointerLock(); } catch (e) {}
+  if (!window.freeCamera) freeCamera = defaultFreeCameraState();
+  if (window.freeCamera.active) {
+    window.freeCamera.active = false;
+    window.freeCamera.locked = true;
+    window.freeCamera.keys = {};
+    if (window.freeCamera.velocity) window.freeCamera.velocity.set(0, 0, 0);
+    try { if (document.pointerLockElement === window.renderer.domElement) document.exitPointerLock(); } catch (e) {}
     saveFreeCameraState();
     updateFreeCameraHint();
-    showToast('自由镜头已固定');
+    window.showToast('自由镜头已固定');
     return;
   }
   captureFreeCameraFromCurrent();
-  freeCamera.active = true;
-  freeCamera.locked = true;
-  freeCamera.resetTween = null;
-  freeCamera.keys = {};
+  window.freeCamera.active = true;
+  window.freeCamera.locked = true;
+  window.freeCamera.resetTween = null;
+  window.freeCamera.keys = {};
   freeCameraPointer.seen = false;
-  if (!freeCamera.velocity) freeCamera.velocity = new THREE.Vector3();
-  try { renderer.domElement.focus && renderer.domElement.focus({ preventScroll: true }); } catch (e) {
-    try { renderer.domElement.focus && renderer.domElement.focus(); } catch (ignore) {}
+  if (!window.freeCamera.velocity) window.freeCamera.velocity = new THREE.Vector3();
+  try { window.renderer.domElement.focus && window.renderer.domElement.focus({ preventScroll: true }); } catch (e) {
+    try { window.renderer.domElement.focus && window.renderer.domElement.focus(); } catch (ignore) {}
   }
   saveFreeCameraState();
   updateFreeCameraHint();
   try {
-    var lockResult = renderer.domElement.requestPointerLock && renderer.domElement.requestPointerLock();
+    var lockResult = window.renderer.domElement.requestPointerLock && window.renderer.domElement.requestPointerLock();
     if (lockResult && lockResult.catch) lockResult.catch(function(){ freeCameraPointer.seen = false; });
   } catch (e) {
     freeCameraPointer.seen = false;
   }
-  showToast('自由镜头: WASD 移动 · 鼠标转向 · K 回正');
+  window.showToast('自由镜头: WASD 移动 · 鼠标转向 · K 回正');
 }
 window.updateFreeCamera = function(dt) {
-  if (!freeCamera) return;
-  if (freeCamera.resetTween) {
-    var tw = freeCamera.resetTween;
+  if (!window.freeCamera) return;
+  if (window.freeCamera.resetTween) {
+    var tw = window.freeCamera.resetTween;
     var t = easeOutCubic01((performance.now() - tw.start) / Math.max(1, tw.duration || 620));
-    freeCamera.position.copy(tw.from.position).lerp(tw.to.position, t);
-    freeCamera.yaw = tw.from.yaw + shortestAngleDelta(tw.from.yaw, tw.to.yaw) * t;
-    freeCamera.pitch = tw.from.pitch + (tw.to.pitch - tw.from.pitch) * t;
-    freeCamera.roll = tw.from.roll + shortestAngleDelta(tw.from.roll, tw.to.roll) * t;
-    freeCamera.fov = tw.from.fov + (tw.to.fov - tw.from.fov) * t;
+    window.freeCamera.position.copy(tw.from.position).lerp(tw.to.position, t);
+    window.freeCamera.yaw = tw.from.yaw + shortestAngleDelta(tw.from.yaw, tw.to.yaw) * t;
+    window.freeCamera.pitch = tw.from.pitch + (tw.to.pitch - tw.from.pitch) * t;
+    window.freeCamera.roll = tw.from.roll + shortestAngleDelta(tw.from.roll, tw.to.roll) * t;
+    window.freeCamera.fov = tw.from.fov + (tw.to.fov - tw.from.fov) * t;
     if (t >= 0.999) {
-      freeCamera.position.copy(tw.to.position);
-      freeCamera.yaw = tw.to.yaw;
-      freeCamera.pitch = tw.to.pitch;
-      freeCamera.roll = tw.to.roll;
-      freeCamera.fov = tw.to.fov;
-      freeCamera.resetTween = null;
-      freeCamera.active = false;
-      freeCamera.locked = false;
+      window.freeCamera.position.copy(tw.to.position);
+      window.freeCamera.yaw = tw.to.yaw;
+      window.freeCamera.pitch = tw.to.pitch;
+      window.freeCamera.roll = tw.to.roll;
+      window.freeCamera.fov = tw.to.fov;
+      window.freeCamera.resetTween = null;
+      window.freeCamera.active = false;
+      window.freeCamera.locked = false;
       saveFreeCameraState();
       updateFreeCameraHint();
       recenterCamera();
-      showToast('自由镜头已回正');
+      window.showToast('自由镜头已回正');
     }
     return;
   }
-  if (!freeCamera.active) return;
-  var keys = freeCamera.keys || {};
+  if (!window.freeCamera.active) return;
+  var keys = window.freeCamera.keys || {};
   FREE_CAMERA_MOVE.set(0, 0, 0);
   if (keys.KeyW) FREE_CAMERA_MOVE.z -= 1;
   if (keys.KeyS) FREE_CAMERA_MOVE.z += 1;
@@ -327,21 +327,21 @@ window.updateFreeCamera = function(dt) {
   if (keys.KeyD) FREE_CAMERA_MOVE.x += 1;
   if (keys.Space) FREE_CAMERA_MOVE.y += 1;
   if (keys.ControlLeft || keys.ControlRight) FREE_CAMERA_MOVE.y -= 1;
-  if (!freeCamera.velocity) freeCamera.velocity = new THREE.Vector3();
+  if (!window.freeCamera.velocity) window.freeCamera.velocity = new THREE.Vector3();
   var targetVel = FREE_CAMERA_TARGET_VEL.set(0, 0, 0);
   if (FREE_CAMERA_MOVE.lengthSq() > 0) {
     FREE_CAMERA_MOVE.normalize();
-    FREE_CAMERA_EULER.set(freeCamera.pitch, freeCamera.yaw, 0, 'YXZ');
+    FREE_CAMERA_EULER.set(window.freeCamera.pitch, window.freeCamera.yaw, 0, 'YXZ');
     FREE_CAMERA_MOVE.applyEuler(FREE_CAMERA_EULER);
     var speed = (keys.ShiftLeft || keys.ShiftRight ? 6.2 : 2.35);
     targetVel.copy(FREE_CAMERA_MOVE).multiplyScalar(speed);
   }
   var ease = targetVel.lengthSq() > 0 ? 8.2 : 13.5;
-  freeCamera.velocity.lerp(targetVel, clampRange(ease * Math.max(0.001, dt || 1 / 60), 0, 1));
-  if (freeCamera.velocity.lengthSq() < 0.0004) freeCamera.velocity.set(0, 0, 0);
-  freeCamera.position.addScaledVector(freeCamera.velocity, Math.max(0.001, dt || 1 / 60));
+  window.freeCamera.velocity.lerp(targetVel, window.clampRange(ease * Math.max(0.001, dt || 1 / 60), 0, 1));
+  if (window.freeCamera.velocity.lengthSq() < 0.0004) window.freeCamera.velocity.set(0, 0, 0);
+  window.freeCamera.position.addScaledVector(window.freeCamera.velocity, Math.max(0.001, dt || 1 / 60));
   var rollDir = (keys.KeyQ ? 1 : 0) - (keys.KeyE ? 1 : 0);
-  if (rollDir) freeCamera.roll = clampRange(freeCamera.roll + rollDir * dt * 0.9, -Math.PI, Math.PI);
+  if (rollDir) window.freeCamera.roll = window.clampRange(window.freeCamera.roll + rollDir * dt * 0.9, -Math.PI, Math.PI);
   scheduleFreeCameraStateSave(720);
 }
 window.flushPersistentVisualState = function() {
@@ -352,21 +352,21 @@ window.addEventListener('beforeunload', flushPersistentVisualState);
 window.addEventListener('pagehide', flushPersistentVisualState);
 
 window.resetBeatCameraSync = function(t) {
-  beatCam.nextIdx = 0;
-  beatCam.events.length = 0;
-  beatCam.punch = 0;
-  beatCam.lastTriggerAt = -10;
-  beatCam.lastRealtimeAt = -10;
-  beatCam.thetaKick = 0;
-  beatCam.phiKick = 0;
-  beatCam.radiusKick = 0;
-  beatCam.rollKick = 0;
-  beatCam.prevAudioTime = isFinite(t) ? t : -1;
+  window.beatCam.nextIdx = 0;
+  window.beatCam.events.length = 0;
+  window.beatCam.punch = 0;
+  window.beatCam.lastTriggerAt = -10;
+  window.beatCam.lastRealtimeAt = -10;
+  window.beatCam.thetaKick = 0;
+  window.beatCam.phiKick = 0;
+  window.beatCam.radiusKick = 0;
+  window.beatCam.rollKick = 0;
+  window.beatCam.prevAudioTime = isFinite(t) ? t : -1;
   camPunch = 0;
-  beatCam.stats.map = 0;
-  beatCam.stats.live = 0;
-  beatCam.stats.merged = 0;
-  beatCam.stats.liveBlocked = 0;
+  window.beatCam.stats.map = 0;
+  window.beatCam.stats.live = 0;
+  window.beatCam.stats.merged = 0;
+  window.beatCam.stats.liveBlocked = 0;
   liveCamAvg = 0;
   liveCamPeak = 0.28;
   liveCamLastRaw = 0;
@@ -375,18 +375,18 @@ window.resetBeatCameraSync = function(t) {
 
 window.syncBeatCameraToTime = function(t) {
   resetBeatCameraSync(t);
-  if (!currentBeatMap) return;
+  if (!window.currentBeatMap) return;
   alignBeatCameraCursorToTime(t);
 }
 
 window.alignBeatCameraCursorToTime = function(t) {
-  if (!currentBeatMap) return;
-  var beats = currentBeatMap.cameraBeats || currentBeatMap.beats || currentBeatMap.kicks || [];
-  beatCam.nextIdx = 0;
-  while (beatCam.nextIdx < beats.length) {
-    var bt = typeof beats[beatCam.nextIdx] === 'number' ? beats[beatCam.nextIdx] : beats[beatCam.nextIdx].time;
-    if (bt >= t + beatCam.lookahead) break;
-    beatCam.nextIdx++;
+  if (!window.currentBeatMap) return;
+  var beats = window.currentBeatMap.cameraBeats || window.currentBeatMap.beats || window.currentBeatMap.kicks || [];
+  window.beatCam.nextIdx = 0;
+  while (window.beatCam.nextIdx < beats.length) {
+    var bt = typeof beats[window.beatCam.nextIdx] === 'number' ? beats[window.beatCam.nextIdx] : beats[window.beatCam.nextIdx].time;
+    if (bt >= t + window.beatCam.lookahead) break;
+    window.beatCam.nextIdx++;
   }
 }
 
@@ -396,39 +396,39 @@ window.easeBeatCamera = function(x) {
 }
 
 window.updateCinemaDynamics = function(rawEnergy, rawLow) {
-  var e = clamp01(rawEnergy || 0);
-  var l = clamp01(rawLow || 0);
-  var isDj = djMode.active;
-  var composite = clamp01(e * (isDj ? 0.52 : 0.62) + l * (isDj ? 0.48 : 0.38));
+  var e = window.clamp01(rawEnergy || 0);
+  var l = window.clamp01(rawLow || 0);
+  var isDj = window.djMode.active;
+  var composite = window.clamp01(e * (isDj ? 0.52 : 0.62) + l * (isDj ? 0.48 : 0.38));
   if (isDj) {
-    var prevEnergy = djMode.sectionEnergy || 0;
-    var prevLow = djMode.sectionLow || 0;
-    djMode.sectionEnergy += (e - djMode.sectionEnergy) * (e > djMode.sectionEnergy ? 0.030 : 0.010);
-    djMode.sectionLow += (l - djMode.sectionLow) * (l > djMode.sectionLow ? 0.036 : 0.012);
-    var change = Math.abs(e - prevEnergy) * 0.46 + Math.abs(l - prevLow) * 0.62;
-    djMode.sectionChange += (change - djMode.sectionChange) * (change > djMode.sectionChange ? 0.055 : 0.018);
-    djMode.visualPulse *= Math.pow(0.30, 1 / 60);
+    var prevEnergy = window.djMode.sectionEnergy || 0;
+    var prevLow = window.djMode.sectionLow || 0;
+    window.djMode.sectionEnergy += (e - window.djMode.sectionEnergy) * (e > window.djMode.sectionEnergy ? 0.030 : 0.010);
+    window.djMode.sectionLow += (l - window.djMode.sectionLow) * (l > window.djMode.sectionLow ? 0.036 : 0.012);
+    var change = Math.abs(e - window.prevEnergy) * 0.46 + Math.abs(l - prevLow) * 0.62;
+    window.djMode.sectionChange += (change - window.djMode.sectionChange) * (change > window.djMode.sectionChange ? 0.055 : 0.018);
+    window.djMode.visualPulse *= Math.pow(0.30, 1 / 60);
   }
   cinemaDynamics.avg += (composite - cinemaDynamics.avg) * (composite > cinemaDynamics.avg ? (isDj ? 0.018 : 0.010) : (isDj ? 0.006 : 0.004));
   cinemaDynamics.lowAvg += (l - cinemaDynamics.lowAvg) * (l > cinemaDynamics.lowAvg ? (isDj ? 0.022 : 0.012) : (isDj ? 0.007 : 0.005));
   cinemaDynamics.peak = Math.max(isDj ? 0.36 : 0.30, cinemaDynamics.peak * (isDj ? 0.9980 : 0.9988), composite);
   var floor = Math.max(0.10, cinemaDynamics.avg * 0.82);
   var span = Math.max(0.18, cinemaDynamics.peak - floor);
-  var lift = clamp01((composite - floor) / span);
+  var lift = window.clamp01((composite - floor) / span);
   lift = lift * lift * (3 - 2 * lift);
   var target = isDj
-    ? 0.50 + lift * 0.66 + clamp01((l - cinemaDynamics.lowAvg) / 0.30) * 0.18 + clamp01(djMode.sectionChange * 2.4) * 0.08
-    : 0.42 + lift * 0.56 + clamp01((l - cinemaDynamics.lowAvg) / 0.36) * 0.12;
+    ? 0.50 + lift * 0.66 + window.clamp01((l - cinemaDynamics.lowAvg) / 0.30) * 0.18 + window.clamp01(window.djMode.sectionChange * 2.4) * 0.08
+    : 0.42 + lift * 0.56 + window.clamp01((l - cinemaDynamics.lowAvg) / 0.36) * 0.12;
   if (cinemaDynamics.avg < 0.18 && l < 0.32) target *= isDj ? 0.88 : 0.78;
   if (e > 0.48 && l > 0.46) target = Math.max(target, isDj ? 1.02 : 0.92);
-  target = clampRange(target, isDj ? 0.42 : 0.34, isDj ? 1.24 : 1.08);
+  target = window.clampRange(target, isDj ? 0.42 : 0.34, isDj ? 1.24 : 1.08);
   cinemaDynamics.scale += (target - cinemaDynamics.scale) * (target > cinemaDynamics.scale ? (isDj ? 0.070 : 0.045) : (isDj ? 0.030 : 0.022));
 }
 
 window.cameraDynamicsScale = function(extra) {
-  var isDj = djMode.active;
-  var djBoost = isDj ? (1.06 + clamp01(djMode.sectionLow) * 0.16 + clamp01(rtBeat.tempoConfidence) * 0.08) : 1;
-  return clampRange((cinemaDynamics.scale || 0.82) * (cinemaTrackProfile.scale || 1) * (extra == null ? 1 : extra) * djBoost, isDj ? 0.24 : 0.18, isDj ? 1.42 : 1.18);
+  var isDj = window.djMode.active;
+  var djBoost = isDj ? (1.06 + window.clamp01(window.djMode.sectionLow) * 0.16 + window.clamp01(rtBeat.tempoConfidence) * 0.08) : 1;
+  return window.clampRange((cinemaDynamics.scale || 0.82) * (cinemaTrackProfile.scale || 1) * (extra == null ? 1 : extra) * djBoost, isDj ? 0.24 : 0.18, isDj ? 1.42 : 1.18);
 }
 
 window.cinemaTrackNameHint = function(song) {
@@ -477,25 +477,25 @@ window.updateCinemaTrackProfile = function(sample) {
   function follow(cur, next, k) { return cur + (next - cur) * k; }
   var early = p.frames < 360;
   var k = early ? 0.020 : 0.006;
-  p.energyAvg = follow(p.energyAvg, clamp01(sample.energy), k);
-  p.lowAvg = follow(p.lowAvg, clamp01(sample.low), k);
-  p.vocalAvg = follow(p.vocalAvg, clamp01(sample.vocal), k * 0.8);
-  p.melodyAvg = follow(p.melodyAvg, clamp01(sample.melody), k * 0.8);
-  var punchRaw = clamp01((sample.lowOnset || 0) * 2.4 + (sample.energyOnset || 0) * 1.5 + sample.low * 0.16);
+  p.energyAvg = follow(p.energyAvg, window.clamp01(sample.energy), k);
+  p.lowAvg = follow(p.lowAvg, window.clamp01(sample.low), k);
+  p.vocalAvg = follow(p.vocalAvg, window.clamp01(sample.vocal), k * 0.8);
+  p.melodyAvg = follow(p.melodyAvg, window.clamp01(sample.melody), k * 0.8);
+  var punchRaw = window.clamp01((sample.lowOnset || 0) * 2.4 + (sample.energyOnset || 0) * 1.5 + sample.low * 0.16);
   p.punchPeak = Math.max(0.10, p.punchPeak * 0.9975, punchRaw);
-  var lowDrive = clamp01((p.lowAvg - 0.20) / 0.42);
-  var loudDrive = clamp01((p.energyAvg - 0.18) / 0.40);
-  var punchDrive = clamp01((p.punchPeak - 0.13) / 0.36);
-  var vocalSoft = clamp01((p.vocalAvg * 0.72 + p.melodyAvg * 0.42 - p.lowAvg * 0.34 - 0.08) / 0.42);
-  var quietSoft = clamp01((0.24 - p.energyAvg) / 0.18);
-  var target = djMode.active
+  var lowDrive = window.clamp01((p.lowAvg - 0.20) / 0.42);
+  var loudDrive = window.clamp01((p.energyAvg - 0.18) / 0.40);
+  var punchDrive = window.clamp01((p.punchPeak - 0.13) / 0.36);
+  var vocalSoft = window.clamp01((p.vocalAvg * 0.72 + p.melodyAvg * 0.42 - p.lowAvg * 0.34 - 0.08) / 0.42);
+  var quietSoft = window.clamp01((0.24 - p.energyAvg) / 0.18);
+  var target = window.djMode.active
     ? 0.72 + lowDrive * 0.34 + loudDrive * 0.18 + punchDrive * 0.42 - vocalSoft * 0.12 - quietSoft * 0.06
     : 0.54 + lowDrive * 0.28 + loudDrive * 0.22 + punchDrive * 0.34 - vocalSoft * 0.34 - quietSoft * 0.18;
-  if (p.density) target += clamp01((p.density - 0.55) / 1.6) * 0.14;
+  if (p.density) target += window.clamp01((p.density - 0.55) / 1.6) * 0.14;
   target *= p.nameHint || 1;
-  target = clampRange(target, djMode.active ? 0.68 : 0.28, djMode.active ? 1.26 : 1.12);
+  target = window.clampRange(target, window.djMode.active ? 0.68 : 0.28, window.djMode.active ? 1.26 : 1.12);
   p.target = target;
-  p.scale += (target - p.scale) * (target > p.scale ? (djMode.active ? 0.045 : 0.030) : (djMode.active ? 0.030 : 0.045));
+  p.scale += (target - p.scale) * (target > p.scale ? (window.djMode.active ? 0.045 : 0.030) : (window.djMode.active ? 0.030 : 0.045));
 }
 
 window.applyCinemaProfileFromBeatMap = function(map) {
@@ -512,9 +512,9 @@ window.applyCinemaProfileFromBeatMap = function(map) {
   var avgLow = sumLow / events.length;
   var density = events.length / Math.max(20, map.duration);
   cinemaTrackProfile.density = density;
-  var target = 0.44 + clamp01((avgImpact - 0.20) / 0.55) * 0.38 + clamp01((avgLow - 0.24) / 0.48) * 0.18 + clamp01((density - 0.45) / 1.65) * 0.20 + clamp01(primary / Math.max(1, events.length)) * 0.08;
+  var target = 0.44 + window.clamp01((avgImpact - 0.20) / 0.55) * 0.38 + window.clamp01((avgLow - 0.24) / 0.48) * 0.18 + window.clamp01((density - 0.45) / 1.65) * 0.20 + window.clamp01(primary / Math.max(1, events.length)) * 0.08;
   target *= cinemaTrackProfile.nameHint || 1;
-  target = clampRange(target, 0.28, 1.12);
+  target = window.clampRange(target, 0.28, 1.12);
   cinemaTrackProfile.target = target;
   cinemaTrackProfile.scale += (target - cinemaTrackProfile.scale) * (target < cinemaTrackProfile.scale ? 0.55 : 0.22);
 }
@@ -535,7 +535,7 @@ window.resetRealtimeBeatEngine = function() {
   rtBeat.tempoConfidence = 0;
   rtBeat.beatCount = 0;
   rtBeat.primedFrames = 0;
-  rtBeat.warmupUntil = (audio && isFinite(audio.currentTime) ? audio.currentTime : 0) + (djMode.active ? 0.34 : 1.15);
+  rtBeat.warmupUntil = (window.audio && isFinite(window.audio.currentTime) ? window.audio.currentTime : 0) + (window.djMode.active ? 0.34 : 1.15);
   rtBeat.pulse = 0;
   rtBeat.score = 0;
   rtBeat.stats.hits = 0;
@@ -567,7 +567,7 @@ window.resetAudioVisualState = function() {
   cinemaDynamics.lowAvg = 0;
   cinemaDynamics.peak = 0.30;
   cinemaDynamics.scale = 0.82;
-  if (djMode.active) resetDjModeMeter();
+  if (window.djMode.active) resetDjModeMeter();
 }
 
 window.beatEventTime = function(ev) {
@@ -671,24 +671,24 @@ window.beatBandRms = function(data, sampleRate, fftSize, hz0, hz1) {
 }
 
 window.processRealtimeBeatEngine = function(dt) {
-  if (!beatAnalyser || !audioCtx || !audio || audio.paused) return null;
+  if (!window.beatAnalyser || !window.audioCtx || !window.audio || window.audio.paused) return null;
   dt = Math.max(0.001, Math.min(0.080, dt || 0.016));
-  var dj = djMode.active;
-  beatAnalyser.getByteFrequencyData(beatFrequencyData);
-  beatAnalyser.getByteTimeDomainData(beatTimeDomainData);
-  var sr = audioCtx.sampleRate || 44100;
-  var sub = beatBandRms(beatFrequencyData, sr, beatAnalyser.fftSize, 38, 74);
-  var kick = beatBandRms(beatFrequencyData, sr, beatAnalyser.fftSize, 52, 165);
-  var body = beatBandRms(beatFrequencyData, sr, beatAnalyser.fftSize, 165, 420);
-  var vocal = beatBandRms(beatFrequencyData, sr, beatAnalyser.fftSize, 420, 2600);
-  var snap = beatBandRms(beatFrequencyData, sr, beatAnalyser.fftSize, 1800, 9200);
+  var dj = window.djMode.active;
+  window.beatAnalyser.getByteFrequencyData(window.beatFrequencyData);
+  window.beatAnalyser.getByteTimeDomainData(window.beatTimeDomainData);
+  var sr = window.audioCtx.sampleRate || 44100;
+  var sub = beatBandRms(window.beatFrequencyData, sr, window.beatAnalyser.fftSize, 38, 74);
+  var kick = beatBandRms(window.beatFrequencyData, sr, window.beatAnalyser.fftSize, 52, 165);
+  var body = beatBandRms(window.beatFrequencyData, sr, window.beatAnalyser.fftSize, 165, 420);
+  var vocal = beatBandRms(window.beatFrequencyData, sr, window.beatAnalyser.fftSize, 420, 2600);
+  var snap = beatBandRms(window.beatFrequencyData, sr, window.beatAnalyser.fftSize, 1800, 9200);
   var low = Math.min(1, kick * 0.86 + sub * 0.42);
   var rms = 0;
-  for (var i = 0; i < beatTimeDomainData.length; i++) {
-    var tv = (beatTimeDomainData[i] - 128) / 128;
+  for (var i = 0; i < window.beatTimeDomainData.length; i++) {
+    var tv = (window.beatTimeDomainData[i] - 128) / 128;
     rms += tv * tv;
   }
-  rms = Math.sqrt(rms / beatTimeDomainData.length);
+  rms = Math.sqrt(rms / window.beatTimeDomainData.length);
 
   function follow(cur, next, upTau, downTau) {
     var tau = next > cur ? upTau : downTau;
@@ -734,13 +734,13 @@ window.processRealtimeBeatEngine = function(dt) {
   rtBeat.onsetAvg = follow(rtBeat.onsetAvg, onset, avgTau, avgTau);
   rtBeat.onsetPeak = Math.max(rtBeat.onsetPeak * Math.pow(dj ? 0.986 : 0.988, dt * 60), onset, 0.032);
   var floor = rtBeat.onsetAvg * (dj ? 0.88 : 0.84);
-  var score = clamp01((onset - floor) / Math.max(dj ? 0.013 : 0.014, rtBeat.onsetPeak - floor));
-  var subNorm = clamp01(sub / Math.max(0.045, rtBeat.subPeak * (dj ? 0.72 : 0.70)));
-  var lowNorm = clamp01(low / Math.max(0.060, rtBeat.lowPeak * (dj ? 0.74 : 0.72)));
-  var bodyNorm = clamp01(body / Math.max(0.045, rtBeat.bodyPeak * (dj ? 0.74 : 0.72)));
-  var vocalNorm = clamp01(vocal / Math.max(0.045, rtBeat.vocalPeak * 0.72));
-  var snapNorm = clamp01(snap / Math.max(0.040, rtBeat.snapPeak * (dj ? 0.78 : 0.72)));
-  var nowT = audio.currentTime || 0;
+  var score = window.clamp01((onset - floor) / Math.max(dj ? 0.013 : 0.014, rtBeat.onsetPeak - floor));
+  var subNorm = window.clamp01(sub / Math.max(0.045, rtBeat.subPeak * (dj ? 0.72 : 0.70)));
+  var lowNorm = window.clamp01(low / Math.max(0.060, rtBeat.lowPeak * (dj ? 0.74 : 0.72)));
+  var bodyNorm = window.clamp01(body / Math.max(0.045, rtBeat.bodyPeak * (dj ? 0.74 : 0.72)));
+  var vocalNorm = window.clamp01(vocal / Math.max(0.045, rtBeat.vocalPeak * 0.72));
+  var snapNorm = window.clamp01(snap / Math.max(0.040, rtBeat.snapPeak * (dj ? 0.78 : 0.72)));
+  var nowT = window.audio.currentTime || 0;
   rtBeat.primedFrames++;
   var warmingUp = nowT < rtBeat.warmupUntil || rtBeat.primedFrames < (dj ? 8 : 18);
   var gapFromLast = nowT - rtBeat.lastHitAt;
@@ -779,12 +779,12 @@ window.processRealtimeBeatEngine = function(dt) {
         rhythmAccept = rhythmAccept || (gapRaw > expectedGap * 1.24 && strongTransient && score > 0.56 && lowDominance > 0.92);
       }
     } else {
-      rhythmAccept = gapRaw >= (dj ? 0.340 : beatCam.realtimeMinInterval) && strongTransient && score > (dj ? 0.56 : 0.58) && lowPresence > (dj ? 0.50 : 0.44);
+      rhythmAccept = gapRaw >= (dj ? 0.340 : window.beatCam.realtimeMinInterval) && strongTransient && score > (dj ? 0.56 : 0.58) && lowPresence > (dj ? 0.50 : 0.44);
     }
   }
   var hit = candidateHit && rhythmAccept;
   if (!hit && (candidateHit || score > 0.42 || vocalNorm > 0.62 || bodyNorm > 0.54)) rtBeat.stats.rejected++;
-  var minGap = hasTempoLock ? Math.max(dj ? 0.315 : 0.400, Math.min(dj ? 0.500 : 0.540, expectedGap * (dj ? 0.64 : 0.72))) : (dj ? 0.340 : beatCam.realtimeMinInterval);
+  var minGap = hasTempoLock ? Math.max(dj ? 0.315 : 0.400, Math.min(dj ? 0.500 : 0.540, expectedGap * (dj ? 0.64 : 0.72))) : (dj ? 0.340 : window.beatCam.realtimeMinInterval);
   if (hit && gapRaw < minGap) {
     rtBeat.stats.blocked++;
     hit = false;
@@ -802,8 +802,8 @@ window.processRealtimeBeatEngine = function(dt) {
 
   if (!hit) {
     if (dj) {
-      djMode.tempoGap = rtBeat.tempoGap;
-      djMode.tempoConfidence = rtBeat.tempoConfidence;
+      window.djMode.tempoGap = rtBeat.tempoGap;
+      window.djMode.tempoConfidence = rtBeat.tempoConfidence;
     }
     return { hit: false, score: score, low: lowNorm, body: bodyNorm, vocal: vocalNorm, snap: snapNorm, tempoConfidence: rtBeat.tempoConfidence };
   }
@@ -827,8 +827,8 @@ window.processRealtimeBeatEngine = function(dt) {
   if (tempoAssist) rtBeat.stats.assisted++;
   if (strongTransient || kickTransient) rtBeat.stats.strong++;
   var strength = dj
-    ? clamp01(0.18 + score * 0.38 + lowPresence * 0.34 + Math.min(1.35, lowDominance) * 0.08 + rmsFlux * 0.72)
-    : clamp01(0.24 + score * 0.36 + lowPresence * 0.34 + Math.min(1.25, lowDominance) * 0.07 + rmsFlux * 0.95);
+    ? window.clamp01(0.18 + score * 0.38 + lowPresence * 0.34 + Math.min(1.35, lowDominance) * 0.08 + rmsFlux * 0.72)
+    : window.clamp01(0.24 + score * 0.36 + lowPresence * 0.34 + Math.min(1.25, lowDominance) * 0.07 + rmsFlux * 0.95);
   if (tempoAssist) strength = Math.max(strength, (dj ? 0.46 : 0.48) + rtBeat.tempoConfidence * (dj ? 0.10 : 0.10) + lowPresence * (dj ? 0.14 : 0.14));
   var comboSlot = (rtBeat.beatCount - 1) % 4;
   var combo = comboSlot === 0 ? 'downbeat' : (comboSlot === 1 ? 'push' : (comboSlot === 2 ? 'drop' : 'rebound'));
@@ -837,22 +837,22 @@ window.processRealtimeBeatEngine = function(dt) {
   if (dj && gapShift > 0.14 && strongTransient && lowPresence > 0.52) combo = 'downbeat';
   rtBeat.pulse = Math.max(rtBeat.pulse, strength);
   if (dj) {
-    djMode.tempoGap = rtBeat.tempoGap;
-    djMode.tempoConfidence = rtBeat.tempoConfidence;
-    djMode.sectionChange = Math.max(djMode.sectionChange, Math.min(1, gapShift * 1.4));
-    djMode.visualPulse = Math.max(djMode.visualPulse, strength);
-    djMode.lastBeatAt = nowT;
+    window.djMode.tempoGap = rtBeat.tempoGap;
+    window.djMode.tempoConfidence = rtBeat.tempoConfidence;
+    window.djMode.sectionChange = Math.max(window.djMode.sectionChange, Math.min(1, gapShift * 1.4));
+    window.djMode.visualPulse = Math.max(window.djMode.visualPulse, strength);
+    window.djMode.lastBeatAt = nowT;
   }
   return {
     hit: true,
     time: dj ? Math.max(0, nowT - 0.026) : nowT,
     strength: strength,
-    confidence: dj ? clamp01(score * 0.58 + lowPresence * 0.30 + rtBeat.tempoConfidence * 0.12) : clamp01(score * 0.62 + lowPresence * 0.26 + rtBeat.tempoConfidence * 0.12),
+    confidence: dj ? window.clamp01(score * 0.58 + lowPresence * 0.30 + rtBeat.tempoConfidence * 0.12) : window.clamp01(score * 0.62 + lowPresence * 0.26 + rtBeat.tempoConfidence * 0.12),
     low: Math.max(0.05, lowPresence),
     body: Math.max(0.02, bodyNorm * (dj ? 0.50 : 0.62)),
     snap: Math.max(0.02, snapNorm * (dj ? 0.86 : 1)),
-    mass: dj ? clamp01(lowPresence * 0.84 + bodyNorm * 0.10) : clamp01(lowPresence * 0.76 + bodyNorm * 0.20),
-    sharpness: dj ? clamp01(snapNorm * 0.58 + bodyNorm * 0.10) : clamp01(snapNorm * 0.70 + bodyNorm * 0.12),
+    mass: dj ? window.clamp01(lowPresence * 0.84 + bodyNorm * 0.10) : window.clamp01(lowPresence * 0.76 + bodyNorm * 0.20),
+    sharpness: dj ? window.clamp01(snapNorm * 0.58 + bodyNorm * 0.10) : window.clamp01(snapNorm * 0.70 + bodyNorm * 0.12),
     tempoAssist: tempoAssist,
     tempoGap: rtBeat.tempoGap,
     combo: combo,
@@ -864,19 +864,19 @@ window.processRealtimeBeatEngine = function(dt) {
 
 window.mergeRealtimeBeatCamera = function(time, amp, tone) {
   var best = null;
-  var bestDist = beatCam.realtimeMergeWindow;
-  for (var i = 0; i < beatCam.events.length; i++) {
-    var dist = Math.abs((beatCam.events[i].hit || 0) - time);
+  var bestDist = window.beatCam.realtimeMergeWindow;
+  for (var i = 0; i < window.beatCam.events.length; i++) {
+    var dist = Math.abs((window.beatCam.events[i].hit || 0) - time);
     if (dist < bestDist) {
-      best = beatCam.events[i];
+      best = window.beatCam.events[i];
       bestDist = dist;
     }
   }
   if (!best) return false;
-  var nowT = audio ? audio.currentTime : uniforms.uTime.value;
+  var nowT = window.audio ? window.audio.currentTime : window.uniforms.uTime.value;
   best.hit = time;
-  best.start = nowT - (best.attack || beatCam.attack) * 0.42;
-  var mergeMaxAmp = ((tone && tone.dj) || djMode.active) ? 0.62 : 0.62;
+  best.start = nowT - (best.attack || window.beatCam.attack) * 0.42;
+  var mergeMaxAmp = ((tone && tone.dj) || window.djMode.active) ? 0.62 : 0.62;
   best.amp = Math.min(mergeMaxAmp, Math.max(best.amp || 0, amp));
   if (tone) {
     best.zoomAmp = Math.max(best.zoomAmp || 0, tone.zoomAmp);
@@ -890,12 +890,12 @@ window.mergeRealtimeBeatCamera = function(time, amp, tone) {
     best.dj = !!tone.dj || !!best.dj;
   }
   best.source = 'hybrid';
-  beatCam.stats.merged++;
+  window.beatCam.stats.merged++;
   return true;
 }
 
 window.scheduleBeatCamera = function(beat, source) {
-  if (!fx.cinema) return;
+  if (!window.fx.cinema) return;
   var time = typeof beat === 'number' ? beat : beat.time;
   if (!isFinite(time)) return;
   var strength = typeof beat === 'number' ? 0.72 : Math.max(0, Math.min(1, beat.strength || 0.72));
@@ -903,10 +903,10 @@ window.scheduleBeatCamera = function(beat, source) {
   var isPrimary = typeof beat === 'number' ? true : beat.primary !== false;
   var visualImpact = typeof beat === 'number' ? strength : Math.max(0, Math.min(1, beat.impact == null ? strength : beat.impact));
   var isDjMapSource = source === 'djmap';
-  var isMapSource = source === 'map' || !source;
+  var isMapSource = source === 'map' || !window.source;
   var isLiveSource = source === 'live' || source === 'fallback';
   var livePreview = !!(isLiveSource && beat && beat.preview);
-  var dj = djMode.active && (isLiveSource || isDjMapSource || (beat && beat.dj));
+  var dj = window.djMode.active && (isLiveSource || isDjMapSource || (beat && beat.dj));
   if (isMapSource && !isPrimary) return;
   if (isMapSource && visualImpact < 0.18 && strength < 0.56) return;
   if (isMapSource && confidence < 0.30 && strength < 0.68) return;
@@ -925,7 +925,7 @@ window.scheduleBeatCamera = function(beat, source) {
   snapTone /= toneSum;
   var sharpness = typeof beat === 'number' ? snapTone : Math.max(0, Math.min(1, beat.sharpness == null ? snapTone : beat.sharpness));
   var mass = typeof beat === 'number' ? lowTone : Math.max(0, Math.min(1, beat.mass == null ? (lowTone * 0.72 + bodyTone * 0.36 + strength * 0.20) : beat.mass));
-  var nowT = audio ? audio.currentTime : uniforms.uTime.value;
+  var nowT = window.audio ? window.audio.currentTime : window.uniforms.uTime.value;
   var mode = 'deep';
   if (dj) {
     if (rawSnapTone > 0.58 && rawSnapTone > rawLowTone * 0.86 && rawSnapTone > rawBodyTone * 1.08) mode = 'snap';
@@ -936,9 +936,9 @@ window.scheduleBeatCamera = function(beat, source) {
   }
   var amp;
   if (dj) {
-    var lowDrive = clamp01((rawLowTone - 0.42) / 0.54);
-    var bodyDrive = clamp01((rawBodyTone - 0.24) / 0.58);
-    var snapDrive = clamp01((rawSnapTone - 0.30) / 0.60);
+    var lowDrive = window.clamp01((rawLowTone - 0.42) / 0.54);
+    var bodyDrive = window.clamp01((rawBodyTone - 0.24) / 0.58);
+    var snapDrive = window.clamp01((rawSnapTone - 0.30) / 0.60);
     if (mode === 'deep') amp = 0.16 + strength * 0.20 + lowDrive * 0.25 + confidence * 0.05;
     else if (mode === 'body') amp = 0.12 + strength * 0.15 + bodyDrive * 0.18 + lowDrive * 0.06;
     else amp = 0.08 + strength * 0.11 + snapDrive * 0.13;
@@ -951,16 +951,16 @@ window.scheduleBeatCamera = function(beat, source) {
   if (source === 'live') amp *= dj ? 0.62 : (livePreview ? 0.78 : 0.92);
   if (mode === 'deep' && !dj) amp = Math.min(0.62, amp * 1.12);
   var dynScale = cameraDynamicsScale(0.92 + visualImpact * 0.12 + mass * 0.08);
-  amp *= dj ? clampRange(dynScale, 0.72, 1.16) : dynScale;
+  amp *= dj ? window.clampRange(dynScale, 0.72, 1.16) : dynScale;
   var attack = dj
     ? (mode === 'snap' ? 0.010 : (mode === 'body' ? 0.015 : 0.017))
-    : Math.max(0.014, Math.min(0.038, beatCam.attack * (1.18 - sharpness * 0.55)));
+    : Math.max(0.014, Math.min(0.038, window.beatCam.attack * (1.18 - sharpness * 0.55)));
   var hold = dj
     ? (mode === 'deep' ? 0.038 + lowTone * 0.014 : (mode === 'body' ? 0.026 : 0.014))
-    : Math.max(0.014, Math.min(0.052, beatCam.hold * (0.62 + lowTone * 0.55 + bodyTone * 0.25)));
+    : Math.max(0.014, Math.min(0.052, window.beatCam.hold * (0.62 + lowTone * 0.55 + bodyTone * 0.25)));
   var release = dj
     ? (mode === 'deep' ? 0.178 + mass * 0.040 : (mode === 'body' ? 0.140 : 0.104))
-    : Math.max(0.110, Math.min(0.255, beatCam.release * (0.76 + mass * 0.56 + bodyTone * 0.18 - sharpness * 0.18)));
+    : Math.max(0.110, Math.min(0.255, window.beatCam.release * (0.76 + mass * 0.56 + bodyTone * 0.18 - sharpness * 0.18)));
   var idx = typeof beat === 'number' ? Math.floor(time * 2.7) : (beat.index || Math.floor(time * 2.7));
   var combo = typeof beat === 'number' ? null : beat.combo;
   if (!combo) {
@@ -975,9 +975,9 @@ window.scheduleBeatCamera = function(beat, source) {
   phiAmp *= 0.82 + dynScale * 0.20;
   rollAmp *= 0.78 + dynScale * 0.24;
   if (dj) {
-    var lowDrive2 = clamp01((rawLowTone - 0.42) / 0.54);
-    var bodyDrive2 = clamp01((rawBodyTone - 0.24) / 0.58);
-    var snapDrive2 = clamp01((rawSnapTone - 0.30) / 0.60);
+    var lowDrive2 = window.clamp01((rawLowTone - 0.42) / 0.54);
+    var bodyDrive2 = window.clamp01((rawBodyTone - 0.24) / 0.58);
+    var snapDrive2 = window.clamp01((rawSnapTone - 0.30) / 0.60);
     if (mode === 'deep') {
       zoomAmp = 0.115 + lowDrive2 * 0.170 + strength * 0.036;
       phiAmp = 0.0016 + bodyDrive2 * 0.0022;
@@ -1016,12 +1016,12 @@ window.scheduleBeatCamera = function(beat, source) {
       rollAmp *= 1.58;
     }
     if (isDjMapSource) {
-      var offlineContrast = Math.pow(clamp01((visualImpact - 0.16) / 0.72), 1.06);
+      var offlineContrast = Math.pow(window.clamp01((visualImpact - 0.16) / 0.72), 1.06);
       var offlineDrive = 0.72 + offlineContrast * 0.94 + Math.pow(strength, 1.22) * 0.14;
-      var sectionLowGate = clamp01(((djMode.sectionLow || 0) - 0.030) / 0.32);
-      var sectionEnergyGate = clamp01(((djMode.sectionEnergy || 0) - 0.045) / 0.40);
+      var sectionLowGate = window.clamp01(((window.djMode.sectionLow || 0) - 0.030) / 0.32);
+      var sectionEnergyGate = window.clamp01(((window.djMode.sectionEnergy || 0) - 0.045) / 0.40);
       var liveSectionGate = Math.max(sectionLowGate * 0.58 + sectionEnergyGate * 0.34, visualImpact * 0.82);
-      var weakSectionScale = 0.54 + Math.pow(clamp01(liveSectionGate), 0.78) * 0.46;
+      var weakSectionScale = 0.54 + Math.pow(window.clamp01(liveSectionGate), 0.78) * 0.46;
       var comboDrive = combo === 'downbeat'
         ? 0.96 + offlineContrast * 0.38
         : (combo === 'drop'
@@ -1058,7 +1058,7 @@ window.scheduleBeatCamera = function(beat, source) {
         rollAmp *= 1.02 + offlineContrast * 0.34;
         zoomAmp *= 0.72 + offlineContrast * 0.20;
       }
-      var peakTame = Math.pow(clamp01((visualImpact - 0.76) / 0.24), 1.35);
+      var peakTame = Math.pow(window.clamp01((visualImpact - 0.76) / 0.24), 1.35);
       if (peakTame > 0) {
         var downbeatTame = combo === 'downbeat' ? 1.0 : 0.58;
         amp *= 1 - peakTame * (0.070 + downbeatTame * 0.050);
@@ -1098,7 +1098,7 @@ window.scheduleBeatCamera = function(beat, source) {
     rollAmp *= 1.35;
   }
   if (livePreview && !dj) {
-    var previewTone = clamp01(visualImpact * 0.54 + rawLowTone * 0.22 + confidence * 0.18 + strength * 0.06);
+    var previewTone = window.clamp01(visualImpact * 0.54 + rawLowTone * 0.22 + confidence * 0.18 + strength * 0.06);
     amp *= 0.72 + previewTone * 0.16;
     zoomAmp *= 0.62 + previewTone * 0.18;
     phiAmp *= 0.70 + previewTone * 0.12;
@@ -1110,44 +1110,44 @@ window.scheduleBeatCamera = function(beat, source) {
   if (dj && isDjMapSource && zoomAmp > 0.30) zoomAmp = 0.30 + (zoomAmp - 0.30) * 0.52;
   amp = Math.max(dj ? (isDjMapSource ? 0.018 : 0.040) : 0.08, Math.min(dj ? (isDjMapSource ? 0.92 : 0.34) : 0.68, amp));
   if (isLiveSource) {
-    var liveMinInterval = dj ? Math.max(0.315, Math.min(0.500, rtBeat.tempoGap ? rtBeat.tempoGap * 0.62 : 0.360)) : beatCam.realtimeMinInterval;
-    if (time - beatCam.lastRealtimeAt < liveMinInterval && strength < (dj ? 0.74 : 0.78)) {
-      beatCam.stats.liveBlocked++;
+    var liveMinInterval = dj ? Math.max(0.315, Math.min(0.500, rtBeat.tempoGap ? rtBeat.tempoGap * 0.62 : 0.360)) : window.beatCam.realtimeMinInterval;
+    if (time - window.beatCam.lastRealtimeAt < liveMinInterval && strength < (dj ? 0.74 : 0.78)) {
+      window.beatCam.stats.liveBlocked++;
       return;
     }
-    beatCam.lastRealtimeAt = time;
+    window.beatCam.lastRealtimeAt = time;
     if (mergeRealtimeBeatCamera(time, amp, {
       zoomAmp: zoomAmp, thetaAmp: thetaAmp, phiAmp: phiAmp, rollAmp: rollAmp, mode: mode,
       low: lowTone, body: bodyTone, snap: snapTone, dj: dj
     })) {
-      beatCam.lastTriggerAt = Math.max(beatCam.lastTriggerAt, time);
+      window.beatCam.lastTriggerAt = Math.max(window.beatCam.lastTriggerAt, time);
       return;
     }
-    for (var ei = beatCam.events.length - 1; ei >= 0; ei--) {
-      var pending = beatCam.events[ei];
-      if (pending.source === 'map' && pending.hit > time && pending.hit - time < beatCam.realtimeMergeWindow) {
-        beatCam.events.splice(ei, 1);
+    for (var ei = window.beatCam.events.length - 1; ei >= 0; ei--) {
+      var pending = window.beatCam.events[ei];
+      if (pending.source === 'map' && pending.hit > time && pending.hit - time < window.beatCam.realtimeMergeWindow) {
+        window.beatCam.events.splice(ei, 1);
       }
     }
   }
   if (isDjMapSource) {
-    var djGap = time - beatCam.lastTriggerAt;
+    var djGap = time - window.beatCam.lastTriggerAt;
     var djMinGap = Math.max(0.255, Math.min(0.470, (beat && beat.step ? beat.step * 0.52 : 0.320)));
     if (djGap < djMinGap && strength < 0.86) return;
-    beatCam.lastTriggerAt = time;
-    beatCam.stats.map++;
+    window.beatCam.lastTriggerAt = time;
+    window.beatCam.stats.map++;
   } else if (!isLiveSource) {
-    var gap = time - beatCam.lastTriggerAt;
-    var minGap = beatCam.minInterval;
+    var gap = time - window.beatCam.lastTriggerAt;
+    var minGap = window.beatCam.minInterval;
     if (isMapSource && isPrimary) minGap *= 0.82;
     if (gap < minGap && strength < 0.88) return;
-    beatCam.lastTriggerAt = time;
-    beatCam.stats.map++;
+    window.beatCam.lastTriggerAt = time;
+    window.beatCam.stats.map++;
   } else {
-    beatCam.lastTriggerAt = Math.max(beatCam.lastTriggerAt, time);
-    beatCam.stats.live++;
+    window.beatCam.lastTriggerAt = Math.max(window.beatCam.lastTriggerAt, time);
+    window.beatCam.stats.live++;
   }
-  beatCam.events.push({
+  window.beatCam.events.push({
     start: isLiveSource ? nowT - attack * 0.42 : nowT + (time - nowT) - attack,
     hit: time,
     amp: amp,
@@ -1165,30 +1165,30 @@ window.scheduleBeatCamera = function(beat, source) {
     body: bodyTone,
     snap: snapTone,
     mass: mass,
-    source: source || 'map',
+    source: window.source || 'map',
     dj: dj
   });
-  var maxEvents = djMode.active ? 12 : 8;
-  if (beatCam.events.length > maxEvents) beatCam.events.splice(0, beatCam.events.length - maxEvents);
+  var maxEvents = window.djMode.active ? 12 : 8;
+  if (window.beatCam.events.length > maxEvents) window.beatCam.events.splice(0, window.beatCam.events.length - maxEvents);
 }
 
 window.updateBeatCamera = function(dt) {
-  var t = audio ? audio.currentTime : uniforms.uTime.value;
-  if (!audio || audio.paused) {
-    beatCam.punch *= Math.pow(0.08, dt);
-    beatCam.thetaKick *= Math.pow(0.05, dt);
-    beatCam.phiKick *= Math.pow(0.05, dt);
-    beatCam.radiusKick *= Math.pow(0.05, dt);
-    beatCam.rollKick *= Math.pow(0.05, dt);
-    beatCam.events.length = 0;
-    beatCam.prevAudioTime = t;
+  var t = window.audio ? window.audio.currentTime : window.uniforms.uTime.value;
+  if (!window.audio || window.audio.paused) {
+    window.beatCam.punch *= Math.pow(0.08, dt);
+    window.beatCam.thetaKick *= Math.pow(0.05, dt);
+    window.beatCam.phiKick *= Math.pow(0.05, dt);
+    window.beatCam.radiusKick *= Math.pow(0.05, dt);
+    window.beatCam.rollKick *= Math.pow(0.05, dt);
+    window.beatCam.events.length = 0;
+    window.beatCam.prevAudioTime = t;
     return;
   }
-  if (beatCam.prevAudioTime >= 0 && Math.abs(t - beatCam.prevAudioTime) > 0.55) {
-    if (djMode.active) syncPodcastDjMapCursor(t, false);
+  if (window.beatCam.prevAudioTime >= 0 && Math.abs(t - window.beatCam.prevAudioTime) > 0.55) {
+    if (window.djMode.active) syncPodcastDjMapCursor(t, false);
     else syncBeatCameraToTime(t);
   }
-  beatCam.prevAudioTime = t;
+  window.beatCam.prevAudioTime = t;
 
   var punch = 0;
   var thetaKick = 0;
@@ -1198,11 +1198,11 @@ window.updateBeatCamera = function(dt) {
   var leadEvent = null;
   var leadPunch = 0;
   var leadVal = 0;
-  for (var i = beatCam.events.length - 1; i >= 0; i--) {
-    var ev = beatCam.events[i];
-    var attack = ev.attack || beatCam.attack;
-    var hold = ev.hold || beatCam.hold;
-    var release = ev.release || beatCam.release;
+  for (var i = window.beatCam.events.length - 1; i >= 0; i--) {
+    var ev = window.beatCam.events[i];
+    var attack = ev.attack || window.beatCam.attack;
+    var hold = ev.hold || window.beatCam.hold;
+    var release = ev.release || window.beatCam.release;
     var local = t - ev.start;
     var val = 0;
     if (local < 0) {
@@ -1215,7 +1215,7 @@ window.updateBeatCamera = function(dt) {
       var r = (local - attack - hold) / release;
       val = 1 - easeBeatCamera(r);
     } else {
-      beatCam.events.splice(i, 1);
+      window.beatCam.events.splice(i, 1);
       continue;
     }
     var evPunch = val * ev.amp;
@@ -1261,12 +1261,12 @@ window.updateBeatCamera = function(dt) {
       punch = Math.min(0.90, punch * (1.04 + (leadEvent.mass || 0) * 0.10));
     }
   }
-  var djEase = djMode.active;
-  beatCam.punch += (punch - beatCam.punch) * (punch > beatCam.punch ? (djEase ? 0.82 : 0.72) : (djEase ? 0.44 : 0.38));
-  beatCam.thetaKick += (thetaKick - beatCam.thetaKick) * (Math.abs(thetaKick) > Math.abs(beatCam.thetaKick) ? (djEase ? 0.80 : 0.70) : (djEase ? 0.42 : 0.36));
-  beatCam.phiKick += (phiKick - beatCam.phiKick) * (Math.abs(phiKick) > Math.abs(beatCam.phiKick) ? (djEase ? 0.80 : 0.70) : (djEase ? 0.42 : 0.36));
-  beatCam.radiusKick += (radiusKick - beatCam.radiusKick) * (radiusKick > beatCam.radiusKick ? (djEase ? 0.82 : 0.72) : (djEase ? 0.40 : 0.34));
-  beatCam.rollKick += (rollKick - beatCam.rollKick) * (Math.abs(rollKick) > Math.abs(beatCam.rollKick) ? (djEase ? 0.82 : 0.72) : (djEase ? 0.44 : 0.38));
+  var djEase = window.djMode.active;
+  window.beatCam.punch += (punch - window.beatCam.punch) * (punch > window.beatCam.punch ? (djEase ? 0.82 : 0.72) : (djEase ? 0.44 : 0.38));
+  window.beatCam.thetaKick += (thetaKick - window.beatCam.thetaKick) * (Math.abs(thetaKick) > Math.abs(window.beatCam.thetaKick) ? (djEase ? 0.80 : 0.70) : (djEase ? 0.42 : 0.36));
+  window.beatCam.phiKick += (phiKick - window.beatCam.phiKick) * (Math.abs(phiKick) > Math.abs(window.beatCam.phiKick) ? (djEase ? 0.80 : 0.70) : (djEase ? 0.42 : 0.36));
+  window.beatCam.radiusKick += (radiusKick - window.beatCam.radiusKick) * (radiusKick > window.beatCam.radiusKick ? (djEase ? 0.82 : 0.72) : (djEase ? 0.40 : 0.34));
+  window.beatCam.rollKick += (rollKick - window.beatCam.rollKick) * (Math.abs(rollKick) > Math.abs(window.beatCam.rollKick) ? (djEase ? 0.82 : 0.72) : (djEase ? 0.44 : 0.38));
 }
 
 window.unlockCenteredView = function() {
@@ -1274,10 +1274,10 @@ window.unlockCenteredView = function() {
 }
 
 window.clearCenteredViewOffsets = function() {
-  pointerTarget.x = 0;
-  pointerTarget.y = 0;
-  pointerParallax.x = 0;
-  pointerParallax.y = 0;
+  window.pointerTarget.x = 0;
+  window.pointerTarget.y = 0;
+  window.pointerParallax.x = 0;
+  window.pointerParallax.y = 0;
   mouseWorld.set(-999, -999, 0);
   mouseActive = false;
   headParallax.x = 0;
@@ -1295,10 +1295,10 @@ window.clearCenteredViewOffsets = function() {
   if (typeof pinchState !== 'undefined') pinchState.active = false;
   if (typeof particlePointerSpin !== 'undefined') particlePointerSpin.active = false;
   if (typeof resetParticleRotationTarget === 'function') resetParticleRotationTarget(false);
-  if (typeof uniforms !== 'undefined' && uniforms.uHandActive) {
-    uniforms.uHandActive.value = 0;
-    uniforms.uHandXY.value.set(-999, -999);
-    if (uniforms.uGestureGrip) uniforms.uGestureGrip.value = 0;
+  if (typeof window.uniforms !== 'undefined' && window.uniforms.uHandActive) {
+    window.uniforms.uHandActive.value = 0;
+    window.uniforms.uHandXY.value.set(-999, -999);
+    if (window.uniforms.uGestureGrip) window.uniforms.uGestureGrip.value = 0;
   }
 }
 
@@ -1340,9 +1340,9 @@ window.updateCamera = function() {
   // 丝滑变速: 线性 lerp 自然给出 "快→慢" 缓出曲线
   var focusEase = fa ? 0.16 : 0.10;
   var radiusEase = fa ? 0.12 : 0.07;
-  if (beatCam.punch > 0.01) {
-    focusEase = Math.max(focusEase, 0.12 + beatCam.punch * 0.12);
-    radiusEase = Math.max(radiusEase, 0.09 + beatCam.punch * 0.12);
+  if (window.beatCam.punch > 0.01) {
+    focusEase = Math.max(focusEase, 0.12 + window.beatCam.punch * 0.12);
+    radiusEase = Math.max(radiusEase, 0.09 + window.beatCam.punch * 0.12);
   }
   orbit.theta  += (targetTheta  - orbit.theta)  * focusEase;
   orbit.phi    += (targetPhi    - orbit.phi)    * focusEase;
@@ -1353,53 +1353,53 @@ window.updateCamera = function() {
 
   var cy = Math.cos(orbit.phi), sy = Math.sin(orbit.phi);
   var ct = Math.cos(orbit.theta), st = Math.sin(orbit.theta);
-  camera.position.set(
+  window.camera.position.set(
     orbit.lookAt.x + orbit.radius * cy * st,
     orbit.lookAt.y + orbit.radius * sy,
     orbit.lookAt.z + orbit.radius * cy * ct
   );
-  camera.lookAt(orbit.lookAt);
-  var cameraShake = clampRange(Number((typeof fx !== 'undefined' && fx) ? fx.cinemaShake : 0.5) || 0, 0, 1.8);
-  camera.rotation.z += beatCam.rollKick * cameraShake;
+  window.camera.lookAt(orbit.lookAt);
+  var cameraShake = window.clampRange(Number((typeof window.fx !== 'undefined' && window.fx) ? window.fx.cinemaShake : 0.5) || 0, 0, 1.8);
+  window.camera.rotation.z += window.beatCam.rollKick * cameraShake;
 
-  var cameraPunch = Math.max(camPunch * 0.55, beatCam.punch * 0.54 + beatCam.radiusKick * 0.16) * cameraShake;
-  var targetFOV = BASE_FOV - cameraPunch * (djMode.active ? 2.62 : 2.35);
-  var fovEase = targetFOV < camera.fov ? 0.24 : 0.12;
-  camera.fov += (targetFOV - camera.fov) * fovEase;
-  camera.updateProjectionMatrix();
+  var cameraPunch = Math.max(camPunch * 0.55, window.beatCam.punch * 0.54 + window.beatCam.radiusKick * 0.16) * cameraShake;
+  var targetFOV = BASE_FOV - cameraPunch * (window.djMode.active ? 2.62 : 2.35);
+  var fovEase = targetFOV < window.camera.fov ? 0.24 : 0.12;
+  window.camera.fov += (targetFOV - window.camera.fov) * fovEase;
+  window.camera.updateProjectionMatrix();
   camPunch *= 0.86;
 }
 
 // 焦点跟拍 (hover 0.5s 后镜头移到目标)
 window.focusHover = { wantType: null, pendingTimer: null, exitTimer: null };
 window.shouldUseWallpaperSafeShelfCamera = function() {
-  return !!(fx && Number(fx.preset) === 5);
+  return !!(window.fx && Number(window.fx.preset) === 5);
 }
 window.shouldUseSkullSafeShelfCamera = function() {
-  return !!(fx && Number(fx.preset) === SKULL_PRESET_INDEX);
+  return !!(window.fx && Number(window.fx.preset) === SKULL_PRESET_INDEX);
 }
 window.shouldUseWallpaperLyricCameraLock = function() {
-  return !!(fx && Number(fx.preset) === 5 && fx.lyricCameraLock);
+  return !!(window.fx && Number(window.fx.preset) === 5 && window.fx.lyricCameraLock);
 }
 window.requestStageLyricCameraSnap = function(frames) {
-  if (typeof stageLyrics === 'undefined' || !stageLyrics) return;
-  stageLyrics.snapCameraLockFrames = Math.max(stageLyrics.snapCameraLockFrames || 0, frames || 8);
+  if (typeof stageLyrics === 'undefined' || !window.stageLyrics) return;
+  window.stageLyrics.snapCameraLockFrames = Math.max(window.stageLyrics.snapCameraLockFrames || 0, frames || 8);
 }
 window.shouldDimWallpaperForShelf = function() {
   if (!shouldUseWallpaperSafeShelfCamera()) return false;
-  if (!shelfManager || !shelfManager.getMode || shelfManager.getMode() !== 'side') return false;
-  if (shelfPinnedOpen) return true;
-  return !!(shelfManager.hasOpenContent && shelfManager.hasOpenContent());
+  if (!window.shelfManager || !window.shelfManager.getMode || window.shelfManager.getMode() !== 'side') return false;
+  if (window.shelfPinnedOpen) return true;
+  return !!(window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent());
 }
 window.shouldOffsetLyricsForShelfDetail = function() {
-  if (!shelfManager || !shelfManager.getMode || shelfManager.getMode() !== 'side') return false;
-  return !!(shelfManager.hasOpenContent && shelfManager.hasOpenContent());
+  if (!window.shelfManager || !window.shelfManager.getMode || window.shelfManager.getMode() !== 'side') return false;
+  return !!(window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent());
 }
 window.shouldAvoidStageLyricsForShelf = function() {
-  if (!shelfManager || !shelfManager.getMode || shelfManager.getMode() !== 'side') return false;
-  if (shelfAlwaysVisible()) return true;
-  if (shelfPinnedOpen) return true;
-  if (shelfManager.hasOpenContent && shelfManager.hasOpenContent()) return true;
+  if (!window.shelfManager || !window.shelfManager.getMode || window.shelfManager.getMode() !== 'side') return false;
+  if (window.shelfAlwaysVisible()) return true;
+  if (window.shelfPinnedOpen) return true;
+  if (window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent()) return true;
   return !!(shelfVisibility > 0.24 || (shelfHoverCue && shelfHoverCue.value > 0.28));
 }
 window.activateFocusZone = function(type) {
@@ -1491,7 +1491,7 @@ var CAM_PUNCH_BEAT_THRESHOLD = 0.55;   // 必须够强才触发
 window.updateCinema = function(dt) {
   cinemaT += dt;
   updateBeatCamera(dt);
-  if (!fx.cinema) {
+  if (!window.fx.cinema) {
     orbit.cineTheta  *= 0.95;
     orbit.cinePhi    *= 0.95;
     orbit.cineRadius *= 0.95;
@@ -1499,13 +1499,13 @@ window.updateCinema = function(dt) {
   }
   var damp = orbit.rotating ? 0.25 : 1.0;
   // v8: 振幅减半, 周期更长 (更优雅)
-  var dj = djMode.active;
-  var shake = clampRange(Number(fx.cinemaShake) || 0, 0, 1.8);
+  var dj = window.djMode.active;
+  var shake = window.clampRange(Number(window.fx.cinemaShake) || 0, 0, 1.8);
   var beatDamp = (orbit.focus.active ? (dj ? 0.66 : 0.55) : (dj ? 1.12 : 1.0)) * shake;
   var idleDamp = damp * (dj ? 0.72 : 1.0) * shake;
-  orbit.cineTheta  = Math.sin(cinemaT * 0.08) * 0.012 * idleDamp + beatCam.thetaKick * beatDamp;
-  orbit.cinePhi    = Math.sin(cinemaT * 0.06 + 1.0) * 0.010 * idleDamp + beatCam.phiKick * beatDamp;
-  orbit.cineRadius = Math.sin(cinemaT * 0.04 + 2.0) * 0.080 * idleDamp - beatCam.radiusKick * beatDamp * (dj ? 1.22 : 1.18);
+  orbit.cineTheta  = Math.sin(cinemaT * 0.08) * 0.012 * idleDamp + window.beatCam.thetaKick * beatDamp;
+  orbit.cinePhi    = Math.sin(cinemaT * 0.06 + 1.0) * 0.010 * idleDamp + window.beatCam.phiKick * beatDamp;
+  orbit.cineRadius = Math.sin(cinemaT * 0.04 + 2.0) * 0.080 * idleDamp - window.beatCam.radiusKick * beatDamp * (dj ? 1.22 : 1.18);
 }
 updateCamera();
 
@@ -1515,7 +1515,7 @@ window.recenterCamera = function() {
   clearCenteredViewOffsets();
   if (typeof skullWheelZoomTarget !== 'undefined') {
     skullWheelZoomTarget = 0;
-    if (!(fx && fx.preset === SKULL_PRESET_INDEX)) skullWheelZoom = 0;
+    if (!(window.fx && window.fx.preset === SKULL_PRESET_INDEX)) skullWheelZoom = 0;
   }
   // 同时解除任何镜头跟拍
   if (focusHover) {
@@ -1524,24 +1524,24 @@ window.recenterCamera = function() {
     if (focusHover.exitTimer) { clearTimeout(focusHover.exitTimer); focusHover.exitTimer = null; }
   }
   orbit.focus.active = false;
-  if (fx && fx.preset === SKULL_PRESET_INDEX) {
+  if (window.fx && window.fx.preset === SKULL_PRESET_INDEX) {
     resetSkullPresetView(false, { smooth:true, keepLyricLock:true });
   } else {
     resetSkullPresetView(true);
   }
-  if (!(fx && fx.preset === SKULL_PRESET_INDEX) && ((fx && fx.lyricCameraLock) || shouldUseWallpaperLyricCameraLock())) requestStageLyricCameraSnap(14);
-  showToast('视角回正');
+  if (!(window.fx && window.fx.preset === SKULL_PRESET_INDEX) && ((window.fx && window.fx.lyricCameraLock) || shouldUseWallpaperLyricCameraLock())) requestStageLyricCameraSnap(14);
+  window.showToast('视角回正');
 }
 
 window.hasActivePlaybackControls = function() {
-  return !!(playing || (audio && !audio.paused) || (Array.isArray(playQueue) && currentIdx >= 0 && playQueue[currentIdx]));
+  return !!(window.playing || (window.audio && !window.audio.paused) || (Array.isArray(window.playQueue) && window.currentIdx >= 0 && window.playQueue[window.currentIdx]));
 }
 
 window.setControlsHidden = function(hidden) {
   var bar = document.getElementById('bottom-bar');
   if (!bar) return;
-  if (hidden && (controlsHovering || miniQueueOpen)) hidden = false;
-  bar.classList.toggle('soft-hidden', !!hidden && controlsAutoHide && bar.classList.contains('visible'));
+  if (hidden && (window.controlsHovering || window.miniQueueOpen)) hidden = false;
+  bar.classList.toggle('soft-hidden', !!hidden && window.controlsAutoHide && bar.classList.contains('visible'));
   bar.style.pointerEvents = '';
   updateControlsChromeState();
 }
@@ -1549,20 +1549,20 @@ window.setControlsHidden = function(hidden) {
 window.isBottomControlsSuppressedForShelf = function() {
   var shelfContentOpen = false;
   try {
-    shelfContentOpen = !!(typeof shelfManager !== 'undefined' && shelfManager && shelfManager.hasOpenContent && shelfManager.hasOpenContent());
+    shelfContentOpen = !!(typeof window.shelfManager !== 'undefined' && window.shelfManager && window.shelfManager.hasOpenContent && window.shelfManager.hasOpenContent());
   } catch (e) {}
-  return !!(shelfPinnedOpen || shelfContentOpen || (controlsShelfSuppressUntil && performance.now() < controlsShelfSuppressUntil));
+  return !!(window.shelfPinnedOpen || shelfContentOpen || (controlsShelfSuppressUntil && performance.now() < controlsShelfSuppressUntil));
 }
 
 window.suppressBottomControlsForShelf = function(duration) {
   controlsShelfSuppressUntil = performance.now() + (duration == null ? 900 : duration);
   controlsHovering = false;
-  if (controlsHideTimer) {
-    clearTimeout(controlsHideTimer);
+  if (window.controlsHideTimer) {
+    clearTimeout(window.controlsHideTimer);
     controlsHideTimer = null;
   }
   document.body.classList.remove('controls-handle-awake');
-  if (miniQueueOpen) closeMiniQueue();
+  if (window.miniQueueOpen) closeMiniQueue();
   var bar = document.getElementById('bottom-bar');
   if (bar) {
     bar.classList.remove('visible', 'soft-hidden');
@@ -1572,11 +1572,11 @@ window.suppressBottomControlsForShelf = function(duration) {
 }
 
 window.scheduleControlsHide = function(delay) {
-  if (controlsHideTimer) clearTimeout(controlsHideTimer);
-  if (!controlsAutoHide) return;
+  if (window.controlsHideTimer) clearTimeout(window.controlsHideTimer);
+  if (!window.controlsAutoHide) return;
   controlsHideTimer = setTimeout(function(){
     controlsHideTimer = null;
-    if (!controlsHovering) setControlsHidden(true);
+    if (!window.controlsHovering) setControlsHidden(true);
   }, delay == null ? 480 : delay);
 }
 
@@ -1587,7 +1587,7 @@ window.revealBottomControls = function(delay) {
   if (bar) bar.classList.add('visible');
   wakeBottomHandle();
   setControlsHidden(false);
-  if (controlsAutoHide) scheduleControlsHide(delay == null ? 520 : delay);
+  if (window.controlsAutoHide) window.scheduleControlsHide(delay == null ? 520 : delay);
 }
 
 window.updateControlsChromeState = function() {
@@ -1614,7 +1614,7 @@ window.forcePlaybackControlsInteractive = function() {
     var bar = document.getElementById('bottom-bar');
     if (bar) {
       bar.style.pointerEvents = '';
-      if (!controlsAutoHide) {
+      if (!window.controlsAutoHide) {
         bar.classList.add('visible');
         bar.classList.remove('soft-hidden');
       }
@@ -1626,7 +1626,7 @@ window.forcePlaybackControlsInteractive = function() {
       btn.classList.remove('busy');
     });
     updateControlsChromeState();
-    if (bar && bar.classList.contains('visible') && controlsAutoHide && !controlsHovering) scheduleControlsHide(220);
+    if (bar && bar.classList.contains('visible') && window.controlsAutoHide && !window.controlsHovering) window.scheduleControlsHide(220);
   } catch (e) {
     console.warn('[PlaybackControlsRestore]', e);
   }
@@ -1644,16 +1644,16 @@ window.updateControlsAutoHideFromPointer = function(x, y) {
   if (isBottomControlsSuppressedForShelf()) return;
   var bar = document.getElementById('bottom-bar');
   if (!bar || !bar.classList.contains('visible')) return;
-  if (!controlsAutoHide) { setControlsHidden(false); return; }
-  if (diyPlayerMode) {
-    var fxPanel = document.getElementById('fx-panel');
-    var fxFab = document.getElementById('fx-fab');
+  if (!window.controlsAutoHide) { setControlsHidden(false); return; }
+  if (window.diyPlayerMode) {
+    var fxPanel = document.getElementById('window.fx-panel');
+    var fxFab = document.getElementById('window.fx-fab');
     var fr = fxPanel ? fxPanel.getBoundingClientRect() : null;
     var br = fxFab ? fxFab.getBoundingClientRect() : null;
     var overFxPanel = fxPanel && (fxPanel.classList.contains('peek') || fxPanel.classList.contains('show')) && fr && x >= fr.left - 18 && x <= fr.right + 18 && y >= fr.top - 18 && y <= fr.bottom + 18;
     var overFxFab = br && x >= br.left - 18 && x <= br.right + 18 && y >= br.top - 18 && y <= br.bottom + 18;
     if (overFxPanel || overFxFab) {
-      scheduleControlsHide(80);
+      window.scheduleControlsHide(80);
       return;
     }
   }
@@ -1665,32 +1665,32 @@ window.updateControlsAutoHideFromPointer = function(x, y) {
   var overBar = x >= rect.left - 18 && x <= rect.right + 18 && y >= rect.top - 18 && y <= rect.bottom + 14;
   var mini = document.getElementById('mini-queue-popover');
   var miniRect = mini ? mini.getBoundingClientRect() : null;
-  var overMini = miniQueueOpen && miniRect && x >= miniRect.left - 16 && x <= miniRect.right + 16 && y >= miniRect.top - 16 && y <= miniRect.bottom + 16;
+  var overMini = window.miniQueueOpen && miniRect && x >= miniRect.left - 16 && x <= miniRect.right + 16 && y >= miniRect.top - 16 && y <= miniRect.bottom + 16;
   if (overHandle) wakeBottomHandle();
   if (overBar || overMini || overHandle) revealBottomControls(overHandle ? 900 : 520);
-  else scheduleControlsHide(70);
+  else window.scheduleControlsHide(70);
 }
 
 window.toggleControlsAutoHide = function() {
-  controlsAutoHide = !controlsAutoHide;
-  saveBooleanPreference(CONTROLS_AUTO_HIDE_STORE_KEY, controlsAutoHide);
+  controlsAutoHide = !window.controlsAutoHide;
+  saveBooleanPreference(window.CONTROLS_AUTO_HIDE_STORE_KEY, window.controlsAutoHide);
   var btn = document.getElementById('controls-hide-btn');
-  if (btn) btn.classList.toggle('active', controlsAutoHide);
+  if (btn) btn.classList.toggle('active', window.controlsAutoHide);
   setControlsHidden(false);
-  if (controlsAutoHide) {
-    scheduleControlsHide(520);
-    showToast('控制条自动隐藏已开启');
+  if (window.controlsAutoHide) {
+    window.scheduleControlsHide(520);
+    window.showToast('控制条自动隐藏已开启');
   } else {
-    if (controlsHideTimer) { clearTimeout(controlsHideTimer); controlsHideTimer = null; }
-    showToast('控制条保持显示');
+    if (window.controlsHideTimer) { clearTimeout(window.controlsHideTimer); controlsHideTimer = null; }
+    window.showToast('控制条保持显示');
   }
 }
 
 window.applyControlsAutoHidePreference = function() {
   var btn = document.getElementById('controls-hide-btn');
-  if (btn) btn.classList.toggle('active', !!controlsAutoHide);
-  if (!controlsAutoHide && controlsHideTimer) {
-    clearTimeout(controlsHideTimer);
+  if (btn) btn.classList.toggle('active', !!window.controlsAutoHide);
+  if (!window.controlsAutoHide && window.controlsHideTimer) {
+    clearTimeout(window.controlsHideTimer);
     controlsHideTimer = null;
   }
   setControlsHidden(false);
@@ -1704,11 +1704,11 @@ window.applyControlsAutoHidePreference = function() {
     controlsHovering = true;
     wakeBottomHandle();
     setControlsHidden(false);
-    if (controlsHideTimer) { clearTimeout(controlsHideTimer); controlsHideTimer = null; }
+    if (window.controlsHideTimer) { clearTimeout(window.controlsHideTimer); controlsHideTimer = null; }
   }
   function leaveControls(){
     controlsHovering = false;
-    scheduleControlsHide(70);
+    window.scheduleControlsHide(70);
     wakeBottomHandle(900);
   }
   bar.addEventListener('mouseenter', enterControls);
@@ -1792,7 +1792,7 @@ window.particlePointerLocalHit = new THREE.Vector3();
 window.particlePointerQuat = new THREE.Quaternion();
 window.particlePointerFrame = { dirty:false, ndcX:0, ndcY:0 };
 window.CLICK_THRESHOLD = 6;
-window.UI_HIT_SELECTOR = '#search-area,#top-right,#fullscreen-diy-zone,#fx-panel,#fx-fab,#fx-fab-hide-btn,#playlist-panel,#bottom-bar,#thumb-wrap,#empty-home,#visual-guide,#trial-banner,#source-fallback-notice,.modal-mask,#toast,#ai-depth-chip,#beat-chip,#drop-overlay';
+window.UI_HIT_SELECTOR = '#search-area,#top-right,#fullscreen-diy-zone,#window.fx-panel,#window.fx-fab,#window.fx-fab-hide-btn,#window.playlist-panel,#bottom-bar,#thumb-wrap,#empty-home,#visual-guide,#trial-banner,#window.source-fallback-notice,.modal-mask,#toast,#ai-depth-chip,#beat-chip,#drop-overlay';
 
 function isPointerOverUi(e) {
   if (!e) return false;
@@ -1802,7 +1802,7 @@ function isPointerOverUi(e) {
 
 function particleLocalPointFromNdc(ndcX, ndcY, out) {
   particlePointerNdc.set(ndcX, ndcY);
-  particlePointerRay.setFromCamera(particlePointerNdc, camera);
+  particlePointerRay.setFromCamera(particlePointerNdc, window.camera);
   if (particles) {
     particles.updateMatrixWorld(true);
     particles.getWorldPosition(particlePointerPlanePoint);
@@ -1828,16 +1828,16 @@ function particleLocalPointFromNdc(ndcX, ndcY, out) {
 function queueParticlePointerFrame(clientX, clientY) {
   var mx = (clientX / innerWidth) * 2 - 1;
   var my = -(clientY / innerHeight) * 2 + 1;
-  pointerTarget.x = mx; pointerTarget.y = my;
-  particlePointerFrame.ndcX = mx;
-  particlePointerFrame.ndcY = my;
-  particlePointerFrame.dirty = true;
+  window.pointerTarget.x = mx; window.pointerTarget.y = my;
+  window.particlePointerFrame.ndcX = mx;
+  window.particlePointerFrame.ndcY = my;
+  window.particlePointerFrame.dirty = true;
 }
 
 function updateParticlePointerFrame() {
-  if (!particlePointerFrame.dirty) return;
-  particlePointerFrame.dirty = false;
-  if (particleLocalPointFromNdc(particlePointerFrame.ndcX, particlePointerFrame.ndcY, particlePointerLocalHit)) {
+  if (!window.particlePointerFrame.dirty) return;
+  window.particlePointerFrame.dirty = false;
+  if (particleLocalPointFromNdc(window.particlePointerFrame.ndcX, window.particlePointerFrame.ndcY, particlePointerLocalHit)) {
     mouseWorld.x = particlePointerLocalHit.x;
     mouseWorld.y = particlePointerLocalHit.y;
     mouseActive = true;
@@ -1850,7 +1850,7 @@ function updateParticlePointerFrame() {
 function beginParticlePointerDrag(e) {
   if (e.button === 2) return;
   if (isPointerOverUi(e)) return;
-  markRenderInteraction('canvas-drag', 1200);
+  window.markRenderInteraction('canvas-drag', 1200);
   idleGuidePointerDown(e);
   orbit.rotating = true; orbit.last.x = e.clientX; orbit.last.y = e.clientY;
   particlePointerSpin.active = true;
@@ -1861,19 +1861,19 @@ function beginParticlePointerDrag(e) {
   mouseDownAt.x = e.clientX; mouseDownAt.y = e.clientY;
   mouseDownAt.t = performance.now(); mouseDownAt.hadDrag = false;
 }
-renderer.domElement.addEventListener('mousedown', function(e){
+window.renderer.domElement.addEventListener('mousedown', function(e){
   beginParticlePointerDrag(e);
 });
 window.addEventListener('mousedown', function(e){
-  if (!(fx && fx.preset === SKULL_PRESET_INDEX)) return;
-  if (orbit.rotating || e.target === renderer.domElement) return;
+  if (!(window.fx && window.fx.preset === SKULL_PRESET_INDEX)) return;
+  if (orbit.rotating || e.target === window.renderer.domElement) return;
   beginParticlePointerDrag(e);
 }, true);
 window.addEventListener('mousemove', function(e){
   updateControlsAutoHideFromPointer(e.clientX, e.clientY);
-  if (typeof idleGuidePointerMove === 'function') idleGuidePointerMove(e);
-  if (freeCamera && freeCamera.active) {
-    markRenderInteraction('free-camera', 900);
+  if (typeof idleGuidePointerMove === 'function') window.idleGuidePointerMove(e);
+  if (window.freeCamera && window.freeCamera.active) {
+    window.markRenderInteraction('free-window.camera', 900);
     var mdx = e.movementX || 0;
     var mdy = e.movementY || 0;
     if ((!mdx && !mdy) && freeCameraPointer.seen) {
@@ -1883,13 +1883,13 @@ window.addEventListener('mousemove', function(e){
     freeCameraPointer.x = e.clientX;
     freeCameraPointer.y = e.clientY;
     freeCameraPointer.seen = true;
-    freeCamera.yaw -= mdx * 0.00125;
-    freeCamera.pitch = clampRange(freeCamera.pitch - mdy * 0.00125, -Math.PI * 0.49, Math.PI * 0.49);
+    window.freeCamera.yaw -= mdx * 0.00125;
+    window.freeCamera.pitch = window.clampRange(window.freeCamera.pitch - mdy * 0.00125, -Math.PI * 0.49, Math.PI * 0.49);
     return;
   }
   if (isPointerOverUi(e) && !orbit.rotating) { mouseActive = false; return; }
   if (orbit.rotating) {
-    markRenderInteraction('canvas-drag', 900);
+    window.markRenderInteraction('canvas-drag', 900);
     unlockCenteredView();
     var dx = e.clientX - orbit.last.x, dy = e.clientY - orbit.last.y;
     if (particlePointerSpin.active) {
@@ -1913,23 +1913,23 @@ window.addEventListener('mouseup', function(){
   particlePointerSpin.active = false;
   idleGuidePointerUp();
 });
-renderer.domElement.addEventListener('mouseleave', function(){
-  particlePointerFrame.dirty = false;
+window.renderer.domElement.addEventListener('mouseleave', function(){
+  window.particlePointerFrame.dirty = false;
   mouseWorld.set(-999, -999, 0);
   mouseActive = false;
   idleGuidePointerLeave();
 });
-renderer.domElement.addEventListener('wheel', function(e){
+window.renderer.domElement.addEventListener('wheel', function(e){
   if (isPointerOverUi(e)) return;
   e.preventDefault();
-  markRenderInteraction('canvas-wheel', 900);
-  if (freeCamera && freeCamera.active) {
-    freeCamera.fov = clampRange((freeCamera.fov || BASE_FOV) + e.deltaY * 0.018, 26, 72);
+  window.markRenderInteraction('canvas-wheel', 900);
+  if (window.freeCamera && window.freeCamera.active) {
+    window.freeCamera.fov = window.clampRange((window.freeCamera.fov || BASE_FOV) + e.deltaY * 0.018, 26, 72);
     saveFreeCameraState();
     return;
   }
-  if (fx && fx.preset === SKULL_PRESET_INDEX && typeof skullWheelZoomTarget !== 'undefined') {
-    skullWheelZoomTarget = clampRange(skullWheelZoomTarget + e.deltaY * 0.00155, -0.95, 1.28);
+  if (window.fx && window.fx.preset === SKULL_PRESET_INDEX && typeof skullWheelZoomTarget !== 'undefined') {
+    skullWheelZoomTarget = window.clampRange(skullWheelZoomTarget + e.deltaY * 0.00155, -0.95, 1.28);
     return;
   }
   idleGuideWheel(e);
@@ -1939,19 +1939,19 @@ renderer.domElement.addEventListener('wheel', function(e){
 }, { passive:false });
 
 // 双击屏幕回正 — 不命中卡片时
-renderer.domElement.addEventListener('dblclick', function(e){
+window.renderer.domElement.addEventListener('dblclick', function(e){
   if (isPointerOverUi(e)) return;
-  if (freeCamera && freeCamera.locked) {
+  if (window.freeCamera && window.freeCamera.locked) {
     resetFreeCameraToDefault();
     resetSkullPresetView(false, { smooth:true, keepLyricLock:true });
     return;
   }
-  if (shelfManager && shelfManager.getMode() !== 'off') {
+  if (window.shelfManager && window.shelfManager.getMode() !== 'off') {
     var mx = (e.clientX / innerWidth) * 2 - 1;
     var my = -(e.clientY / innerHeight) * 2 + 1;
     var rc = new THREE.Raycaster();
-    rc.setFromCamera(new THREE.Vector2(mx, my), camera);
-    if (shelfManager.raycastCards(rc)) return;
+    rc.setFromCamera(new THREE.Vector2(mx, my), window.camera);
+    if (window.shelfManager.raycastCards(rc)) return;
   }
   recenterCamera();
 });

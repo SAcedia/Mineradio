@@ -1,0 +1,795 @@
+{
+  "project": {
+    "name": "Mineradio",
+    "description": "沉浸式音乐播放器，融合天气电台、歌词舞台、粒子视觉和 3D 歌单架。",
+    "languages": [
+      "JavaScript",
+      "HTML",
+      "CSS",
+      "Markdown",
+      "JSON"
+    ],
+    "frameworks": [
+      "Electron",
+      "Three.js",
+      "GSAP",
+      "NeteaseCloudMusicApi",
+      "Vite"
+    ],
+    "entryPoint": "desktop/main.js"
+  },
+  "files": [
+    {
+      "path": ".env",
+      "category": "config",
+      "language": "env",
+      "sizeLines": 1
+    },
+    {
+      "path": ".gitattributes",
+      "category": "code",
+      "language": "unknown",
+      "sizeLines": 10
+    },
+    {
+      "path": ".gitignore",
+      "category": "code",
+      "language": "unknown",
+      "sizeLines": 50
+    },
+    {
+      "path": "AGENTS.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 109
+    },
+    {
+      "path": "AI_HANDOFF.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 181
+    },
+    {
+      "path": "build/after-pack.js",
+      "category": "script",
+      "language": "javascript",
+      "sizeLines": 67
+    },
+    {
+      "path": "build/icon.ico",
+      "category": "data",
+      "language": "binary",
+      "sizeLines": 0
+    },
+    {
+      "path": "build/icon.png",
+      "category": "data",
+      "language": "binary",
+      "sizeLines": 0
+    },
+    {
+      "path": "build/installer.nsh",
+      "category": "script",
+      "language": "nsis",
+      "sizeLines": 1024
+    },
+    {
+      "path": "build/installerHeader.bmp",
+      "category": "data",
+      "language": "binary",
+      "sizeLines": 0
+    },
+    {
+      "path": "build/installerSidebar.bmp",
+      "category": "data",
+      "language": "binary",
+      "sizeLines": 0
+    },
+    {
+      "path": "CHANGELOG.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 151
+    },
+    {
+      "path": "desktop/main.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 1473
+    },
+    {
+      "path": "desktop/overlay-preload.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 20
+    },
+    {
+      "path": "desktop/preload.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 53
+    },
+    {
+      "path": "dj-analyzer.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 865
+    },
+    {
+      "path": "docs/3D_PLAYLIST_SHELF_MEMORY.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 90
+    },
+    {
+      "path": "docs/assets/readme/cinema-beat-smoke.png",
+      "category": "data",
+      "language": "binary",
+      "sizeLines": 0
+    },
+    {
+      "path": "docs/assets/support/mineradio-author-support-poster.png",
+      "category": "data",
+      "language": "binary",
+      "sizeLines": 0
+    },
+    {
+      "path": "docs/DESKTOP_LYRICS_VISUAL.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 29
+    },
+    {
+      "path": "docs/GLASS_SVG_TEXTURE.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 116
+    },
+    {
+      "path": "docs/HANDOFF_NEXT_CHAT.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 86
+    },
+    {
+      "path": "docs/INSTALLER_STYLE.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 56
+    },
+    {
+      "path": "docs/PROJECT_MEMORY.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 383
+    },
+    {
+      "path": "docs/QQ_MUSIC_INTERFACE_NOTES.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 43
+    },
+    {
+      "path": "docs/RELEASE_NOTES_v1.1.0.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 40
+    },
+    {
+      "path": "docs/SECURITY_REBUILD_2026-06-24.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 45
+    },
+    {
+      "path": "docs/superpowers/plans/2026-06-30-project-refactoring.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 570
+    },
+    {
+      "path": "docs/superpowers/plans/2026-07-01-esm-vite-migration.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 299
+    },
+    {
+      "path": "docs/superpowers/plans/2026-07-02-architecture-v1.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 158
+    },
+    {
+      "path": "docs/superpowers/specs/2026-06-30-cancelled-tasks-revival-design.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 42
+    },
+    {
+      "path": "docs/superpowers/specs/2026-06-30-project-refactoring-design.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 311
+    },
+    {
+      "path": "docs/superpowers/specs/2026-06-30-review-findings.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 33
+    },
+    {
+      "path": "docs/SUPPORT.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 8
+    },
+    {
+      "path": "LICENSE",
+      "category": "code",
+      "language": "unknown",
+      "sizeLines": 562
+    },
+    {
+      "path": "NOTICE.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 27
+    },
+    {
+      "path": "package-lock.json",
+      "category": "infra",
+      "language": "json",
+      "sizeLines": 6230
+    },
+    {
+      "path": "package.json",
+      "category": "config",
+      "language": "json",
+      "sizeLines": 104
+    },
+    {
+      "path": "PRIVACY.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 35
+    },
+    {
+      "path": "public/assets/skull-decimation-points.bin",
+      "category": "data",
+      "language": "binary",
+      "sizeLines": 0
+    },
+    {
+      "path": "public/css/base.css",
+      "category": "code",
+      "language": "css",
+      "sizeLines": 1844
+    },
+    {
+      "path": "public/css/components.css",
+      "category": "code",
+      "language": "css",
+      "sizeLines": 10567
+    },
+    {
+      "path": "public/css/desktop-shell.css",
+      "category": "code",
+      "language": "css",
+      "sizeLines": 50
+    },
+    {
+      "path": "public/css/tokens.css",
+      "category": "code",
+      "language": "css",
+      "sizeLines": 5
+    },
+    {
+      "path": "public/default-user-fx-archive.json",
+      "category": "config",
+      "language": "json",
+      "sizeLines": 88
+    },
+    {
+      "path": "public/desktop-lyrics.html",
+      "category": "markup",
+      "language": "html",
+      "sizeLines": 1212
+    },
+    {
+      "path": "public/index.html",
+      "category": "markup",
+      "language": "html",
+      "sizeLines": 1160
+    },
+    {
+      "path": "public/js/audio/audio-engine.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 318
+    },
+    {
+      "path": "public/js/audio/beat-analysis.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 2877
+    },
+    {
+      "path": "public/js/audio/lyrics.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 386
+    },
+    {
+      "path": "public/js/audio/playback.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 1035
+    },
+    {
+      "path": "public/js/core/api-helper.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 818
+    },
+    {
+      "path": "public/js/core/collect.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 147
+    },
+    {
+      "path": "public/js/core/cover.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 138
+    },
+    {
+      "path": "public/js/core/discover.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 915
+    },
+    {
+      "path": "public/js/core/like.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 155
+    },
+    {
+      "path": "public/js/core/prefs.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 26
+    },
+    {
+      "path": "public/js/core/state.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 865
+    },
+    {
+      "path": "public/js/init.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 313
+    },
+    {
+      "path": "public/js/main.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 29
+    },
+    {
+      "path": "public/js/platforms/netease.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 82
+    },
+    {
+      "path": "public/js/platforms/qq.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 43
+    },
+    {
+      "path": "public/js/platforms/youtube.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 44
+    },
+    {
+      "path": "public/js/shared.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 325
+    },
+    {
+      "path": "public/js/splash.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 1053
+    },
+    {
+      "path": "public/js/three/particles.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 2119
+    },
+    {
+      "path": "public/js/three/shelf.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 2368
+    },
+    {
+      "path": "public/js/three/three-lyrics.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 2156
+    },
+    {
+      "path": "public/js/three/three-scene.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 1959
+    },
+    {
+      "path": "public/js/ui/console.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 2399
+    },
+    {
+      "path": "public/js/ui/controls.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 879
+    },
+    {
+      "path": "public/js/ui/login.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 742
+    },
+    {
+      "path": "public/js/ui/misc.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 1583
+    },
+    {
+      "path": "public/js/ui/playlists.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 1495
+    },
+    {
+      "path": "public/js/ui/youtube.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 60
+    },
+    {
+      "path": "public/vendor/gsap.min.js",
+      "category": "script",
+      "language": "javascript",
+      "sizeLines": 12
+    },
+    {
+      "path": "public/vendor/music-tempo.LICENCE",
+      "category": "docs",
+      "language": "text",
+      "sizeLines": 22
+    },
+    {
+      "path": "public/vendor/music-tempo.min.js",
+      "category": "script",
+      "language": "javascript",
+      "sizeLines": 1
+    },
+    {
+      "path": "public/vendor/three.r128.min.js",
+      "category": "script",
+      "language": "javascript",
+      "sizeLines": 7
+    },
+    {
+      "path": "public/wallpaper.html",
+      "category": "markup",
+      "language": "html",
+      "sizeLines": 143
+    },
+    {
+      "path": "README.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 109
+    },
+    {
+      "path": "RELEASE.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 65
+    },
+    {
+      "path": "scripts/codemod-final.js",
+      "category": "script",
+      "language": "javascript",
+      "sizeLines": 82
+    },
+    {
+      "path": "scripts/codemod-references.js",
+      "category": "script",
+      "language": "javascript",
+      "sizeLines": 195
+    },
+    {
+      "path": "scripts/codemod-safe.js",
+      "category": "script",
+      "language": "javascript",
+      "sizeLines": 91
+    },
+    {
+      "path": "scripts/codemod-to-window.js",
+      "category": "script",
+      "language": "javascript",
+      "sizeLines": 94
+    },
+    {
+      "path": "scripts/codemod-v3.js",
+      "category": "script",
+      "language": "javascript",
+      "sizeLines": 127
+    },
+    {
+      "path": "SECURITY.md",
+      "category": "docs",
+      "language": "markdown",
+      "sizeLines": 30
+    },
+    {
+      "path": "server/lib/auth.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 112
+    },
+    {
+      "path": "server/lib/cookie.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 89
+    },
+    {
+      "path": "server/lib/network.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 82
+    },
+    {
+      "path": "server/lib/send-json.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 48
+    },
+    {
+      "path": "server/lib/song.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 102
+    },
+    {
+      "path": "server/lib/string.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 38
+    },
+    {
+      "path": "server/routes/app.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 157
+    },
+    {
+      "path": "server/routes/audio.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 95
+    },
+    {
+      "path": "server/routes/beatmap.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 154
+    },
+    {
+      "path": "server/routes/login.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 137
+    },
+    {
+      "path": "server/routes/lyric.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 385
+    },
+    {
+      "path": "server/routes/playlist.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 129
+    },
+    {
+      "path": "server/routes/podcast.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 324
+    },
+    {
+      "path": "server/routes/qq.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 986
+    },
+    {
+      "path": "server/routes/search.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 49
+    },
+    {
+      "path": "server/routes/song.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 184
+    },
+    {
+      "path": "server/routes/update.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 1174
+    },
+    {
+      "path": "server/routes/user.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 94
+    },
+    {
+      "path": "server/routes/weather.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 249
+    },
+    {
+      "path": "server/routes/youtube.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 189
+    },
+    {
+      "path": "server.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 252
+    },
+    {
+      "path": "vite-plugin-window-globals.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 215
+    },
+    {
+      "path": "vite.config.js",
+      "category": "code",
+      "language": "javascript",
+      "sizeLines": 46
+    }
+  ],
+  "importMap": {
+    "public/js/main.js": [
+      "public/js/shared.js",
+      "public/js/core/prefs.js",
+      "public/js/three/three-lyrics.js",
+      "public/js/core/state.js",
+      "public/js/core/cover.js",
+      "public/js/core/discover.js",
+      "public/js/core/like.js",
+      "public/js/core/collect.js",
+      "public/js/core/api-helper.js",
+      "public/js/platforms/netease.js",
+      "public/js/platforms/qq.js",
+      "public/js/platforms/youtube.js",
+      "public/js/three/three-scene.js",
+      "public/js/three/particles.js",
+      "public/js/audio/beat-analysis.js",
+      "public/js/three/shelf.js",
+      "public/js/audio/audio-engine.js",
+      "public/js/audio/playback.js",
+      "public/js/audio/lyrics.js",
+      "public/js/ui/youtube.js",
+      "public/js/ui/controls.js",
+      "public/js/ui/console.js",
+      "public/js/ui/login.js",
+      "public/js/ui/playlists.js",
+      "public/js/ui/misc.js",
+      "public/js/splash.js",
+      "public/js/init.js"
+    ],
+    "server.js": [
+      "server/routes/qq.js",
+      "server/routes/podcast.js",
+      "server/routes/youtube.js",
+      "server/routes/login.js",
+      "server/routes/beatmap.js",
+      "server/routes/playlist.js",
+      "server/routes/search.js",
+      "server/routes/weather.js",
+      "server/routes/song.js",
+      "server/routes/user.js",
+      "server/routes/app.js",
+      "server/routes/lyric.js",
+      "server/routes/audio.js",
+      "server/routes/update.js"
+    ],
+    "desktop/main.js": [
+      "server.js"
+    ],
+    "server/routes/beatmap.js": [
+      "server/lib/send-json.js",
+      "server/lib/network.js"
+    ],
+    "server/routes/app.js": [
+      "server/lib/send-json.js",
+      "server/lib/song.js"
+    ],
+    "server/routes/login.js": [
+      "server/lib/send-json.js",
+      "server/lib/network.js",
+      "server/lib/cookie.js",
+      "server/lib/auth.js"
+    ],
+    "server/routes/lyric.js": [
+      "server/lib/send-json.js"
+    ],
+    "server/routes/playlist.js": [
+      "server/lib/send-json.js",
+      "server/lib/network.js",
+      "server/lib/song.js"
+    ],
+    "server/routes/podcast.js": [
+      "server/lib/send-json.js",
+      "dj-analyzer.js"
+    ],
+    "server/routes/qq.js": [
+      "server/lib/send-json.js",
+      "server/lib/cookie.js",
+      "server/lib/network.js"
+    ],
+    "server/routes/search.js": [
+      "server/lib/send-json.js",
+      "server/lib/song.js"
+    ],
+    "server/routes/song.js": [
+      "server/lib/send-json.js",
+      "server/lib/network.js",
+      "server/lib/song.js"
+    ],
+    "server/routes/audio.js": [],
+    "server/routes/update.js": [],
+    "server/routes/user.js": [],
+    "server/routes/weather.js": [],
+    "server/routes/youtube.js": [],
+    "dj-analyzer.js": [],
+    "server/lib/send-json.js": [],
+    "server/lib/network.js": [],
+    "server/lib/cookie.js": [],
+    "server/lib/auth.js": [],
+    "server/lib/song.js": [],
+    "server/lib/string.js": [],
+    "build/after-pack.js": [],
+    "desktop/preload.js": [],
+    "desktop/overlay-preload.js": []
+  },
+  "complexity": "large"
+}

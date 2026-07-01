@@ -9,20 +9,20 @@ window.isCloudSong = function(song) {
 window.isSongLiked = function(song) {
   if (!song || !song.id) return false;
   if (likedSongMap[String(song.id)]) return true;
-  if (songProviderKey(song) === 'youtube') {
+  if (window.songProviderKey(song) === 'youtube') {
     try { return localStorage.getItem('mineradio-local-like-youtube:' + String(song.id)) !== null; } catch(e) { return false; }
   }
   return false;
 }
 window.ensureLoggedInForAction = function() {
-  if (loginStatus.loggedIn) return true;
-  showToast('登录后可同步到网易云');
-  showLoginModal();
+  if (window.loginStatus.loggedIn) return true;
+  window.showToast('登录后可同步到网易云');
+  window.showLoginModal();
   return false;
 }
 window.updateLikeButtons = function(song) {
-  song = song || currentCoverSong();
-  var liked = isSongLiked(song);
+  song = song || window.currentCoverSong();
+  var liked = window.isSongLiked(song);
   var busy = !!(song && song.id && likeBusyMap[String(song.id)]);
   var btn = document.getElementById('heart-btn');
   if (btn) {
@@ -45,34 +45,34 @@ window.artistCollectTrayIconSvg = function() {
 window.artistNextPlusIconSvg = function() {
   return '<svg fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13"/><path d="M5.5 12h13"/></svg>';
 }
-window.songActionHtml = function(kind, source, index, song) {
-  var liked = isSongLiked(song);
+window.songActionHtml = function(kind, window.source, index, song) {
+  var liked = window.isSongLiked(song);
   if (kind === 'like') {
-    return '<button class="song-action-btn' + (liked ? ' liked' : '') + '" title="' + (liked ? '取消红心' : '红心喜欢') + '" onclick="event.stopPropagation();toggleLike' + source + '(' + index + ')">' + heartIconSvg() + '</button>';
+    return '<button class="song-action-btn' + (liked ? ' liked' : '') + '" title="' + (liked ? '取消红心' : '红心喜欢') + '" onclick="event.stopPropagation();toggleLike' + window.source + '(' + index + ')">' + window.heartIconSvg() + '</button>';
   }
-  return '<button class="song-action-btn" title="收藏到歌单" onclick="event.stopPropagation();collect' + source + '(' + index + ')">' + playlistPlusIconSvg() + '</button>';
+  return '<button class="song-action-btn" title="收藏到歌单" onclick="event.stopPropagation();collect' + window.source + '(' + index + ')">' + window.playlistPlusIconSvg() + '</button>';
 }
 window.syncLikeStatusForSongs = function(songs) {
-  if (!loginStatus.loggedIn || !songs || !songs.length) return;
-  var ids = songs.filter(isCloudSong).map(function(s){ return String(s.id); });
+  if (!window.loginStatus.loggedIn || !songs || !songs.length) return;
+  var ids = songs.filter(window.isCloudSong).map(function(s){ return String(s.id); });
   if (!ids.length) return;
   var token = ++likeStatusToken;
-  neteaseLikeCheck(ids).then(function(r){
+  window.neteaseLikeCheck(ids).then(function(r){
     if (token < likeStatusToken - 3 || !r || !r.liked) return;
     Object.keys(r.liked).forEach(function(id){ likedSongMap[String(id)] = !!r.liked[id]; });
-    safeRenderQueuePanel('like-status-sync', { scrollCurrent: miniQueueOpen });
-    if ($results && $results.classList.contains('show')) refreshSearchResultActionStates();
-    updateLikeButtons();
+    window.safeRenderQueuePanel('like-status-sync', { scrollCurrent: window.miniQueueOpen });
+    if ($results && $results.classList.contains('show')) window.refreshSearchResultActionStates();
+    window.updateLikeButtons();
   }).catch(function(err){ console.warn('like check failed:', err); });
 }
 window.syncLikeStatusForSong = function(song) {
-  if (!isCloudSong(song)) { updateLikeButtons(song); return; }
-  syncLikeStatusForSongs([song]);
+  if (!window.isCloudSong(song)) { window.updateLikeButtons(song); return; }
+  window.syncLikeStatusForSongs([song]);
 }
 window.isLikedPlaylistContext = function(id, title, meta) {
   var sid = String(id || '');
   var text = String(title || (meta && meta.name) || '').trim();
-  var hit = userPlaylists.find(function(pl){ return String(pl.id || '') === sid; });
+  var hit = window.userPlaylists.find(function(pl){ return String(pl.id || '') === sid; });
   if (hit) {
     if (Number(hit.specialType || 0) === 5) return true;
     text = text || hit.name || '';
@@ -81,15 +81,15 @@ window.isLikedPlaylistContext = function(id, title, meta) {
 }
 window.markSongsLiked = function(songs, liked) {
   (songs || []).forEach(function(song){
-    if (isCloudSong(song)) likedSongMap[String(song.id)] = !!liked;
+    if (window.isCloudSong(song)) likedSongMap[String(song.id)] = !!liked;
   });
 }
 window.refreshSearchResultActionStates = function() {
-  if (!playlist || !$results || !$results.children.length) return;
+  if (!window.playlist || !$results || !$results.children.length) return;
   Array.prototype.forEach.call($results.querySelectorAll('[data-like-index]'), function(btn){
     var i = Number(btn.getAttribute('data-like-index'));
-    var song = playlist[i];
-    var liked = isSongLiked(song);
+    var song = window.playlist[i];
+    var liked = window.isSongLiked(song);
     btn.classList.toggle('liked', liked);
     btn.title = liked ? '取消红心' : '红心喜欢';
   });
@@ -97,7 +97,7 @@ window.refreshSearchResultActionStates = function() {
 window.toggleLikeSong = async function(song) {
   if (!song || !song.id) return;
   var id = String(song.id);
-  if (songProviderKey(song) === 'youtube') {
+  if (window.songProviderKey(song) === 'youtube') {
     var key = 'mineradio-local-like-youtube:' + id;
     var next = !likedSongMap[id];
     likeBusyMap[id] = true;
@@ -110,45 +110,45 @@ window.toggleLikeSong = async function(song) {
       }
     } catch(e) {}
     likeBusyMap[id] = false;
-    updateLikeButtons(song);
-    safeRenderQueuePanel('like-toggle-optimistic', { scrollCurrent: miniQueueOpen });
-    refreshSearchResultActionStates();
-    showToast(next ? '已加入红心喜欢' : '已取消红心');
+    window.updateLikeButtons(song);
+    window.safeRenderQueuePanel('like-toggle-optimistic', { scrollCurrent: window.miniQueueOpen });
+    window.refreshSearchResultActionStates();
+    window.showToast(next ? '已加入红心喜欢' : '已取消红心');
     return;
   }
-  if (!isCloudSong(song)) {
-    showToast(songProviderKey(song) === 'qq' ? 'QQ 音乐红心同步待登录接口接入' : '本地文件暂不支持红心同步');
+  if (!window.isCloudSong(song)) {
+    window.showToast(window.songProviderKey(song) === 'qq' ? 'QQ 音乐红心同步待登录接口接入' : '本地文件暂不支持红心同步');
     return;
   }
-  if (!ensureLoggedInForAction()) return;
+  if (!window.ensureLoggedInForAction()) return;
   var id = String(song.id);
   if (likeBusyMap[id]) return;
   var next = !likedSongMap[id];
   likeBusyMap[id] = true;
   likedSongMap[id] = next;
-  updateLikeButtons(song);
-  safeRenderQueuePanel('like-toggle-optimistic', { scrollCurrent: miniQueueOpen });
-  refreshSearchResultActionStates();
+  window.updateLikeButtons(song);
+  window.safeRenderQueuePanel('like-toggle-optimistic', { scrollCurrent: window.miniQueueOpen });
+  window.refreshSearchResultActionStates();
   try {
-    var r = await neteaseLike(id, String(next));
+    var r = await window.neteaseLike(id, String(next));
     if (r && r.error) throw new Error(r.error);
     likedSongMap[id] = next;
-    showToast(next ? '已加入红心喜欢' : '已取消红心');
+    window.showToast(next ? '已加入红心喜欢' : '已取消红心');
   } catch (err) {
     likedSongMap[id] = !next;
-    showToast('红心操作失败');
+    window.showToast('红心操作失败');
   } finally {
     delete likeBusyMap[id];
-    updateLikeButtons(song);
-    safeRenderQueuePanel('like-toggle-final', { scrollCurrent: miniQueueOpen });
-    refreshSearchResultActionStates();
+    window.updateLikeButtons(song);
+    window.safeRenderQueuePanel('like-toggle-final', { scrollCurrent: window.miniQueueOpen });
+    window.refreshSearchResultActionStates();
   }
 }
 window.toggleLikeCurrent = function() {
- toggleLikeSong(currentCoverSong()); }
+ window.toggleLikeSong(window.currentCoverSong()); }
 window.toggleLikeSearchResult = function(i) {
- if (playlist[i]) toggleLikeSong(playlist[i]); }
+ if (window.playlist[i]) window.toggleLikeSong(window.playlist[i]); }
 window.toggleLikeQueueIndex = function(i) {
- if (playQueue[i]) toggleLikeSong(playQueue[i]); }
+ if (window.playQueue[i]) window.toggleLikeSong(window.playQueue[i]); }
 window.toggleLikeDetailSong = function(song) {
- toggleLikeSong(song); }
+ window.toggleLikeSong(song); }

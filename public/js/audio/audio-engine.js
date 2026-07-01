@@ -2,38 +2,38 @@
 //  音频上下文 & 频谱分析
 // ============================================================
 window.initAudio = function() {
-  if (audioReady) return;
+  if (window.audioReady) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  source = audioCtx.createMediaElementSource(audio);
-  analyser = audioCtx.createAnalyser();
-  beatAnalyser = audioCtx.createAnalyser();
-  gainNode = audioCtx.createGain();
-  analyser.fftSize = FFT_SIZE;
-  analyser.smoothingTimeConstant = 0.58;
-  beatAnalyser.fftSize = BEAT_FFT_SIZE;
-  beatAnalyser.smoothingTimeConstant = 0.10;
-  source.connect(analyser);
-  source.connect(beatAnalyser);
-  analyser.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
+  source = window.audioCtx.createMediaElementSource(window.audio);
+  analyser = window.audioCtx.createAnalyser();
+  beatAnalyser = window.audioCtx.createAnalyser();
+  gainNode = window.audioCtx.createGain();
+  window.analyser.fftSize = window.FFT_SIZE;
+  window.analyser.smoothingTimeConstant = 0.58;
+  window.beatAnalyser.fftSize = window.BEAT_FFT_SIZE;
+  window.beatAnalyser.smoothingTimeConstant = 0.10;
+  window.source.connect(window.analyser);
+  window.source.connect(window.beatAnalyser);
+  window.analyser.connect(window.gainNode);
+  window.gainNode.connect(window.audioCtx.destination);
   applyVolumeToAudio();
-  frequencyData.fill(0);
-  beatFrequencyData.fill(0);
-  beatTimeDomainData.fill(128);
+  window.frequencyData.fill(0);
+  window.beatFrequencyData.fill(0);
+  window.beatTimeDomainData.fill(128);
   resetRealtimeBeatEngine();
   audioReady = true;
 }
 window.resumeAudioAnalysis = function() {
-  if (audioCtx && audioCtx.state === 'suspended') return audioCtx.resume().catch(function(e){ console.warn('audio context resume failed:', e); });
+  if (window.audioCtx && window.audioCtx.state === 'suspended') return window.audioCtx.resume().catch(function(e){ console.warn('window.audio context resume failed:', e); });
   return Promise.resolve();
 }
 
 window.ensureUiSfxContext = function() {
   var AudioContextCtor = window.AudioContext || window.webkitAudioContext;
   if (!AudioContextCtor) return null;
-  if (!uiSfxCtx || uiSfxCtx.state === 'closed') uiSfxCtx = new AudioContextCtor();
-  if (uiSfxCtx.state === 'suspended' && uiSfxCtx.resume) uiSfxCtx.resume().catch(function(){});
-  return uiSfxCtx;
+  if (!window.uiSfxCtx || window.uiSfxCtx.state === 'closed') uiSfxCtx = new AudioContextCtor();
+  if (window.uiSfxCtx.state === 'suspended' && window.uiSfxCtx.resume) window.uiSfxCtx.resume().catch(function(){});
+  return window.uiSfxCtx;
 }
 
 window.playShelfSelectTick = function(direction, variant) {
@@ -46,7 +46,7 @@ window.playShelfSelectTick = function(direction, variant) {
   var dir = direction < 0 ? -1 : 1;
   var pitch = dir > 0 ? 1.035 : 0.965;
   var rowScale = variant === 'row' ? 0.74 : 1.0;
-  var volumeScale = 0.38 + Math.max(0, Math.min(1, targetVolume == null ? 0.65 : targetVolume)) * 0.62;
+  var volumeScale = 0.38 + Math.max(0, Math.min(1, targetVolume == null ? 0.65 : window.targetVolume)) * 0.62;
   var t = ctx.currentTime + 0.002;
   var out = ctx.createGain();
   out.gain.setValueAtTime(0.0001, t);
@@ -107,31 +107,31 @@ window.playShelfSelectTick = function(direction, variant) {
 }
 
 window.clearAudioFadeTimers = function() {
-  if (audioFadeTimer) {
-    clearTimeout(audioFadeTimer);
+  if (window.audioFadeTimer) {
+    clearTimeout(window.audioFadeTimer);
     audioFadeTimer = null;
   }
-  if (audioElementFadeFrame) {
-    cancelAnimationFrame(audioElementFadeFrame);
+  if (window.audioElementFadeFrame) {
+    cancelAnimationFrame(window.audioElementFadeFrame);
     audioElementFadeFrame = 0;
   }
 }
 window.currentAudioOutputGain = function() {
-  if (gainNode && gainNode.gain && isFinite(gainNode.gain.value)) return clampRange(Number(gainNode.gain.value), 0, 1);
-  if (audio && isFinite(audio.volume)) return clampRange(Number(audio.volume), 0, 1);
-  return clampRange(targetVolume, 0, 1);
+  if (window.gainNode && window.gainNode.gain && isFinite(window.gainNode.gain.value)) return window.clampRange(Number(window.gainNode.gain.value), 0, 1);
+  if (window.audio && isFinite(window.audio.volume)) return window.clampRange(Number(window.audio.volume), 0, 1);
+  return window.clampRange(window.targetVolume, 0, 1);
 }
 window.audioSilentFloor = function() {
-  return targetVolume > 0.001 ? AUDIO_SILENCE_GAIN : 0;
+  return window.targetVolume > 0.001 ? AUDIO_SILENCE_GAIN : 0;
 }
 window.normalizeAudioFadeTarget = function(value) {
-  value = clampRange(Number(value) || 0, 0, 1);
+  value = window.clampRange(Number(value) || 0, 0, 1);
   return value <= 0.001 ? audioSilentFloor() : value;
 }
 window.holdAudioOutputGain = function(now) {
   var current = currentAudioOutputGain();
-  if (!gainNode || !audioCtx || !gainNode.gain) return current;
-  var param = gainNode.gain;
+  if (!window.gainNode || !window.audioCtx || !window.gainNode.gain) return current;
+  var param = window.gainNode.gain;
   try {
     if (typeof param.cancelAndHoldAtTime === 'function') {
       param.cancelAndHoldAtTime(now);
@@ -150,85 +150,85 @@ window.holdAudioOutputGain = function(now) {
 window.setAudioOutputGainImmediate = function(value) {
   value = normalizeAudioFadeTarget(value);
   clearAudioFadeTimers();
-  if (gainNode && audioCtx) {
-    var now = audioCtx.currentTime || 0;
-    gainNode.gain.cancelScheduledValues(now);
-    gainNode.gain.setValueAtTime(value, now);
-  } else if (audio) {
-    audio.volume = value;
+  if (window.gainNode && window.audioCtx) {
+    var now = window.audioCtx.currentTime || 0;
+    window.gainNode.gain.cancelScheduledValues(now);
+    window.gainNode.gain.setValueAtTime(value, now);
+  } else if (window.audio) {
+    window.audio.volume = value;
   }
 }
 window.rampAudioOutputGain = function(value, durationMs) {
   value = normalizeAudioFadeTarget(value);
   durationMs = Math.max(0, Number(durationMs) || 0);
   clearAudioFadeTimers();
-  var serial = audioFadeSerial;
-  if (gainNode && audioCtx) {
-    var now = audioCtx.currentTime || 0;
+  var serial = window.audioFadeSerial;
+  if (window.gainNode && window.audioCtx) {
+    var now = window.audioCtx.currentTime || 0;
     holdAudioOutputGain(now);
     if (durationMs <= 0) {
-      gainNode.gain.setValueAtTime(value, now);
+      window.gainNode.gain.setValueAtTime(value, now);
       return;
     }
-    gainNode.gain.linearRampToValueAtTime(value, now + durationMs / 1000);
+    window.gainNode.gain.linearRampToValueAtTime(value, now + durationMs / 1000);
     return;
   }
-  if (!audio) return;
+  if (!window.audio) return;
   var from = currentAudioOutputGain();
   var started = performance.now();
   function tickAudioFade(nowMs) {
-    if (serial !== audioFadeSerial || !audio) return;
-    var t = durationMs ? clampRange((nowMs - started) / durationMs, 0, 1) : 1;
+    if (serial !== window.audioFadeSerial || !window.audio) return;
+    var t = durationMs ? window.clampRange((nowMs - started) / durationMs, 0, 1) : 1;
     var eased = 1 - Math.pow(1 - t, 3);
-    audio.volume = from + (value - from) * eased;
+    window.audio.volume = from + (value - from) * eased;
     if (t < 1) audioElementFadeFrame = requestAnimationFrame(tickAudioFade);
     else audioElementFadeFrame = 0;
   }
   audioElementFadeFrame = requestAnimationFrame(tickAudioFade);
 }
 window.preparePlaybackFadeIn = function() {
-  audioFadeSerial++;
+  window.audioFadeSerial++;
   setAudioOutputGainImmediate(0);
 }
 window.startPlaybackFadeIn = function() {
-  audioFadeSerial++;
-  if (targetVolume <= 0.001) {
+  window.audioFadeSerial++;
+  if (window.targetVolume <= 0.001) {
     setAudioOutputGainImmediate(0);
     return;
   }
-  rampAudioOutputGain(targetVolume, AUDIO_FADE_IN_MS);
+  rampAudioOutputGain(window.targetVolume, window.AUDIO_FADE_IN_MS);
 }
 window.restorePlaybackGain = function() {
-  audioFadeSerial++;
-  setAudioOutputGainImmediate(targetVolume);
+  window.audioFadeSerial++;
+  setAudioOutputGainImmediate(window.targetVolume);
 }
 window.fadeOutAndPauseAudio = function() {
-  if (!audio || audio.paused) return Promise.resolve(false);
-  var serial = ++audioFadeSerial;
-  rampAudioOutputGain(0, AUDIO_FADE_OUT_MS);
+  if (!window.audio || window.audio.paused) return Promise.resolve(false);
+  var serial = ++window.audioFadeSerial;
+  rampAudioOutputGain(0, window.AUDIO_FADE_OUT_MS);
   return new Promise(function(resolve) {
     audioFadeTimer = setTimeout(function(){
       audioFadeTimer = null;
-      if (serial !== audioFadeSerial || !audio) {
+      if (serial !== window.audioFadeSerial || !window.audio) {
         resolve(false);
         return;
       }
-      try { audio.pause(); } catch (pauseErr) { console.warn('[TogglePlayPause]', pauseErr); }
+      try { window.audio.pause(); } catch (pauseErr) { console.warn('[TogglePlayPause]', pauseErr); }
       setAudioOutputGainImmediate(0);
       resolve(true);
-    }, AUDIO_FADE_OUT_MS + 80);
+    }, window.AUDIO_FADE_OUT_MS + 80);
   });
 }
 
 window.applyVolumeToAudio = function() {
-  if (audio) {
-    audio.muted = false;
-    audio.volume = gainNode ? 1 : targetVolume;
+  if (window.audio) {
+    window.audio.muted = false;
+    window.audio.volume = window.gainNode ? 1 : window.targetVolume;
   }
-  if (gainNode && audioCtx) {
-    var now = audioCtx.currentTime || 0;
-    gainNode.gain.cancelScheduledValues(now);
-    gainNode.gain.setTargetAtTime(targetVolume, now, 0.025);
+  if (window.gainNode && window.audioCtx) {
+    var now = window.audioCtx.currentTime || 0;
+    window.gainNode.gain.cancelScheduledValues(now);
+    window.gainNode.gain.setTargetAtTime(window.targetVolume, now, 0.025);
   }
 }
 
@@ -237,14 +237,14 @@ window.updateVolumeUi = function() {
   var value = document.getElementById('volume-value');
   var icon = document.getElementById('volume-icon');
   var wrap = document.getElementById('volume-control');
-  var pct = Math.round(targetVolume * 100);
-  if (slider && Math.abs(parseFloat(slider.value) - targetVolume) > 0.001) slider.value = targetVolume;
+  var pct = Math.round(window.targetVolume * 100);
+  if (slider && Math.abs(parseFloat(slider.value) - window.targetVolume) > 0.001) slider.value = window.targetVolume;
   if (value) value.textContent = pct + '%';
-  if (wrap) wrap.classList.toggle('muted', targetVolume <= 0.01);
+  if (wrap) wrap.classList.toggle('muted', window.targetVolume <= 0.01);
   if (icon) {
-    icon.innerHTML = targetVolume <= 0.01
+    icon.innerHTML = window.targetVolume <= 0.01
       ? '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="17" y1="9" x2="22" y2="14"/><line x1="22" y1="9" x2="17" y2="14"/>'
-      : targetVolume < 0.45
+      : window.targetVolume < 0.45
         ? '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15 10.5a2 2 0 0 1 0 3"/>'
         : '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15 9.5a4 4 0 0 1 0 5"/><path d="M18 7a7 7 0 0 1 0 10"/>';
   }
@@ -257,12 +257,12 @@ window.setVolume = function(value, silent) {
   try { localStorage.setItem('apex-player-volume', String(next)); } catch (e) {}
   applyVolumeToAudio();
   updateVolumeUi();
-  if (!silent) showToast('音量 ' + Math.round(next * 100) + '%');
+  if (!silent) window.showToast('音量 ' + Math.round(next * 100) + '%');
 }
 window.adjustVolumeByKeyboard = function(delta) {
   var step = Number(delta) || 0;
   if (!step) return;
-  setVolume(clampRange(targetVolume + step, 0, 1), false);
+  setVolume(window.clampRange(window.targetVolume + step, 0, 1), false);
 }
 
 window.toggleVolumePanel = function(e) {
@@ -273,7 +273,7 @@ window.toggleVolumePanel = function(e) {
 }
 
 window.toggleMute = function() {
-  setVolume(targetVolume > 0.01 ? 0 : (lastNonZeroVolume || 0.8));
+  setVolume(window.targetVolume > 0.01 ? 0 : (window.lastNonZeroVolume || 0.8));
 }
 
 window.bindVolumeControls = function() {
@@ -299,7 +299,7 @@ window.bindVolumeControls = function() {
     slider.addEventListener('input', function(){ setVolume(slider.value, true); });
     slider.addEventListener('focus', keepVolumePanelOpen);
     slider.addEventListener('blur', closeVolumePanelSoon);
-    slider.addEventListener('change', function(){ showToast('音量 ' + Math.round(targetVolume * 100) + '%'); });
+    slider.addEventListener('change', function(){ window.showToast('音量 ' + Math.round(window.targetVolume * 100) + '%'); });
   }
   if (btn) {
     btn.addEventListener('dblclick', function(e){ e.stopPropagation(); toggleMute(); });

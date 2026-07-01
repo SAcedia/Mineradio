@@ -1,0 +1,813 @@
+{
+  "graphName": "Mineradio Core Architecture — shared.js + state.js",
+  "description": "Knowledge graph covering the foundation layer (public/js/shared.js) and central state layer (public/js/core/state.js). Captures functions, data structures, constants, cross-file imports, and external module dependencies.",
+  "nodes": [
+    {
+      "id": "file:public/js/shared.js",
+      "type": "file",
+      "name": "shared.js",
+      "filePath": "public/js/shared.js",
+      "summary": "Foundation layer — cross-file utilities, GSAP modal helpers, all STORE_KEY localStorage constants, hotkey action definitions and settings I/O, DIY mode preference, audio URL cache and song cache-key generator, fxDefaults master preset object, PACKAGED_DEFAULT_FX_SNAPSHOT frozen template. Loads first after vendors, before all module JS.",
+      "tags": ["javascript", "core", "foundation", "constants", "utilities", "hotkeys", "fx-defaults"]
+    },
+    {
+      "id": "file:public/js/core/state.js",
+      "type": "file",
+      "name": "state.js",
+      "filePath": "public/js/core/state.js",
+      "summary": "Central mutable state for the entire application. Covers audio analysis (bass/mid/treble/FFT), playback queue and position, login/auth state (netease + QQ dual account), DIY player mode toggle with side effects, beat analysis engine state (beatMapCache, rtBeat, djMode), FX state (initialized from fxDefaults + saved lyric layout), UI auto-hide and pointer parallax, desktop runtime mode and fullscreen state, render power management (deep sleep, background cache trimming, renderer resize), and runtime performance snapshots.",
+      "tags": ["javascript", "core", "state", "audio-analysis", "playback", "login", "beat-analysis", "fx", "ui-state", "performance", "render-power"]
+    },
+    {
+      "id": "file:public/js/api-helper.js",
+      "type": "file",
+      "name": "api-helper.js",
+      "filePath": "public/js/api-helper.js",
+      "summary": "External dependency — provides closeTrackDetailModal, closeCustomLyricModal, and initializes customCoverMap, customLyricMap, customLyricPrefs, playbackQuality on window.",
+      "tags": ["javascript", "external", "modal", "api"]
+    },
+    {
+      "id": "file:public/js/login.js",
+      "type": "file",
+      "name": "login.js",
+      "filePath": "public/js/login.js",
+      "summary": "External dependency — provides closeLoginModal and closeUserModal for the modal backdrop binding system.",
+      "tags": ["javascript", "external", "login", "modal"]
+    },
+    {
+      "id": "file:public/js/playlists.js",
+      "type": "file",
+      "name": "playlists.js",
+      "filePath": "public/js/playlists.js",
+      "summary": "External dependency — provides closeUpdatePanel for the update modal backdrop binding.",
+      "tags": ["javascript", "external", "playlists", "update"]
+    },
+    {
+      "id": "file:public/js/prefs.js",
+      "type": "file",
+      "name": "prefs.js",
+      "filePath": "public/js/prefs.js",
+      "summary": "External dependency — provides readSavedVolume, readSavedPlaybackVisualPreset, saveBooleanPreference and similar preference I/O functions referenced by state.js.",
+      "tags": ["javascript", "external", "preferences", "localStorage"]
+    },
+    {
+      "id": "file:public/js/core/three-lyrics.js",
+      "type": "file",
+      "name": "three-lyrics.js",
+      "filePath": "public/js/core/three-lyrics.js",
+      "summary": "External dependency — provides readSavedLyricLayout() used by state.js to initialize the fx object with persisted lyric layout overrides.",
+      "tags": ["javascript", "external", "lyrics", "layout", "threejs"]
+    },
+    {
+      "id": "file:vendor/gsap",
+      "type": "file",
+      "name": "gsap",
+      "filePath": "vendor/gsap",
+      "summary": "External vendor dependency — GSAP animation library used for modal open/close animations and value pulsing.",
+      "tags": ["javascript", "vendor", "animation", "gsap"]
+    },
+    {
+      "id": "function:public/js/shared.js:clamp01",
+      "type": "function",
+      "name": "clamp01",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Math clamp value between 0 and 1 via Math.max(0, Math.min(1, v))."
+    },
+    {
+      "id": "function:public/js/shared.js:clampRange",
+      "type": "function",
+      "name": "clampRange",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Math clamp value between arbitrary min and max via Math.max(min, Math.min(max, v))."
+    },
+    {
+      "id": "function:public/js/shared.js:songProviderKey",
+      "type": "function",
+      "name": "songProviderKey",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Extracts provider identifier from song object — returns 'qq', 'youtube', or 'netease' based on song.provider/song.source/song.type."
+    },
+    {
+      "id": "function:public/js/shared.js:openGsapModal",
+      "type": "function",
+      "name": "openGsapModal",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Opens a modal overlay with GSAP animation: mask autoAlpha fade-in (0.38s power2.out), panel scale+blur reveal (0.68s expo.out). Falls back to direct CSS when GSAP unavailable."
+    },
+    {
+      "id": "function:public/js/shared.js:closeGsapModal",
+      "type": "function",
+      "name": "closeGsapModal",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Closes a modal with GSAP animation: panel autoAlpha out with blur (0.28s power2.in), mask autoAlpha out (0.34s power2.inOut), then clears GSAP props and fires optional afterClose callback."
+    },
+    {
+      "id": "function:public/js/shared.js:bindModalBackdropClose",
+      "type": "function",
+      "name": "bindModalBackdropClose",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Binds click-to-close on modal backdrops. Wires 5 modals (track-detail, login, user, custom-lyric, update) to their respective close functions. Uses __backdropCloseBound guard to prevent duplicate binding."
+    },
+    {
+      "id": "function:public/js/shared.js:getHotkeyDefaults",
+      "type": "function",
+      "name": "getHotkeyDefaults",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Builds default hotkey map from HOTKEY_ACTIONS array, producing { local: {}, global: {} } keyed by action key (e.g. window.togglePlay)."
+    },
+    {
+      "id": "function:public/js/shared.js:readHotkeySettings",
+      "type": "function",
+      "name": "readHotkeySettings",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Reads hotkey settings from localStorage via HOTKEY_SETTINGS_STORE_KEY, merges with defaults via Object.assign for both local and global keymaps."
+    },
+    {
+      "id": "function:public/js/shared.js:readDiyModePreference",
+      "type": "function",
+      "name": "readDiyModePreference",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Reads DIY player mode boolean from localStorage via DIY_MODE_STORE_KEY. Returns true if value is '1'."
+    },
+    {
+      "id": "function:public/js/shared.js:readBooleanPreference",
+      "type": "function",
+      "name": "readBooleanPreference",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Generic boolean localStorage reader. Returns stored value if set (truthy for 'true' or '1'), otherwise returns the provided fallback."
+    },
+    {
+      "id": "function:public/js/shared.js:_cacheKeyForSong",
+      "type": "function",
+      "name": "_cacheKeyForSong",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Generates a unique cache key string for a song in format '{provider}:{id}' using songProviderKey and song.id/mid/songmid/name+artist fallback."
+    },
+    {
+      "id": "function:public/js/shared.js:clonePackagedDefaultFxSnapshot",
+      "type": "function",
+      "name": "clonePackagedDefaultFxSnapshot",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Returns a shallow clone of the frozen PACKAGED_DEFAULT_FX_SNAPSHOT via Object.assign({}, ...)."
+    },
+    {
+      "id": "function:public/js/shared.js:packagedDefaultLyricLayoutRaw",
+      "type": "function",
+      "name": "packagedDefaultLyricLayoutRaw",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Returns the packaged default FX snapshot merged with desktopLyricsSchema marker ('desktop-lyrics-v3')."
+    },
+    {
+      "id": "data:public/js/shared.js:fxDefaults",
+      "type": "data",
+      "name": "fxDefaults",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Master FX preset defaults object (~70 properties). Covers preset selection, intensity, cinema shake, depth, cover resolution, bloom, lyric styling (color, glow, font, weight, offsets), visual tint, UI accent colors, background mode, desktop lyrics, shelf parameters, performance quality, and camera mode.",
+      "tags": ["fx", "preset", "defaults", "visual"]
+    },
+    {
+      "id": "data:public/js/shared.js:PACKAGED_DEFAULT_FX_SNAPSHOT",
+      "type": "data",
+      "name": "PACKAGED_DEFAULT_FX_SNAPSHOT",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Frozen object (Object.freeze) representing the packaged default FX snapshot. Structurally mirrors fxDefaults with identical properties. Used as a reset/fallback template.",
+      "tags": ["fx", "snapshot", "frozen", "default"]
+    },
+    {
+      "id": "data:public/js/shared.js:HOTKEY_ACTIONS",
+      "type": "data",
+      "name": "HOTKEY_ACTIONS",
+      "parentId": "file:public/js/shared.js",
+      "summary": "Array of 7 hotkey action definitions. Each entry has key (event name), label, category, local keybind, and global keybind. Covers play/pause, prev/next track, volume up/down, fullscreen toggle, desktop lyrics toggle.",
+      "tags": ["hotkeys", "actions", "keybindings"]
+    },
+    {
+      "id": "data:public/js/shared.js:STORE_KEYS",
+      "type": "data",
+      "name": "STORE_KEYS",
+      "parentId": "file:public/js/shared.js",
+      "summary": "All 17 localStorage store key constants: CUSTOM_COVER, CUSTOM_LYRIC, CUSTOM_LYRIC_PREF, LYRIC_LAYOUT, VISUAL_PRESET_SCHEMA, PLAYBACK_QUALITY, UPLOAD_TIP, DIY_MODE, PLAYLIST_PANEL_PIN, USER_CAPSULE_AUTO_HIDE, FX_FAB_AUTO_HIDE, CONTROLS_AUTO_HIDE, FREE_CAMERA, HOTKEY_SETTINGS, VISUAL_GUIDE_SEEN, LOCAL_BEATMAP, LOCAL_BEAT_PREF.",
+      "tags": ["localStorage", "constants", "store-keys"]
+    },
+    {
+      "id": "function:public/js/core/state.js:markAppPerf",
+      "type": "function",
+      "name": "markAppPerf",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Records an app performance mark with name and timestamp (performance.now()). Pushes to appPerfMarks array, calls performance.mark(), logs to console.debug for first 16 marks."
+    },
+    {
+      "id": "function:public/js/core/state.js:installStartupLongTaskObserver",
+      "type": "function",
+      "name": "installStartupLongTaskObserver",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Installs PerformanceObserver for 'longtask' entries during first 15 seconds of startup. Disconnects after 16s. Logs long task duration via console.debug."
+    },
+    {
+      "id": "function:public/js/core/state.js:applyUserCapsuleAutoHideState",
+      "type": "function",
+      "name": "applyUserCapsuleAutoHideState",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Toggles 'user-capsule-auto-hide' CSS class on body and updates the hide-btn button text/title based on window.userCapsuleAutoHide state."
+    },
+    {
+      "id": "function:public/js/core/state.js:toggleUserCapsuleAutoHide",
+      "type": "function",
+      "name": "toggleUserCapsuleAutoHide",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Toggles window.userCapsuleAutoHide boolean, persists via saveBooleanPreference, applies CSS state, and shows a toast notification."
+    },
+    {
+      "id": "function:public/js/core/state.js:updateUserCapsuleAutoHideFromPointer",
+      "type": "function",
+      "name": "updateUserCapsuleAutoHideFromPointer",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Updates 'user-capsule-peek' CSS class based on pointer proximity to top-right corner (within 112px x 126px), when auto-hide is active and not in immersive mode."
+    },
+    {
+      "id": "function:public/js/core/state.js:applyFxFabAutoHideState",
+      "type": "function",
+      "name": "applyFxFabAutoHideState",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Toggles 'fx-fab-auto-hide' and 'fx-fab-peek' CSS classes on body based on window.fxFabAutoHide. Optionally forces hidden state. Updates the hide-btn button state."
+    },
+    {
+      "id": "function:public/js/core/state.js:toggleFxFabAutoHide",
+      "type": "function",
+      "name": "toggleFxFabAutoHide",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Toggles window.fxFabAutoHide boolean, persists via saveBooleanPreference, applies CSS state with forceHidden, and shows a toast notification."
+    },
+    {
+      "id": "function:public/js/core/state.js:updateFxFabAutoHideFromPointer",
+      "type": "function",
+      "name": "updateFxFabAutoHideFromPointer",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Updates 'fx-fab-peek' CSS class based on pointer proximity to bottom-right corner, FX panel open state, and reveal arm state. Skips when DIY mode or immersive mode is off."
+    },
+    {
+      "id": "function:public/js/core/state.js:layoutFullscreenDiyZone",
+      "type": "function",
+      "name": "layoutFullscreenDiyZone",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Calculates position and size for the fullscreen DIY zone button relative to the top-right account pill or user button. Sets CSS custom properties (--fullscreen-diy-*) on root element. Returns { left, top, width, height }."
+    },
+    {
+      "id": "function:public/js/core/state.js:shouldSuppressFullscreenDiyPeek",
+      "type": "function",
+      "name": "shouldSuppressFullscreenDiyPeek",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true if fullscreen DIY peek should be suppressed due to active visual guide, open FX panel, or open hotkey modal."
+    },
+    {
+      "id": "function:public/js/core/state.js:updateFullscreenDiyPeekFromPointer",
+      "type": "function",
+      "name": "updateFullscreenDiyPeekFromPointer",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Updates 'fullscreen-diy-peek' CSS class based on pointer proximity to the DIY zone near top-right. Considers fullscreen state, immersive mode, and peek suppression."
+    },
+    {
+      "id": "function:public/js/core/state.js:isDiyMode",
+      "type": "function",
+      "name": "isDiyMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns boolean value of window.diyPlayerMode."
+    },
+    {
+      "id": "function:public/js/core/state.js:syncDiyModeButton",
+      "type": "function",
+      "name": "syncDiyModeButton",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Syncs the 'on' class, 'aria-pressed', and 'title' attributes for both diy-mode-btn and fullscreen-diy-btn elements based on window.diyPlayerMode."
+    },
+    {
+      "id": "function:public/js/core/state.js:applyDiyMode",
+      "type": "function",
+      "name": "applyDiyMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Applies DIY or simple mode by toggling CSS classes ('diy-mode'/'simple-mode' on body, 'diy-mode-preload'/'simple-mode-preload' on html). Optionally saves preference, closes panels when leaving DIY mode, shows toast, and animates buttons with GSAP back.out."
+    },
+    {
+      "id": "function:public/js/core/state.js:toggleDiyMode",
+      "type": "function",
+      "name": "toggleDiyMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Toggles DIY mode via applyDiyMode with save+toast+animate options. Updates visual guide state if active."
+    },
+    {
+      "id": "function:public/js/core/state.js:isPodcastSong",
+      "type": "function",
+      "name": "isPodcastSong",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true if song.type === 'podcast'."
+    },
+    {
+      "id": "function:public/js/core/state.js:djSongKey",
+      "type": "function",
+      "name": "djSongKey",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Generates DJ mode song key string: 'local:{localKey}' for local songs, 'podcast:{id}' for podcast songs, empty string for null songs."
+    },
+    {
+      "id": "function:public/js/core/state.js:resetDjModeMeter",
+      "type": "function",
+      "name": "resetDjModeMeter",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Resets all DJ mode meter values (tempoGap, tempoConfidence, sectionEnergy, sectionLow, sectionChange, visualPulse, lastBeatAt) to zero or -10."
+    },
+    {
+      "id": "function:public/js/core/state.js:resetDjBeatMapState",
+      "type": "function",
+      "name": "resetDjBeatMapState",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Resets DJ beat map state: clears currentDjBeatMap, resets djBeatMapNextIdx and djBeatPulseNextIdx to 0."
+    },
+    {
+      "id": "function:public/js/core/state.js:cancelDjBeatAnalysisTimer",
+      "type": "function",
+      "name": "cancelDjBeatAnalysisTimer",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Clears the DJ beat analysis timeout and nulls the timer reference."
+    },
+    {
+      "id": "function:public/js/core/state.js:setDjModeActive",
+      "type": "function",
+      "name": "setDjModeActive",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Sets DJ mode active state and song key. On activation: clears beatMapCache and cancels normal beat analysis. On deactivation: increments djBeatMapToken, cancels DJ analysis timer, resets DJ beat map state."
+    },
+    {
+      "id": "function:public/js/core/state.js:maybeAnnounceDjMode",
+      "type": "function",
+      "name": "maybeAnnounceDjMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Shows a toast notification 'DJ Mode · 离线锁拍' at most every 8 seconds while DJ mode is active."
+    },
+    {
+      "id": "function:public/js/core/state.js:isDevelopmentLockedFx",
+      "type": "function",
+      "name": "isDevelopmentLockedFx",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Checks if a given FX key is locked for development via the DEVELOPMENT_LOCKED_FX map (currently only wallpaperMode locked)."
+    },
+    {
+      "id": "function:public/js/core/state.js:normalizeDevelopmentLockedFxState",
+      "type": "function",
+      "name": "normalizeDevelopmentLockedFxState",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Ensures locked FX properties are forced to their disabled state. Currently sets fx.wallpaperMode = false."
+    },
+    {
+      "id": "function:public/js/core/state.js:pulseObjectValue",
+      "type": "function",
+      "name": "pulseObjectValue",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Pulses a numeric property on any object to a peak value, then GSAP-animates it back to 0 with power3.out easing. Falls back to setTimeout when GSAP unavailable."
+    },
+    {
+      "id": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "type": "function",
+      "name": "isDeepBackgroundMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true when deep background optimization should activate: document hidden OR desktop minimized OR desktop not visible, unless live background keep mode is active."
+    },
+    {
+      "id": "function:public/js/core/state.js:currentPerformanceBackgroundMode",
+      "type": "function",
+      "name": "currentPerformanceBackgroundMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Normalizes the performance background mode string from fx.performanceBackground and fx.liveBackgroundKeep flag."
+    },
+    {
+      "id": "function:public/js/core/state.js:isLiveBackgroundKeepMode",
+      "type": "function",
+      "name": "isLiveBackgroundKeepMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true if current performance background mode is 'keep' (live background remains active when minimized/hidden)."
+    },
+    {
+      "id": "function:public/js/core/state.js:isBackgroundReleaseMode",
+      "type": "function",
+      "name": "isBackgroundReleaseMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true if current performance background mode is 'release' (aggressive resource release when backgrounded)."
+    },
+    {
+      "id": "function:public/js/core/state.js:isHiddenForBackgroundOptimization",
+      "type": "function",
+      "name": "isHiddenForBackgroundOptimization",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Returns true when document is hidden AND live background keep mode is NOT active."
+    },
+    {
+      "id": "function:public/js/core/state.js:isVisibleBackgroundMode",
+      "type": "function",
+      "name": "isVisibleBackgroundMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Always returns false (stub for visible background eco mode)."
+    },
+    {
+      "id": "function:public/js/core/state.js:updateRenderPowerClasses",
+      "type": "function",
+      "name": "updateRenderPowerClasses",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Sets 'render-deep-sleep' and 'render-background-eco' CSS classes on document.body based on current background power state."
+    },
+    {
+      "id": "function:public/js/core/state.js:safeObjectKeys",
+      "type": "function",
+      "name": "safeObjectKeys",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Safe wrapper around Object.keys — returns [] for null/undefined and catches any exceptions."
+    },
+    {
+      "id": "function:public/js/core/state.js:markProtectedKey",
+      "type": "function",
+      "name": "markProtectedKey",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Marks a key as protected by setting map[String(key)] = true. Used to prevent cache eviction of in-use entries."
+    },
+    {
+      "id": "function:public/js/core/state.js:collectProtectedCoverUrls",
+      "type": "function",
+      "name": "collectProtectedCoverUrls",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Collects all cover URLs that must be protected from cache eviction: current song cover (60/360/400 sizes), currentCoverSource, playlist panel detail cover, and shelfManager card covers."
+    },
+    {
+      "id": "function:public/js/core/state.js:collectProtectedBeatMapKeys",
+      "type": "function",
+      "name": "collectProtectedBeatMapKeys",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Collects beat map cache keys to protect: songs within ±5 of currentIdx, beatPrefetchLastKey, active djMode.songKey, and localBeatAnalysis song key."
+    },
+    {
+      "id": "function:public/js/core/state.js:collectProtectedCoverDepthIds",
+      "type": "function",
+      "name": "collectProtectedCoverDepthIds",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Collects cover depth AI cache IDs to protect: currentCoverSource.src and current song covers at 360/400 sizes combined with tex dimensions."
+    },
+    {
+      "id": "function:public/js/core/state.js:trimObjectCache",
+      "type": "function",
+      "name": "trimObjectCache",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Generic object cache trimmer. Iterates keys in insertion order, deletes non-protected entries until cache size drops to 'keep' limit. Optionally skips entries via skipRecord callback. Returns number of dropped entries."
+    },
+    {
+      "id": "function:public/js/core/state.js:trimCoverDepthCache",
+      "type": "function",
+      "name": "trimCoverDepthCache",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Specialized trim for coverDepthCache using ordered key list. Protects latest 'keep' entries plus protectedKeys set. Rebuilds coverDepthCacheKeys from remaining entries. Returns dropped count."
+    },
+    {
+      "id": "function:public/js/core/state.js:collectRuntimePerfSnapshot",
+      "type": "function",
+      "name": "collectRuntimePerfSnapshot",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Collects comprehensive runtime performance snapshot: render state (mode, fps, skipped, longFrames), cache counts (playlist covers, depth, beatMaps), heap memory sample, renderer info (geometries, textures, calls, triangles), viewport dimensions and pixel ratio, and deep sleep status."
+    },
+    {
+      "id": "function:public/js/core/state.js:trimRuntimeCaches",
+      "type": "function",
+      "name": "trimRuntimeCaches",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Trims all runtime caches (playlist covers, cover depth, beat maps, DJ beat maps) using their respective trim functions. In aggressive mode: uses tighter keep limits and disposes renderer render lists. Returns total dropped count."
+    },
+    {
+      "id": "function:public/js/core/state.js:trimVisualCachesForBackground",
+      "type": "function",
+      "name": "trimVisualCachesForBackground",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Trims runtime caches aggressively when deep background mode is active, via trimRuntimeCaches('deep-background', true)."
+    },
+    {
+      "id": "function:public/js/core/state.js:scheduleBackgroundCacheTrim",
+      "type": "function",
+      "name": "scheduleBackgroundCacheTrim",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Schedules a trimVisualCachesForBackground call after 900ms delay, if deep background mode is active. Debounces via clearTimeout on backgroundCacheTrimTimer."
+    },
+    {
+      "id": "function:public/js/core/state.js:maybeTrimRuntimeCaches",
+      "type": "function",
+      "name": "maybeTrimRuntimeCaches",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Conditional cache trimmer. Skips if not in deep background and less than 30s since startup. Applies different intervals: release mode (3.6s), deep (7s), active (45s)."
+    },
+    {
+      "id": "function:public/js/core/state.js:applyRendererPowerMode",
+      "type": "function",
+      "name": "applyRendererPowerMode",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Applies renderer power mode: in deep sleep, shrinks renderer to 4x4 with adaptive pixel ratio; in active mode, sets to full viewport. Disposes render lists in sleep mode and schedules cache trim."
+    },
+    {
+      "id": "function:public/js/core/state.js:updateDesktopRuntimeState",
+      "type": "function",
+      "name": "updateDesktopRuntimeState",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Updates desktop runtime state (minimized, visible, focused, fullscreen) from Electron IPC state. Calls updateRenderPowerClasses, applyRendererPowerMode, syncs desktop overlay state, recovers visuals if leaving deep background, and refreshes main renderer viewport on fullscreen change."
+    },
+    {
+      "id": "function:public/js/core/state.js:installRenderPowerHooks",
+      "type": "function",
+      "name": "installRenderPowerHooks",
+      "parentId": "file:public/js/core/state.js",
+      "summary": "Installs all render power lifecycle hooks: visibilitychange listener (update power + recover visuals), window focus/blur listeners, and desktopWindow.onStateChange hook for Electron desktop state."
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "file:public/js/shared.js",
+      "type": "imports",
+      "summary": "state.js depends on shared.js for fxDefaults, all STORE_KEY constants, readHotkeySettings, readBooleanPreference, readDiyModePreference, and diyPlayerMode."
+    },
+    {
+      "source": "function:public/js/core/state.js:applyDiyMode",
+      "target": "data:public/js/shared.js:fxDefaults",
+      "type": "reads",
+      "summary": "applyDiyMode reads window.diyPlayerMode (initialized from shared.js readDiyModePreference)."
+    },
+    {
+      "source": "function:public/js/core/state.js:toggleDiyMode",
+      "target": "function:public/js/core/state.js:applyDiyMode",
+      "type": "calls"
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "function:public/js/shared.js:readHotkeySettings",
+      "type": "calls",
+      "summary": "state.js line 545 calls window.readHotkeySettings() to initialize hotkeySettings."
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "function:public/js/shared.js:readBooleanPreference",
+      "type": "calls",
+      "summary": "state.js calls window.readBooleanPreference for controlsAutoHide, playlistPanelPinned, userCapsuleAutoHide, fxFabAutoHide."
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "data:public/js/shared.js:fxDefaults",
+      "type": "reads",
+      "summary": "state.js line 529: Object.assign({}, window.fxDefaults, ...) initializes window.fx."
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "data:public/js/shared.js:STORE_KEYS",
+      "type": "reads",
+      "summary": "state.js reads CONTROLS_AUTO_HIDE_STORE_KEY, PLAYLIST_PANEL_PIN_STORE_KEY, USER_CAPSULE_AUTO_HIDE_STORE_KEY, FX_FAB_AUTO_HIDE_STORE_KEY for preference I/O."
+    },
+    {
+      "source": "file:public/js/shared.js",
+      "target": "file:vendor/gsap",
+      "type": "references",
+      "summary": "openGsapModal and closeGsapModal use window.gsap for modal animations."
+    },
+    {
+      "source": "function:public/js/shared.js:bindModalBackdropClose",
+      "target": "file:public/js/api-helper.js",
+      "type": "references",
+      "summary": "bindModalBackdropClose references window.closeTrackDetailModal and window.closeCustomLyricModal (defined in api-helper.js)."
+    },
+    {
+      "source": "function:public/js/shared.js:bindModalBackdropClose",
+      "target": "file:public/js/login.js",
+      "type": "references",
+      "summary": "bindModalBackdropClose references window.closeLoginModal and window.closeUserModal (defined in login.js)."
+    },
+    {
+      "source": "function:public/js/shared.js:bindModalBackdropClose",
+      "target": "file:public/js/playlists.js",
+      "type": "references",
+      "summary": "bindModalBackdropClose references closeUpdatePanel (defined in playlists.js, unqualified)."
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "file:public/js/core/three-lyrics.js",
+      "type": "references",
+      "summary": "state.js line 529 calls window.readSavedLyricLayout() (defined in three-lyrics.js) to merge saved lyric layout into fx state."
+    },
+    {
+      "source": "file:public/js/core/state.js",
+      "target": "file:public/js/prefs.js",
+      "type": "references",
+      "summary": "state.js calls readSavedVolume() (line 351) and readSavedPlaybackVisualPreset() (line 527) from prefs.js."
+    },
+    {
+      "source": "function:public/js/core/state.js:applyRendererPowerMode",
+      "target": "function:public/js/core/state.js:scheduleBackgroundCacheTrim",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:scheduleBackgroundCacheTrim",
+      "target": "function:public/js/core/state.js:trimVisualCachesForBackground",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimVisualCachesForBackground",
+      "target": "function:public/js/core/state.js:trimRuntimeCaches",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimRuntimeCaches",
+      "target": "function:public/js/core/state.js:collectProtectedCoverUrls",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimRuntimeCaches",
+      "target": "function:public/js/core/state.js:collectProtectedBeatMapKeys",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimRuntimeCaches",
+      "target": "function:public/js/core/state.js:trimObjectCache",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimRuntimeCaches",
+      "target": "function:public/js/core/state.js:trimCoverDepthCache",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimRuntimeCaches",
+      "target": "function:public/js/core/state.js:collectProtectedCoverDepthIds",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:maybeTrimRuntimeCaches",
+      "target": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:maybeTrimRuntimeCaches",
+      "target": "function:public/js/core/state.js:isBackgroundReleaseMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:maybeTrimRuntimeCaches",
+      "target": "function:public/js/core/state.js:trimRuntimeCaches",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "target": "function:public/js/core/state.js:isLiveBackgroundKeepMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:isLiveBackgroundKeepMode",
+      "target": "function:public/js/core/state.js:currentPerformanceBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:isBackgroundReleaseMode",
+      "target": "function:public/js/core/state.js:currentPerformanceBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:updateDesktopRuntimeState",
+      "target": "function:public/js/core/state.js:updateRenderPowerClasses",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:updateDesktopRuntimeState",
+      "target": "function:public/js/core/state.js:applyRendererPowerMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:updateDesktopRuntimeState",
+      "target": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:installRenderPowerHooks",
+      "target": "function:public/js/core/state.js:updateRenderPowerClasses",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:installRenderPowerHooks",
+      "target": "function:public/js/core/state.js:applyRendererPowerMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:installRenderPowerHooks",
+      "target": "function:public/js/core/state.js:updateDesktopRuntimeState",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:updateFullscreenDiyPeekFromPointer",
+      "target": "function:public/js/core/state.js:layoutFullscreenDiyZone",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:updateFullscreenDiyPeekFromPointer",
+      "target": "function:public/js/core/state.js:shouldSuppressFullscreenDiyPeek",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:applyDiyMode",
+      "target": "function:public/js/core/state.js:syncDiyModeButton",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:applyDiyMode",
+      "target": "function:public/js/core/state.js:isDiyMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:collectProtectedCoverUrls",
+      "target": "function:public/js/shared.js:songProviderKey",
+      "type": "references",
+      "summary": "collectProtectedCoverUrls implicitly uses song provider key patterns via window.songCoverSrc."
+    },
+    {
+      "source": "function:public/js/core/state.js:collectRuntimePerfSnapshot",
+      "target": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:collectRuntimePerfSnapshot",
+      "target": "function:public/js/core/state.js:safeObjectKeys",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimObjectCache",
+      "target": "function:public/js/core/state.js:safeObjectKeys",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:trimCoverDepthCache",
+      "target": "function:public/js/core/state.js:safeObjectKeys",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:collectProtectedBeatMapKeys",
+      "target": "function:public/js/core/state.js:markProtectedKey",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:collectProtectedCoverDepthIds",
+      "target": "function:public/js/core/state.js:markProtectedKey",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:applyRendererPowerMode",
+      "target": "function:public/js/core/state.js:isDeepBackgroundMode",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:setDjModeActive",
+      "target": "function:public/js/core/state.js:resetDjModeMeter",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:setDjModeActive",
+      "target": "function:public/js/core/state.js:resetDjBeatMapState",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:setDjModeActive",
+      "target": "function:public/js/core/state.js:cancelDjBeatAnalysisTimer",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:setDjModeActive",
+      "target": "function:public/js/core/state.js:djSongKey",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:toggleUserCapsuleAutoHide",
+      "target": "function:public/js/core/state.js:applyUserCapsuleAutoHideState",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/core/state.js:toggleFxFabAutoHide",
+      "target": "function:public/js/core/state.js:applyFxFabAutoHideState",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/shared.js:_cacheKeyForSong",
+      "target": "function:public/js/shared.js:songProviderKey",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/shared.js:readHotkeySettings",
+      "target": "function:public/js/shared.js:getHotkeyDefaults",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/shared.js:packagedDefaultLyricLayoutRaw",
+      "target": "function:public/js/shared.js:clonePackagedDefaultFxSnapshot",
+      "type": "calls"
+    },
+    {
+      "source": "function:public/js/shared.js:closeGsapModal",
+      "target": "function:public/js/shared.js:openGsapModal",
+      "type": "references",
+      "summary": "closeGsapModal mirrors the GSAP animation pattern of openGsapModal in reverse."
+    }
+  ]
+}

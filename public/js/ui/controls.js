@@ -22,10 +22,10 @@ window.isMusicSearchMode = function(mode) {
   return mode !== 'podcast';
 }
 window.searchResultKey = function(q, mode) {
-  return (mode || searchMode || 'song') + '|' + String(q || '').trim();
+  return (mode || window.searchMode || 'song') + '|' + String(q || '').trim();
 }
 window.clearSearchResults = function() {
-  searchRequestSeq++;
+  window.searchRequestSeq++;
   searchLastResultQuery = '';
   playlist = [];
   podcastResults = [];
@@ -36,14 +36,14 @@ window.clearSearchResults = function() {
 }
 window.readSearchHistory = function() {
   try {
-    var raw = JSON.parse(localStorage.getItem(SEARCH_HISTORY_STORE_KEY) || '[]');
+    var raw = JSON.parse(localStorage.getItem(window.SEARCH_HISTORY_STORE_KEY) || '[]');
     return Array.isArray(raw) ? raw.map(function(v){ return String(v || '').trim(); }).filter(Boolean).slice(0, 10) : [];
   } catch (e) {
     return [];
   }
 }
 window.writeSearchHistory = function(items) {
-  try { localStorage.setItem(SEARCH_HISTORY_STORE_KEY, JSON.stringify((items || []).slice(0, 10))); } catch (e) {}
+  try { localStorage.setItem(window.SEARCH_HISTORY_STORE_KEY, JSON.stringify((items || []).slice(0, 10))); } catch (e) {}
 }
 window.rememberSearchQuery = function(q) {
   q = String(q || '').trim();
@@ -53,7 +53,7 @@ window.rememberSearchQuery = function(q) {
   writeSearchHistory(items);
 }
 window.renderSearchHistory = function() {
-  if (searchMode !== 'song' && searchMode !== 'netease' && searchMode !== 'qq' && searchMode !== 'youtube') return false;
+  if (window.searchMode !== 'song' && window.searchMode !== 'netease' && window.searchMode !== 'qq' && window.searchMode !== 'youtube') return false;
   var items = readSearchHistory();
   if (!items.length) {
     $results.innerHTML = '';
@@ -64,7 +64,7 @@ window.renderSearchHistory = function() {
     '<div class="search-history">' +
       '<div class="search-history-head"><span>搜索历史</span><button class="search-history-clear" type="button" data-clear-history="1">清空</button></div>' +
       '<div class="search-history-list">' +
-        items.map(function(q){ return '<button class="search-history-chip" type="button" data-history-query="' + escHtml(q) + '">' + escHtml(q) + '</button>'; }).join('') +
+        items.map(function(q){ return '<button class="search-history-chip" type="button" data-history-query="' + window.escHtml(q) + '">' + window.escHtml(q) + '</button>'; }).join('') +
       '</div>' +
     '</div>';
   $results.classList.add('show');
@@ -106,7 +106,7 @@ window.updateSearchModeTabs = function() {
   }
   var ytBtn = document.getElementById('search-mode-youtube');
   if (ytBtn) {
-    var ytEnabled = typeof searchSourceEnabled === 'function' ? searchSourceEnabled('youtube') : true;
+    var ytEnabled = typeof searchSourceEnabled === 'function' ? window.searchSourceEnabled('youtube') : true;
     ytBtn.style.display = ytEnabled ? '' : 'none';
     ytBtn.classList.toggle('active', searchMode === 'youtube');
     ytBtn.setAttribute('aria-selected', searchMode === 'youtube' ? 'true' : 'false');
@@ -166,25 +166,25 @@ window.programMetaText = function(item) {
 }
 window.searchThumbHtml = function(src) {
   return src
-    ? '<img src="' + coverUrlWithSize(src, 80) + '" alt="" loading="lazy" onerror="this.style.opacity=0.2">'
+    ? '<img src="' + window.coverUrlWithSize(src, 80) + '" alt="" loading="lazy" onerror="this.style.opacity=0.2">'
     : '<div style="width:40px;height:40px;border-radius:6px;background:rgba(255,255,255,0.06);flex-shrink:0"></div>';
 }
 window.renderPodcastRadios = function(items, label) {
   podcastResults = items || [];
   podcastPrograms = [];
   playlist = [];
-  if (!podcastResults.length) {
+  if (!window.podcastResults.length) {
     $results.innerHTML = '<div class="search-empty">No podcast found</div>';
     $results.classList.add('show');
     return;
   }
-  $results.innerHTML = podcastResults.map(function(p, i){
+  $results.innerHTML = window.podcastResults.map(function(p, i){
     return '<div class="search-result">' +
       '<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0" onclick="openPodcastPrograms(' + i + ')">' +
         searchThumbHtml(p.cover) +
         '<div class="search-result-info">' +
-          '<div class="search-result-title">' + escHtml(p.name || '') + '<span class="tag-podcast">Podcast</span></div>' +
-          '<div class="search-result-meta">' + escHtml(podcastMetaText(p) || label || 'NetEase Radio') + '</div>' +
+          '<div class="search-result-title">' + window.escHtml(p.name || '') + '<span class="tag-podcast">Podcast</span></div>' +
+          '<div class="search-result-meta">' + window.escHtml(podcastMetaText(p) || label || 'NetEase Radio') + '</div>' +
         '</div>' +
       '</div>' +
       '<button class="add-btn" title="Open" onclick="event.stopPropagation();openPodcastPrograms(' + i + ')">›</button>' +
@@ -194,66 +194,66 @@ window.renderPodcastRadios = function(items, label) {
   if (window.gsap) animateListItems($results, '.search-result', { x: 0, y: 6, stagger: 0.012, duration: 0.18, limit: 18 });
 }
 window.loadPodcastHot = async function() {
-  var requestSeq = ++searchRequestSeq;
+  var requestSeq = ++window.searchRequestSeq;
   $results.innerHTML = '<div class="search-empty">Loading podcasts...</div>';
   $results.classList.add('show');
   try {
-    var data = await neteasePodcastHot(18);
-    if (requestSeq !== searchRequestSeq || searchMode !== 'podcast') return;
+    var data = await window.neteasePodcastHot(18);
+    if (requestSeq !== window.searchRequestSeq || window.searchMode !== 'podcast') return;
     renderPodcastRadios(data.podcasts || [], 'Hot podcasts');
   } catch (err) {
     console.error('Podcast hot:', err);
-    if (requestSeq === searchRequestSeq) $results.innerHTML = '<div class="search-empty">Podcast load failed</div>';
+    if (requestSeq === window.searchRequestSeq) $results.innerHTML = '<div class="search-empty">Podcast load failed</div>';
   }
 }
 window.doPodcastSearch = async function(q) {
-  var requestSeq = ++searchRequestSeq;
+  var requestSeq = ++window.searchRequestSeq;
   try {
-    var data = await neteasePodcastSearch(q, 18);
-    if (requestSeq !== searchRequestSeq || searchMode !== 'podcast' || $input.value.trim() !== q) return;
+    var data = await window.neteasePodcastSearch(q, 18);
+    if (requestSeq !== window.searchRequestSeq || window.searchMode !== 'podcast' || $input.value.trim() !== q) return;
     renderPodcastRadios(data.podcasts || [], 'Search results');
   } catch (err) {
     console.error('Podcast search:', err);
   }
 }
 window.openPodcastPrograms = async function(i) {
-  var radio = podcastResults[i]; if (!radio) return;
-  var requestSeq = ++searchRequestSeq;
+  var radio = window.podcastResults[i]; if (!radio) return;
+  var requestSeq = ++window.searchRequestSeq;
   podcastCurrentRadio = radio;
   $results.innerHTML = '<div class="search-empty">Loading episodes...</div>';
   $results.classList.add('show');
   try {
-    var data = await neteasePodcastPrograms(radio.id, 36);
-    if (requestSeq !== searchRequestSeq || searchMode !== 'podcast') return;
+    var data = await window.neteasePodcastPrograms(radio.id, 36);
+    if (requestSeq !== window.searchRequestSeq || window.searchMode !== 'podcast') return;
     podcastCurrentRadio = Object.assign({}, radio, data.radio || {});
     podcastPrograms = data.programs || [];
-    playlist = podcastPrograms;
+    playlist = window.podcastPrograms;
     renderPodcastPrograms();
   } catch (err) {
     console.error('Podcast programs:', err);
-    if (requestSeq === searchRequestSeq) $results.innerHTML = '<div class="search-empty">Episodes load failed</div>';
+    if (requestSeq === window.searchRequestSeq) $results.innerHTML = '<div class="search-empty">Episodes load failed</div>';
   }
 }
 window.renderPodcastPrograms = function() {
-  var radio = podcastCurrentRadio || {};
-  if (!podcastPrograms.length) {
-    $results.innerHTML = '<div class="podcast-result-head"><button class="podcast-back-btn" onclick="event.stopPropagation();renderPodcastRadios(podcastResults)">‹</button><div class="search-result-info"><div class="search-result-title">' + escHtml(radio.name || 'Podcast') + '</div><div class="search-result-meta">No playable episodes</div></div></div>';
+  var radio = window.podcastCurrentRadio || {};
+  if (!window.podcastPrograms.length) {
+    $results.innerHTML = '<div class="podcast-result-head"><button class="podcast-back-btn" onclick="event.stopPropagation();renderPodcastRadios(window.podcastResults)">‹</button><div class="search-result-info"><div class="search-result-title">' + window.escHtml(radio.name || 'Podcast') + '</div><div class="search-result-meta">No playable episodes</div></div></div>';
     $results.classList.add('show');
     return;
   }
   $results.innerHTML =
     '<div class="podcast-result-head">' +
-      '<button class="podcast-back-btn" onclick="event.stopPropagation();renderPodcastRadios(podcastResults)">‹</button>' +
+      '<button class="podcast-back-btn" onclick="event.stopPropagation();renderPodcastRadios(window.podcastResults)">‹</button>' +
       searchThumbHtml(radio.cover) +
-      '<div class="search-result-info"><div class="search-result-title">' + escHtml(radio.name || 'Podcast') + '<span class="tag-podcast">Podcast</span></div><div class="search-result-meta">' + escHtml(radio.djName || (podcastPrograms.length + ' episodes')) + '</div></div>' +
+      '<div class="search-result-info"><div class="search-result-title">' + window.escHtml(radio.name || 'Podcast') + '<span class="tag-podcast">Podcast</span></div><div class="search-result-meta">' + window.escHtml(radio.djName || (window.podcastPrograms.length + ' episodes')) + '</div></div>' +
     '</div>' +
-    podcastPrograms.map(function(p, i){
+    window.podcastPrograms.map(function(p, i){
       return '<div class="search-result">' +
         '<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0" onclick="playPodcastProgram(' + i + ')">' +
           searchThumbHtml(p.cover) +
           '<div class="search-result-info">' +
-            '<div class="search-result-title">' + escHtml(p.name || '') + '</div>' +
-            '<div class="search-result-meta">' + escHtml(programMetaText(p)) + '</div>' +
+            '<div class="search-result-title">' + window.escHtml(p.name || '') + '</div>' +
+            '<div class="search-result-meta">' + window.escHtml(programMetaText(p)) + '</div>' +
           '</div>' +
         '</div>' +
         '<button class="add-btn" title="下一首播放" onclick="event.stopPropagation();queuePodcastProgram(' + i + ')">+</button>' +
@@ -263,25 +263,25 @@ window.renderPodcastPrograms = function() {
   if (window.gsap) animateListItems($results, '.search-result', { x: 0, y: 6, stagger: 0.010, duration: 0.18, limit: 18 });
 }
 window.queuePodcastProgram = function(i) {
-  var item = podcastPrograms[i]; if (!item) return;
-  queueSongNext(item);
-  showToast('已设为下一首: ' + item.name);
+  var item = window.podcastPrograms[i]; if (!item) return;
+  window.queueSongNext(item);
+  window.showToast('已设为下一首: ' + item.name);
 }
 window.playPodcastProgram = function(i) {
-  var item = podcastPrograms[i]; if (!item) return;
-  playSearchResult(i);
+  var item = window.podcastPrograms[i]; if (!item) return;
+  window.playSearchResult(i);
 }
 
 $input.addEventListener('input', function(){
-  clearTimeout(searchTimer);
+  clearTimeout(window.searchTimer);
   var q = $input.value.trim();
   if (!q) {
     if (searchMode === 'podcast') loadPodcastHot();
     else renderSearchHistory();
     return;
   }
-  if (isMusicSearchMode(searchMode)) {
-    $results.innerHTML = '<div class="search-empty">正在搜索 “' + escHtml(q) + '”…</div>';
+  if (isMusicSearchMode(window.searchMode)) {
+    $results.innerHTML = '<div class="search-empty">正在搜索 “' + window.escHtml(q) + '”…</div>';
     $results.classList.add('show');
   }
   searchTimer = setTimeout(function(){ doSearch(q); }, 180);
@@ -289,7 +289,7 @@ $input.addEventListener('input', function(){
 $input.addEventListener('focus', function(){
   var searchArea = document.getElementById('search-area');
   if (searchArea) setPeek(searchArea, true, 'search');
-  if (!$input.value.trim() && isMusicSearchMode(searchMode)) renderSearchHistory();
+  if (!$input.value.trim() && isMusicSearchMode(window.searchMode)) renderSearchHistory();
   else if ($results.children.length > 0) $results.classList.add('show');
   else if (searchMode === 'podcast') loadPodcastHot();
 });
@@ -302,12 +302,12 @@ if (searchBoxEl) {
 $input.addEventListener('keydown', function(e){
   if (e.key === 'Enter') {
     e.preventDefault();
-    clearTimeout(searchTimer);
+    clearTimeout(window.searchTimer);
     var q = $input.value.trim();
-    if (isMusicSearchMode(searchMode) && q && playlist.length && searchLastResultQuery === searchResultKey(q)) $results.classList.add('show');
+    if (isMusicSearchMode(window.searchMode) && q && window.playlist.length && searchLastResultQuery === searchResultKey(q)) $results.classList.add('show');
     else doSearch(q, { autoPlayFirst: false });
   } else if (e.key === 'Escape') {
-    clearTimeout(searchTimer);
+    clearTimeout(window.searchTimer);
     $input.blur();
     clearSearchResults();
     if (!emptyHomeActive) setPeek(document.getElementById('search-area'), false, 'search');
@@ -338,31 +338,31 @@ document.addEventListener('click', function(e){
 updateSearchModeTabs();
 
 window.songSourceTagHtml = function(song) {
-  var key = songProviderKey(song);
+  var key = window.songProviderKey(song);
   var label = ({ netease: 'NE', qq: 'QQ', youtube: 'YT' })[key] || key.toUpperCase();
-  return '<span class="tag-source ' + key + '">' + label + '</span>';
+  return '<span class="tag-window.source ' + key + '">' + label + '</span>';
 }
 window.searchResultMetaText = function(song) {
   var bits = [];
   if (song.artist) bits.push(song.artist);
   if (song.album) bits.push(song.album);
-  if (songProviderKey(song) === 'qq' && !song.playable) bits.push('QQ 播放需会话/授权');
-  return bits.join('  ·  ') || songSourceLabel(song);
+  if (window.songProviderKey(song) === 'qq' && !song.playable) bits.push('QQ 播放需会话/授权');
+  return bits.join('  ·  ') || window.songSourceLabel(song);
 }
 window.searchResultMetaHtml = function(song, index) {
   song = song || {};
   var artist = String(song.artist || '').trim();
   var bits = [];
   if (song.album) bits.push(song.album);
-  if (songProviderKey(song) === 'qq' && !song.playable) bits.push('QQ 播放需会话/授权');
-  var tail = bits.length ? (' · ' + escHtml(bits.join('  ·  '))) : '';
-  if (!artist) return escHtml(searchResultMetaText(song));
-  return '<button class="search-artist-link" type="button" onclick="event.stopPropagation();openSearchResultArtist(' + index + ')">' + escHtml(artist) + '</button>' + tail;
+  if (window.songProviderKey(song) === 'qq' && !song.playable) bits.push('QQ 播放需会话/授权');
+  var tail = bits.length ? (' · ' + window.escHtml(bits.join('  ·  '))) : '';
+  if (!artist) return window.escHtml(searchResultMetaText(song));
+  return '<button class="search-artist-link" type="button" onclick="event.stopPropagation();openSearchResultArtist(' + index + ')">' + window.escHtml(artist) + '</button>' + tail;
 }
 window.openSearchResultArtist = function(index) {
-  var song = playlist && playlist[index];
+  var song = window.playlist && window.playlist[index];
   if (!song) return;
-  openArtistDetailForSong(song);
+  window.openArtistDetailForSong(song);
 }
 window.searchIntentPrefersQQ = function(q) {
   q = String(q || '').toLowerCase();
@@ -447,7 +447,7 @@ window.scoreSongSearchResult = function(song, q, sourceIndex) {
   if (artistMentioned && name && nq.indexOf(name) >= 0) score += 34;
   if (/周杰伦|周杰倫|jay\s*chou/i.test(String(q || '')) && !artistMentioned) score -= 28;
   if (album && nq && (album.indexOf(nq) >= 0 || nq.indexOf(album) >= 0)) score += 8;
-  if (songProviderKey(song) === 'qq') score += searchIntentPrefersQQ(q) ? 48 : 4;
+  if (window.songProviderKey(song) === 'qq') score += searchIntentPrefersQQ(q) ? 48 : 4;
   if (song && song.playable === false) score -= 12;
   if (!qAsksDerivative) {
     if (derivative) score -= artistMentioned ? 76 : 96;
@@ -462,7 +462,7 @@ window.mergeSongSearchResults = function(neteaseSongs, qqSongs, limit, q, youtub
   var seen = {};
   function push(song, sourceIndex) {
     if (!song || !song.name) return;
-    var key = songProviderKey(song) + ':' + (song.mid || song.id || (song.name + '|' + song.artist));
+    var key = window.songProviderKey(song) + ':' + (song.mid || song.id || (song.name + '|' + song.artist));
     if (seen[key]) return;
     seen[key] = true;
     song._searchScore = scoreSongSearchResult(song, q, sourceIndex);
@@ -476,60 +476,60 @@ window.mergeSongSearchResults = function(neteaseSongs, qqSongs, limit, q, youtub
 }
 window.fetchMusicSearchResults = async function(q, mode) {
   if (mode === 'qq') {
-    var qqOnly = await qqSearch(q, 12);
+    var qqOnly = await window.qqSearch(q, 12);
     return mergeSongSearchResults([], qqOnly.songs || [], 18, q);
   }
   if (mode === 'netease') {
-    var neOnly = await neteaseSearch(q, 18);
+    var neOnly = await window.neteaseSearch(q, 18);
     return mergeSongSearchResults(neOnly.songs || [], [], 18, q);
   }
   if (mode === 'youtube') {
-    if (!searchSourceEnabled('youtube')) { showToast('YouTube 已关闭'); return []; }
-    var ytOnly = await youtubeSearch(q, 18);
+    if (!window.searchSourceEnabled('youtube')) { window.showToast('YouTube 已关闭'); return []; }
+    var ytOnly = await window.youtubeSearch(q, 18);
     return mergeSongSearchResults([], [], 18, q, ytOnly.songs || []);
   }
   // 'song' (all) mode: parallel search across all platforms
   var promises = [
-    neteaseSearch(q, 10),
-    qqSearch(q, 8)
+    window.neteaseSearch(q, 10),
+    window.qqSearch(q, 8)
   ];
-  if (searchSourceEnabled('youtube')) {
-    promises.push(youtubeSearch(q, 8));
+  if (window.searchSourceEnabled('youtube')) {
+    promises.push(window.youtubeSearch(q, 8));
   }
   var result = await Promise.allSettled(promises);
   var neteaseSongs = result[0].status === 'fulfilled' ? ((result[0].value && result[0].value.songs) || []) : [];
   var qqSongs = result[1].status === 'fulfilled' ? ((result[1].value && result[1].value.songs) || []) : [];
   var youtubeSongs = [];
-  if (searchSourceEnabled('youtube')) {
+  if (window.searchSourceEnabled('youtube')) {
     youtubeSongs = result[2].status === 'fulfilled' ? ((result[2].value && result[2].value.songs) || []) : [];
   }
   return mergeSongSearchResults(neteaseSongs, qqSongs, 18, q, youtubeSongs);
 }
 window.renderSongSearchResults = function(songs) {
   playlist = songs || [];
-  $results.innerHTML = playlist.map(function(s, i){
+  $results.innerHTML = window.playlist.map(function(s, i){
     var vipTag = (s.fee === 1) ? '<span class="tag-vip">VIP</span>' : '';
     var sourceTag = songSourceTagHtml(s);
-    var sourceClass = songProviderKey(s) + '-source';
-    var thumb = songCoverSrc(s, 80);
+    var sourceClass = window.songProviderKey(s) + '-window.source';
+    var thumb = window.songCoverSrc(s, 80);
     var imgTag = thumb
       ? '<img src="' + thumb + '" alt="" loading="lazy" onerror="this.style.opacity=0.2">'
       : '<div style="width:40px;height:40px;border-radius:6px;background:rgba(255,255,255,0.06);flex-shrink:0"></div>';
     return '<div class="search-result ' + sourceClass + '">' +
-      '<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0" onclick="playSearchResult(' + i + ')">' +
+      '<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0" onclick="window.playSearchResult(' + i + ')">' +
         imgTag +
         '<div class="search-result-info">' +
-          '<div class="search-result-title">' + escHtml(s.name) + sourceTag + vipTag + '</div>' +
+          '<div class="search-result-title">' + window.escHtml(s.name) + sourceTag + vipTag + '</div>' +
           '<div class="search-result-meta">' + searchResultMetaHtml(s, i) + '</div>' +
         '</div>' +
       '</div>' +
-      '<button class="song-action-btn' + (isSongLiked(s) ? ' liked' : '') + '" data-like-index="' + i + '" title="' + (isSongLiked(s) ? '取消红心' : '红心喜欢') + '" onclick="event.stopPropagation();toggleLikeSearchResult(' + i + ')">' + heartIconSvg() + '</button>' +
-      '<button class="song-action-btn" title="收藏到歌单" onclick="event.stopPropagation();collectSearchResult(' + i + ')">' + playlistPlusIconSvg() + '</button>' +
+      '<button class="song-action-btn' + (window.isSongLiked(s) ? ' liked' : '') + '" data-like-index="' + i + '" title="' + (window.isSongLiked(s) ? '取消红心' : '红心喜欢') + '" onclick="event.stopPropagation();window.toggleLikeSearchResult(' + i + ')">' + window.heartIconSvg() + '</button>' +
+      '<button class="song-action-btn" title="收藏到歌单" onclick="event.stopPropagation();window.collectSearchResult(' + i + ')">' + window.playlistPlusIconSvg() + '</button>' +
       '<button class="add-btn" title="下一首播放" onclick="event.stopPropagation();queueSearchResult(' + i + ')">+</button>' +
     '</div>';
   }).join('');
   $results.classList.add('show');
-  syncLikeStatusForSongs(playlist);
+  window.syncLikeStatusForSongs(window.playlist);
   if (window.gsap) animateListItems($results, '.search-result', { x: 0, y: 6, stagger: 0.012, duration: 0.18, limit: 18 });
 }
 
@@ -538,7 +538,7 @@ window.doSearch = async function(q, opts) {
   q = String(q || '').trim();
   if (!q) {
     if (searchMode === 'podcast') loadPodcastHot();
-    else if (searchMode === 'youtube') loadYouTubeTrending();
+    else if (searchMode === 'youtube') window.loadYouTubeTrending();
     else renderSearchHistory();
     return;
   }
@@ -546,11 +546,11 @@ window.doSearch = async function(q, opts) {
     doPodcastSearch(q);
     return;
   }
-  var requestSeq = ++searchRequestSeq;
+  var requestSeq = ++window.searchRequestSeq;
   try {
-    var mode = searchMode;
+    var mode = window.searchMode;
     var songs = await fetchMusicSearchResults(q, mode);
-    if (requestSeq !== searchRequestSeq || $input.value.trim() !== q) return;
+    if (requestSeq !== window.searchRequestSeq || $input.value.trim() !== q) return;
     if (!songs.length) {
       playlist = [];
       searchLastResultQuery = '';
@@ -561,7 +561,7 @@ window.doSearch = async function(q, opts) {
     searchLastResultQuery = searchResultKey(q, mode);
     rememberSearchQuery(q);
     renderSongSearchResults(songs);
-    if (opts.autoPlayFirst) playSearchResult(0);
+    if (opts.autoPlayFirst) window.playSearchResult(0);
   } catch (err) { console.error('Search:', err); }
 }
 
@@ -649,13 +649,13 @@ window.bindSmoothWheelScroll = function(scroller) {
   }, { passive: true });
 }
 window.bindSmoothQueueScrolling = function() {
-  if (smoothWheelScrollBound) return;
+  if (window.smoothWheelScrollBound) return;
   smoothWheelScrollBound = true;
   [
     'mini-queue-list',
     'search-results',
-    'fx-panel',
-    'playlist-panel',
+    'window.fx-panel',
+    'window.playlist-panel',
     'track-detail-body'
   ].forEach(function(id){
     bindSmoothWheelScroll(document.getElementById(id));
@@ -674,16 +674,16 @@ window.miniQueueSkeleton = function() {
   return '<div class="mini-queue-skeleton"></div><div class="mini-queue-skeleton"></div><div class="mini-queue-skeleton"></div>';
 }
 window.togglePlaylistPanel = function(force) {
-  var el = document.getElementById('playlist-panel');
+  var el = document.getElementById('window.playlist-panel');
   if (force === false) el.classList.remove('show');
   else if (force === true) el.classList.add('show');
   else el.classList.toggle('show');
   if (el.classList.contains('show')) {
     if (window.gsap) window.gsap.fromTo(el, { x: -12, autoAlpha: 0.92 }, { x: 0, autoAlpha: 1, duration: 0.22, ease: 'power2.out', overwrite: true });
     scheduleUiWarmTask(function(){
-      flushDeferredQueuePanel('playlist-panel-open');
-      if (!playQueue.length && queueViewTab === 'queue') switchPlaylistTab('playlists');
-      if (playQueue.length && currentIdx >= 0 && queueViewTab !== 'queue') switchPlaylistTab('queue');
+      flushDeferredQueuePanel('window.playlist-panel-open');
+      if (!window.playQueue.length && queueViewTab === 'queue') window.switchPlaylistTab('playlists');
+      if (window.playQueue.length && window.currentIdx >= 0 && window.queueViewTab !== 'queue') window.switchPlaylistTab('queue');
       if (queueViewTab === 'queue') animateVisiblePanelList(document.getElementById('queue-list'), '.queue-item', el, '.queue-item.now', { scrollActive: false });
       else if (queueViewTab === 'playlists') animateVisiblePanelList(document.getElementById('pl-list'), '.pl-card', el);
       else animateVisiblePanelList(document.getElementById('podcast-list'), '.pl-card', el);
@@ -691,33 +691,33 @@ window.togglePlaylistPanel = function(force) {
   }
 }
 window.applyPlaylistPanelPinState = function(openPanel) {
-  var panel = document.getElementById('playlist-panel');
-  var btn = document.getElementById('playlist-pin-btn');
+  var panel = document.getElementById('window.playlist-panel');
+  var btn = document.getElementById('window.playlist-pin-btn');
   if (panel) {
-    panel.classList.toggle('pinned', !!playlistPanelPinned);
-    if (playlistPanelPinned || openPanel) {
+    panel.classList.toggle('pinned', !!window.playlistPanelPinned);
+    if (window.playlistPanelPinned || openPanel) {
       panel.dataset.preserveTabOnOpen = '1';
       setPeek(panel, true, 'pl');
     }
   }
   if (btn) {
-    btn.classList.toggle('active', !!playlistPanelPinned);
-    btn.title = playlistPanelPinned ? '取消常开歌单' : '常开歌单';
+    btn.classList.toggle('active', !!window.playlistPanelPinned);
+    btn.title = window.playlistPanelPinned ? '取消常开歌单' : '常开歌单';
   }
 }
 window.setPlaylistPanelPinned = function(on, silent) {
   playlistPanelPinned = !!on;
-  saveBooleanPreference(PLAYLIST_PANEL_PIN_STORE_KEY, playlistPanelPinned);
-  applyPlaylistPanelPinState(playlistPanelPinned);
-  if (!silent) showToast(playlistPanelPinned ? '左侧歌单已常开' : '左侧歌单已恢复自动隐藏');
+  saveBooleanPreference(window.PLAYLIST_PANEL_PIN_STORE_KEY, window.playlistPanelPinned);
+  applyPlaylistPanelPinState(window.playlistPanelPinned);
+  if (!silent) window.showToast(window.playlistPanelPinned ? '左侧歌单已常开' : '左侧歌单已恢复自动隐藏');
 }
 window.togglePlaylistPanelPinned = function() {
-  setPlaylistPanelPinned(!playlistPanelPinned);
+  setPlaylistPanelPinned(!window.playlistPanelPinned);
 }
 window.scrollPlaylistPanelToCurrent = function() {
-  var panel = document.getElementById('playlist-panel');
+  var panel = document.getElementById('window.playlist-panel');
   var list = document.getElementById('queue-list');
-  if (!panel || !list || queueViewTab !== 'queue') return;
+  if (!panel || !list || window.queueViewTab !== 'queue') return;
   var now = performance.now();
   if (panel.__lastCurrentScrollAt && now - panel.__lastCurrentScrollAt < 650) return;
   panel.__lastCurrentScrollAt = now;
@@ -727,7 +727,7 @@ window.scrollPlaylistPanelToCurrent = function() {
 }
 window.switchPlaylistTab = function(tab) {
   tab = tab === 'podcasts' ? 'podcasts' : (tab === 'playlists' ? 'playlists' : 'queue');
-  if (tab !== 'playlists') hideLocalPlaylistDetail();
+  if (tab !== 'playlists') window.hideLocalPlaylistDetail();
   queueViewTab = tab;
   document.getElementById('tab-queue').classList.toggle('active', tab === 'queue');
   document.getElementById('tab-pl').classList.toggle('active', tab === 'playlists');
@@ -737,21 +737,21 @@ window.switchPlaylistTab = function(tab) {
   document.getElementById('pl-pane').style.display = tab === 'playlists' ? '' : 'none';
   var podcastPane = document.getElementById('podcast-pane');
   if (podcastPane) podcastPane.style.display = tab === 'podcasts' ? '' : 'none';
-  if (tab === 'playlists' || tab === 'podcasts') refreshUserPlaylists();
-  if (tab === 'queue') animateVisiblePanelList(document.getElementById('queue-list'), '.queue-item', document.getElementById('playlist-panel'), '.queue-item.now');
-  if (tab === 'playlists') { renderLocalPlaylistsIntoView(); animateVisiblePanelList(document.getElementById('pl-list'), '.pl-card', document.getElementById('playlist-panel')); }
-  if (tab === 'podcasts') animateVisiblePanelList(document.getElementById('podcast-list'), '.pl-card', document.getElementById('playlist-panel'));
+  if (tab === 'playlists' || tab === 'podcasts') window.refreshUserPlaylists();
+  if (tab === 'queue') animateVisiblePanelList(document.getElementById('queue-list'), '.queue-item', document.getElementById('window.playlist-panel'), '.queue-item.now');
+  if (tab === 'playlists') { window.renderLocalPlaylistsIntoView(); animateVisiblePanelList(document.getElementById('pl-list'), '.pl-card', document.getElementById('window.playlist-panel')); }
+  if (tab === 'podcasts') animateVisiblePanelList(document.getElementById('podcast-list'), '.pl-card', document.getElementById('window.playlist-panel'));
 }
 window.setMiniQueueOpen = function(open) {
   miniQueueOpen = !!open;
   var pop = document.getElementById('mini-queue-popover');
   var btn = document.getElementById('mini-queue-btn');
-  if (pop) pop.classList.toggle('show', miniQueueOpen);
-  if (btn) btn.classList.toggle('active', miniQueueOpen);
-  if (miniQueueOpen) {
-    var seq = ++miniQueueRenderSeq;
+  if (pop) pop.classList.toggle('show', window.miniQueueOpen);
+  if (btn) btn.classList.toggle('active', window.miniQueueOpen);
+  if (window.miniQueueOpen) {
+    var seq = ++window.miniQueueRenderSeq;
     requestAnimationFrame(function(){
-      if (seq !== miniQueueRenderSeq || !miniQueueOpen) return;
+      if (seq !== window.miniQueueRenderSeq || !window.miniQueueOpen) return;
       renderMiniQueuePanel({ animate: true, scrollCurrent: true });
     });
     revealBottomControls(1300);
@@ -759,16 +759,16 @@ window.setMiniQueueOpen = function(open) {
 }
 window.toggleMiniQueue = function(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
-  setMiniQueueOpen(!miniQueueOpen);
+  setMiniQueueOpen(!window.miniQueueOpen);
 }
 window.closeMiniQueue = function() {
   setMiniQueueOpen(false);
 }
 window.openPlaylistPanelTab = function(tab, preserve) {
   tab = tab === 'podcasts' ? 'podcasts' : (tab === 'playlists' ? 'playlists' : 'queue');
-  var panel = document.getElementById('playlist-panel');
+  var panel = document.getElementById('window.playlist-panel');
   if (panel && panel.dataset && preserve !== false) panel.dataset.preserveTabOnOpen = '1';
-  switchPlaylistTab(tab);
+  window.switchPlaylistTab(tab);
   setPeek(panel, true, 'pl');
 }
 window.renderMiniQueuePanel = function(opts) {
@@ -776,19 +776,19 @@ window.renderMiniQueuePanel = function(opts) {
   var $list = document.getElementById('mini-queue-list');
   var $count = document.getElementById('mini-queue-count');
   if (!$list || !$count) return;
-  var total = playQueue.length;
-  $count.textContent = total ? (total + ' 首' + (currentIdx >= 0 ? ' · 正在播放 ' + (currentIdx + 1) : '')) : '0 首';
-  if (!miniQueueOpen && !opts.animate && !opts.scrollCurrent) return;
+  var total = window.playQueue.length;
+  $count.textContent = total ? (total + ' 首' + (window.currentIdx >= 0 ? ' · 正在播放 ' + (window.currentIdx + 1) : '')) : '0 首';
+  if (!window.miniQueueOpen && !opts.animate && !opts.scrollCurrent) return;
   if (!total) {
     $list.innerHTML = '<div class="mini-queue-empty">队列为空，先搜索或打开歌单</div>';
     return;
   }
-  $list.innerHTML = playQueue.map(function(song, i){
-    var thumb = songCoverSrc(song, 60);
+  $list.innerHTML = window.playQueue.map(function(song, i){
+    var thumb = window.songCoverSrc(song, 60);
     var imgTag = thumb ? '<img src="' + thumb + '" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0.2">' : '<div class="mini-queue-cover"></div>';
-    return '<div class="mini-queue-item' + (i === currentIdx ? ' now' : '') + '" onclick="playQueueAt(' + i + ')">' +
+    return '<div class="mini-queue-item' + (i === window.currentIdx ? ' now' : '') + '" onclick="window.playQueueAt(' + i + ')">' +
       imgTag +
-      '<div class="mini-queue-info"><div class="mini-queue-name">' + escHtml(song.name) + '</div><div class="mini-queue-sub">' + escHtml(song.artist || '') + '</div></div>' +
+      '<div class="mini-queue-info"><div class="mini-queue-name">' + window.escHtml(song.name) + '</div><div class="mini-queue-sub">' + window.escHtml(song.artist || '') + '</div></div>' +
       '<button class="mini-queue-remove mini-queue-next" onclick="event.stopPropagation();queueIndexNext(' + i + ')" title="下一首播放">下</button>' +
       '<button class="mini-queue-remove" onclick="event.stopPropagation();removeFromQueue(' + i + ')" title="移除">×</button>' +
     '</div>';
@@ -801,39 +801,39 @@ window.renderMiniQueuePanel = function(opts) {
   }
 }
 document.addEventListener('click', function(e){
-  if (miniQueueOpen && !(e.target && e.target.closest && e.target.closest('#bottom-bar'))) closeMiniQueue();
+  if (window.miniQueueOpen && !(e.target && e.target.closest && e.target.closest('#bottom-bar'))) closeMiniQueue();
 });
 bindSmoothQueueScrolling();
 window.renderQueuePanel = function(opts) {
   opts = opts || {};
   var $ql = document.getElementById('queue-list');
-  var seq = ++queueRenderSeq;
-  if (!playQueue.length) {
+  var seq = ++window.queueRenderSeq;
+  if (!window.playQueue.length) {
     $ql.innerHTML = '<div style="text-align:center;padding:24px 0;color:rgba(255,255,255,.32);font-size:11.5px">队列为空，搜索后点 + 设为下一首</div>';
     renderMiniQueuePanel();
-    var panel = document.getElementById('playlist-panel');
-    if (panel && (panel.classList.contains('show') || panel.classList.contains('peek')) && queueViewTab === 'queue') switchPlaylistTab('playlists');
+    var panel = document.getElementById('window.playlist-panel');
+    if (panel && (panel.classList.contains('show') || panel.classList.contains('peek')) && queueViewTab === 'queue') window.switchPlaylistTab('playlists');
     return;
   }
-  $ql.innerHTML = playQueue.map(function(song, i){
-    var thumb = songCoverSrc(song, 60);
+  $ql.innerHTML = window.playQueue.map(function(song, i){
+    var thumb = window.songCoverSrc(song, 60);
     var imgTag = thumb ? '<img src="' + thumb + '" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0.2">' : '<div style="width:38px;height:38px;border-radius:6px;background:rgba(255,255,255,.06);flex-shrink:0"></div>';
-    return '<div class="queue-item' + (i === currentIdx ? ' now' : '') + '" onclick="playQueueAt(' + i + ')">' +
+    return '<div class="queue-item' + (i === window.currentIdx ? ' now' : '') + '" onclick="window.playQueueAt(' + i + ')">' +
       imgTag +
-      '<div class="qi-info"><div class="qi-name">' + escHtml(song.name) + '</div><div class="qi-sub"><button class="queue-artist-link" type="button" onclick="event.stopPropagation();openQueueArtist(' + i + ')">' + escHtml(song.artist || '未知歌手') + '</button></div></div>' +
+      '<div class="qi-info"><div class="qi-name">' + window.escHtml(song.name) + '</div><div class="qi-sub"><button class="queue-artist-link" type="button" onclick="event.stopPropagation();openQueueArtist(' + i + ')">' + window.escHtml(song.artist || '未知歌手') + '</button></div></div>' +
       '<div class="qi-act">' +
-        '<button class="' + (isSongLiked(song) ? 'liked' : '') + '" onclick="event.stopPropagation();toggleLikeQueueIndex(' + i + ')" title="' + (isSongLiked(song) ? '取消红心' : '红心喜欢') + '">' + heartIconSvg() + '</button>' +
+        '<button class="' + (window.isSongLiked(song) ? 'liked' : '') + '" onclick="event.stopPropagation();window.toggleLikeQueueIndex(' + i + ')" title="' + (window.isSongLiked(song) ? '取消红心' : '红心喜欢') + '">' + window.heartIconSvg() + '</button>' +
         '<button class="queue-next" onclick="event.stopPropagation();queueIndexNext(' + i + ')" title="下一首播放">下</button>' +
-        '<button onclick="event.stopPropagation();collectQueueIndex(' + i + ')" title="收藏到歌单">' + playlistPlusIconSvg() + '</button>' +
+        '<button onclick="event.stopPropagation();window.collectQueueIndex(' + i + ')" title="收藏到歌单">' + window.playlistPlusIconSvg() + '</button>' +
         '<button onclick="event.stopPropagation();removeFromQueue(' + i + ')" title="移除">×</button>' +
       '</div>' +
     '</div>';
   }).join('');
-  if (opts.animate && seq === queueRenderSeq) animateVisiblePanelList($ql, '.queue-item', document.getElementById('playlist-panel'), '.queue-item.now');
-  renderMiniQueuePanel({ scrollCurrent: miniQueueOpen });
+  if (opts.animate && seq === window.queueRenderSeq) animateVisiblePanelList($ql, '.queue-item', document.getElementById('window.playlist-panel'), '.queue-item.now');
+  renderMiniQueuePanel({ scrollCurrent: window.miniQueueOpen });
 }
 window.refreshUserPlaylists = async function(force) {
-  if (!loginStatus.loggedIn && !qqLoginStatus.loggedIn) {
+  if (!window.loginStatus.loggedIn && !window.qqLoginStatus.loggedIn) {
     resetPlaylistPanelRenderLimit();
     document.getElementById('pl-list').innerHTML = '<div style="text-align:center;padding:24px 0;color:rgba(255,255,255,.32);font-size:11.5px">登录后显示个人歌单</div>';
     var podcastListLoggedOut = document.getElementById('podcast-list');
@@ -841,11 +841,11 @@ window.refreshUserPlaylists = async function(force) {
     return;
   }
   if (force) resetPlaylistPanelRenderLimit();
-  var hasCachedQQPlaylists = userPlaylists.some(function(pl){ return pl && pl.provider === 'qq'; });
-  var needsQQRefresh = qqLoginStatus.loggedIn && !hasCachedQQPlaylists;
-  if (!force && !needsQQRefresh && (userPlaylists.length || myPodcastCollections.length)) {
+  var hasCachedQQPlaylists = window.userPlaylists.some(function(pl){ return pl && pl.provider === 'qq'; });
+  var needsQQRefresh = window.qqLoginStatus.loggedIn && !hasCachedQQPlaylists;
+  if (!force && !needsQQRefresh && (window.userPlaylists.length || window.myPodcastCollections.length)) {
     var cachedAnimate = isPlaylistPanelVisibleForRender();
-    renderUserPlaylistsList({ animate: cachedAnimate });
+    window.renderUserPlaylistsList({ animate: cachedAnimate });
     renderMyPodcastCollections({ animate: cachedAnimate });
     return;
   }
@@ -858,20 +858,20 @@ window.refreshUserPlaylists = async function(force) {
   if ($pod) $pod.innerHTML = miniQueueSkeleton();
   try {
     var result = await Promise.all([
-      loginStatus.loggedIn ? neteaseUserPlaylists() : Promise.resolve({ playlists: [] }),
-      loginStatus.loggedIn ? neteasePodcastMy() : Promise.resolve({ collections: [], loggedIn: false }),
-      qqLoginStatus.loggedIn ? qqUserPlaylists() : Promise.resolve({ playlists: [] }),
+      window.loginStatus.loggedIn ? window.neteaseUserPlaylists() : Promise.resolve({ playlists: [] }),
+      window.loginStatus.loggedIn ? window.neteasePodcastMy() : Promise.resolve({ collections: [], loggedIn: false }),
+      window.qqLoginStatus.loggedIn ? window.qqUserPlaylists() : Promise.resolve({ playlists: [] }),
       Promise.resolve({ playlists: [] })
     ]);
     var neteaseLists = (result[0].playlists || []).map(function(pl){ pl.provider = 'netease'; pl.source = 'netease'; return pl; });
     qqPlaylists = (result[2].playlists || []).map(function(pl){ pl.provider = 'qq'; pl.source = 'qq'; return pl; });
-    userPlaylists = neteaseLists.concat(qqPlaylists);
+    userPlaylists = neteaseLists.concat(window.qqPlaylists);
     myPodcastCollections = result[1].collections || [];
     var animatePanel = isPlaylistPanelVisibleForRender();
-    renderUserPlaylistsList({ animate: animatePanel, reset: true });
+    window.renderUserPlaylistsList({ animate: animatePanel, reset: true });
     renderMyPodcastCollections({ animate: animatePanel });
     if (emptyHomeActive) renderHomeDiscover();
-    scheduleShelfRebuild('refresh-user-playlists', true);
+    window.scheduleShelfRebuild('refresh-user-playlists', true);
   } catch (e) { console.warn(e); }
 }
 

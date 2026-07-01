@@ -1,0 +1,518 @@
+{
+  "module": "core services (api-helper, like, collect, cover, discover)",
+  "nodes": [
+    {
+      "id": "api-helper.js",
+      "label": "api-helper.js",
+      "type": "file",
+      "description": "Core API/utility helpers: fetch wrapper, HTML escaping, playback quality normalization, listen stats, song cloning, track detail modal, custom lyric system, artist resolution"
+    },
+    {
+      "id": "apiJson",
+      "label": "apiJson(url, opts)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Fetch wrapper with optional AbortController timeout. Returns parsed JSON. Used extensively across all modules."
+    },
+    {
+      "id": "escHtml",
+      "label": "escHtml(s)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "HTML-escape a string using innerText/textContent pattern"
+    },
+    {
+      "id": "normalizePlaybackQuality",
+      "label": "normalizePlaybackQuality(value)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Normalizes quality labels (jymaster, hires, lossless, exhigh, standard) to canonical values"
+    },
+    {
+      "id": "playbackQualityLabel",
+      "label": "playbackQualityLabel(value)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Chinese label for playback quality tier"
+    },
+    {
+      "id": "playbackQualityRank",
+      "label": "playbackQualityRank(value)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Numeric rank 1-5 for quality comparison"
+    },
+    {
+      "id": "readPlaybackQualityPreference",
+      "label": "readPlaybackQualityPreference()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Reads quality preference from localStorage, defaults to hires"
+    },
+    {
+      "id": "savePlaybackQualityPreference",
+      "label": "savePlaybackQualityPreference()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Saves current quality preference to localStorage"
+    },
+    {
+      "id": "updatePlaybackQualityUi",
+      "label": "updatePlaybackQualityUi()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Updates DOM elements for quality button, label, options; hides for YouTube tracks"
+    },
+    {
+      "id": "setPlaybackQuality",
+      "label": "setPlaybackQuality(value)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Sets playback quality, triggers SVIP check, updates UI and current track"
+    },
+    {
+      "id": "applyPlaybackQualityToCurrentTrack",
+      "label": "applyPlaybackQualityToCurrentTrack(nextQuality)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Reloads current track at new quality using playQueueAt with qualitySwitch"
+    },
+    {
+      "id": "loadListenStatsState",
+      "label": "loadListenStatsState()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Loads listen history/stats from localStorage, returns {history, songs, artists, updatedAt}"
+    },
+    {
+      "id": "saveListenStatsState",
+      "label": "saveListenStatsState()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Saves listenStatsState to localStorage with updatedAt timestamp"
+    },
+    {
+      "id": "currentCoverSong",
+      "label": "currentCoverSong()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Returns the current song from playQueue[currentIdx] or currentLocalSong. Central accessor used by many modules."
+    },
+    {
+      "id": "songSourceLabel",
+      "label": "songSourceLabel(song)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Returns Chinese label for song source (QQ音乐, YouTube, 本地上传, 网易云播客, 网易云音乐)"
+    },
+    {
+      "id": "cloneSong",
+      "label": "cloneSong(song)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Clones a song object and hydrates custom cover. Central cloning utility."
+    },
+    {
+      "id": "closeTrackDetailModal",
+      "label": "closeTrackDetailModal()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Closes track detail modal via GSAP closeGsapModal"
+    },
+    {
+      "id": "openTrackDetailModal",
+      "label": "openTrackDetailModal(type, songOverride)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Opens track detail modal with artist info or song comments, fetches data via apiJson"
+    },
+    {
+      "id": "resolveArtistSongForDetail",
+      "label": "resolveArtistSongForDetail(song, artist)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Searches for artist song across netease/qq/youtube to open artist detail modal"
+    },
+    {
+      "id": "setLyricSourceMode",
+      "label": "setLyricSourceMode(mode, silent)",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Switches between original and custom lyrics, saves preference per-song"
+    },
+    {
+      "id": "readCustomLyricMap",
+      "label": "readCustomLyricMap()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Reads custom lyric map from localStorage"
+    },
+    {
+      "id": "saveCustomLyricMap",
+      "label": "saveCustomLyricMap()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Persists custom lyric map to localStorage"
+    },
+    {
+      "id": "currentLyricSong",
+      "label": "currentLyricSong()",
+      "type": "function",
+      "file": "api-helper.js",
+      "description": "Returns current song for lyrics (similar to currentCoverSong)"
+    },
+    {
+      "id": "customLyricMap",
+      "label": "customLyricMap",
+      "type": "variable",
+      "file": "api-helper.js",
+      "description": "Global variable storing custom lyrics keyed by song key, initialized at load"
+    },
+    {
+      "id": "customLyricPrefs",
+      "label": "customLyricPrefs",
+      "type": "variable",
+      "file": "api-helper.js",
+      "description": "Per-song preference for custom vs original lyrics"
+    },
+    {
+      "id": "like.js",
+      "label": "like.js",
+      "type": "file",
+      "description": "Like/heart system: cloud song detection, like toggling, YouTube local like storage, sync with Netease"
+    },
+    {
+      "id": "isCloudSong",
+      "label": "isCloudSong(song)",
+      "type": "function",
+      "file": "like.js",
+      "description": "Checks if song is a netease cloud song (not QQ, local, podcast, YouTube)"
+    },
+    {
+      "id": "isSongLiked",
+      "label": "isSongLiked(song)",
+      "type": "function",
+      "file": "like.js",
+      "description": "Checks likedSongMap or localStorage for YouTube likes"
+    },
+    {
+      "id": "ensureLoggedInForAction",
+      "label": "ensureLoggedInForAction()",
+      "type": "function",
+      "file": "like.js",
+      "description": "Returns true if logged in, otherwise shows login modal and toast"
+    },
+    {
+      "id": "updateLikeButtons",
+      "label": "updateLikeButtons(song)",
+      "type": "function",
+      "file": "like.js",
+      "description": "Updates DOM heart-btn and collect-btn liked/busy state"
+    },
+    {
+      "id": "toggleLikeSong",
+      "label": "toggleLikeSong(song)",
+      "type": "function",
+      "file": "like.js",
+      "description": "Toggles like for a song. YouTube: localStorage. Netease: API call with optimistic UI."
+    },
+    {
+      "id": "toggleLikeCurrent",
+      "label": "toggleLikeCurrent()",
+      "type": "function",
+      "file": "like.js",
+      "description": "Toggles like for the current cover song"
+    },
+    {
+      "id": "syncLikeStatusForSongs",
+      "label": "syncLikeStatusForSongs(songs)",
+      "type": "function",
+      "file": "like.js",
+      "description": "Batch checks like status with Netease API to sync likedSongMap"
+    },
+    {
+      "id": "likedSongMap",
+      "label": "likedSongMap",
+      "type": "variable",
+      "file": "like.js",
+      "description": "Global map of song id -> boolean for liked status"
+    },
+    {
+      "id": "likeBusyMap",
+      "label": "likeBusyMap",
+      "type": "variable",
+      "file": "like.js",
+      "description": "Per-song lock to prevent concurrent like toggles"
+    },
+    {
+      "id": "collect.js",
+      "label": "collect.js",
+      "type": "file",
+      "description": "Collect/playlist modal: open/close collect modal, render playlist targets, add song to playlist"
+    },
+    {
+      "id": "openCollectModal",
+      "label": "openCollectModal(song)",
+      "type": "function",
+      "file": "collect.js",
+      "description": "Opens collect modal for a song. Supports YouTube (local only) and Netease (logged-in required)"
+    },
+    {
+      "id": "closeCollectModal",
+      "label": "closeCollectModal()",
+      "type": "function",
+      "file": "collect.js",
+      "description": "Closes collect modal and resets state"
+    },
+    {
+      "id": "renderCollectModal",
+      "label": "renderCollectModal()",
+      "type": "function",
+      "file": "collect.js",
+      "description": "Renders the collect modal with song info and user playlist list"
+    },
+    {
+      "id": "createPlaylistFromCollect",
+      "label": "createPlaylistFromCollect()",
+      "type": "function",
+      "file": "collect.js",
+      "description": "Creates new Netease playlist from collect modal, then adds target song"
+    },
+    {
+      "id": "addCollectTargetToPlaylist",
+      "label": "addCollectTargetToPlaylist(pid)",
+      "type": "function",
+      "file": "collect.js",
+      "description": "Adds currently targeted song to specified playlist via API"
+    },
+    {
+      "id": "collectTargetSong",
+      "label": "collectTargetSong",
+      "type": "variable",
+      "file": "collect.js",
+      "description": "Global reference to the song being collected"
+    },
+    {
+      "id": "collectBusy",
+      "label": "collectBusy",
+      "type": "variable",
+      "file": "collect.js",
+      "description": "Lock flag for collect operation"
+    },
+    {
+      "id": "cover.js",
+      "label": "cover.js",
+      "type": "file",
+      "description": "Cover/image system: custom covers, cover proxy, URL sizing, cover caching for songs"
+    },
+    {
+      "id": "readCustomCoverMap",
+      "label": "readCustomCoverMap()",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Reads custom cover map from localStorage"
+    },
+    {
+      "id": "saveCustomCoverMap",
+      "label": "saveCustomCoverMap()",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Persists custom cover map to localStorage"
+    },
+    {
+      "id": "customCoverMap",
+      "label": "customCoverMap",
+      "type": "variable",
+      "file": "cover.js",
+      "description": "Global map of song keys to custom cover data URLs"
+    },
+    {
+      "id": "songCustomCoverKey",
+      "label": "songCustomCoverKey(song)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Generates unique key for a song for custom cover lookup (qq/id/local/podcast/meta)"
+    },
+    {
+      "id": "getCustomCoverForSong",
+      "label": "getCustomCoverForSong(song)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Returns custom cover if set, checking song.customCover first then customCoverMap"
+    },
+    {
+      "id": "hydrateCustomCover",
+      "label": "hydrateCustomCover(song)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Attaches customCover property to song if custom cover exists. Used in cloneSong."
+    },
+    {
+      "id": "songCoverSrc",
+      "label": "songCoverSrc(song, size)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Returns cover URL: custom cover if set, else song.cover with size param. Central cover accessor."
+    },
+    {
+      "id": "coverProxySrc",
+      "label": "coverProxySrc(url, cacheBust)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Proxies external cover URLs through /api/cover for CORS"
+    },
+    {
+      "id": "coverUrlWithSize",
+      "label": "coverUrlWithSize(url, size)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Appends size parameter to cover URLs (param=320y320)"
+    },
+    {
+      "id": "setCustomCoverForCurrent",
+      "label": "setCustomCoverForCurrent(dataUrl, opts)",
+      "type": "function",
+      "file": "cover.js",
+      "description": "Sets custom cover for current song, saves to map, updates UI and shelf rebuild"
+    },
+    {
+      "id": "discover.js",
+      "label": "discover.js",
+      "type": "file",
+      "description": "Home/discover page: listen stats tracking, daily recommendations, weather radio, home tiles/mosaic"
+    },
+    {
+      "id": "homeListenSummary",
+      "label": "homeListenSummary()",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Returns {recent, topSong, topArtist, totalPlays} from listenStatsState"
+    },
+    {
+      "id": "goHome",
+      "label": "goHome()",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Navigates to home page, sets forced state, loads weather and discover data"
+    },
+    {
+      "id": "renderHomeDiscover",
+      "label": "renderHomeDiscover()",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Renders full home page: weather, daily songs, playlists, podcasts, tiles, mosaic backdrop"
+    },
+    {
+      "id": "playHomeDaily",
+      "label": "playHomeDaily()",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Plays daily recommended songs from homeDiscoverState"
+    },
+    {
+      "id": "loadHomeWeatherRadio",
+      "label": "loadHomeWeatherRadio(force, opts)",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Fetches weather radio data (songs matched to local weather) via apiJson"
+    },
+    {
+      "id": "loadHomeDiscover",
+      "label": "loadHomeDiscover(force)",
+      "type": "function",
+      "file": "discover.js",
+      "description": "Loads daily recommendations, playlists, and podcasts from netease API"
+    },
+    {
+      "id": "listenStatsState",
+      "label": "listenStatsState",
+      "type": "variable",
+      "file": "discover.js",
+      "description": "Global state for listen tracking: history[], songs{}, artists{}"
+    },
+    {
+      "id": "homeDiscoverState",
+      "label": "homeDiscoverState",
+      "type": "variable",
+      "file": "discover.js",
+      "description": "Global state for home page: loading, loggedIn, songs[], playlists[], podcasts[]"
+    },
+    {
+      "id": "homeWeatherRadioState",
+      "label": "homeWeatherRadioState",
+      "type": "variable",
+      "file": "discover.js",
+      "description": "Global state for weather radio: weather, radio data, loading, city"
+    },
+    {
+      "id": "listenSession",
+      "label": "listenSession",
+      "type": "variable",
+      "file": "discover.js",
+      "description": "Current listening session tracker (key, song, startedAt, listenMs, progress)"
+    },
+    {
+      "id": "songProviderKey",
+      "label": "songProviderKey(song)",
+      "type": "function",
+      "description": "Returns normalized provider key for a song (youtube/qq/netease). Defined in index.html"
+    }
+  ],
+  "edges": [
+    {"source": "cloneSong", "target": "hydrateCustomCover", "label": "calls"},
+    {"source": "toggleLikeSong", "target": "isCloudSong", "label": "depends_on"},
+    {"source": "toggleLikeSong", "target": "isSongLiked", "label": "depends_on"},
+    {"source": "toggleLikeSong", "target": "ensureLoggedInForAction", "label": "depends_on"},
+    {"source": "toggleLikeSong", "target": "updateLikeButtons", "label": "calls"},
+    {"source": "toggleLikeSong", "target": "songProviderKey", "label": "depends_on"},
+    {"source": "toggleLikeCurrent", "target": "currentCoverSong", "label": "calls"},
+    {"source": "toggleLikeCurrent", "target": "toggleLikeSong", "label": "calls"},
+    {"source": "updateLikeButtons", "target": "currentCoverSong", "label": "calls"},
+    {"source": "updateLikeButtons", "target": "isSongLiked", "label": "depends_on"},
+    {"source": "openCollectModal", "target": "isCloudSong", "label": "depends_on"},
+    {"source": "openCollectModal", "target": "songProviderKey", "label": "depends_on"},
+    {"source": "openCollectModal", "target": "ensureLoggedInForAction", "label": "depends_on"},
+    {"source": "openCollectModal", "target": "renderCollectModal", "label": "calls"},
+    {"source": "openCollectModal", "target": "songCoverSrc", "label": "depends_on"},
+    {"source": "renderCollectModal", "target": "songCoverSrc", "label": "depends_on"},
+    {"source": "addCollectTargetToPlaylist", "target": "apiJson", "label": "calls"},
+    {"source": "createPlaylistFromCollect", "target": "addCollectTargetToPlaylist", "label": "calls"},
+    {"source": "songCoverSrc", "target": "getCustomCoverForSong", "label": "calls"},
+    {"source": "songCoverSrc", "target": "coverUrlWithSize", "label": "calls"},
+    {"source": "getCustomCoverForSong", "target": "songCustomCoverKey", "label": "depends_on"},
+    {"source": "getCustomCoverForSong", "target": "customCoverMap", "label": "reads"},
+    {"source": "hydrateCustomCover", "target": "getCustomCoverForSong", "label": "calls"},
+    {"source": "readCustomCoverMap", "target": "customCoverMap", "label": "writes"},
+    {"source": "setCustomCoverForCurrent", "target": "currentCoverSong", "label": "calls"},
+    {"source": "setCustomCoverForCurrent", "target": "songCustomCoverKey", "label": "depends_on"},
+    {"source": "setCustomCoverForCurrent", "target": "saveCustomCoverMap", "label": "calls"},
+    {"source": "updatePlaybackQualityUi", "target": "currentCoverSong", "label": "calls"},
+    {"source": "updatePlaybackQualityUi", "target": "songProviderKey", "label": "calls"},
+    {"source": "setPlaybackQuality", "target": "updatePlaybackQualityUi", "label": "calls"},
+    {"source": "setPlaybackQuality", "target": "applyPlaybackQualityToCurrentTrack", "label": "calls"},
+    {"source": "applyPlaybackQualityToCurrentTrack", "target": "playQueueAt", "label": "calls (cross-file to playback.js)"},
+    {"source": "openTrackDetailModal", "target": "currentCoverSong", "label": "calls"},
+    {"source": "openTrackDetailModal", "target": "apiJson", "label": "calls"},
+    {"source": "openTrackDetailModal", "target": "songCoverSrc", "label": "calls"},
+    {"source": "openTrackDetailModal", "target": "songSourceLabel", "label": "calls"},
+    {"source": "openTrackDetailModal", "target": "isSongLiked", "label": "calls (cross-file to like.js)"},
+    {"source": "openTrackDetailModal", "target": "getCustomCoverForSong", "label": "calls (cross-file to cover.js)"},
+    {"source": "openTrackDetailModal", "target": "songProviderKey", "label": "calls"},
+    {"source": "resolveArtistSongForDetail", "target": "apiJson", "label": "calls"},
+    {"source": "resolveArtistSongForDetail", "target": "songProviderKey", "label": "depends_on"},
+    {"source": "renderHomeDiscover", "target": "homeListenSummary", "label": "calls"},
+    {"source": "renderHomeDiscover", "target": "songCoverSrc", "label": "calls (cross-file to cover.js)"},
+    {"source": "renderHomeDiscover", "target": "currentCoverSong", "label": "calls (cross-file to api-helper.js)"},
+    {"source": "loadHomeWeatherRadio", "target": "apiJson", "label": "calls (cross-file to api-helper.js)"},
+    {"source": "loadHomeDiscover", "target": "cloneSong", "label": "calls (cross-file to api-helper.js)"},
+    {"source": "goHome", "target": "renderHomeDiscover", "label": "calls"},
+    {"source": "goHome", "target": "loadHomeWeatherRadio", "label": "calls"},
+    {"source": "goHome", "target": "loadHomeDiscover", "label": "calls"},
+    {"source": "playHomeDaily", "target": "cloneSong", "label": "calls (cross-file to api-helper.js)"},
+    {"source": "playHomeDaily", "target": "playQueueAt", "label": "calls (cross-file to playback.js)"},
+    {"source": "saveListenStatsState", "target": "listenStatsState", "label": "writes"},
+    {"source": "loadListenStatsState", "target": "listenStatsState", "label": "writes (initializes)"},
+    {"source": "setLyricSourceMode", "target": "applyOriginalLyricsState", "label": "calls"},
+    {"source": "setLyricSourceMode", "target": "applyCustomLyricState", "label": "calls"}
+  ]
+}

@@ -1,0 +1,71 @@
+[
+  {
+    "order": 1,
+    "title": "Foundation Layer — shared.js",
+    "description": "The bottom of the dependency pyramid. shared.js defines all cross-cutting utilities and constants: clamp/clampRange for numeric clamping, songProviderKey() for routing songs to their platform, openGsapModal/closeGsapModal for animated modal transitions, bindModalBackdropClose for backdrop-dismiss behavior, localStorage storage keys (CUSTOM_COVER_STORE_KEY, LYRIC_LAYOUT_STORE_KEY, etc.), the fxDefaults preset object with ~70 visual parameters, hotkey defaults, audio globals (audio, audioCtx, analyser), and the custom cover/lyric maps. Every other module reads from window globals set here.",
+    "nodeIds": ["file:public/js/shared.js"]
+  },
+  {
+    "order": 2,
+    "title": "State & Preferences — core/state.js, core/prefs.js",
+    "description": "Initializes global playback state: frequency data arrays (FFT_SIZE=2048), audio energy bands (bass, mid, treble, beatPulse), lyrics state (lyricsLines, lyricsVisible, lyricsHasNativeKaraoke), queue state (playlist, playQueue, currentIdx), login status objects for Netease/QQ/YouTube, and the track switch token for stale-response guarding. prefs.js adds localStorage persistence helpers: readSavedVolume, saveDiyModePreference, readSavedPlaybackVisualPreset — the thin persistence layer used by all higher modules.",
+    "nodeIds": ["file:public/js/core/state.js", "file:public/js/core/prefs.js"]
+  },
+  {
+    "order": 3,
+    "title": "Platform API Layer — platforms/netease.js, qq.js, youtube.js",
+    "description": "Three parallel platform API wrappers following an identical pattern: each defines a platformApi() function that wraps fetch to /api/{platform}/*, a Qs builder for URL-encoding params, and a declarative API configuration table (neteaseAPIList, qqAPIList, youtubeAPIList) from which functions like neteaseSearch(), qqSongUrl(), youtubeTrending() are auto-generated at module load. These modules depend on core/api-helper.js for apiJson(). Netease exposes ~15 endpoints (search, song URL, playlists, login QR, likes, lyrics); QQ exposes ~7 (search, song URL, login cookie); YouTube exposes ~8 (search, song URL, trending, login).",
+    "nodeIds": ["file:public/js/platforms/netease.js", "file:public/js/platforms/qq.js", "file:public/js/platforms/youtube.js"]
+  },
+  {
+    "order": 4,
+    "title": "Core Services: API Helper — core/api-helper.js",
+    "description": "The shared networking and formatting layer. apiJson() provides a standardized async fetch wrapper with timeout via AbortController. escHtml() sanitizes text for DOM injection. The playback quality system normalizes string values (jymaster → hires → lossless → exhigh → standard), provides labels/rankings/short labels, and includes upgrade/downgrade logic for trial vs VIP accounts. Also hosts loadCustomCoverMap/loadCustomLyricMap initialization, the songCoverSrc() resolution chain (custom → proxy → direct), and quality detection on song URL responses.",
+    "nodeIds": ["file:public/js/core/api-helper.js"]
+  },
+  {
+    "order": 5,
+    "title": "Core Services: Domain — core/cover.js, like.js, collect.js, discover.js",
+    "description": "Business logic for four key domains: cover.js manages custom cover maps (localStorage-backed per-song custom album art), proxy URL building, and cover size normalization. like.js handles heart/like toggle with isSongLiked/likeSong APIs, cross-platform like maps (Netease cloud or YouTube localStorage fallback), and UI button state (liked/busy). collect.js opens the collect-to-playlist modal, manages the collectTargetSong, and connects to neteaseUserPlaylists. discover.js powers the Home page — sets art backgrounds, formats play counts (万/亿), manages listen sessions (beginListenSession/finalizeListenSession) for play tracking, and renders personalized recommendations (daily/recent/private radio cards).",
+    "nodeIds": ["file:public/js/core/cover.js", "file:public/js/core/like.js", "file:public/js/core/collect.js", "file:public/js/core/discover.js"]
+  },
+  {
+    "order": 6,
+    "title": "Audio Engine — audio/audio-engine.js, audio/beat-analysis.js",
+    "description": "The Web Audio backend. audio-engine.js initializes the AudioContext (initAudio), creates the analysis chain (MediaElementSource → analyser → beatAnalyser → gainNode → destination), and provides ensureUiSfxContext for UI sound effects (shelf select ticks). beat-analysis.js is the largest module (~2876 lines) — implements the real-time beat detection engine (processRealtimeBeatEngine, tickBeatMap), offline beat pre-analysis via OfflineAudioContext (kick-frequency 60-150Hz energy curve → peak detection → camera-synchronized beat maps), tempo estimation (medianGap, estimateTempoPhaseOffset), DJ mode beat map system, and the beat cache layer (localStorage beatmap storage).",
+    "nodeIds": ["file:public/js/audio/audio-engine.js", "file:public/js/audio/beat-analysis.js"]
+  },
+  {
+    "order": 7,
+    "title": "Playback & Lyrics — audio/playback.js, audio/lyrics.js",
+    "description": "playback.js manages the play queue: queueItemKey() builds unique song keys, queueSong/queueSongNext enqueue with de-duplication, nextTrack/prevTrack advance position with play-mode awareness (sequential/shuffle/repeat), setPlaybackQuality negotiates quality with the server, and the play catalog maps songs to actual audio URLs. lyrics.js fetches and parses lyrics: fetchLyric uses a 7-day localStorage cache, parses YRC (syllable-timed karaoke) and LRC formats, falls back to plain text, and stores lines in lyricsLines[] for the stage/desktop lyric renderers to consume.",
+    "nodeIds": ["file:public/js/audio/playback.js", "file:public/js/audio/lyrics.js"]
+  },
+  {
+    "order": 8,
+    "title": "Three.js Engine — three/three-scene.js, three-lyrics.js, particles.js",
+    "description": "The 3D rendering core built on Three.js r128. three-scene.js creates scene, camera (PerspectiveCamera 45°), and renderer (WebGLRenderer, alpha, high-performance), implements adaptive DPR/render-quality based on pixel budget and viewport size, manages the Skull preset's head/eye tracking system (face tracking via camera → headParallax → particleRotation), cinema dynamics (updateCinemaDynamics), free-camera orbit, and the main frame loop's audio-to-visual uniform binding. three-lyrics.js manages the 3D stage lyrics system — TextSprite-based words that fly in/out with beat-synced glow (lyricSunEnergy, beatGlow), camera-locked layout, and palette management. particles.js builds the cover-sampled particle grid (GRID_X×GRID_Y, up to ~64K points), 7 presets (emily cover, tunnel, orbit, void, vinyl, wallpaper, skull) each with unique position/color/noise logic, ripple system, float layer, bloom particles, and cover-resolution adaptation.",
+    "nodeIds": ["file:public/js/three/three-scene.js", "file:public/js/three/three-lyrics.js", "file:public/js/three/particles.js"]
+  },
+  {
+    "order": 9,
+    "title": "3D Shelf & UI Layer — three/shelf.js, ui/controls.js, ui/login.js, ui/playlists.js, ui/youtube.js, ui/misc.js, ui/console.js, splash.js",
+    "description": "The top of the dependency pyramid where visuals meet interaction. shelf.js creates the 3D playlist shelf — a Three.js card stack with two modes (side: angled 5-card stack; stage: centered arc with reflection + glow), dynamic layout profiles for portrait/narrow/skull-safe viewports, card selection with animated transitions, and a shelfManager update loop. controls.js handles search input/debounce, search history, result rendering, play-mode cycling, and the bottom-bar transport controls. login.js implements the multi-platform login modal — QR code polling for Netease, cookie-based for QQ and YouTube, user capsule with VIP badges, and dual-account management. playlists.js manages localStorage-based local playlists (create/rename/delete/sync) and renders the playlist panel tabs. youtube.js handles YouTube search source toggling and trending loading. misc.js provides the idle guide canvas (3D particle art shown when idle) and utility modals (track detail, custom lyric, update panel). console.js is the comprehensive FX control panel — 7 preset cards, 38 lyric color presets, color pickers (lyric, accent, shelf, background), sliders for every visual parameter, toggle grid for overlays, user archive save/load/export, and the shelf/camera/performance configuration seg controls. splash.js runs the WebGL launch animation — dust particles, streaks, shards, signal-line pulse, and the 'click to enter' transition that reveals the main scene.",
+    "nodeIds": [
+      "file:public/js/three/shelf.js",
+      "file:public/js/ui/controls.js",
+      "file:public/js/ui/login.js",
+      "file:public/js/ui/playlists.js",
+      "file:public/js/ui/youtube.js",
+      "file:public/js/ui/misc.js",
+      "file:public/js/ui/console.js",
+      "file:public/js/splash.js"
+    ]
+  },
+  {
+    "order": 10,
+    "title": "App Init — init.js, main.js, index.html",
+    "description": "The entry point wiring everything together. main.js is the Vite module entry — a flat list of 28 side-effect imports that populate window globals in strict dependency order (shared → prefs → three-lyrics → state → cover → discover → like → collect → api-helper → netease → qq → youtube → three-scene → particles → beat-analysis → shelf → audio-engine → playback → lyrics → youtube → controls → console → login → playlists → misc → splash → init). init.js starts the requestAnimationFrame render loop (animate()), implements adaptive FPS (shouldSkipAdaptiveRenderFrame based on background/load-tier/interaction mode), runs real-time spectrum analysis in the loop (5-band energy extraction: kick/vocal/mid/treble/rms with dynamic peak tracking), orchestrates beat-to-visual synchronization (scheduleBeatCamera, beatPulse, cinema dynamics, lyric sun energy), and manages the 3D camera pose (parallax, skull tracking, gesture rotation, shelf). index.html provides the complete DOM shell: splash overlay, search area with multi-source tabs, empty-home page with recommendation cards, visual FX console panel, playlist/queue side panels, gesture HUD, bottom-bar transport controls, progress bar, SVG glass texture filters, and all DOM hook IDs that init.js and the UI modules query via getElementById.",
+    "nodeIds": ["file:public/js/init.js", "file:public/js/main.js", "file:public/index.html"]
+  }
+]

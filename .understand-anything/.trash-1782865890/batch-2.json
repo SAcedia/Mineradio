@@ -1,0 +1,433 @@
+{
+  "module": "audio engine (audio-engine, beat-analysis, playback, lyrics)",
+  "nodes": [
+    {
+      "id": "audio-engine.js",
+      "label": "audio-engine.js",
+      "type": "file",
+      "description": "Audio context init, Web Audio API setup (analyser, gain), volume controls, fade in/out, UI sound effects"
+    },
+    {
+      "id": "initAudio",
+      "label": "initAudio()",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Creates AudioContext, connects source->analyser->beatAnalyser->gainNode->destination"
+    },
+    {
+      "id": "resumeAudioAnalysis",
+      "label": "resumeAudioAnalysis()",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Resumes suspended AudioContext"
+    },
+    {
+      "id": "fadeOutAndPauseAudio",
+      "label": "fadeOutAndPauseAudio()",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Ramps gain to 0 over AUDIO_FADE_OUT_MS, then pauses HTMLAudioElement"
+    },
+    {
+      "id": "applyVolumeToAudio",
+      "label": "applyVolumeToAudio()",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Syncs targetVolume to gainNode and audio element volume"
+    },
+    {
+      "id": "setVolume",
+      "label": "setVolume(value, silent)",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Sets target volume, persists to localStorage, updates UI"
+    },
+    {
+      "id": "bindVolumeControls",
+      "label": "bindVolumeControls()",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Binds volume slider, button events, mouse hover panel open/close"
+    },
+    {
+      "id": "rampAudioOutputGain",
+      "label": "rampAudioOutputGain(value, durationMs)",
+      "type": "function",
+      "file": "audio-engine.js",
+      "description": "Smooth gain ramp using AudioParam linearRampToValueAtTime or requestAnimationFrame fallback"
+    },
+    {
+      "id": "audioCtx",
+      "label": "audioCtx",
+      "type": "variable",
+      "file": "audio-engine.js",
+      "description": "Web Audio API AudioContext instance"
+    },
+    {
+      "id": "analyser",
+      "label": "analyser",
+      "type": "variable",
+      "file": "audio-engine.js",
+      "description": "Primary AnalyserNode for FFT audio visualization"
+    },
+    {
+      "id": "gainNode",
+      "label": "gainNode",
+      "type": "variable",
+      "file": "audio-engine.js",
+      "description": "GainNode for volume control"
+    },
+    {
+      "id": "targetVolume",
+      "label": "targetVolume",
+      "type": "variable",
+      "file": "audio-engine.js",
+      "description": "Current target volume (0-1)"
+    },
+    {
+      "id": "beat-analysis.js",
+      "label": "beat-analysis.js",
+      "type": "file",
+      "description": "Offline beat detection using frequency band energy analysis, MusicTempo library via Web Worker, disk caching"
+    },
+    {
+      "id": "analyzeAudioBeats",
+      "label": "analyzeAudioBeats(audioUrl, durationSec, token, options)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Main offline beat analysis: fetches audio, decodes, filters into 4 bands, detects onset peaks, produces beat map with strength/confidence/primary/camera flags"
+    },
+    {
+      "id": "beatMapSongKey",
+      "label": "beatMapSongKey(song)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Generates unique key for song beat map (local/qq/song prefix)"
+    },
+    {
+      "id": "scheduleBeatAnalysis",
+      "label": "scheduleBeatAnalysis(songId, audioUrl, token, song)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Schedules delayed beat analysis after playback starts with idle timeout and disk cache check"
+    },
+    {
+      "id": "scheduleQueueBeatPrefetch",
+      "label": "scheduleQueueBeatPrefetch(fromIdx, delayMs, state)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Prefetches beat maps for upcoming queue items in background"
+    },
+    {
+      "id": "analyzeMusicTempoInWorker",
+      "label": "analyzeMusicTempoInWorker(buffer, token)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Runs MusicTempo analysis in a Web Worker for BPM detection"
+    },
+    {
+      "id": "readBeatDiskCache",
+      "label": "readBeatDiskCache(key)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Reads beat map from server-side disk cache"
+    },
+    {
+      "id": "writeBeatDiskCache",
+      "label": "writeBeatDiskCache(key, map, song, mode)",
+      "type": "function",
+      "file": "beat-analysis.js",
+      "description": "Writes beat map to server-side disk cache"
+    },
+    {
+      "id": "beatMapCache",
+      "label": "beatMapCache",
+      "type": "variable",
+      "file": "beat-analysis.js",
+      "description": "In-memory cache for beat maps keyed by beatMapSongKey"
+    },
+    {
+      "id": "beatMapToken",
+      "label": "beatMapToken",
+      "type": "variable",
+      "file": "beat-analysis.js",
+      "description": "Token incremented on each track switch to cancel stale analysis"
+    },
+    {
+      "id": "currentBeatMap",
+      "label": "currentBeatMap",
+      "type": "variable",
+      "description": "Active beat map for the currently playing song (declared in index.html, written by playback.js)"
+    },
+    {
+      "id": "playback.js",
+      "label": "playback.js",
+      "type": "file",
+      "description": "Core playback queue controller: play at index, next/prev, toggle play, shuffle, queue management, auto-fallback, glass effect controls"
+    },
+    {
+      "id": "playQueueAt",
+      "label": "playQueueAt(idx, opts)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Central playback function: sets up audio, handles quality/SVIP, beat analysis scheduling, lyric fetch, cross-platform source fallback (netease/qq/youtube)"
+    },
+    {
+      "id": "togglePlay",
+      "label": "togglePlay()",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Toggle play/pause with fade transitions, YT URL expiry retry"
+    },
+    {
+      "id": "nextTrack",
+      "label": "nextTrack()",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Advances to next track (shuffle or sequential)"
+    },
+    {
+      "id": "prevTrack",
+      "label": "prevTrack()",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Goes to previous track"
+    },
+    {
+      "id": "queueSong",
+      "label": "queueSong(song, opts)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Adds song to play queue (end or next position), deduplicates"
+    },
+    {
+      "id": "shuffleQueue",
+      "label": "shuffleQueue()",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Fisher-Yates shuffle of playQueue"
+    },
+    {
+      "id": "tryAutoPlaybackFallback",
+      "label": "tryAutoPlaybackFallback(song, data, idx, token, opts)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "When a song fails to play, searches alternate platform (netease<->qq) for same title+artist"
+    },
+    {
+      "id": "skipFailedQueueItem",
+      "label": "skipFailedQueueItem(idx, token, message)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Marks item as failed and skips to next playable queue item"
+    },
+    {
+      "id": "safePlaybackStep",
+      "label": "safePlaybackStep(label, fn)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Wraps playback setup step in try/catch for resilience"
+    },
+    {
+      "id": "bindPlayerControlAnimations",
+      "label": "bindPlayerControlAnimations()",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Binds GSAP hover/press/release animations to all bottom-bar control buttons"
+    },
+    {
+      "id": "queueItemKey",
+      "label": "queueItemKey(song)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Unique key for a song in the queue (qq/song/local/podcast prefix)"
+    },
+    {
+      "id": "playQueue",
+      "label": "playQueue",
+      "type": "variable",
+      "description": "Global play queue array (defined in index.html)"
+    },
+    {
+      "id": "currentIdx",
+      "label": "currentIdx",
+      "type": "variable",
+      "description": "Global index into playQueue (defined in index.html)"
+    },
+    {
+      "id": "lyrics.js",
+      "label": "lyrics.js",
+      "type": "file",
+      "description": "Lyric fetching, parsing (LRC/YRC), rendering trigger, source cycling, offset/speed adjustment, mini source bar"
+    },
+    {
+      "id": "fetchLyric",
+      "label": "fetchLyric(songOrId, token, preferSource)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Fetches lyrics from API with caching, parses YRC/LRC, applies preferred source"
+    },
+    {
+      "id": "renderLyrics",
+      "label": "renderLyrics()",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Triggers clearStageLyrics() - actual rendering done by stageLyrics in three-lyrics.js"
+    },
+    {
+      "id": "toggleLyricsPanel",
+      "label": "toggleLyricsPanel(force)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Toggles particleLyrics FX flag, creates or clears lyrics particles"
+    },
+    {
+      "id": "cycleLyricSource",
+      "label": "cycleLyricSource()",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Cycles through lyric sources (lrclib/music-kit/netease/kugou/yt-captions) for YT songs"
+    },
+    {
+      "id": "setLyricSource",
+      "label": "setLyricSource(source)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Sets specific lyric source by name"
+    },
+    {
+      "id": "adjustLyricOffset",
+      "label": "adjustLyricOffset(delta)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Adjusts lyric sync offset (+/- seconds), saves per-song preference"
+    },
+    {
+      "id": "adjustPlaybackSpeed",
+      "label": "adjustPlaybackSpeed(delta)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Changes audio playback rate (0.25x-3x), saves per-song preference"
+    },
+    {
+      "id": "updateMiniSourceBar",
+      "label": "updateMiniSourceBar()",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Shows/hides mini source bar based on current song provider"
+    },
+    {
+      "id": "updateMiniSourceButtons",
+      "label": "updateMiniSourceButtons()",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Updates active state of mini source buttons"
+    },
+    {
+      "id": "parseYrcText",
+      "label": "parseYrcText(text)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Parses YRC (Yun) lyrics format with word-level timing"
+    },
+    {
+      "id": "parseLyricText",
+      "label": "parseLyricText(text)",
+      "type": "function",
+      "file": "lyrics.js",
+      "description": "Parses standard LRC lyrics format"
+    },
+    {
+      "id": "lyricsLines",
+      "label": "lyricsLines",
+      "type": "variable",
+      "description": "Current active lyric lines (defined in index.html)"
+    },
+    {
+      "id": "lyricsTimingSource",
+      "label": "lyricsTimingSource",
+      "type": "variable",
+      "description": "Source type of current lyrics (yrc-word/yrc-line/lrc-line/fallback/custom-lrc/custom-text)"
+    },
+    {
+      "id": "lyricSourceMode",
+      "label": "lyricSourceMode",
+      "type": "variable",
+      "description": "Current lyric mode: 'original' or 'custom'"
+    },
+    {
+      "id": "playbackProviderLabel",
+      "label": "playbackProviderLabel(song)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Returns display name for playback provider (YouTube/QQ音乐/网易云)"
+    },
+    {
+      "id": "alternatePlaybackProvider",
+      "label": "alternatePlaybackProvider(song)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Returns the opposite provider for auto-fallback (netease<->qq)"
+    },
+    {
+      "id": "searchAlternatePlatformSong",
+      "label": "searchAlternatePlatformSong(song)",
+      "type": "function",
+      "file": "playback.js",
+      "description": "Searches for same song on alternate platform via apiJson"
+    }
+  ],
+  "edges": [
+    {"source": "playQueueAt", "target": "cloneSong", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "playQueueAt", "target": "updatePlaybackQualityUi", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "playQueueAt", "target": "currentCoverSong", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "playQueueAt", "target": "applyPreferredLyricsForCurrent", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "playQueueAt", "target": "getCustomCoverForSong", "label": "calls (cross-file: cover.js)"},
+    {"source": "playQueueAt", "target": "coverUrlWithSize", "label": "calls (cross-file: cover.js)"},
+    {"source": "playQueueAt", "target": "hydrateCustomCover", "label": "calls (cross-file: cover.js)"},
+    {"source": "playQueueAt", "target": "songProviderKey", "label": "depends_on"},
+    {"source": "playQueueAt", "target": "updateLikeButtons", "label": "calls (cross-file: like.js)"},
+    {"source": "playQueueAt", "target": "syncLikeStatusForSong", "label": "calls (cross-file: like.js)"},
+    {"source": "playQueueAt", "target": "updateMiniSourceBar", "label": "calls (cross-file: lyrics.js)"},
+    {"source": "playQueueAt", "target": "fetchLyric", "label": "calls (cross-file: lyrics.js)"},
+    {"source": "playQueueAt", "target": "scheduleBeatAnalysis", "label": "calls (cross-file: beat-analysis.js)"},
+    {"source": "playQueueAt", "target": "scheduleQueueBeatPrefetch", "label": "calls (cross-file: beat-analysis.js)"},
+    {"source": "playQueueAt", "target": "readBeatDiskCache", "label": "calls (cross-file: beat-analysis.js)"},
+    {"source": "playQueueAt", "target": "beatMapSongKey", "label": "calls (cross-file: beat-analysis.js)"},
+    {"source": "playQueueAt", "target": "initAudio", "label": "calls (cross-file: audio-engine.js)"},
+    {"source": "playQueueAt", "target": "preparePlaybackFadeIn", "label": "calls (cross-file: audio-engine.js)"},
+    {"source": "playQueueAt", "target": "applyVolumeToAudio", "label": "calls (cross-file: audio-engine.js)"},
+    {"source": "playQueueAt", "target": "resumeAudioAnalysis", "label": "calls (cross-file: audio-engine.js)"},
+    {"source": "playQueueAt", "target": "attemptAudioPlay", "label": "calls (self)"},
+    {"source": "playQueueAt", "target": "tryAutoPlaybackFallback", "label": "calls (self)"},
+    {"source": "playQueueAt", "target": "skipFailedQueueItem", "label": "calls (self)"},
+    {"source": "playQueueAt", "target": "youtubeSongUrl", "label": "calls (platforms/youtube.js)"},
+    {"source": "playQueueAt", "target": "qqSongUrl", "label": "calls (platforms/qq.js)"},
+    {"source": "playQueueAt", "target": "neteaseSongUrl", "label": "calls (platforms/netease.js)"},
+    {"source": "togglePlay", "target": "fadeOutAndPauseAudio", "label": "calls (cross-file: audio-engine.js)"},
+    {"source": "togglePlay", "target": "attemptAudioPlay", "label": "calls (self)"},
+    {"source": "togglePlay", "target": "playQueueAt", "label": "calls (self)"},
+    {"source": "queueSong", "target": "cloneSong", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "nextTrack", "target": "playQueueAt", "label": "calls (self)"},
+    {"source": "prevTrack", "target": "playQueueAt", "label": "calls (self)"},
+    {"source": "scheduleBeatAnalysis", "target": "analyzeAudioBeats", "label": "calls"},
+    {"source": "scheduleBeatAnalysis", "target": "readBeatDiskCache", "label": "calls"},
+    {"source": "scheduleQueueBeatPrefetch", "target": "readBeatDiskCache", "label": "calls"},
+    {"source": "scheduleQueueBeatPrefetch", "target": "analyzeAudioBeats", "label": "calls"},
+    {"source": "scheduleQueueBeatPrefetch", "target": "fetchBeatPrefetchAudioUrl", "label": "calls"},
+    {"source": "fetchBeatPrefetchAudioUrl", "target": "neteaseSongUrl", "label": "calls (platforms/netease.js)"},
+    {"source": "fetchBeatPrefetchAudioUrl", "target": "qqSongUrl", "label": "calls (platforms/qq.js)"},
+    {"source": "scheduleBeatAnalysis", "target": "beatMapSongKey", "label": "depends_on"},
+    {"source": "analyzeAudioBeats", "target": "beatMapSongKey", "label": "depends_on"},
+    {"source": "analyzeAudioBeats", "target": "currentBeatMap", "label": "writes"},
+    {"source": "fetchLyric", "target": "apiJson", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "fetchLyric", "target": "songProviderKey", "label": "depends_on"},
+    {"source": "fetchLyric", "target": "applyPreferredLyricsForCurrent", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "fetchLyric", "target": "setOriginalLyricsState", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "renderLyrics", "target": "clearStageLyrics", "label": "calls (cross-file: three-lyrics.js)"},
+    {"source": "toggleLyricsPanel", "target": "createLyricsParticles", "label": "calls (cross-file: three-lyrics.js)"},
+    {"source": "toggleLyricsPanel", "target": "clearStageLyrics", "label": "calls (cross-file: three-lyrics.js)"},
+    {"source": "searchAlternatePlatformSong", "target": "apiJson", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "searchAlternatePlatformSong", "target": "alternatePlaybackProvider", "label": "calls (self)"}
+  ]
+}

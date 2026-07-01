@@ -1,0 +1,453 @@
+{
+  "module": "UI controls (controls, console, login, youtube, playlists, misc)",
+  "nodes": [
+    {
+      "id": "controls.js",
+      "label": "controls.js",
+      "type": "file",
+      "description": "Search system: mode tabs, history, result rendering, podcast search, playlist panel toggling, queue panel rendering"
+    },
+    {
+      "id": "updateSearchModeTabs",
+      "label": "updateSearchModeTabs()",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Updates DOM for search mode tabs (song/netease/qq/youtube/podcast) active state and placeholders"
+    },
+    {
+      "id": "setSearchMode",
+      "label": "setSearchMode(mode)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Sets search mode, updates tabs, clears results, triggers search or history"
+    },
+    {
+      "id": "doSearch",
+      "label": "doSearch(q)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Main search function: remembers query, calls platform-specific search APIs, merges QQ/Netease results"
+    },
+    {
+      "id": "mergeSongSearchResults",
+      "label": "mergeSongSearchResults(netData, qqData, q)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Merges Netease and QQ search results, deduplicates on normalized title+artist"
+    },
+    {
+      "id": "renderQueuePanel",
+      "label": "renderQueuePanel(reason, opts)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Renders the mini queue panel with song list, current track highlight, like/collect actions"
+    },
+    {
+      "id": "safeRenderQueuePanel",
+      "label": "safeRenderQueuePanel(reason, opts)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Safely calls renderQueuePanel with error handling"
+    },
+    {
+      "id": "switchPlaylistTab",
+      "label": "switchPlaylistTab(tab)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Switches between playlists/podcasts tabs in playlist panel"
+    },
+    {
+      "id": "togglePlaylistPanel",
+      "label": "togglePlaylistPanel(force)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Toggles playlist panel visibility"
+    },
+    {
+      "id": "refreshUserPlaylists",
+      "label": "refreshUserPlaylists(force)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Fetches user playlists from Netease and QQ APIs, merges with local playlists"
+    },
+    {
+      "id": "openPlaylistPanelTab",
+      "label": "openPlaylistPanelTab(tab, force)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Opens playlist panel to specific tab, triggers refresh"
+    },
+    {
+      "id": "openProviderLogin",
+      "label": "openProviderLogin(provider)",
+      "type": "function",
+      "file": "controls.js",
+      "description": "Opens login modal for specific provider"
+    },
+    {
+      "id": "console.js",
+      "label": "console.js",
+      "type": "file",
+      "description": "Visual FX console: preset grid, sliders, toggles, user FX archives save/load/import/export"
+    },
+    {
+      "id": "presetMeta",
+      "label": "presetMeta[]",
+      "type": "variable",
+      "file": "console.js",
+      "description": "Array of 7 preset definitions with name, description, icons (emily/滚筒/星球/虚空/唱片/星河/安魂)"
+    },
+    {
+      "id": "renderUserFxArchives",
+      "label": "renderUserFxArchives()",
+      "type": "function",
+      "file": "console.js",
+      "description": "Renders the user FX archive grid (save/load presets) with rename/export/import capabilities"
+    },
+    {
+      "id": "buildPresetGrid",
+      "label": "buildPresetGrid()",
+      "type": "function",
+      "file": "console.js",
+      "description": "Renders preset selection grid cards"
+    },
+    {
+      "id": "bindFxPanel",
+      "label": "bindFxPanel()",
+      "type": "function",
+      "file": "console.js",
+      "description": "Binds all FX panel interactions: sliders, toggles, presets, color pickers, archive buttons"
+    },
+    {
+      "id": "saveUserFxArchive",
+      "label": "saveUserFxArchive(index)",
+      "type": "function",
+      "file": "console.js",
+      "description": "Saves current FX state to an archive slot"
+    },
+    {
+      "id": "applyUserFxArchive",
+      "label": "applyUserFxArchive(index)",
+      "type": "function",
+      "file": "console.js",
+      "description": "Applies FX state from an archive slot"
+    },
+    {
+      "id": "setPreset",
+      "label": "setPreset(index, opts)",
+      "type": "function",
+      "file": "console.js",
+      "description": "Sets visual preset, triggers burst animation, saves layout"
+    },
+    {
+      "id": "userFxArchives",
+      "label": "userFxArchives[]",
+      "type": "variable",
+      "file": "console.js",
+      "description": "Array of user-saved FX archive configurations"
+    },
+    {
+      "id": "fx",
+      "label": "fx (global)",
+      "type": "variable",
+      "description": "Global FX state object containing all visual parameters (preset, intensity, depth, etc.)"
+    },
+    {
+      "id": "fxDefaults",
+      "label": "fxDefaults",
+      "type": "variable",
+      "description": "Default values for all FX parameters"
+    },
+    {
+      "id": "login.js",
+      "label": "login.js",
+      "type": "file",
+      "description": "Multi-platform login system: Netease/QQ/YouTube login modals, status management, user button, account switching"
+    },
+    {
+      "id": "showLoginModal",
+      "label": "showLoginModal(opts)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Opens login modal with provider selection (netease/qq)"
+    },
+    {
+      "id": "closeLoginModal",
+      "label": "closeLoginModal()",
+      "type": "function",
+      "file": "login.js",
+      "description": "Closes login modal"
+    },
+    {
+      "id": "setLoginProvider",
+      "label": "setLoginProvider(provider)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Sets active login provider"
+    },
+    {
+      "id": "updateLoginProviderUi",
+      "label": "updateLoginProviderUi()",
+      "type": "function",
+      "file": "login.js",
+      "description": "Updates login modal UI for selected provider"
+    },
+    {
+      "id": "hasAnyPlatformLogin",
+      "label": "hasAnyPlatformLogin()",
+      "type": "function",
+      "file": "login.js",
+      "description": "Returns true if netease or qq is logged in"
+    },
+    {
+      "id": "hasPlatformLogin",
+      "label": "hasPlatformLogin(provider)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Checks if specific provider has valid login"
+    },
+    {
+      "id": "hasProviderSvip",
+      "label": "hasProviderSvip(provider, status)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Returns true if netease account has SVIP"
+    },
+    {
+      "id": "platformMeta",
+      "label": "platformMeta(provider)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Returns metadata for provider (key, short label, full label, app name, dot class)"
+    },
+    {
+      "id": "loginStatus",
+      "label": "loginStatus",
+      "type": "variable",
+      "file": "login.js",
+      "description": "Netease login status object (loggedIn, nickname, avatar, vipLevel)"
+    },
+    {
+      "id": "qqLoginStatus",
+      "label": "qqLoginStatus",
+      "type": "variable",
+      "file": "login.js",
+      "description": "QQ login status object"
+    },
+    {
+      "id": "renderUserBtn",
+      "label": "renderUserBtn()",
+      "type": "function",
+      "file": "login.js",
+      "description": "Renders the user button in top bar showing login state"
+    },
+    {
+      "id": "refreshLoginStatus",
+      "label": "refreshLoginStatus(force)",
+      "type": "function",
+      "file": "login.js",
+      "description": "Fetches netease login status, triggers playlist/discover refresh if logged in"
+    },
+    {
+      "id": "youtube.js",
+      "label": "youtube.js",
+      "type": "file",
+      "description": "YouTube source toggle, search source enable/disable, YouTube trending loader"
+    },
+    {
+      "id": "loginYouTube",
+      "label": "loginYouTube()",
+      "type": "function",
+      "file": "youtube.js",
+      "description": "Opens YouTube login page in new window"
+    },
+    {
+      "id": "searchSourceEnabled",
+      "label": "searchSourceEnabled(provider)",
+      "type": "function",
+      "file": "youtube.js",
+      "description": "Checks if search source is enabled in localStorage (youtube defaults OFF)"
+    },
+    {
+      "id": "toggleSearchSource",
+      "label": "toggleSearchSource(provider)",
+      "type": "function",
+      "file": "youtube.js",
+      "description": "Toggles search source on/off, updates toggle buttons"
+    },
+    {
+      "id": "initSearchSourceToggles",
+      "label": "initSearchSourceToggles()",
+      "type": "function",
+      "file": "youtube.js",
+      "description": "Initializes search source toggle buttons on page load"
+    },
+    {
+      "id": "loadYouTubeTrending",
+      "label": "loadYouTubeTrending()",
+      "type": "function",
+      "file": "youtube.js",
+      "description": "Loads YouTube trending music into search results"
+    },
+    {
+      "id": "playlists.js",
+      "label": "playlists.js",
+      "type": "file",
+      "description": "Local playlist CRUD: create/delete/rename, add/remove songs, detail view, play from playlist"
+    },
+    {
+      "id": "createLocalPlaylist",
+      "label": "createLocalPlaylist(name)",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Creates a new local playlist (localStorage), shows modal for naming"
+    },
+    {
+      "id": "showLocalPlaylistDetail",
+      "label": "showLocalPlaylistDetail(id)",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Shows detail panel for a local playlist with song list"
+    },
+    {
+      "id": "hideLocalPlaylistDetail",
+      "label": "hideLocalPlaylistDetail()",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Hides local playlist detail panel"
+    },
+    {
+      "id": "getLocalLikedSongs",
+      "label": "getLocalLikedSongs()",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Returns all locally liked songs from multiple localStorage keys"
+    },
+    {
+      "id": "renderLocalPlaylistsIntoView",
+      "label": "renderLocalPlaylistsIntoView()",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Renders local playlists list in the playlist panel"
+    },
+    {
+      "id": "loadPlaylistIntoQueueById",
+      "label": "loadPlaylistIntoQueueById(id, playNow, name)",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Loads a playlist (netease/qq/local/youtube) into the play queue"
+    },
+    {
+      "id": "addSongToLocalPlaylist",
+      "label": "addSongToLocalPlaylist(playlistId, song)",
+      "type": "function",
+      "file": "playlists.js",
+      "description": "Adds a song to a local playlist"
+    },
+    {
+      "id": "misc.js",
+      "label": "misc.js",
+      "type": "file",
+      "description": "Miscellaneous: idle guide visual, toast notifications, file handling, DIY mode, visual guide"
+    },
+    {
+      "id": "showToast",
+      "label": "showToast(text, duration)",
+      "type": "function",
+      "file": "misc.js",
+      "description": "Shows a toast notification. Cross-file dependency: used everywhere."
+    },
+    {
+      "id": "closeVisualGuide",
+      "label": "closeVisualGuide()",
+      "type": "function",
+      "file": "misc.js",
+      "description": "Closes the idle visual guide"
+    },
+    {
+      "id": "idleGuidePointerMove",
+      "label": "idleGuidePointerMove(e)",
+      "type": "function",
+      "file": "misc.js",
+      "description": "Handles pointer move for idle guide interaction (rotation, tilt)"
+    },
+    {
+      "id": "handleFiles",
+      "label": "handleFiles(files)",
+      "type": "function",
+      "file": "misc.js",
+      "description": "Handles imported audio files (drag/drop or file picker) for local playback"
+    },
+    {
+      "id": "applyDiyMode",
+      "label": "applyDiyMode()",
+      "type": "function",
+      "file": "misc.js",
+      "description": "Applies DIY mode UI changes to the visual console"
+    },
+    {
+      "id": "openGsapModal",
+      "label": "openGsapModal(modal)",
+      "type": "function",
+      "description": "Opens a modal with GSAP animation (defined in shared/index.html)"
+    },
+    {
+      "id": "closeGsapModal",
+      "label": "closeGsapModal(modal, callback)",
+      "type": "function",
+      "description": "Closes a modal with GSAP animation (defined in shared/index.html)"
+    }
+  ],
+  "edges": [
+    {"source": "doSearch", "target": "apiJson", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "doSearch", "target": "mergeSongSearchResults", "label": "calls (self)"},
+    {"source": "doSearch", "target": "searchSourceEnabled", "label": "calls (cross-file: youtube.js)"},
+    {"source": "doSearch", "target": "neteaseSearch", "label": "calls (platforms/netease.js)"},
+    {"source": "doSearch", "target": "qqSearch", "label": "calls (platforms/qq.js)"},
+    {"source": "doSearch", "target": "youtubeSearch", "label": "calls (platforms/youtube.js)"},
+    {"source": "mergeSongSearchResults", "target": "cloneSong", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "updateSearchModeTabs", "target": "searchSourceEnabled", "label": "calls (cross-file: youtube.js)"},
+    {"source": "renderQueuePanel", "target": "currentCoverSong", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "renderQueuePanel", "target": "isSongLiked", "label": "calls (cross-file: like.js)"},
+    {"source": "renderQueuePanel", "target": "songSourceLabel", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "renderQueuePanel", "target": "songCoverSrc", "label": "calls (cross-file: cover.js)"},
+    {"source": "renderQueuePanel", "target": "playQueueAt", "label": "calls (cross-file: playback.js)"},
+    {"source": "renderQueuePanel", "target": "toggleLikeQueueIndex", "label": "calls (cross-file: like.js)"},
+    {"source": "setSearchMode", "target": "updateSearchModeTabs", "label": "calls (self)"},
+    {"source": "playHomeDaily", "target": "playQueueAt", "label": "calls (cross-file: playback.js)"},
+    {"source": "refreshUserPlaylists", "target": "apiJson", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "refreshUserPlaylists", "target": "renderLocalPlaylistsIntoView", "label": "calls (cross-file: playlists.js)"},
+    {"source": "buildPresetGrid", "target": "setPreset", "label": "calls (self)"},
+    {"source": "saveUserFxArchive", "target": "fx", "label": "reads"},
+    {"source": "applyUserFxArchive", "target": "fx", "label": "writes"},
+    {"source": "bindFxPanel", "target": "setPreset", "label": "calls (self)"},
+    {"source": "setPreset", "target": "saveLyricLayout", "label": "calls (cross-file: three-lyrics.js)"},
+    {"source": "renderUserBtn", "target": "hasAnyPlatformLogin", "label": "depends_on"},
+    {"source": "renderUserBtn", "target": "platformMeta", "label": "calls (self)"},
+    {"source": "showLoginModal", "target": "openGsapModal", "label": "calls"},
+    {"source": "closeLoginModal", "target": "closeGsapModal", "label": "calls"},
+    {"source": "closeCollectModal", "target": "closeGsapModal", "label": "calls (shared.js)"},
+    {"source": "closeTrackDetailModal", "target": "closeGsapModal", "label": "calls (shared.js)"},
+    {"source": "openTrackDetailModal", "target": "openGsapModal", "label": "calls (shared.js)"},
+    {"source": "closeTrackDetailModal", "target": "closeGsapModal", "label": "calls (shared.js)"},
+    {"source": "loadPlaylistIntoQueueById", "target": "apiJson", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "loadPlaylistIntoQueueById", "target": "cloneSong", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "loadPlaylistIntoQueueById", "target": "playQueueAt", "label": "calls (cross-file: playback.js)"},
+    {"source": "loadPlaylistIntoQueueById", "target": "safeShelfRebuild", "label": "calls (cross-file: shelf.js)"},
+    {"source": "loadYouTubeTrending", "target": "youtubeTrending", "label": "calls (platforms/youtube.js)"},
+    {"source": "loadYouTubeTrending", "target": "renderSearchResults", "label": "calls (self)"},
+    {"source": "handleFiles", "target": "currentCoverSong", "label": "calls (cross-file: api-helper.js)"},
+    {"source": "handleFiles", "target": "playQueueAt", "label": "calls (cross-file: playback.js)"},
+    {"source": "handleFiles", "target": "safeShelfRebuild", "label": "calls (cross-file: shelf.js)"},
+    {"source": "applyDiyMode", "target": "fx", "label": "reads"},
+    {"source": "initSearchSourceToggles", "target": "searchSourceEnabled", "label": "depends_on"},
+    {"source": "toggleSearchSource", "target": "searchSourceEnabled", "label": "depends_on"},
+    {"source": "toggleSearchSource", "target": "setSearchMode", "label": "calls (cross-file: controls.js)"},
+    {"source": "goHome", "target": "loadHomeDiscover", "label": "calls (cross-file: discover.js)"},
+    {"source": "goHome", "target": "loadHomeWeatherRadio", "label": "calls (cross-file: discover.js)"},
+    {"source": "setPlaybackQuality", "target": "openProviderLogin", "label": "calls (cross-file: controls.js)"},
+    {"source": "setPlaybackQuality", "target": "showToast", "label": "calls (cross-file: misc.js)"},
+    {"source": "setPlaybackQuality", "target": "hasProviderSvip", "label": "calls (cross-file: login.js)"},
+    {"source": "setPlaybackQuality", "target": "hasPlatformLogin", "label": "calls (cross-file: login.js)"}
+  ]
+}

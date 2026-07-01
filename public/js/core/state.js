@@ -1,11 +1,11 @@
 window.uiSfxCtx = null;
 window.lastShelfSelectSfxAt = 0;
 window.FFT_SIZE = 2048;
-window.frequencyData = new Uint8Array(FFT_SIZE / 2);
-window.timeDomainData = new Uint8Array(FFT_SIZE);
+window.frequencyData = new Uint8Array(window.FFT_SIZE / 2);
+window.timeDomainData = new Uint8Array(window.FFT_SIZE);
 window.BEAT_FFT_SIZE = 2048;
-window.beatFrequencyData = new Uint8Array(BEAT_FFT_SIZE / 2);
-window.beatTimeDomainData = new Uint8Array(BEAT_FFT_SIZE);
+window.beatFrequencyData = new Uint8Array(window.BEAT_FFT_SIZE / 2);
+window.beatTimeDomainData = new Uint8Array(window.BEAT_FFT_SIZE);
 window.bass = 0;
 window.mid = 0;
 window.treble = 0;
@@ -198,23 +198,23 @@ var updatePreviewState = {
   ]
 };
 window.applyUserCapsuleAutoHideState = function() {
-  document.body.classList.toggle('user-capsule-auto-hide', !!userCapsuleAutoHide);
+  document.body.classList.toggle('user-capsule-auto-hide', !!window.userCapsuleAutoHide);
   var btn = document.getElementById('user-capsule-hide-btn');
   if (btn) {
-    btn.classList.toggle('on', !!userCapsuleAutoHide);
-    btn.textContent = userCapsuleAutoHide ? '›' : '‹';
-    btn.title = userCapsuleAutoHide ? '取消自动隐藏账号胶囊' : '自动隐藏账号胶囊';
+    btn.classList.toggle('on', !!window.userCapsuleAutoHide);
+    btn.textContent = window.userCapsuleAutoHide ? '›' : '‹';
+    btn.title = window.userCapsuleAutoHide ? '取消自动隐藏账号胶囊' : '自动隐藏账号胶囊';
   }
 }
 window.toggleUserCapsuleAutoHide = function(e) {
   if (e && e.stopPropagation) e.stopPropagation();
-  userCapsuleAutoHide = !userCapsuleAutoHide;
-  saveBooleanPreference(USER_CAPSULE_AUTO_HIDE_STORE_KEY, userCapsuleAutoHide);
+  userCapsuleAutoHide = !window.userCapsuleAutoHide;
+  saveBooleanPreference(window.USER_CAPSULE_AUTO_HIDE_STORE_KEY, window.userCapsuleAutoHide);
   applyUserCapsuleAutoHideState();
-  showToast(userCapsuleAutoHide ? '账号胶囊已自动隐藏' : '账号胶囊已固定显示');
+  window.showToast(window.userCapsuleAutoHide ? '账号胶囊已自动隐藏' : '账号胶囊已固定显示');
 }
 window.updateUserCapsuleAutoHideFromPointer = function(x, y) {
-  if (!userCapsuleAutoHide || immersiveMode) {
+  if (!window.userCapsuleAutoHide || window.immersiveMode) {
     document.body.classList.remove('user-capsule-peek');
     return;
   }
@@ -223,39 +223,39 @@ window.updateUserCapsuleAutoHideFromPointer = function(x, y) {
 }
 window.applyFxFabAutoHideState = function(opts) {
   opts = opts || {};
-  document.body.classList.toggle('fx-fab-auto-hide', !!fxFabAutoHide);
-  if (!fxFabAutoHide) {
-    document.body.classList.remove('fx-fab-peek');
+  document.body.classList.toggle('window.fx-fab-auto-hide', !!window.fxFabAutoHide);
+  if (!window.fxFabAutoHide) {
+    document.body.classList.remove('window.fx-fab-peek');
     fxFabAutoHideRevealArmed = true;
   } else if (opts.forceHidden) {
-    document.body.classList.remove('fx-fab-peek');
+    document.body.classList.remove('window.fx-fab-peek');
     fxFabAutoHideRevealArmed = false;
   }
-  var btn = document.getElementById('fx-fab-hide-btn');
+  var btn = document.getElementById('window.fx-fab-hide-btn');
   if (btn) {
-    btn.classList.toggle('on', !!fxFabAutoHide);
-    btn.textContent = fxFabAutoHide ? '›' : '‹';
-    btn.title = fxFabAutoHide ? '取消自动隐藏视觉控制台' : '自动隐藏视觉控制台';
+    btn.classList.toggle('on', !!window.fxFabAutoHide);
+    btn.textContent = window.fxFabAutoHide ? '›' : '‹';
+    btn.title = window.fxFabAutoHide ? '取消自动隐藏视觉控制台' : '自动隐藏视觉控制台';
   }
 }
 window.toggleFxFabAutoHide = function(e) {
   if (e && e.stopPropagation) e.stopPropagation();
-  fxFabAutoHide = !fxFabAutoHide;
-  saveBooleanPreference(FX_FAB_AUTO_HIDE_STORE_KEY, fxFabAutoHide);
-  applyFxFabAutoHideState({ forceHidden: fxFabAutoHide });
-  showToast(fxFabAutoHide ? '视觉控制台按钮已自动隐藏' : '视觉控制台按钮已固定显示');
+  fxFabAutoHide = !window.fxFabAutoHide;
+  saveBooleanPreference(window.FX_FAB_AUTO_HIDE_STORE_KEY, window.fxFabAutoHide);
+  applyFxFabAutoHideState({ forceHidden: window.fxFabAutoHide });
+  window.showToast(window.fxFabAutoHide ? '视觉控制台按钮已自动隐藏' : '视觉控制台按钮已固定显示');
 }
 window.updateFxFabAutoHideFromPointer = function(x, y) {
-  if (!fxFabAutoHide || !diyPlayerMode || immersiveMode) {
-    document.body.classList.remove('fx-fab-peek');
+  if (!window.fxFabAutoHide || !window.diyPlayerMode || window.immersiveMode) {
+    document.body.classList.remove('window.fx-fab-peek');
     fxFabAutoHideRevealArmed = true;
     return;
   }
-  var panel = document.getElementById('fx-panel');
+  var panel = document.getElementById('window.fx-panel');
   var panelOpen = !!(panel && (panel.classList.contains('peek') || panel.classList.contains('show')));
   var nearBottomRight = x > innerWidth - 126 && y > innerHeight - 158;
   if (!nearBottomRight) fxFabAutoHideRevealArmed = true;
-  document.body.classList.toggle('fx-fab-peek', panelOpen || (nearBottomRight && fxFabAutoHideRevealArmed));
+  document.body.classList.toggle('window.fx-fab-peek', panelOpen || (nearBottomRight && window.fxFabAutoHideRevealArmed));
 }
 window.layoutFullscreenDiyZone = function() {
   var width = innerWidth < 820 ? 104 : 128;
@@ -279,16 +279,16 @@ window.layoutFullscreenDiyZone = function() {
   return { left: left, top: top, width: width, height: height };
 }
 window.shouldSuppressFullscreenDiyPeek = function() {
-  var fxPanel = document.getElementById('fx-panel');
+  var fxPanel = document.getElementById('window.fx-panel');
   var hotkeyModal = document.getElementById('hotkey-modal');
   var fxPanelOpen = !!(fxPanel && (fxPanel.classList.contains('peek') || fxPanel.classList.contains('show')));
   var hotkeyOpen = !!(hotkeyModal && hotkeyModal.classList.contains('show'));
-  return !!(visualGuideActive || fxPanelOpen || hotkeyOpen);
+  return !!(window.visualGuideActive || fxPanelOpen || hotkeyOpen);
 }
 window.updateFullscreenDiyPeekFromPointer = function(x, y) {
-  var ds = desktopRuntimeState || {};
+  var ds = window.desktopRuntimeState || {};
   var isFullscreen = !!(ds.fullscreen || desktopFullscreenActive || document.fullscreenElement || document.body.classList.contains('desktop-fullscreen'));
-  if (!isFullscreen || immersiveMode || shouldSuppressFullscreenDiyPeek()) {
+  if (!isFullscreen || window.immersiveMode || shouldSuppressFullscreenDiyPeek()) {
     document.body.classList.remove('fullscreen-diy-peek');
     return;
   }
@@ -303,37 +303,37 @@ window.updateFullscreenDiyPeekFromPointer = function(x, y) {
   document.body.classList.toggle('fullscreen-diy-peek', active);
 }
 window.isDiyMode = function() {
-  return !!diyPlayerMode;
+  return !!window.diyPlayerMode;
 }
 window.syncDiyModeButton = function() {
   ['diy-mode-btn', 'fullscreen-diy-btn'].forEach(function(id) {
     var btn = document.getElementById(id);
     if (!btn) return;
-    btn.classList.toggle('on', diyPlayerMode);
-    btn.setAttribute('aria-pressed', diyPlayerMode ? 'true' : 'false');
-    btn.title = diyPlayerMode ? '关闭 DIY 玩家模式' : '开启 DIY 玩家模式';
+    btn.classList.toggle('on', window.diyPlayerMode);
+    btn.setAttribute('aria-pressed', window.diyPlayerMode ? 'true' : 'false');
+    btn.title = window.diyPlayerMode ? '关闭 DIY 玩家模式' : '开启 DIY 玩家模式';
     btn.setAttribute('aria-label', btn.title);
   });
 }
 window.applyDiyMode = function(on, opts) {
   opts = opts || {};
   diyPlayerMode = !!on;
-  document.documentElement.classList.toggle('diy-mode-preload', diyPlayerMode);
-  document.documentElement.classList.toggle('simple-mode-preload', !diyPlayerMode);
-  document.body.classList.toggle('diy-mode', diyPlayerMode);
-  document.body.classList.toggle('simple-mode', !diyPlayerMode);
-  syncDiyModeButton();
-  if (opts.save) saveDiyModePreference(diyPlayerMode);
-  if (!diyPlayerMode) {
+  document.documentElement.classList.toggle('diy-mode-preload', window.diyPlayerMode);
+  document.documentElement.classList.toggle('simple-mode-preload', !window.diyPlayerMode);
+  document.body.classList.toggle('diy-mode', window.diyPlayerMode);
+  document.body.classList.toggle('simple-mode', !window.diyPlayerMode);
+  window.syncDiyModeButton();
+  if (opts.save) saveDiyModePreference(window.diyPlayerMode);
+  if (!window.diyPlayerMode) {
     toggleFxPanel(false);
-    togglePlaylistPanel(false);
+    window.togglePlaylistPanel(false);
     closeUploadTip(false);
     var quality = document.getElementById('quality-control');
     var volume = document.getElementById('volume-control');
     if (quality) quality.classList.remove('open');
     if (volume) volume.classList.remove('open');
   }
-  if (opts.toast) showToast(diyPlayerMode ? 'DIY 玩家模式已开启' : '已切回简约模式');
+  if (opts.toast) window.showToast(window.diyPlayerMode ? 'DIY 玩家模式已开启' : '已切回简约模式');
   if (opts.animate && window.gsap) {
     ['diy-mode-btn', 'fullscreen-diy-btn'].forEach(function(id) {
       var btn = document.getElementById(id);
@@ -342,14 +342,14 @@ window.applyDiyMode = function(on, opts) {
   }
 }
 window.toggleDiyMode = function() {
-  applyDiyMode(!diyPlayerMode, { save: true, toast: true, animate: true });
-  if (visualGuideActive) {
-    visualGuideState.mode = diyPlayerMode ? 'diy' : 'simple';
+  window.applyDiyMode(!window.diyPlayerMode, { save: true, toast: true, animate: true });
+  if (window.visualGuideActive) {
+    visualGuideState.mode = window.diyPlayerMode ? 'diy' : 'simple';
     showVisualGuideStep(0);
   }
 }
 window.targetVolume = readSavedVolume();
-window.lastNonZeroVolume = targetVolume > 0.01 ? targetVolume : 0.8;
+window.lastNonZeroVolume = window.targetVolume > 0.01 ? targetVolume : 0.8;
 window.volumeCloseTimer = null;
 
 // v7.2: 离线节拍预解析
@@ -460,13 +460,13 @@ window.djSongKey = function(song) {
 }
 
 window.resetDjModeMeter = function() {
-  djMode.tempoGap = 0;
-  djMode.tempoConfidence = 0;
-  djMode.sectionEnergy = 0;
-  djMode.sectionLow = 0;
-  djMode.sectionChange = 0;
-  djMode.visualPulse = 0;
-  djMode.lastBeatAt = -10;
+  window.djMode.tempoGap = 0;
+  window.djMode.tempoConfidence = 0;
+  window.djMode.sectionEnergy = 0;
+  window.djMode.sectionLow = 0;
+  window.djMode.sectionChange = 0;
+  window.djMode.visualPulse = 0;
+  window.djMode.lastBeatAt = -10;
 }
 
 window.resetDjBeatMapState = function() {
@@ -485,17 +485,17 @@ window.cancelDjBeatAnalysisTimer = function() {
 window.setDjModeActive = function(active, song) {
   active = !!active;
   var key = active ? djSongKey(song) : '';
-  var changed = djMode.active !== active || djMode.songKey !== key;
-  djMode.active = active;
-  djMode.songKey = key;
+  var changed = window.djMode.active !== active || window.djMode.songKey !== key;
+  window.djMode.active = active;
+  window.djMode.songKey = key;
   if (changed) {
-    djMode.startedAt = performance.now();
+    window.djMode.startedAt = performance.now();
     resetDjModeMeter();
   }
   if (active) {
     currentBeatMap = null;
     beatMapNextIdx = 0;
-    cancelBeatAnalysisTimer();
+    window.cancelBeatAnalysisTimer();
     hideBeatChip();
   } else {
     djBeatMapToken++;
@@ -505,11 +505,11 @@ window.setDjModeActive = function(active, song) {
 }
 
 window.maybeAnnounceDjMode = function() {
-  if (!djMode.active) return;
+  if (!window.djMode.active) return;
   var now = performance.now();
-  if (now - djMode.lastNoticeAt > 8000) {
-    djMode.lastNoticeAt = now;
-    showToast('DJ Mode · 离线锁拍');
+  if (now - window.djMode.lastNoticeAt > 8000) {
+    window.djMode.lastNoticeAt = now;
+    window.showToast('DJ Mode · 离线锁拍');
   }
 }
 
@@ -518,18 +518,18 @@ var DEVELOPMENT_LOCKED_FX = {
   wallpaperMode: true
 };
 window.isDevelopmentLockedFx = function(key) {
-  return !!DEVELOPMENT_LOCKED_FX[key];
+  return !!window.DEVELOPMENT_LOCKED_FX[key];
 }
 window.normalizeDevelopmentLockedFxState = function() {
-  if (!fx) return;
-  fx.wallpaperMode = false;
+  if (!window.fx) return;
+  window.fx.wallpaperMode = false;
 }
 window.playbackVisualPreset = readSavedPlaybackVisualPreset();
 window.startupVisualPreviewActive = false;
-window.fx = Object.assign({}, fxDefaults, readSavedLyricLayout());
-normalizeDevelopmentLockedFxState();
+window.fx = Object.assign({}, window.fxDefaults, window.readSavedLyricLayout());
+window.normalizeDevelopmentLockedFxState();
 window.presetTransition = { active:false, start:-10, duration:0.92, from:0, to:0 };
-window.controlsAutoHide = readBooleanPreference(CONTROLS_AUTO_HIDE_STORE_KEY, false);
+window.controlsAutoHide = window.readBooleanPreference(window.CONTROLS_AUTO_HIDE_STORE_KEY, false);
 window.controlsHovering = false;
 window.controlsHideTimer = null;
 window.controlsHandleDimTimer = null;
@@ -538,11 +538,11 @@ window.controlsShelfSuppressUntil = 0;
 window.cursorHideTimer = null;
 window.CURSOR_HIDE_DELAY = 2500;
 window.fxPanelPinned = false;
-window.playlistPanelPinned = readBooleanPreference(PLAYLIST_PANEL_PIN_STORE_KEY, false);
-window.userCapsuleAutoHide = readBooleanPreference(USER_CAPSULE_AUTO_HIDE_STORE_KEY, false);
-window.fxFabAutoHide = readBooleanPreference(FX_FAB_AUTO_HIDE_STORE_KEY, false);
+window.playlistPanelPinned = window.readBooleanPreference(window.PLAYLIST_PANEL_PIN_STORE_KEY, false);
+window.userCapsuleAutoHide = window.readBooleanPreference(window.USER_CAPSULE_AUTO_HIDE_STORE_KEY, false);
+window.fxFabAutoHide = window.readBooleanPreference(window.FX_FAB_AUTO_HIDE_STORE_KEY, false);
 window.fxFabAutoHideRevealArmed = true;
-window.hotkeySettings = readHotkeySettings();
+window.hotkeySettings = window.readHotkeySettings();
 window.immersiveMode = false;
 var immersiveState = {
   shelfMode: null,
@@ -590,11 +590,11 @@ var runtimePerfState = {
 };
 window.isDeepBackgroundMode = function() {
   if (isLiveBackgroundKeepMode()) return false;
-  var ds = desktopRuntimeState || {};
+  var ds = window.desktopRuntimeState || {};
   return !!(document.hidden || ds.minimized || ds.visible === false);
 }
 window.currentPerformanceBackgroundMode = function() {
-  return normalizePerformanceBackgroundMode((fx||{}).performanceBackground, (fx||{}).liveBackgroundKeep === true);
+  return window.normalizePerformanceBackgroundMode((window.fx||{}).performanceBackground, (window.fx||{}).liveBackgroundKeep === true);
 }
 window.isLiveBackgroundKeepMode = function() {
   return currentPerformanceBackgroundMode() === 'keep';
@@ -622,26 +622,26 @@ window.collectProtectedCoverUrls = function() {
   var keep = Object.create(null);
   function mark(url) { if (url) keep[String(url)] = true; }
   try {
-    var song = (typeof currentCoverSong === 'function') ? currentCoverSong() : (playQueue && currentIdx >= 0 ? playQueue[currentIdx] : null);
+    var song = (typeof currentCoverSong === 'function') ? window.currentCoverSong() : (window.playQueue && window.currentIdx >= 0 ? window.playQueue[window.currentIdx] : null);
     if (song) {
       mark(song.cover);
       if (typeof songCoverSrc === 'function') {
-        mark(songCoverSrc(song, 60));
-        mark(songCoverSrc(song, 360));
-        mark(songCoverSrc(song, 400));
+        mark(window.songCoverSrc(song, 60));
+        mark(window.songCoverSrc(song, 360));
+        mark(window.songCoverSrc(song, 400));
       }
     }
     if (typeof currentCoverSource !== 'undefined' && currentCoverSource && currentCoverSource.src) mark(currentCoverSource.src);
-    if (typeof playlistPanelDetailState !== 'undefined' && playlistPanelDetailState && playlistPanelDetailState.playlist) {
-      var cover = playlistPanelDetailState.playlist.cover;
+    if (typeof window.playlistPanelDetailState !== 'undefined' && window.playlistPanelDetailState && window.playlistPanelDetailState.playlist) {
+      var cover = window.playlistPanelDetailState.playlist.cover;
       mark(cover);
       if (typeof coverUrlWithSize === 'function') {
-        mark(coverUrlWithSize(cover, 88));
-        mark(coverUrlWithSize(cover, 96));
+        mark(window.coverUrlWithSize(cover, 88));
+        mark(window.coverUrlWithSize(cover, 96));
       }
     }
-    if (shelfManager && shelfManager.getCards) {
-      shelfManager.getCards().forEach(function(card){
+    if (window.shelfManager && window.shelfManager.getCards) {
+      window.shelfManager.getCards().forEach(function(card){
         if (card && card.item) mark(card.item.cover);
       });
     }
@@ -651,15 +651,15 @@ window.collectProtectedCoverUrls = function() {
 window.collectProtectedBeatMapKeys = function() {
   var keep = Object.create(null);
   try {
-    if (typeof beatMapSongKey === 'function' && playQueue && playQueue.length) {
-      var start = Math.max(0, currentIdx - 5);
-      var end = Math.min(playQueue.length - 1, currentIdx + 5);
-      for (var i = start; i <= end; i++) markProtectedKey(keep, beatMapSongKey(playQueue[i]));
+    if (typeof beatMapSongKey === 'function' && window.playQueue && window.playQueue.length) {
+      var start = Math.max(0, window.currentIdx - 5);
+      var end = Math.min(window.playQueue.length - 1, window.currentIdx + 5);
+      for (var i = start; i <= end; i++) markProtectedKey(keep, window.beatMapSongKey(window.playQueue[i]));
     }
     if (typeof beatPrefetchLastKey !== 'undefined') markProtectedKey(keep, beatPrefetchLastKey);
-    if (typeof djMode !== 'undefined' && djMode && djMode.songKey) markProtectedKey(keep, djMode.songKey);
-    if (typeof localBeatAnalysis !== 'undefined' && localBeatAnalysis && localBeatAnalysis.song && typeof beatMapSongKey === 'function') {
-      markProtectedKey(keep, beatMapSongKey(localBeatAnalysis.song));
+    if (typeof window.djMode !== 'undefined' && window.djMode && window.djMode.songKey) markProtectedKey(keep, window.djMode.songKey);
+    if (typeof window.localBeatAnalysis !== 'undefined' && window.localBeatAnalysis && window.localBeatAnalysis.song && typeof beatMapSongKey === 'function') {
+      markProtectedKey(keep, window.beatMapSongKey(window.localBeatAnalysis.song));
     }
   } catch (e) {}
   return keep;
@@ -670,10 +670,10 @@ window.collectProtectedCoverDepthIds = function() {
     if (typeof coverDepthCacheId !== 'function') return keep;
     var candidates = [];
     if (typeof currentCoverSource !== 'undefined' && currentCoverSource && currentCoverSource.src) candidates.push(currentCoverSource.src);
-    var song = (typeof currentCoverSong === 'function') ? currentCoverSong() : null;
+    var song = (typeof currentCoverSong === 'function') ? window.currentCoverSong() : null;
     if (song && typeof songCoverSrc === 'function') {
-      candidates.push(songCoverSrc(song, 360));
-      candidates.push(songCoverSrc(song, 400));
+      candidates.push(window.songCoverSrc(song, 360));
+      candidates.push(window.songCoverSrc(song, 400));
     }
     var texImg = (typeof coverTex !== 'undefined' && coverTex && coverTex.image) ? coverTex.image : null;
     var w = texImg && texImg.width ? texImg.width : 0;
@@ -726,9 +726,9 @@ window.trimCoverDepthCache = function(keep, protectedKeys) {
 window.collectRuntimePerfSnapshot = function(now) {
   now = now || performance.now();
   runtimePerfState.cacheCounts = {
-    playlistCovers: safeObjectKeys(playlistCoverCache).length,
+    playlistCovers: safeObjectKeys(window.playlistCoverCache).length,
     coverDepth: coverDepthCacheKeys ? coverDepthCacheKeys.length : 0,
-    beatMaps: safeObjectKeys(beatMapCache).length,
+    beatMaps: safeObjectKeys(window.beatMapCache).length,
     djBeatMaps: safeObjectKeys(djBeatMapCache).length
   };
   if (performance && performance.memory && now - runtimePerfState.lastHeapSampleAt > 12000) {
@@ -743,20 +743,20 @@ window.collectRuntimePerfSnapshot = function(now) {
       longFrames: renderPerfState.longFrames
     } : null,
     runtime: runtimePerfState,
-    renderer: (typeof renderer !== 'undefined' && renderer && renderer.info) ? {
-      geometries: renderer.info.memory && renderer.info.memory.geometries,
-      textures: renderer.info.memory && renderer.info.memory.textures,
-      calls: renderer.info.render && renderer.info.render.calls,
-      triangles: renderer.info.render && renderer.info.render.triangles
+    renderer: (typeof window.renderer !== 'undefined' && window.renderer && window.renderer.info) ? {
+      geometries: window.renderer.info.memory && window.renderer.info.memory.geometries,
+      textures: window.renderer.info.memory && window.renderer.info.memory.textures,
+      calls: window.renderer.info.render && window.renderer.info.render.calls,
+      triangles: window.renderer.info.render && window.renderer.info.render.triangles
     } : null,
-    viewport: (typeof renderer !== 'undefined' && renderer && renderer.domElement) ? {
+    viewport: (typeof window.renderer !== 'undefined' && window.renderer && window.renderer.domElement) ? {
       width: innerWidth,
       height: innerHeight,
       devicePixelRatio: window.devicePixelRatio || 1,
-      renderPixelRatio: renderer.getPixelRatio ? Number(renderer.getPixelRatio().toFixed(3)) : 0,
-      canvasWidth: renderer.domElement.width || 0,
-      canvasHeight: renderer.domElement.height || 0,
-      renderPixels: (renderer.domElement.width || 0) * (renderer.domElement.height || 0),
+      renderPixelRatio: window.renderer.getPixelRatio ? Number(window.renderer.getPixelRatio().toFixed(3)) : 0,
+      canvasWidth: window.renderer.domElement.width || 0,
+      canvasHeight: window.renderer.domElement.height || 0,
+      renderPixels: (window.renderer.domElement.width || 0) * (window.renderer.domElement.height || 0),
       targetFps: (typeof getAdaptiveRenderFps === 'function') ? getAdaptiveRenderFps() : 0,
       interactionBoost: (typeof isRenderInteractionActive === 'function') ? isRenderInteractionActive() : false,
       interactionReason: (typeof renderInteractionReason !== 'undefined') ? renderInteractionReason : ''
@@ -769,14 +769,14 @@ window.trimRuntimeCaches = function(reason, aggressive) {
   var protectedCovers = collectProtectedCoverUrls();
   var protectedBeats = collectProtectedBeatMapKeys();
   var dropped = 0;
-  dropped += trimObjectCache(playlistCoverCache, aggressive ? 72 : 180, protectedCovers, function(rec){
+  dropped += trimObjectCache(window.playlistCoverCache, aggressive ? 72 : 180, protectedCovers, function(rec){
     return rec && rec.loading;
   });
   dropped += trimCoverDepthCache(aggressive ? 4 : 10, collectProtectedCoverDepthIds());
-  dropped += trimObjectCache(beatMapCache, aggressive ? 12 : 36, protectedBeats);
+  dropped += trimObjectCache(window.beatMapCache, aggressive ? 12 : 36, protectedBeats);
   dropped += trimObjectCache(djBeatMapCache, aggressive ? 4 : 12, protectedBeats);
-  if (aggressive && typeof renderer !== 'undefined' && renderer && renderer.renderLists && renderer.renderLists.dispose) {
-    try { renderer.renderLists.dispose(); } catch (e) {}
+  if (aggressive && typeof window.renderer !== 'undefined' && window.renderer && window.renderer.renderLists && window.renderer.renderLists.dispose) {
+    try { window.renderer.renderLists.dispose(); } catch (e) {}
   }
   runtimePerfState.lastCacheTrimAt = performance.now();
   runtimePerfState.cacheTrimCount += 1;
@@ -805,36 +805,36 @@ window.maybeTrimRuntimeCaches = function(now) {
   trimRuntimeCaches(deep ? (isBackgroundReleaseMode() ? 'release-frame' : 'deep-frame') : 'active-frame', deep);
 }
 window.applyRendererPowerMode = function() {
-  if (typeof renderer === 'undefined' || !renderer) return;
+  if (typeof renderer === 'undefined' || !window.renderer) return;
   var deep = isDeepBackgroundMode();
   var width = deep ? 4 : Math.max(1, innerWidth);
   var height = deep ? 4 : Math.max(1, innerHeight);
   var pixelRatio = getRenderPixelRatio();
   var mode = deep ? 'sleep' : 'active';
-  if (renderPowerState.mode === mode && renderPowerState.width === width && renderPowerState.height === height && Math.abs(renderPowerState.pixelRatio - pixelRatio) < 0.001) return;
+  if (window.renderPowerState.mode === mode && window.renderPowerState.width === width && window.renderPowerState.height === height && Math.abs(window.renderPowerState.pixelRatio - pixelRatio) < 0.001) return;
   renderPowerState = { mode: mode, width: width, height: height, pixelRatio: pixelRatio };
-  renderer.setPixelRatio(pixelRatio);
-  renderer.setSize(width, height, false);
-  if (typeof uniforms !== 'undefined' && uniforms && uniforms.uPixel) uniforms.uPixel.value = renderer.getPixelRatio();
+  window.renderer.setPixelRatio(pixelRatio);
+  window.renderer.setSize(width, height, false);
+  if (typeof window.uniforms !== 'undefined' && window.uniforms && window.uniforms.uPixel) window.uniforms.uPixel.value = window.renderer.getPixelRatio();
   if (deep) {
-    if (renderer.renderLists && renderer.renderLists.dispose) renderer.renderLists.dispose();
+    if (window.renderer.renderLists && window.renderer.renderLists.dispose) window.renderer.renderLists.dispose();
     scheduleBackgroundCacheTrim();
   }
 }
 window.updateDesktopRuntimeState = function(state) {
   state = state || {};
-  var wasFullscreen = desktopRuntimeState.fullscreen;
+  var wasFullscreen = window.desktopRuntimeState.fullscreen;
   var wasDeep = isDeepBackgroundMode();
-  desktopRuntimeState.desktop = !!window.desktopWindow;
-  desktopRuntimeState.minimized = !!state.isMinimized;
-  desktopRuntimeState.visible = state.isVisible !== false;
-  desktopRuntimeState.focused = state.isFocused !== false;
-  desktopRuntimeState.fullscreen = !!(state.isFullScreen || state.isNativeFullScreen || state.isHtmlFullScreen || state.isWindowFullScreen);
+  window.desktopRuntimeState.desktop = !!window.desktopWindow;
+  window.desktopRuntimeState.minimized = !!state.isMinimized;
+  window.desktopRuntimeState.visible = state.isVisible !== false;
+  window.desktopRuntimeState.focused = state.isFocused !== false;
+  window.desktopRuntimeState.fullscreen = !!(state.isFullScreen || state.isNativeFullScreen || state.isHtmlFullScreen || state.isWindowFullScreen);
   updateRenderPowerClasses();
   applyRendererPowerMode();
-  if (fx && (fx.desktopLyrics || fx.wallpaperMode)) setTimeout(syncDesktopOverlayState, 0);
+  if (window.fx && (window.fx.desktopLyrics || window.fx.wallpaperMode)) setTimeout(syncDesktopOverlayState, 0);
   if (wasDeep && !isDeepBackgroundMode()) recoverVisualsAfterBackground('desktop-runtime-state');
-  if (desktopRuntimeState.fullscreen !== wasFullscreen) scheduleMainRendererViewportRefresh('desktop-runtime-state');
+  if (window.desktopRuntimeState.fullscreen !== wasFullscreen) scheduleMainRendererViewportRefresh('desktop-runtime-state');
 }
 window.installRenderPowerHooks = function() {
   updateRenderPowerClasses();
@@ -844,20 +844,20 @@ window.installRenderPowerHooks = function() {
     if (!isDeepBackgroundMode()) recoverVisualsAfterBackground('visibilitychange');
   });
   window.addEventListener('focus', function(){
-    desktopRuntimeState.focused = true;
+    window.desktopRuntimeState.focused = true;
     updateRenderPowerClasses();
     applyRendererPowerMode();
     if (!isDeepBackgroundMode()) recoverVisualsAfterBackground('focus');
   });
   window.addEventListener('blur', function(){
-    desktopRuntimeState.focused = false;
+    window.desktopRuntimeState.focused = false;
     updateRenderPowerClasses();
     applyRendererPowerMode();
   });
   if (window.desktopWindow && typeof window.desktopWindow.onStateChange === 'function') {
-    window.desktopWindow.onStateChange(updateDesktopRuntimeState);
+    window.desktopWindow.onStateChange(window.updateDesktopRuntimeState);
     if (typeof window.desktopWindow.getState === 'function') {
-      window.desktopWindow.getState().then(updateDesktopRuntimeState).catch(function(){});
+      window.desktopWindow.getState().then(window.updateDesktopRuntimeState).catch(function(){});
     }
   }
 }
