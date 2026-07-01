@@ -2150,3 +2150,26 @@ window.updateStageLyrics3D = function(dt) {
   if (typeof window.applyLyricDynamics === 'function') window.applyLyricDynamics(dt);
   if (typeof window.applyLyricRenderProfile === 'function') window.applyLyricRenderProfile();
 };
+
+window.normalizeCustomBackgroundMedia = function(value) {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    var img = window.normalizeCustomBackgroundImage(value);
+    if (img) return { type: 'image', src: img };
+    if (/^data:video\/(mp4|webm|quicktime);base64,/i.test(value) || /^https?:\/\//i.test(value)) return { type: 'video', src: String(value) };
+    return null;
+  }
+  if (typeof value !== 'object') return null;
+  var type = value.type === 'video' ? 'video' : (value.type === 'image' ? 'image' : '');
+  if (type === 'image') {
+    var imageSrc = window.normalizeCustomBackgroundImage(value.src || value.url || '');
+    return imageSrc ? { type: 'image', src: imageSrc } : null;
+  }
+  if (type === 'video') {
+    var src = String(value.src || '').trim();
+    var id = String(value.id || '').trim();
+    if (!id && !/^data:video\/(mp4|webm|quicktime);base64,/i.test(src) && !/^https?:\/\//i.test(src)) return null;
+    return { type: 'video', src: src, id: id };
+  }
+  return null;
+};
