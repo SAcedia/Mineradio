@@ -1961,3 +1961,29 @@ window.liftFxFloatingPopups = function() {
     if (el && el.parentElement !== document.body) document.body.appendChild(el);
   });
 };
+
+window.bindColorLabPicker = function(picker) {
+  if (!picker || picker._colorLabBound) return;
+  picker._colorLabBound = true;
+  picker.setAttribute('aria-haspopup', 'dialog');
+  picker.setAttribute('data-color-lab-picker', '1');
+  function openFromPickerEvent(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    picker._colorLabOpenedAt = Date.now();
+    openColorLabForPicker(picker);
+  }
+  picker.addEventListener('pointerdown', openFromPickerEvent);
+  picker.addEventListener('mousedown', function(e){ e.preventDefault(); e.stopPropagation(); });
+  picker.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    if (Date.now() - (picker._colorLabOpenedAt || 0) < 260) return;
+    openColorLabForPicker(picker);
+  });
+  picker.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' ') openFromPickerEvent(e);
+  });
+};
