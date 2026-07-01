@@ -293,6 +293,7 @@ function drawMineradioSplashWebgl(elapsed) {
   resize();
   window.addEventListener('resize', resize);
   drawMineradioSplash();
+  }, 0);
 })();
 
 function drawMineradioSplash() { window._splashTiming.firstFrame = window._splashTiming.firstFrame || performance.now();
