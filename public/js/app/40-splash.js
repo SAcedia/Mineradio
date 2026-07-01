@@ -220,19 +220,12 @@ function drawMineradioSplashWebgl(elapsed) {
   window._splashTiming.iifeStart = performance.now();
   splashCanvas = document.getElementById('splash-canvas');
   if (!splashCanvas) return;
-
-  // Defer WebGL/2D init so browser renders CSS background animations first
-  setTimeout(function deferredSplashInit() {
-    if (!splashAnimating) return;
-    window._splashTiming.deferredStart = performance.now();
-
-    if (!reduceSplashMotion && initMineradioSplashWebgl(splashCanvas)) {
-      splashCtx = null;
-    } else {
-      splashCtx = splashCanvas.getContext('2d');
-    }
-
-    function resize() {
+  if (!reduceSplashMotion && initMineradioSplashWebgl(splashCanvas)) {
+    splashCtx = null;
+  } else {
+    splashCtx = splashCanvas.getContext('2d');
+  }
+  function resize() {
     splashPixelRatio = Math.min(1.6, Math.max(1, window.devicePixelRatio || 1));
     splashW = window.innerWidth;
     splashH = window.innerHeight;
@@ -293,7 +286,6 @@ function drawMineradioSplashWebgl(elapsed) {
   resize();
   window.addEventListener('resize', resize);
   drawMineradioSplash();
-  }, 0);
 })();
 
 function drawMineradioSplash() { window._splashTiming.firstFrame = window._splashTiming.firstFrame || performance.now();
