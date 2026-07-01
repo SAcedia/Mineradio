@@ -2100,3 +2100,53 @@ window.tickLyricsParticles = function() {
     if (typeof window.showStageLine === 'function') window.showStageLine(window.lyricsLines[newIdx]);
   }
 };
+
+window.hexToRgb = function(hex) {
+  hex = window.normalizeHexColor(hex).slice(1);
+  return {
+    r: parseInt(hex.slice(0, 2), 16),
+    g: parseInt(hex.slice(2, 4), 16),
+    b: parseInt(hex.slice(4, 6), 16)
+  };
+};
+
+window.updateStageLyrics3D = function(dt) {
+  if (!window.stageLyrics || !window.stageLyrics.group) return;
+  if (!window.fx || (!window.fx.particleLyrics && !window.stageLyrics.current && (!window.stageLyrics.outgoing || !window.stageLyrics.outgoing.length))) return;
+  if (!isFinite(window.stageLyrics.highBloom)) window.stageLyrics.highBloom = 0;
+  if (!isFinite(window.stageLyrics.beatGlow)) window.stageLyrics.beatGlow = 0;
+  if (!isFinite(window.stageLyrics.glowFollowX)) window.stageLyrics.glowFollowX = 0;
+  if (!isFinite(window.stageLyrics.glowFollowY)) window.stageLyrics.glowFollowY = 0;
+  if (!isFinite(window.stageLyrics.glowFollowRoll)) window.stageLyrics.glowFollowRoll = 0;
+  if (!window.uniforms) return;
+  var t = window.uniforms.uTime.value;
+  var lyricGlowStrength = window.fx.lyricGlow ? Math.min(0.85, Math.max(0, window.fx.lyricGlowStrength)) : 0;
+  var glowDrive = Math.min(1.7, Math.max(0, lyricGlowStrength / 0.50));
+  var glowBreath = lyricGlowStrength > 0 ? (0.5 + 0.5 * Math.sin(t * 1.05)) : 0;
+  var musicBloom = Math.max(window.lyricSunEnergy || 0, (window.beatPulse || 0) * 0.10);
+  var beatGlowRaw = window.fx.lyricGlowBeat && lyricGlowStrength > 0
+    ? Math.max((window.beatPulse || 0) * 1.22, (window.beatCam ? window.beatCam.punch : 0) * 0.86 + (window.beatCam ? window.beatCam.radiusKick : 0) * 1.85)
+    : 0;
+  window.stageLyrics.beatGlow += (beatGlowRaw - window.stageLyrics.beatGlow) * (beatGlowRaw > window.stageLyrics.beatGlow ? 0.32 : 0.10);
+  if (!isFinite(window.stageLyrics.beatGlow)) window.stageLyrics.beatGlow = 0;
+  var skullLyricPreset = !!(window.fx && window.fx.preset === window.SKULL_PRESET_INDEX);
+  var solarBloom = lyricGlowStrength > 0 ? (0.18 + glowBreath * 0.16 + musicBloom * 0.90 + window.stageLyrics.beatGlow * 1.18 + Math.sin(t * 0.37 + 1.2) * 0.035) * glowDrive : 0;
+  if (skullLyricPreset && lyricGlowStrength > 0) {
+    solarBloom = (0.035 + glowBreath * 0.030 + musicBloom * 0.11 + Math.pow(Math.max(0, window.stageLyrics.beatGlow), 1.26) * 1.45 + Math.pow(Math.max(0, window.skullBeatFlash || 0), 1.08) * 1.18) * glowDrive;
+  }
+  solarBloom = Math.max(0, Math.min(1.45, solarBloom));
+  window.stageLyrics.highBloom += (solarBloom - window.stageLyrics.highBloom) * (solarBloom > window.stageLyrics.highBloom ? (skullLyricPreset ? 0.22 : 0.075) : (skullLyricPreset ? 0.070 : 0.050));
+  if (!isFinite(window.stageLyrics.highBloom)) window.stageLyrics.highBloom = 0;
+  if (typeof window.updateLyricStarRiver === 'function') window.updateLyricStarRiver(dt);
+  var followDrive = window.fx.lyricGlowBeat && lyricGlowStrength > 0 ? Math.min(1.35, window.stageLyrics.beatGlow) : 0;
+  var followXTarget = followDrive * ((window.beatCam ? window.beatCam.thetaKick * 34 : 0) + (window.beatCam ? window.beatCam.rollKick * 8 : 0));
+  var followYTarget = followDrive * ((window.beatCam ? window.beatCam.phiKick * 42 : 0) - (window.beatCam ? window.beatCam.radiusKick * 0.48 : 0));
+  window.stageLyrics.glowFollowX += (followXTarget - window.stageLyrics.glowFollowX) * 0.085;
+  window.stageLyrics.glowFollowY += (followYTarget - window.stageLyrics.glowFollowY) * 0.085;
+  window.stageLyrics.glowFollowRoll += (-window.stageLyrics.glowFollowRoll) * 0.045;
+  if (!isFinite(window.stageLyrics.glowFollowX)) window.stageLyrics.glowFollowX = 0;
+  if (!isFinite(window.stageLyrics.glowFollowY)) window.stageLyrics.glowFollowY = 0;
+  if (!isFinite(window.stageLyrics.glowFollowRoll)) window.stageLyrics.glowFollowRoll = 0;
+  if (typeof window.applyLyricDynamics === 'function') window.applyLyricDynamics(dt);
+  if (typeof window.applyLyricRenderProfile === 'function') window.applyLyricRenderProfile();
+};
