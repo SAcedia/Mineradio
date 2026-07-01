@@ -945,7 +945,7 @@ async function playFromListenRecord(r) {
   homeForcedOpen = false;
   homeSuppressed = false;
   setHomeControlsLocked(false);
-  var provider = r.source || (r.key && r.key.split(':')[0]) || '';
+  var provider = r.sourceKey || r.source || (r.key && r.key.split(':')[0]) || '';
   var song = {
     id: r.id || r.key || '',
     mid: r.mid || '',

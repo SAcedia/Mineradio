@@ -550,6 +550,9 @@ body.home-controls-locked #bottom-bar{opacity:0!important;pointer-events:none!im
 .ctrl-btn.play-ctrl:hover{background:rgba(255,255,255,.10);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 6px 16px rgba(0,0,0,.20);transform:translateY(-1px)}
 .ctrl-btn.play-ctrl:active{transform:translateY(0) scale(.94);background:rgba(255,255,255,.04)}
 .ctrl-btn.play-ctrl svg{width:22px;height:22px}
+.ctrl-btn.lyric-source-tag{width:auto;min-width:28px;height:22px;padding:0 7px;border-radius:7px;font-size:9.5px;font-weight:800;letter-spacing:.2px;color:rgba(255,255,255,.50);background:rgba(255,255,255,.04);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);line-height:1;transition:color .2s,background .2s,transform .2s}
+.ctrl-btn.lyric-source-tag:hover{color:rgba(255,255,255,.80);background:rgba(255,255,255,.08);transform:translateY(-1px)}
+.ctrl-btn.lyric-source-tag:active{transform:translateY(0) scale(.95)}
 #play-mode-btn[data-mode="loop"]{color:rgba(255,255,255,.70)}
 #play-mode-btn[data-mode="shuffle"],#play-mode-btn[data-mode="single"]{color:rgba(210,244,241,.90);text-shadow:0 0 12px rgba(0,245,212,.15)}
 #play-mode-btn.mode-switching #play-mode-icon{animation:play-mode-pop .42s cubic-bezier(.16,1,.3,1)}

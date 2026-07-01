@@ -299,7 +299,7 @@ function setLyricSource(source) {
     _lyricSourceIdx = idx;
   }
   var btn = document.getElementById('lyric-source-btn');
-  if (btn) btn.textContent = _lyricSourceIdx < 0 ? '词' : '源·' + (_lyricSourceLabels[source] || source);
+  if (btn) btn.textContent = _lyricSourceIdx < 0 ? '词' : (_lyricSourceLabels[source] || source);
   updateMiniSourceButtons();
   var cur = currentCoverSong();
   if (cur) {
