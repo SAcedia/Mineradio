@@ -270,7 +270,7 @@ function showLocalPlaylistDetail(playlistId) {
   var songs, title, isLiked = playlistId === '__liked__';
   if (isLiked) {
     songs = getLocalLikedSongs();
-    title = '我喜欢的音乐';
+    title = '我的喜欢';
   } else {
     var playlists = loadLocalPlaylists();
     var pl = playlists.find(function(p){ return p.id === playlistId; });
@@ -299,10 +299,10 @@ function renderLocalPlaylistsIntoView() {
   var playlists = loadLocalPlaylists();
   var likedSongs = getLocalLikedSongs();
   var html = '<div class="pl-section-label">本地歌单</div>';
-  // 我喜欢的音乐
+  // 我的喜欢
   html += '<div class="pl-card" data-local-pl-id="__liked__">' +
     '<div style="width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,.06);flex-shrink:0"></div>' +
-    '<div style="flex:1;min-width:0"><div class="pl-name">我喜欢的音乐<span class="tag-source local" style="margin-left:6px;vertical-align:1px">本地</span></div><div class="pl-sub">' + likedSongs.length + ' 首</div></div>' +
+    '<div style="flex:1;min-width:0"><div class="pl-name">我的喜欢<span class="tag-source local" style="margin-left:6px;vertical-align:1px">本地</span></div><div class="pl-sub">' + likedSongs.length + ' 首</div></div>' +
   '</div>';
   // 本地歌单
   playlists.forEach(function(pl){

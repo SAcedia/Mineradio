@@ -292,7 +292,7 @@ function makeShelfManager() {
         var likedSongs = typeof getLocalLikedSongs === 'function' ? getLocalLikedSongs() : [];
         if (likedSongs.length) {
           var firstCover = (likedSongs[0] && likedSongs[0].cover) || '';
-          items.push({ type:'localLiked', title: '我喜欢的音乐', sub:'本地红心 · ' + likedSongs.length + ' 首',
+          items.push({ type:'localLiked', title: '我的喜欢', sub:'本地红心 · ' + likedSongs.length + ' 首',
             cover: firstCover, tag: '本地红心', likedSongs: likedSongs });
         }
       } catch(e) {}
