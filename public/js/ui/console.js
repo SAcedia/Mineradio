@@ -150,7 +150,7 @@ function normalizeFxArchiveSnapshot(raw) {
 }
 function readUserFxArchives() {
   var raw = [];
-  try { raw = JSON.parse(localStorage.getItem(USER_FX_ARCHIVE_STORE_KEY) || '[]') || []; } catch(e) { raw = []; }
+  try { raw = JSON.parse(Mineradio.util.storageGet(USER_FX_ARCHIVE_STORE_KEY) || '[]') || []; } catch(e) { raw = []; }
   if (!Array.isArray(raw)) raw = [];
   return raw.map(function(slot, index){
     slot = slot && typeof slot === 'object' ? slot : {};
@@ -159,10 +159,10 @@ function readUserFxArchives() {
   }).filter(function(slot){ return !!(slot.snapshot || slot.savedAt || slot.createdAt); });
 }
 function hasStoredUserFxArchives() {
-  try { return localStorage.getItem(USER_FX_ARCHIVE_STORE_KEY) != null; } catch(e) { return true; }
+  try { return Mineradio.util.storageGet(USER_FX_ARCHIVE_STORE_KEY) != null; } catch(e) { return true; }
 }
 function saveUserFxArchives() {
-  try { localStorage.setItem(USER_FX_ARCHIVE_STORE_KEY, JSON.stringify(userFxArchives)); } catch(e) { console.warn('[saveUserFxArchives]', e); }
+  try { Mineradio.util.storageSet(USER_FX_ARCHIVE_STORE_KEY, userFxArchives); } catch(e) { console.warn('[saveUserFxArchives]', e); }
 }
 function createPackagedDefaultUserFxArchiveSlot() {
   return { name: normalizeUserFxArchiveName(PACKAGED_DEFAULT_USER_FX_ARCHIVE_NAME, 0), createdAt: PACKAGED_DEFAULT_USER_FX_ARCHIVE_EXPORTED_AT, savedAt: PACKAGED_DEFAULT_USER_FX_ARCHIVE_SAVED_AT, snapshot: normalizeFxArchiveSnapshot(clonePackagedDefaultFxSnapshot()) };
@@ -1568,7 +1568,7 @@ function relabelFxPanelControls() {
 }
 
 function saveHotkeySettings() {
-  try { localStorage.setItem(HOTKEY_SETTINGS_STORE_KEY, JSON.stringify(hotkeySettings || getHotkeyDefaults())); } catch (e) {}
+  try { Mineradio.util.storageSet(HOTKEY_SETTINGS_STORE_KEY, hotkeySettings || getHotkeyDefaults()); } catch (e) {}
 }
 function hotkeyActionMeta(actionKey) {
   for (var i = 0; i < HOTKEY_ACTIONS.length; i++) {

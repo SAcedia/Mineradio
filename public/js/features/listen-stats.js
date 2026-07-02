@@ -3,7 +3,7 @@
 
 function loadListenStatsState() {
   try {
-    var raw = JSON.parse(localStorage.getItem("mineradio-listen-stats-v1") || "{}") || {};
+    var raw = JSON.parse(Mineradio.util.storageGet("mineradio-listen-stats-v1") || "{}") || {};
     window.listenStatsState = { songs: raw.songs || {}, artists: raw.artists || {}, history: raw.history || [], recents: raw.recents || [], lastWriteAt: raw.lastWriteAt || 0 };
     if (!window.listenStatsState.lastWriteAt) window.listenStatsState.lastWriteAt = Date.now();
   } catch (e) {
@@ -13,7 +13,7 @@ function loadListenStatsState() {
 function saveListenStatsState() {
   try {
     window.listenStatsState.lastWriteAt = Date.now();
-    localStorage.setItem("mineradio-listen-stats-v1", JSON.stringify(window.listenStatsState));
+    Mineradio.util.storageSet("mineradio-listen-stats-v1", window.listenStatsState);
   } catch (e) {}
 }
 function songFromListenRecord(record) {

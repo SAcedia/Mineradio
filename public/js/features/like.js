@@ -10,7 +10,7 @@ function isSongLiked(song) {
   if (!song || !song.id) return false;
   if (likedSongMap[String(song.id)]) return true;
   if (Mineradio.util.songProviderKey(song) === 'youtube') {
-    try { return localStorage.getItem('mineradio-local-like-youtube:' + String(song.id)) !== null; } catch(e) { return false; }
+    try { return Mineradio.util.storageGet('mineradio-local-like-youtube:' + String(song.id)) !== null; } catch(e) { return false; }
   }
   return false;
 }
@@ -105,9 +105,9 @@ async function toggleLikeSong(song) {
     window.Mineradio.bus.emit('like:toggle', { song: song, liked: next, phase: 'optimistic' });
     try {
       if (next) {
-        localStorage.setItem(key, JSON.stringify({ liked: true, name: song.name, artist: song.artist, cover: song.cover, savedAt: Date.now() }));
+        Mineradio.util.storageSet(key, JSON.stringify({ liked: true, name: song.name, artist: song.artist, cover: song.cover, savedAt: Date.now() }));
       } else {
-        localStorage.removeItem(key);
+        Mineradio.util.storageRemove(key);
       }
     } catch(e) {}
     likeBusyMap[id] = false;

@@ -308,7 +308,7 @@ function coverTextureSizeForResolution(v) {
 }
 function readSavedLyricLayout() {
   try {
-    var savedLayoutRaw = localStorage.getItem(LYRIC_LAYOUT_STORE_KEY);
+    var savedLayoutRaw = Mineradio.util.storageGet(LYRIC_LAYOUT_STORE_KEY);
     var raw = savedLayoutRaw ? (JSON.parse(savedLayoutRaw) || {}) : packagedDefaultLyricLayoutRaw();
     var savedPreset = clampRange(Number(raw.preset) || 0, 0, 6);
     if (savedPreset === 3 && raw.visualPresetSchema !== VISUAL_PRESET_SCHEMA) {

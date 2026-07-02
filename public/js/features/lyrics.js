@@ -35,7 +35,7 @@ async function fetchLyric(songOrId, token, preferSource) {
     var cacheKey = 'mineradio-lyric-' + provider + ':' + (song ? song.id : songOrId) + (preferSource ? '-' + preferSource : '');
     var r;
     try {
-      var cached = localStorage.getItem(cacheKey);
+      var cached = Mineradio.util.storageGet(cacheKey);
       if (cached) {
         var parsed = JSON.parse(cached);
         if (parsed && parsed.ts && Date.now() - parsed.ts < 7 * 86400000) {
@@ -48,7 +48,7 @@ async function fetchLyric(songOrId, token, preferSource) {
       _lyricFetchController = new AbortController();
       r = await Mineradio.util.apiJson(endpoint, { signal: _lyricFetchController.signal });
       _lyricFetchController = null;
-      try { localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: r })); } catch (e) {}
+      try { Mineradio.util.storageSet(cacheKey, JSON.stringify({ ts: Date.now(), data: r })); } catch (e) {}
     }
     if (token !== trackSwitchToken) return;
     var nativeLines = parseYrcText(r.yrc || '');
@@ -215,11 +215,11 @@ function _prefetchAdjacent(centerIdx) {
 }
 var _lyricOffsetToastTimer = null;
 function _saveLyricOffset() {
-  try { localStorage.setItem('mineradio-lyric-offset', String(_lyricOffset || 0)); } catch (e) {}
+  try { Mineradio.util.storageSet('mineradio-lyric-offset', String(_lyricOffset || 0)); } catch (e) {}
 }
 function _loadLyricOffset() {
   try {
-    var v = parseFloat(localStorage.getItem('mineradio-lyric-offset'));
+    var v = parseFloat(Mineradio.util.storageGet('mineradio-lyric-offset'));
     if (isFinite(v)) _lyricOffset = Math.max(-30, Math.min(30, v));
   } catch (e) {}
 }
@@ -318,15 +318,15 @@ function _saveSongPref(song) {
     if (_lyricOffset && _lyricOffset !== 0) pref.lyricOffset = _lyricOffset;
     if (window.audio && window.audio.playbackRate && window.audio.playbackRate !== 1) pref.speed = window.audio.playbackRate;
     if (_lyricSourceIdx > 0) pref.lyricSource = _lyricSources[_lyricSourceIdx];
-    if (Object.keys(pref).length) localStorage.setItem(key, JSON.stringify(pref));
-    else localStorage.removeItem(key);
+    if (Object.keys(pref).length) Mineradio.util.storageSet(key, pref);
+    else Mineradio.util.storageRemove(key);
   } catch(e) {}
 }
 function _loadSongPref(song) {
   var key = _songPrefKey(song);
   if (!key) return;
   try {
-    var raw = localStorage.getItem(key);
+    var raw = Mineradio.util.storageGet(key);
     if (!raw) return;
     var pref = JSON.parse(raw);
     if (pref.lyricOffset && isFinite(pref.lyricOffset)) {

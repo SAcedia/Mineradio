@@ -12,7 +12,7 @@ function loginYouTube() {
 }
 function searchSourceEnabled(provider) {
   try {
-    var v = localStorage.getItem('mineradio-source-' + provider);
+    var v = Mineradio.util.storageGet('mineradio-source-' + provider);
     if (provider === 'youtube') return v === '1'; // YouTube defaults OFF
     return v !== '0';
   } catch(e) { return provider !== 'youtube'; }
@@ -20,7 +20,7 @@ function searchSourceEnabled(provider) {
 function toggleSearchSource(provider) {
   var on = searchSourceEnabled(provider);
   var next = !on;
-  try { localStorage.setItem('mineradio-source-' + provider, next ? '1' : '0'); } catch(e) {}
+  try { Mineradio.util.storageSet('mineradio-source-' + provider, next ? '1' : '0'); } catch(e) {}
   ['toggle-' + provider + '-btn', 'login-' + provider + '-toggle'].forEach(function(id){
     var btn = document.getElementById(id);
     if (btn) {

@@ -2182,16 +2182,16 @@ function unpackLocalBeatMap(stored) {
   };
 }
 function readLocalBeatPrefs() {
-  try { return JSON.parse(localStorage.getItem(LOCAL_BEAT_PREF_STORE_KEY) || '{}') || {}; }
+  try { return JSON.parse(Mineradio.util.storageGet(LOCAL_BEAT_PREF_STORE_KEY) || '{}') || {}; }
   catch (e) { return {}; }
 }
 function saveLocalBeatPrefs() {
-  try { localStorage.setItem(LOCAL_BEAT_PREF_STORE_KEY, JSON.stringify(localBeatMapPrefs || {})); } catch (e) {}
+  try { Mineradio.util.storageSet(LOCAL_BEAT_PREF_STORE_KEY, localBeatMapPrefs || {}); } catch (e) {}
 }
 function readLocalBeatMapCache() {
   var out = {};
   try {
-    var raw = JSON.parse(localStorage.getItem(LOCAL_BEATMAP_STORE_KEY) || '{}') || {};
+    var raw = JSON.parse(Mineradio.util.storageGet(LOCAL_BEATMAP_STORE_KEY) || '{}') || {};
     Object.keys(raw).forEach(function(key){
       var entry = raw[key] || {};
       out[key] = { updatedAt: entry.updatedAt || 0 };
@@ -2224,7 +2224,7 @@ function saveLocalBeatMapCache() {
   var attempts = [12, 8, 5, 3];
   for (var i = 0; i < attempts.length; i++) {
     try {
-      localStorage.setItem(LOCAL_BEATMAP_STORE_KEY, JSON.stringify(packLocalBeatCache(attempts[i])));
+      Mineradio.util.storageSet(LOCAL_BEATMAP_STORE_KEY, packLocalBeatCache(attempts[i]));
       return true;
     } catch (e) {}
   }

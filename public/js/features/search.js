@@ -44,14 +44,14 @@ function clearSearchResults() {
 }
 function readSearchHistory() {
   try {
-    var raw = JSON.parse(localStorage.getItem(SEARCH_HISTORY_STORE_KEY) || '[]');
+    var raw = JSON.parse(Mineradio.util.storageGet(SEARCH_HISTORY_STORE_KEY) || '[]');
     return Array.isArray(raw) ? raw.map(function(v){ return String(v || '').trim(); }).filter(Boolean).slice(0, 10) : [];
   } catch (e) {
     return [];
   }
 }
 function writeSearchHistory(items) {
-  try { localStorage.setItem(SEARCH_HISTORY_STORE_KEY, JSON.stringify((items || []).slice(0, 10))); } catch (e) {}
+  try { Mineradio.util.storageSet(SEARCH_HISTORY_STORE_KEY, JSON.stringify((items || []).slice(0, 10))); } catch (e) {}
 }
 function rememberSearchQuery(q) {
   q = String(q || '').trim();

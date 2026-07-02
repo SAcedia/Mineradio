@@ -114,7 +114,7 @@ function defaultFreeCameraState() {
 function readFreeCameraState() {
   var state = defaultFreeCameraState();
   try {
-    var raw = JSON.parse(localStorage.getItem(FREE_CAMERA_STORE_KEY) || '{}') || {};
+    var raw = JSON.parse(Mineradio.util.storageGet(FREE_CAMERA_STORE_KEY) || '{}') || {};
     if (raw.position) {
       state.position.set(
         clampRange(Number(raw.position.x) || 0, -80, 80),

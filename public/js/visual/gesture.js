@@ -240,10 +240,10 @@ function setPeek(el, on, key) {
   }
 }
 function uploadTipWasSeen() {
-  try { return localStorage.getItem(UPLOAD_TIP_STORE_KEY) === '1'; } catch (e) { return true; }
+  try { return Mineradio.util.storageGet(UPLOAD_TIP_STORE_KEY) === '1'; } catch (e) { return true; }
 }
 function markUploadTipSeen() {
-  try { localStorage.setItem(UPLOAD_TIP_STORE_KEY, '1'); } catch (e) {}
+  try { Mineradio.util.storageSet(UPLOAD_TIP_STORE_KEY, '1'); } catch (e) {}
 }
 function closeUploadTip(manual) {
   var tip = document.getElementById('upload-tip');

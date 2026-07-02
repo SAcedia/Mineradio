@@ -128,7 +128,12 @@ function escHtml(s) { var d = document.createElement('div'); d.textContent = s; 
 //  Storage — safe JSON localStorage wrapper
 // ============================================================
 function storageGet(key, fallback) {
-  try { var v = JSON.parse(localStorage.getItem(key)); return v != null ? v : fallback; } catch (e) { return fallback; }
+  try {
+    var raw = localStorage.getItem(key);
+    if (raw == null) return fallback;
+    // 尝试 JSON 解析；若失败（纯字符串存储），返回原值
+    try { return JSON.parse(raw); } catch (e) { return raw; }
+  } catch (e) { return fallback; }
 }
 function storageSet(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }

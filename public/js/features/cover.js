@@ -6,7 +6,7 @@ window.Mineradio.bus.on('player:trackchange', function(data) {
 var customCoverMap = {};
 function readCustomCoverMap() {
   try {
-    var raw = localStorage.getItem(CUSTOM_COVER_STORE_KEY);
+    var raw = Mineradio.util.storageGet(CUSTOM_COVER_STORE_KEY);
     var parsed = raw ? JSON.parse(raw) : {};
     return parsed && typeof parsed === 'object' ? parsed : {};
   } catch (e) {
@@ -15,7 +15,7 @@ function readCustomCoverMap() {
 }
 function saveCustomCoverMap() {
   try {
-    localStorage.setItem(CUSTOM_COVER_STORE_KEY, JSON.stringify(customCoverMap || {}));
+    Mineradio.util.storageSet(CUSTOM_COVER_STORE_KEY, customCoverMap || {});
     return true;
   } catch (e) {
     console.warn('custom cover save failed:', e);

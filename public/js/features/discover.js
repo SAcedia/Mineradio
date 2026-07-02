@@ -443,10 +443,10 @@ async function loadHomeWeatherRadio(force, opts) {
       homeWeatherRadioState.updatedAt = Date.now();
       if (homeWeatherRadioState.weather && homeWeatherRadioState.weather.location && homeWeatherRadioState.weather.location.name) {
         homeWeatherRadioState.city = homeWeatherRadioState.weather.location.name;
-        localStorage.setItem(HOME_WEATHER_CITY_KEY, homeWeatherRadioState.city);
+        Mineradio.util.storageSet(HOME_WEATHER_CITY_KEY, homeWeatherRadioState.city);
       } else if (opts.city) {
         homeWeatherRadioState.city = opts.city;
-        localStorage.setItem(HOME_WEATHER_CITY_KEY, homeWeatherRadioState.city);
+        Mineradio.util.storageSet(HOME_WEATHER_CITY_KEY, homeWeatherRadioState.city);
       }
     } catch (e) {
       console.warn('weather radio failed:', e);
@@ -550,6 +550,24 @@ function locateWeatherRadio() {
   renderHomeDiscover();
   var locationSettled = false;
   var ipFallbackStarted = false;
+
+  // 先用 ip-api.com 快速定位
+  fetch('http://ip-api.com/json/?fields=city,lat,lon,timezone&lang=zh-CN', { signal: AbortSignal.timeout(3000) })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (locationSettled || !data || data.status === 'fail') return;
+      locationSettled = true;
+      homeWeatherRadioState.city = data.city || '当前位置';
+      Mineradio.util.storageSet(HOME_WEATHER_CITY_KEY, homeWeatherRadioState.city);
+      renderHomeDiscover();
+      loadHomeWeatherRadio(true, {
+        lat: data.lat,
+        lon: data.lon,
+        city: data.city || '当前位置',
+        timezone: data.timezone || '',
+      });
+    }).catch(function(){});
+
   function useIpFallback() {
     if (locationSettled || ipFallbackStarted) return;
     ipFallbackStarted = true;
@@ -559,7 +577,7 @@ function locateWeatherRadio() {
       if (locationSettled) return;
       locationSettled = true;
       homeWeatherRadioState.city = loc.city || '当前位置';
-      localStorage.setItem(HOME_WEATHER_CITY_KEY, homeWeatherRadioState.city);
+      Mineradio.util.storageSet(HOME_WEATHER_CITY_KEY, homeWeatherRadioState.city);
       renderHomeDiscover();
       showToast('已用网络位置定位到 ' + (loc.city || '当前位置'));
       loadHomeWeatherRadio(true, {
@@ -586,7 +604,7 @@ function changeWeatherCity() {
   city = String(city || '').trim();
   if (!city) return;
   homeWeatherRadioState.city = city;
-  localStorage.setItem(HOME_WEATHER_CITY_KEY, city);
+  Mineradio.util.storageSet(HOME_WEATHER_CITY_KEY, city);
   homeWeatherRadioState.loaded = false;
   loadHomeWeatherRadio(true, { city: city });
 }

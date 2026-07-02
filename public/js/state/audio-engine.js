@@ -254,7 +254,7 @@ function setVolume(value, silent) {
   var next = Math.max(0, Math.min(1, Number(value) || 0));
   targetVolume = next;
   if (next > 0.01) lastNonZeroVolume = next;
-  try { localStorage.setItem('apex-player-volume', String(next)); } catch (e) {}
+  try { Mineradio.util.storageSet('apex-player-volume', String(next)); } catch (e) {}
   applyVolumeToAudio();
   updateVolumeUi();
   if (!silent) showToast('音量 ' + Math.round(next * 100) + '%');

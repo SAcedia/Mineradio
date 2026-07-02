@@ -573,10 +573,10 @@ function activeVisualGuideSteps() {
   return diyPlayerMode ? visualGuideStepsDiy : visualGuideSteps;
 }
 function visualGuideWasSeen() {
-  try { return localStorage.getItem(VISUAL_GUIDE_SEEN_STORE_KEY) === '1'; } catch (e) { return true; }
+  try { return Mineradio.util.storageGet(VISUAL_GUIDE_SEEN_STORE_KEY) === '1'; } catch (e) { return true; }
 }
 function markVisualGuideSeen() {
-  try { localStorage.setItem(VISUAL_GUIDE_SEEN_STORE_KEY, '1'); } catch (e) {}
+  try { Mineradio.util.storageSet(VISUAL_GUIDE_SEEN_STORE_KEY, '1'); } catch (e) {}
 }
 function maybeRunStartupVisualGuide(source) {
   if (visualGuideWasSeen() || visualGuideActive || immersiveMode || playing) return false;

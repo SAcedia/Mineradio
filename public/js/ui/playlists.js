@@ -7,7 +7,7 @@ var LOCAL_PLAYLIST_STORAGE_KEY = 'mineradio-local-playlists-v1';
 
 function loadLocalPlaylists() {
   try {
-    var raw = localStorage.getItem(LOCAL_PLAYLIST_STORAGE_KEY);
+    var raw = Mineradio.util.storageGet(LOCAL_PLAYLIST_STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch (e) {}
   return [];
@@ -15,7 +15,7 @@ function loadLocalPlaylists() {
 
 function saveLocalPlaylists(playlists) {
   try {
-    localStorage.setItem(LOCAL_PLAYLIST_STORAGE_KEY, JSON.stringify(playlists));
+    Mineradio.util.storageSet(LOCAL_PLAYLIST_STORAGE_KEY, playlists);
   } catch (e) {}
 }
 
@@ -217,7 +217,7 @@ function getLocalLikedSongs() {
     for (var i = 0; i < localStorage.length; i++) {
       var key = localStorage.key(i);
       if (!key || key.indexOf('mineradio-local-like-') !== 0) continue;
-      var val = localStorage.getItem(key);
+      var val = Mineradio.util.storageGet(key);
       if (!val) continue;
       var liked = false, meta = null;
       if (val[0] === '{') { try { meta = JSON.parse(val); liked = meta && meta.liked; } catch(e) {} }

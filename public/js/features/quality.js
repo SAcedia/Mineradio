@@ -54,13 +54,13 @@ function playbackResolvedQualityText(data) {
 }
 function readPlaybackQualityPreference() {
   try {
-    return normalizePlaybackQuality(localStorage.getItem(PLAYBACK_QUALITY_STORE_KEY) || 'hires');
+    return normalizePlaybackQuality(Mineradio.util.storageGet(PLAYBACK_QUALITY_STORE_KEY) || 'hires');
   } catch (e) {
     return 'hires';
   }
 }
 function savePlaybackQualityPreference() {
-  try { localStorage.setItem(PLAYBACK_QUALITY_STORE_KEY, playbackQuality); } catch (e) {}
+  try { Mineradio.util.storageSet(PLAYBACK_QUALITY_STORE_KEY, playbackQuality); } catch (e) {}
 }
 function updatePlaybackQualityUi() {
   var label = document.getElementById('quality-btn-label');
