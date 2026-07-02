@@ -57,6 +57,23 @@ if (window.desktopWindow && window.desktopWindow.getSetting) {
     }
   }).catch(function(){});
 }
+
+// 布局模式切换（供 UI 调用）
+window.setLayoutMode = function(mode) {
+  layoutMode = mode;
+  applyLayoutMode(mode);
+  document.querySelectorAll('#layout-mode-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-layout') === mode); });
+  if (window.desktopWindow && window.desktopWindow.setSetting) window.desktopWindow.setSetting('layoutMode', mode).catch(function(){});
+};
+
+// 名言偏好切换（供 UI 调用）
+window.setQuotePref = function(key, value) {
+  if (key === 'lang') { quoteLang = value; document.querySelectorAll('#quote-lang-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-lang') === value); }); }
+  if (key === 'style') { quoteStyle = value; document.querySelectorAll('#quote-style-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-style') === value); }); }
+  if (window.desktopWindow && window.desktopWindow.setSetting) window.desktopWindow.setSetting('quote' + key.charAt(0).toUpperCase() + key.slice(1), value).catch(function(){});
+  // 刷新名言
+  if (window.refreshQuote) setTimeout(window.refreshQuote, 100);
+};
 var volumeTween = null, trackSwitchToken = 0;
 var audioFadeTimer = null, audioElementFadeFrame = 0, audioFadeSerial = 0;
 var AUDIO_FADE_IN_MS = 460;

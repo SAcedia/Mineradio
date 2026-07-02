@@ -457,8 +457,24 @@
             <button data-desktop-lyrics-fps="120">120</button>
             <button data-desktop-lyrics-fps="0">无上限</button>
           </div>
-          <div class="fx-slider dev-locked"><label>壁纸透明度</label><input id="fx-wallpaperopacity" type="range" min="0.35"
-              max="1" step="0.01" disabled><output></output></div>
+           <div class="fx-slider dev-locked"><label>壁纸透明度</label><input id="fx-wallpaperopacity" type="range" min="0.35"
+               max="1" step="0.01" disabled><output></output></div>
+           <div class="fx-section-label">布局模式</div>
+           <div class="fx-seg" id="layout-mode-seg">
+             <button data-layout="auto" class="active" onclick="setLayoutMode('auto')">自适应</button>
+             <button data-layout="side" onclick="setLayoutMode('side')">左右</button>
+             <button data-layout="stack" onclick="setLayoutMode('stack')">上下</button>
+           </div>
+           <div class="fx-section-label">每日一言</div>
+           <div class="fx-seg" id="quote-lang-seg">
+             <button data-lang="zh" class="active" onclick="setQuotePref('lang','zh')">中文</button>
+             <button data-lang="en" onclick="setQuotePref('lang','en')">English</button>
+           </div>
+           <div class="fx-seg" id="quote-style-seg" style="margin-top:6px">
+             <button data-style="classic" class="active" onclick="setQuotePref('style','classic')">经典</button>
+             <button data-style="modern" onclick="setQuotePref('style','modern')">现代</button>
+             <button data-style="zen" onclick="setQuotePref('style','zen')">Zen</button>
+           </div>
         </div>
       </div>
 
