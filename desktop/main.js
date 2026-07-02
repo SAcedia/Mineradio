@@ -1126,6 +1126,7 @@ function destroyWallpaperTray() {
     wallpaperTray = null;
   }
 }
+function closeOverlayWindows() {
   closeDesktopLyricsWindow();
   closeWallpaperWindow();
 }
