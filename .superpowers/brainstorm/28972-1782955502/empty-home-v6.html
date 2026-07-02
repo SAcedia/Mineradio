@@ -1,0 +1,204 @@
+<h2>empty-home UI 对比</h2>
+<p class="subtitle">当前 vs 优化后 — 改动点已标绿</p>
+
+<div class="split">
+  <!-- 当前 -->
+  <div class="mockup">
+    <div class="mockup-header" style="background:#1a1a1a;font-size:11px">当前</div>
+    <div class="mockup-body" style="padding:0;background:#0c0e14;min-height:380px;font-size:10px">
+      <!-- 搜索栏 -->
+      <div style="padding:8px 10px 4px">
+        <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:5px 10px;border:1px solid rgba(255,255,255,.05)">
+          <span style="color:rgba(255,255,255,.2)">搜索歌曲、歌手...</span>
+        </div>
+      </div>
+      <!-- 主体 -->
+      <div style="display:grid;grid-template-columns:1.1fr 1.9fr;gap:8px;padding:0 10px">
+        <!-- Hero -->
+        <div style="background:linear-gradient(145deg,rgba(33,29,34,.64),rgba(9,10,14,.76));border-radius:12px;padding:10px;border:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:7px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.4px">MINERADIO · YOUR LIBRARY</div>
+          <div style="font-size:14px;font-weight:700;margin-top:4px">我的音乐库</div>
+          <div style="font-size:8px;color:rgba(255,255,255(.4);margin-top:2px;line-height:1.4">登录后同步你的歌单和最近播放</div>
+          <div style="display:flex;gap:3px;margin-top:6px;flex-wrap:wrap">
+            <div style="background:rgba(255,255,255,.05);padding:2px 7px;border-radius:8px;font-size:7px">上海 26°</div>
+            <div style="background:rgba(255,255,255,.05);padding:2px 7px;border-radius:8px;font-size:7px">登录</div>
+          </div>
+          <!-- Mosaic decoration -->
+          <div style="display:grid;grid-template-columns:1.2fr .8fr;grid-template-rows:1fr 1fr;gap:3px;height:42px;margin-top:6px">
+            <div style="background:rgba(255,255,255,.04);border-radius:5px;grid-row:1/3"></div>
+            <div style="background:rgba(255,255,255(.04);border-radius:5px"></div>
+            <div style="background:rgba(255,255,255(.04);border-radius:5px"></div>
+          </div>
+        </div>
+        <!-- Cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;align-content:start">
+          <div style="background:linear-gradient(142deg,rgba(18,21,26,.66),rgba(8,9,13,.76));border-radius:8px;padding:7px;border:1px solid rgba(255,255,255,.05)">
+            <div style="font-size:6px;color:rgba(255,255,255(.25);text-transform:uppercase">Library</div>
+            <div style="font-size:9px;font-weight:600;margin-top:2px">我的歌单</div>
+            <div style="font-size:7px;color:rgba(255,255,255(.3);margin-top:1px">打开左侧歌单库</div>
+          </div>
+          <div style="background:linear-gradient(142deg,rgba(18,21,26,.66),rgba(8,9,13,.76));border-radius:8px;padding:7px;border:1px solid rgba(255,255,255,.05)">
+            <div style="font-size:6px;color:rgba(255,255,255(.25);text-transform:uppercase">Daily</div>
+            <div style="font-size:9px;font-weight:600;margin-top:2px">每日推荐</div>
+            <div style="font-size:7px;color:rgba(255,255,255(.3);margin-top:1px">登录后同步</div>
+          </div>
+          <div style="background:linear-gradient(142deg,rgba(18,21,26,.66),rgba(8,9,13,.76));border-radius:8px;padding:7px;border:1px solid rgba(255,255,255,.05)">
+            <div style="font-size:6px;color:rgba(255,255,255(.25);text-transform:uppercase">Mix</div>
+            <div style="font-size:9px;font-weight:600;margin-top:2px">私人电台</div>
+            <div style="font-size:7px;color:rgba(255,255,255(.3);margin-top:1px">智能推荐</div>
+          </div>
+          <div style="background:linear-gradient(142deg,rgba(18,21,26,.66),rgba(8,9,13,.76));border-radius:8px;padding:7px;border:1px solid rgba(255,255,255,.05)">
+            <div style="font-size:6px;color:rgba(255,255,255(.25);text-transform:uppercase">Continue</div>
+            <div style="font-size:9px;font-weight:600;margin-top:2px">继续听</div>
+            <div style="font-size:7px;color:rgba(255,255,255(.3);margin-top:1px">最近播放</div>
+          </div>
+        </div>
+      </div>
+      <!-- Tiles -->
+      <div style="margin:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;padding:5px">
+        <div style="font-size:7px;color:rgba(255,255,255(.3);margin-bottom:3px">为你准备</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px">
+          <div style="background:rgba(255,255,255(.05);border-radius:3px;height:24px"></div>
+          <div style="background:rgba(255,255,255(.05);border-radius:3px;height:24px"></div>
+          <div style="background:rgba(255,255,255(.05);border-radius:3px;height:24px"></div>
+          <div style="background:rgba(255,255,255(.05);border-radius:3px;height:24px"></div>
+          <div style="background:rgba(255,255,255(.05);border-radius:3px;height:24px"></div>
+        </div>
+      </div>
+      <!-- Control bar (hidden in home) -->
+      <div style="margin:6px 10px 8px;background:rgba(6,8,12,.58);border-radius:20px;padding:4px 10px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.06)">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:22px;height:22px;border-radius:5px;background:rgba(255,255,255(.04)"></div>
+          <div><div style="font-size:8px;color:rgba(255,255,255(.5)">未在播放</div><div style="font-size:7px;color:rgba(255,255,255(.2)">选择歌曲开始</div></div>
+        </div>
+        <div style="display:flex;gap:3px;opacity:.5">
+          <div style="width:20px;height:20px;border-radius:4px;background:rgba(255,255,255(.03)"></div>
+          <div style="width:20px;height:20px;border-radius:4px;background:rgba(255,255,255(.03)"></div>
+          <div style="width:24px;height:24px;border-radius:5px;background:rgba(255,255,255(.04)"></div>
+          <div style="width:20px;height:20px;border-radius:4px;background:rgba(255,255,255(.03)"></div>
+          <div style="width:20px;height:20px;border-radius:4px;background:rgba(255,255,255(.03)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 优化后 -->
+  <div class="mockup">
+    <div class="mockup-header" style="background:#1a2a2a;font-size:11px">优化后</div>
+    <div class="mockup-body" style="padding:0;background:#0c0e14;min-height:380px;position:relative;font-size:10px">
+      <!-- 背景粒子模拟 -->
+      <div style="position:absolute;inset:0;opacity:.15;background:radial-gradient(ellipse at 30% 40%,rgba(122,215,194,.15) 0,transparent 50%),radial-gradient(ellipse at 70% 50%,rgba(255,83,103,.1) 0,transparent 40%)"></div>
+      
+      <div style="position:relative;z-index:1">
+        <!-- 搜索栏（不变） -->
+        <div style="padding:8px 10px 4px">
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:5px 10px;border:1px solid rgba(255,255,255,.05)">
+            <span style="color:rgba(255,255,255(.2)">搜索歌曲、歌手...</span>
+          </div>
+        </div>
+        <!-- 主体 -->
+        <div style="display:grid;grid-template-columns:1.1fr 1.9fr;gap:8px;padding:0 10px">
+          <!-- Hero: 更低透明度 + 更高 blur + Mosaic 改用每日一言 -->
+          <div style="background:linear-gradient(145deg,rgba(33,29,34,.35),rgba(9,10,14,.45));backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:12px;padding:10px;border:1px solid rgba(255,255,255,.05)">
+            <div style="font-size:7px;color:rgba(255,255,255(.25);text-transform:uppercase;letter-spacing:.4px">MINERADIO · YOUR LIBRARY</div>
+            <div style="font-size:14px;font-weight:700;margin-top:4px;color:rgba(255,255,255,.9)">我的音乐库</div>
+            <div style="font-size:8px;color:rgba(255,255,255(.4);margin-top:2px;line-height:1.4">登录后同步你的歌单和最近播放</div>
+            <div style="display:flex;gap:3px;margin-top:6px;flex-wrap:wrap">
+              <div style="background:rgba(255,255,255(.05);padding:2px 7px;border-radius:8px;font-size:7px">上海 26°</div>
+              <div style="background:rgba(255,255,255(.05);padding:2px 7px;border-radius:8px;font-size:7px">登录</div>
+            </div>
+            <!-- Mosaic: 每日一言（功能） -->
+            <div style="display:grid;grid-template-columns:1.2fr .8fr;grid-template-rows:1fr 1fr;gap:3px;height:42px;margin-top:6px">
+              <div style="background:rgba(122,215,194,.06);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:5px;grid-row:1/3;padding:6px;display:flex;flex-direction:column;justify-content:center;border:1px solid rgba(255,255,255,.04)">
+                <div style="font-size:6px;color:rgba(255,255,255(.2);text-transform:uppercase">每日一言</div>
+                <div style="font-size:8px;font-weight:500;color:rgba(255,255,255(.6);margin-top:1px;font-style:italic;line-height:1.3">"音乐是灵魂的语言"</div>
+                <div style="font-size:6px;color:rgba(255,255,255(.2);margin-top:1px">— 尼采</div>
+              </div>
+              <div style="background:rgba(255,83,103,.06);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:5px;padding:5px;border:1px solid rgba(255,255,255(.04);display:flex;flex-direction:column;justify-content:center">
+                <div style="font-size:6px;color:rgba(255,255,255(.2);text-transform:uppercase">本周</div>
+                <div style="font-size:9px;font-weight:700;color:rgba(255,255,255(.7)">128 分钟</div>
+                <div style="font-size:6px;color:rgba(255,255,255(.2)">45 首</div>
+              </div>
+              <div style="background:rgba(244,210,138,.06);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:5px;padding:5px;border:1px solid rgba(255,255,255(.04);display:flex;flex-direction:column;justify-content:center">
+                <div style="font-size:6px;color:rgba(255,255,255(.2);text-transform:uppercase">队列</div>
+                <div style="font-size:9px;font-weight:700;color:rgba(255,255,255(.7)">12 首</div>
+                <div style="font-size:6px;color:rgba(255,255,255(.2)">≈45 分钟</div>
+              </div>
+            </div>
+          </div>
+          <!-- Cards: 更低透明度 + blur -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;align-content:start">
+            <div style="background:linear-gradient(142deg,rgba(18,21,26,.35),rgba(8,9,13(.45));backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);border-radius:8px;padding:7px;border:1px solid rgba(255,255,255(.05)">
+              <div style="font-size:6px;color:rgba(255,255,255(.25);text-transform:uppercase">Library</div>
+              <div style="font-size:9px;font-weight:600;margin-top:2px;color:rgba(255,255,255,.85)">我的歌单</div>
+              <div style="font-size:7px;color:rgba(255,255,255(.3);margin-top:1px">打开左侧歌单库</div>
+            </div>
+            <div style="background:linear-gradient(142deg,rgba(18,21,26,.35),rgba(8,9,13(.45));backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);border-radius:8px;padding:7px;border:1px solid rgba(255,255,255(.05)">
+              <div style="font-size:6px;color:rgba(255,255,255(.25);text-transform:uppercase">Daily</div>
+              <div style="font-size:9px;font-weight:600;margin-top:2px;color:rgba(255,255,255,.85)">每日推荐</div>
+              <div style="font-size:7px;color:rgba(255,255,255(.3);margin-top:1px">登录后同步</div>
+            </div>
+            <div style="background:linear-gradient(142deg,rgba(18,21,26,.35),rgba(8,9,13(.45));backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);border-radius:8px;padding:7px;border:1px solid rgba(255,255,255(.05)">
+              <div style="font-size:6px;color:rgba(255,255,255(.25);text-transform:uppercase">Mix</div>
+              <div style="font-size:9px;font-weight:600;margin-top:2px;color:rgba(255,255,255,.85)">私人电台</div>
+              <div style="font-size:7px;color:rgba(255,255,255(.3);margin-top:1px">智能推荐</div>
+            </div>
+            <div style="background:linear-gradient(142deg,rgba(18,21,26,.35),rgba(8,9,13(.45));backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);border-radius:8px;padding:7px;border:1px solid rgba(255,255,255(.05)">
+              <div style="font-size:6px;color:rgba(255,255,255(.25);text-transform:uppercase">Continue</div>
+              <div style="font-size:9px;font-weight:600;margin-top:2px;color:rgba(255,255,255,.85)">继续听</div>
+              <div style="font-size:7px;color:rgba(255,255,255(.3);margin-top:1px">最近播放</div>
+            </div>
+          </div>
+        </div>
+        <!-- Tiles -->
+        <div style="margin:6px 10px;background:rgba(255,255,255(.02);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:6px;padding:5px;border:1px solid rgba(255,255,255(.04)">
+          <div style="font-size:7px;color:rgba(255,255,255(.3);margin-bottom:3px">为你准备</div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px">
+            <div style="background:rgba(255,255,255(.04);border-radius:3px;height:24px"></div>
+            <div style="background:rgba(255,255,255(.04);border-radius:3px;height:24px"></div>
+            <div style="background:rgba(255,255,255(.04);border-radius:3px;height:24px"></div>
+            <div style="background:rgba(255,255,255(.04);border-radius:3px;height:24px"></div>
+            <div style="background:rgba(255,255,255(.04);border-radius:3px;height:24px"></div>
+          </div>
+        </div>
+        <!-- 控制栏（融合） -->
+        <div style="margin:6px 10px 8px;background:rgba(6,8,12,.35);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:20px;padding:4px 10px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255(.04)">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:22px;height:22px;border-radius:5px;background:rgba(255,255,255(.04)"></div>
+            <div><div style="font-size:8px;color:rgba(255,255,255(.4)">未在播放</div><div style="font-size:7px;color:rgba(255,255,255(.2)">选择歌曲开始</div></div>
+          </div>
+          <div style="display:flex;gap:3px;opacity:.4">
+            <div style="width:20px;height:20px;border-radius:4px;background:rgba(255,255,255(.03)"></div>
+            <div style="width:20px;height:20px;border-radius:4px;background:rgba(255,255,255(.03)"></div>
+            <div style="width:24px;height:24px;border-radius:5px;background:rgba(255,255,255(.04)"></div>
+            <div style="width:20px;height:20px;border-radius:4px;background:rgba(255,255,255(.03)"></div>
+            <div style="width:20px;height:20px;border-radius:4px;background:rgba(255,255,255(.03)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:10px">
+  <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:10px;border:1px solid rgba(255,255,255(.06)">
+    <div style="font-weight:600;color:rgba(255,255,255(.6);margin-bottom:4px">当前问题</div>
+    <ul style="margin:0;padding-left:12px;color:rgba(255,255,255(.45);line-height:1.6">
+      <li>Hero 背景不透明 (.64)，完全挡住 canvas 特效</li>
+      <li>卡片背景 .66，看不清底层粒子</li>
+      <li>Mosaic 是装饰封面，无功能</li>
+      <li>控制栏 .58 透明度，和 home 不融合</li>
+    </ul>
+  </div>
+  <div style="background:rgba(122,215,194,.03);border-radius:8px;padding:10px;border:1px solid rgba(122,215,194,(.1)">
+    <div style="font-weight:600;color:#7ad7c2;margin-bottom:4px">优化内容</div>
+    <ul style="margin:0;padding-left:12px;color:rgba(255,255,255(.55);line-height:1.6">
+      <li>Hero → .40 + blur(40px)，粒子透出</li>
+      <li>卡片 → .40 + blur(36px)</li>
+      <li>Mosaic → 每日一言 + 本周统计 + 队列</li>
+      <li>控制栏 → .35 + blur(14px) 融合</li>
+      <li>卡片 hover → 微上浮 (-2px) + 边框发光</li>
+      <li>4K 屏幕 ≥2000px 整体放大 1.15x</li>
+    </ul>
+  </div>
+</div>
