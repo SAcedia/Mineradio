@@ -28,6 +28,9 @@
 </head>
 
 <body>
+  <!-- ========================================================== -->
+  <!--  Desktop Window Shell / Titlebar                           -->
+  <!-- ========================================================== -->
   <div id="desktop-window-shell">
     <div id="desktop-titlebar" aria-label="window controls">
       <div class="desktop-drag-region">
@@ -78,12 +81,16 @@
     <div id="canvas-container"></div>
     <canvas id="idle-guide-canvas" aria-hidden="true"></canvas>
 
-    <!-- 启动页 -->
+    <!-- ========================================================== -->
+    <!--  Splash Screen                                             -->
+    <!-- ========================================================== -->
     <div id="splash">
       <canvas id="splash-canvas"></canvas>
       <div class="splash-bg-noise"></div>
 
-      <!-- 主内容 -->
+      <!-- ========================================================== -->
+    <!--  Main Content                                              -->
+    <!-- ========================================================== -->
       <div class="splash-content">
         <div class="splash-wordmark" id="splash-wordmark" aria-label="Mineradio">
           <span class="splash-word-mine">Mine</span>
@@ -100,7 +107,9 @@
 
     <div id="hint" aria-hidden="true"></div>
 
-    <!-- 顶部搜索 -->
+    <!-- ========================================================== -->
+    <!--  Search Area                                               -->
+    <!-- ========================================================== -->
     <div id="search-area">
       <div id="search-stack">
         <div id="search-box">
@@ -142,7 +151,9 @@
       </div>
     </div>
 
-    <!-- 空场 Home -->
+    <!-- ========================================================== -->
+    <!--  Empty Home                                                -->
+    <!-- ========================================================== -->
     <section id="empty-home" aria-label="Mineradio home">
       <div class="empty-home-shell">
         <div class="home-hero">
@@ -208,7 +219,9 @@
       </div>
     </section>
 
-    <!-- 顶部右侧 (只保留用户) -->
+    <!-- ========================================================== -->
+    <!--  Top Right Buttons                                         -->
+    <!-- ========================================================== -->
     <div id="top-right">
       <button id="user-capsule-hide-btn" class="user-capsule-hide-btn" type="button"
         onclick="toggleUserCapsuleAutoHide(event)" title="自动隐藏账号胶囊">‹</button>
@@ -236,7 +249,9 @@
     </button>
     <button id="fx-fab-hide-btn" type="button" onclick="toggleFxFabAutoHide(event)" title="自动隐藏视觉控制台">‹</button>
 
-    <!-- 控制台 (右侧贴边自动显示, 无关闭按钮) -->
+    <!-- ========================================================== -->
+    <!--  FX Console (Right Panel)                                  -->
+    <!-- ========================================================== -->
     <div id="fx-panel">
       <div class="fx-head">
         <div>
@@ -581,7 +596,9 @@
       </div>
     </div>
 
-    <!-- 歌单/队列面板 (左侧贴边自动显示, 无关闭按钮) -->
+    <!-- ========================================================== -->
+    <!--  Playlist / Queue Panel (Left)                             -->
+    <!-- ========================================================== -->
     <div id="playlist-panel">
       <div class="queue-head">
         <div>
@@ -687,7 +704,9 @@
       </div>
     </div>
 
-    <!-- 底部控件 -->
+    <!-- ========================================================== -->
+    <!--  Bottom Controls Bar                                       -->
+    <!-- ========================================================== -->
     <svg id="control-glass-svg" class="control-glass-filter-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
       focusable="false">
       <defs>
@@ -941,7 +960,9 @@
 
     <canvas id="login-guide-canvas" aria-hidden="true"></canvas>
 
-    <!-- 登录模态 -->
+    <!-- ========================================================== -->
+    <!--  Login Modals                                              -->
+    <!-- ========================================================== -->
     <div id="login-modal" class="modal-mask">
       <div class="modal dual-login-modal">
         <div class="login-platform-tabs" id="login-platform-tabs">

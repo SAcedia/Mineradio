@@ -1,4 +1,6 @@
-// Event Bus — fire-and-forget cross-module notifications
+// ============================================================
+//  Event Bus — fire-and-forget cross-module notifications
+// ============================================================
 window.Mineradio = window.Mineradio || {};
 window.Mineradio.state = window.Mineradio.state || {};
 window.Mineradio.fx = window.Mineradio.fx || {};

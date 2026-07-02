@@ -1,3 +1,6 @@
+// ============================================================
+//  App — main animation loop & startup
+// ============================================================
 var prevTime = performance.now();
 var renderPerfState = {
   mode: 'vsync',

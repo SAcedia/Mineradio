@@ -1,5 +1,6 @@
-// 40-splash.js — Splash screen canvas animation
-
+// ============================================================
+//  Splash — canvas animation & intro sequence
+// ============================================================
 window._splashTiming = window._splashTiming || {};
 window._splashTiming.scriptTop = performance.now();
 
