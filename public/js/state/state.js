@@ -1,10 +1,12 @@
+// ============================================================
+//  音频 / 频谱分析
+// ============================================================
 var uiSfxCtx = null, lastShelfSelectSfxAt = 0;
-var desktopFullscreenActive = false;     // used by 24-gesture.js, 34-misc-ui.js, 41-desktop-overlay.js
 var FFT_SIZE = 2048;
 var frequencyData = new Uint8Array(FFT_SIZE / 2);
 var timeDomainData = new Uint8Array(FFT_SIZE);
-var analyser = null;                    // set by 05-audio-engine.js initAudio(); declared here for early refs in 07-audio-analyzer.js
-var gainNode = null;                    // set by 05-audio-engine.js initAudio(); declared here for early refs in applyVolumeToAudio()
+var analyser = null;
+var gainNode = null;
 var BEAT_FFT_SIZE = 2048;
 var beatFrequencyData = new Uint8Array(BEAT_FFT_SIZE / 2);
 var beatTimeDomainData = new Uint8Array(BEAT_FFT_SIZE);
@@ -12,15 +14,40 @@ var bass = 0, mid = 0, treble = 0, audioEnergy = 0, beatPulse = 0, prevEnergy = 
 var lyricSunEnergy = 0, lyricSunTarget = 0, lyricSunHold = 0, lyricSunAvg = 0, lyricSunPeak = 0.55;
 var smoothBass = 0, smoothMid = 0, smoothTreb = 0, smoothEnergy = 0;
 var bassPeak = 0.12, midPeak = 0.10, treblePeak = 0.08, energyPeak = 0.10;
-var beatOnsetFlag = false;        // beat 上升沿瞬时标志,每帧消费一次
-var lastStrongDrop = 0;           // 用于 burst 预设的强 drop 时刻
-var diyPlayerMode;                // DIY 玩家模式,在 applyDiyMode 中赋值
-var audio;                        // Audio 元素,在 playback/playlists 中延迟创建
-Mineradio.state.audioReady = false; // 音频上下文就绪标志,由 05-audio-engine.js initAudio() 设置
+var beatOnsetFlag = false;
+var lastStrongDrop = 0;
+var diyPlayerMode;
+var audio;
+Mineradio.state.audioReady = false;
+
+// ============================================================
+//  播放队列 & 歌词
+// ============================================================
+var playlist = [], playQueue = [], currentIdx = -1, playing = false, playToggleBusy = false;
+var queueViewTab = 'queue', playMode = 'loop', miniQueueOpen = false;
+var miniQueueRenderSeq = 0, queueRenderSeq = 0, playlistRenderSeq = 0;
+var queuePanelDirty = false;
+var PLAYLIST_PANEL_BATCH_SIZE = 28;
+var playlistPanelRenderLimit = PLAYLIST_PANEL_BATCH_SIZE;
+var playlistPanelLazyBound = false;
+var PLAYLIST_DETAIL_INITIAL_RENDER = 64;
+var PLAYLIST_DETAIL_BATCH_SIZE = 48;
+var volumeTween = null, trackSwitchToken = 0;
+var audioFadeTimer = null, audioElementFadeFrame = 0, audioFadeSerial = 0;
+var AUDIO_FADE_IN_MS = 460;
+var AUDIO_FADE_OUT_MS = 420;
+var AUDIO_SILENCE_GAIN = 0.0001;
+var smoothWheelScrollBound = false;
 
 var lyricsLines = [], lyricsVisible = false, lyricsHasNativeKaraoke = false, lyricsTimingSource = 'none';
-var playlist = [], playQueue = [], currentIdx = -1, playing = false, playToggleBusy = false;
-var searchMode = 'song', podcastResults = [], podcastPrograms = [], podcastCurrentRadio = null;
+var originalLyricsState = { lines: [], hasNativeKaraoke: false, timingSource: 'none' };
+var lyricSourceMode = 'original';
+var _lyricOffset = 0;
+var _prefetchToken = 0;
+
+// ============================================================
+//  登录 / 账号
+// ============================================================
 var loginStatus = { loggedIn: false, vipType: 0, vipLevel: 'none', isVip: false, isSvip: false, vipLabel: '无VIP' };
 var qqLoginStatus = { provider: 'qq', loggedIn: false, preview: false, nickname: 'QQ 音乐', userId: '', avatar: '', vipType: 0 };
 var qqLoginWasLoggedIn = false;
@@ -34,68 +61,9 @@ var qqManualCookieOpen = false;
 var loginStatusChecked = false, loginStatusCheckFailed = false;
 var qrPollTimer = null, qrKey = null;
 
-// 布局 & 名言偏好设置
-var layoutMode = 'auto';       // 'auto' | 'side' | 'stack'
-var quoteLang = 'zh';          // 'zh' | 'en'
-var quoteStyle = 'classic';    // 'classic' | 'modern' | 'zen'
-
-function applyLayoutMode(mode) {
-  var el = document.getElementById('empty-home');
-  if (!el) return;
-  if (mode === 'auto') el.removeAttribute('data-layout');
-  else el.setAttribute('data-layout', mode);
-}
-
-// 从 IPC 加载持久化设置
-if (window.desktopWindow && window.desktopWindow.getSetting) {
-  window.desktopWindow.getSetting(null).then(function(res){
-    var s = res && res.value;
-    if (s) {
-      if (s.layoutMode) { layoutMode = s.layoutMode; applyLayoutMode(s.layoutMode); }
-      if (s.quoteLang) quoteLang = s.quoteLang;
-      if (s.quoteStyle) quoteStyle = s.quoteStyle;
-    }
-  }).catch(function(){});
-}
-
-// 布局模式切换（供 UI 调用）
-window.setLayoutMode = function(mode) {
-  layoutMode = mode;
-  applyLayoutMode(mode);
-  document.querySelectorAll('#layout-mode-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-layout') === mode); });
-  if (window.desktopWindow && window.desktopWindow.setSetting) window.desktopWindow.setSetting('layoutMode', mode).catch(function(){});
-};
-
-// 名言偏好切换（供 UI 调用）
-window.setQuotePref = function(key, value) {
-  if (key === 'lang') { quoteLang = value; document.querySelectorAll('#quote-lang-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-lang') === value); }); }
-  if (key === 'style') { quoteStyle = value; document.querySelectorAll('#quote-style-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-style') === value); }); }
-  if (window.desktopWindow && window.desktopWindow.setSetting) window.desktopWindow.setSetting('quote' + key.charAt(0).toUpperCase() + key.slice(1), value).catch(function(){});
-  // 刷新名言
-  if (window.refreshQuote) setTimeout(window.refreshQuote, 100);
-};
-var volumeTween = null, trackSwitchToken = 0;
-var audioFadeTimer = null, audioElementFadeFrame = 0, audioFadeSerial = 0;
-var AUDIO_FADE_IN_MS = 460;
-var AUDIO_FADE_OUT_MS = 420;
-var AUDIO_SILENCE_GAIN = 0.0001;
-var userPlaylists = [], qqPlaylists = [], myPodcastCollections = [], myPodcastItems = {}, playlistCoverCache = {};
-var localBeatMapCache = null;   // initialized by beat-analysis.js on load
-var localBeatMapPrefs = null;   // initialized by beat-analysis.js on load
-var playbackQuality = null;     // initialized by api-helper.js on load
-var qqPlaybackQualityCeiling = '';
-var coverCropState = null, coverCropBound = false;
-var currentLocalSong = null;
-var lyricSourceMode = 'original';
-var originalLyricsState = { lines: [], hasNativeKaraoke: false, timingSource: 'none' };
-var _lyricOffset = 0; // 歌词时间轴手动偏移（秒），Alt+[ 减 / Alt+] 增 / 按钮调节
-var _prefetchToken = 0;
-var localBeatAnalysis = { song:null, audioUrl:'', mode:'mr', active:false, token:0 };
-var likedSongMap = {}, likeBusyMap = {}, likeStatusToken = 0;
-var collectTargetSong = null, collectBusy = false;
-var uploadTipTimer = null, uploadTipAttempts = 0;
-var visualGuideActive = false, visualGuideStep = 0, visualGuideResizeBound = false;
-var visualGuideState = { bottomWasVisible: false, searchWasPeek: false, manual: false };
+// ============================================================
+//  首页 (empty-home)
+// ============================================================
 var emptyHomeActive = false;
 var homeForcedOpen = false;
 var homeSuppressed = false;
@@ -111,44 +79,80 @@ var homeWeatherLoadTimer = null;
 var homeWeatherLoadPromise = null;
 var weatherRadioStartBusy = false;
 var activeRadioContext = null;
-var listenStatsState = null;    // initialized by api-helper.js on load
+var listenStatsState = null;
 var listenSession = null;
-var appPerfMarks = [];
-function markAppPerf(name) {
-  try {
-    var value = performance.now();
-    appPerfMarks.push({ name: name, value: Math.round(value) });
-    if (performance && performance.mark) performance.mark('mineradio:' + name);
-    if (appPerfMarks.length <= 16) console.debug('[MineradioPerf]', name, Math.round(value) + 'ms');
-  } catch (e) {}
+
+// ============================================================
+//  布局 & 名言偏好（IPC 持久化）
+// ============================================================
+var layoutMode = 'auto';
+var quoteLang = 'zh';
+var quoteStyle = 'classic';
+
+function applyLayoutMode(mode) {
+  var el = document.getElementById('empty-home');
+  if (!el) return;
+  if (mode === 'auto') el.removeAttribute('data-layout');
+  else el.setAttribute('data-layout', mode);
 }
-markAppPerf('script-start');
-function installStartupLongTaskObserver() {
-  try {
-    if (!('PerformanceObserver' in window)) return;
-    var observer = new PerformanceObserver(function(list){
-      list.getEntries().forEach(function(entry){
-        if (entry.startTime > 15000) return;
-        console.debug('[MineradioPerf] longtask', Math.round(entry.startTime) + 'ms', Math.round(entry.duration) + 'ms');
-      });
-    });
-    observer.observe({ entryTypes: ['longtask'] });
-    setTimeout(function(){ try { observer.disconnect(); } catch (e) {} }, 16000);
-  } catch (e) {}
+
+if (window.desktopWindow && window.desktopWindow.getSetting) {
+  window.desktopWindow.getSetting(null).then(function(res){
+    var s = res && res.value;
+    if (s) {
+      if (s.layoutMode) { layoutMode = s.layoutMode; applyLayoutMode(s.layoutMode); }
+      if (s.quoteLang) quoteLang = s.quoteLang;
+      if (s.quoteStyle) quoteStyle = s.quoteStyle;
+    }
+  }).catch(function(){});
 }
-installStartupLongTaskObserver();
-var queueViewTab = 'queue', playMode = 'loop', miniQueueOpen = false;
-var miniQueueRenderSeq = 0, queueRenderSeq = 0, playlistRenderSeq = 0;
-var queuePanelDirty = false;
-var PLAYLIST_PANEL_BATCH_SIZE = 28;
-var playlistPanelRenderLimit = PLAYLIST_PANEL_BATCH_SIZE;
-var playlistPanelLazyBound = false;
-var PLAYLIST_DETAIL_INITIAL_RENDER = 64;
-var PLAYLIST_DETAIL_BATCH_SIZE = 48;
-var smoothWheelScrollBound = false;
+
+window.setLayoutMode = function(mode) {
+  layoutMode = mode;
+  applyLayoutMode(mode);
+  document.querySelectorAll('#layout-mode-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-layout') === mode); });
+  if (window.desktopWindow && window.desktopWindow.setSetting) window.desktopWindow.setSetting('layoutMode', mode).catch(function(){});
+};
+
+window.setQuotePref = function(key, value) {
+  if (key === 'lang') { quoteLang = value; document.querySelectorAll('#quote-lang-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-lang') === value); }); }
+  if (key === 'style') { quoteStyle = value; document.querySelectorAll('#quote-style-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-style') === value); }); }
+  if (window.desktopWindow && window.desktopWindow.setSetting) window.desktopWindow.setSetting('quote' + key.charAt(0).toUpperCase() + key.slice(1), value).catch(function(){});
+  if (window.refreshQuote) setTimeout(window.refreshQuote, 100);
+};
+
+// ============================================================
+//  歌单 / 收藏 / 本地
+// ============================================================
+var userPlaylists = [], qqPlaylists = [], myPodcastCollections = [], myPodcastItems = {}, playlistCoverCache = {};
+var localBeatMapCache = null;
+var localBeatMapPrefs = null;
+var playbackQuality = null;
+var qqPlaybackQualityCeiling = '';
+var likedSongMap = {}, likeBusyMap = {}, likeStatusToken = 0;
+var collectTargetSong = null, collectBusy = false;
+var coverCropState = null, coverCropBound = false;
+var currentLocalSong = null;
+var localBeatAnalysis = { song:null, audioUrl:'', mode:'mr', active:false, token:0 };
+
+// ============================================================
+//  封面 / AI 深度
+// ============================================================
 var coverProcessToken = 0, aiDepthPipeline = null, aiDepthReady = false, aiDepthBusy = false, aiDepthFailUntil = 0;
 var coverDepthCache = Object.create(null), coverDepthCacheKeys = [];
 var aiDepthLastRunAt = 0, aiDepthMinGapMs = 18000;
+var uploadTipTimer = null, uploadTipAttempts = 0;
+
+// ============================================================
+//  新手指引
+// ============================================================
+var visualGuideActive = false, visualGuideStep = 0, visualGuideResizeBound = false;
+var visualGuideState = { bottomWasVisible: false, searchWasPeek: false, manual: false };
+var desktopFullscreenActive = false;
+
+// ============================================================
+//  更新状态 (updatePreview)
+// ============================================================
 var updatePreviewState = {
   visible: false,
   open: false,
