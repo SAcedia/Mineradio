@@ -212,6 +212,9 @@ function toggleMiniQueue(e) {
 function closeMiniQueue() {
   setMiniQueueOpen(false);
 }
+// ============================================================
+//  Tabs — switch playlist view
+// ============================================================
 function openPlaylistPanelTab(tab, preserve) {
   tab = tab === 'podcasts' ? 'podcasts' : (tab === 'playlists' ? 'playlists' : 'queue');
   var panel = document.getElementById('playlist-panel');
@@ -252,6 +255,9 @@ document.addEventListener('click', function(e){
   if (miniQueueOpen && !(e.target && e.target.closest && e.target.closest('#bottom-bar'))) closeMiniQueue();
 });
 bindSmoothQueueScrolling();
+// ============================================================
+//  Queue — render panel
+// ============================================================
 function renderQueuePanel(opts) {
   opts = opts || {};
   var $ql = document.getElementById('queue-list');
