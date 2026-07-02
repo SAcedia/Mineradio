@@ -6,6 +6,8 @@ var _lyricFetchController = null;
 window.Mineradio.bus.on('player:trackchange', function() {
   if (_lyricFetchController) { _lyricFetchController.abort(); _lyricFetchController = null; }
 });
+// ============================================================
+//  Fetch — API request with cache
 async function fetchLyric(songOrId, token, preferSource) {
   try {
     // 没有指定 source 时（正常切歌），重置为默认源
@@ -168,6 +170,8 @@ function parseYrcText(text) {
   });
   return finalizeLyricLineDurations(lines);
 }
+// ============================================================
+//  Prefetch — adjacent audio elements
 function _prefetchAdjacent(centerIdx) {
   if (!Array.isArray(playQueue) || playQueue.length < 2) return;
   _prefetchToken++;
@@ -256,6 +260,8 @@ function showLyricOffsetToast() {
 var _lyricSources = ['lrclib', 'music-kit', 'netease', 'kugou', 'yt-captions'];
 var _lyricSourceLabels = { 'lrclib': 'LRC', 'music-kit': 'YT', 'netease': '网', 'kugou': '酷', 'yt-captions': 'CC' };
 var _lyricSourceIdx = 0;
+// ============================================================
+//  Source — cycle lyric provider
 function cycleLyricSource() {
   _lyricSourceIdx = (_lyricSourceIdx + 1) % _lyricSources.length;
   var src = _lyricSources[_lyricSourceIdx];
@@ -272,6 +278,8 @@ function renderLyrics() {
   // v8: 歌词渲染由 stageLyrics 在每帧 tickLyricsParticles 里推动
   clearStageLyrics();
 }
+// ============================================================
+//  Display — lyrics panel toggle
 function toggleLyricsPanel(force) {
   if (force === false) fx.particleLyrics = false;
   else if (force === true) fx.particleLyrics = true;
@@ -288,6 +296,8 @@ function toggleLyricsPanel(force) {
 }
 function updateLyricsHighlight() { /* v8: 由 tickLyricsParticles 接管 */ }
 
+// ============================================================
+//  Set Source — specific lyric provider
 function setLyricSource(source) {
   if (source === 'auto') {
     _lyricSourceIdx = 0;
@@ -310,6 +320,8 @@ function _songPrefKey(song) {
   if (!song || !song.id) return '';
   return 'mineradio-song-pref:' + Mineradio.util.songProviderKey(song) + ':' + song.id;
 }
+// ============================================================
+//  Preferences — per-song lyric prefs
 function _saveSongPref(song) {
   var key = _songPrefKey(song);
   if (!key) return;

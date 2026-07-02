@@ -135,6 +135,9 @@ function updateSearchModeTabs() {
   requestAnimationFrame(updateSearchPillGlassDisplacementMap);
 }
 
+// ============================================================
+//  Mode — toggle search context
+// ============================================================
 function setSearchMode(mode) {
   mode = (mode === 'podcast' || mode === 'netease' || mode === 'qq' || mode === 'youtube') ? mode : 'song';
   if (searchMode === mode) return;

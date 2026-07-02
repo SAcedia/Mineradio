@@ -16,6 +16,9 @@ function compactHomeCount(n) {
   if (n >= 10000) return Math.round(n / 10000) + '万';
   return n ? String(n) : '';
 }
+// ============================================================
+//  Listen Session — snapshot & stats
+// ============================================================
 function listenSongSnapshot(song) {
   song = song || {};
   return {
@@ -164,6 +167,9 @@ function homeToneForItem(item, index) {
   if (item.kind === 'search') return 'search';
   return ['daily', 'playlist', 'local', 'guide', 'search'][index % 5];
 }
+// ============================================================
+//  Mosaic — quotes, stats, queue
+// ============================================================
 function renderHomeMosaic(items) {
   // 每日一言 — 使用 QuoteService
   var quoteCell = document.getElementById('mosaic-quote');
@@ -221,6 +227,9 @@ function renderHomeMosaic(items) {
     queueCell.innerHTML = '<div style="padding:8px;display:flex;flex-direction:column;justify-content:center;height:100%"><div style="color:rgba(255,255,255,.2);font-size:7px;text-transform:uppercase;letter-spacing:.3px">当前队列</div><div style="font-size:13px;font-weight:700;margin-top:1px;color:rgba(255,255,255,.7)">' + qLen + ' 首</div><div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:1px">约 ' + Math.round(qMin) + ' 分钟</div></div>';
   }
 }
+// ============================================================
+//  Tiles — recommended items
+// ============================================================
 function renderHomeTiles() {
   var row = document.getElementById('home-tile-row');
   var title = document.getElementById('home-rail-title');
@@ -274,6 +283,9 @@ function renderHomeTiles() {
   row._homeTiles = tiles;
   renderHomeMosaic(tiles);
 }
+// ============================================================
+//  Home — render all content
+// ============================================================
 function renderHomeDiscover() {
   var sub = document.getElementById('home-subtitle');
   var loggedOutHome = !homeDiscoverState.loggedIn && !hasAnyPlatformLogin();
@@ -420,6 +432,9 @@ function homeWeatherRadioUrl(opts) {
   params.push('t=' + Date.now());
   return '/api/weather/radio?' + params.join('&');
 }
+// ============================================================
+//  Weather Radio — load & locate
+// ============================================================
 async function loadHomeWeatherRadio(force, opts) {
   opts = opts || {};
   if (homeWeatherRadioState.loading && homeWeatherLoadPromise && opts.lat == null && opts.lon == null && !opts.city) {
@@ -787,6 +802,9 @@ async function waitForHomeDiscoverIdle(timeout) {
     await new Promise(function(resolve){ setTimeout(resolve, 80); });
   }
 }
+// ============================================================
+//  Play — daily / private / recent
+// ============================================================
 async function playHomeDaily() {
   homeForcedOpen = false;
   homeSuppressed = false;

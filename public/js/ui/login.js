@@ -82,6 +82,9 @@ function renderTopAccountPill(provider) {
     vipTag +
   '</span>';
 }
+// ============================================================
+//  Netease — login status refresh
+// ============================================================
 async function refreshLoginStatus(force) {
   try {
     var info = await Mineradio.platforms.netease.loginStatus();
@@ -134,6 +137,9 @@ function normalizeQQLoginStatus(info) {
     stale: !!info.stale || !!(info.profileUnavailable && !(info.nickname && info.avatar))
   });
 }
+// ============================================================
+//  QQ — login status refresh
+// ============================================================
 async function refreshQQLoginStatus() {
   try {
     var info = await Mineradio.platforms.qq.loginStatus();
@@ -182,6 +188,9 @@ function _scheduleQQLoginPollStop() {
     _clearQQLoginPoll();
   }, 120000);
 }
+// ============================================================
+//  UI — user button & pills
+// ============================================================
 function renderUserBtn() {
   var btn = document.getElementById('user-btn');
   if (!btn) return;
@@ -210,6 +219,9 @@ function renderUserBtn() {
   }
   updatePlaybackQualityUi();
 }
+// ============================================================
+//  Modal — show/hide login dialog
+// ============================================================
 async function showLoginModal(opts) {
   opts = opts || {};
   if (opts.provider) loginProvider = opts.provider === 'qq' ? 'qq' : 'netease';

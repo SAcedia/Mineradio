@@ -74,6 +74,9 @@ function moveQueueIndexToTop(idx) {
   else if (currentIdx >= 0 && currentIdx < idx) currentIdx += 1;
   return 0;
 }
+// ============================================================
+//  Search Results — play from search
+// ============================================================
 function playSearchResult(i) {
   var song = playlist[i]; if (!song) return;
   homeForcedOpen = false;
@@ -93,6 +96,9 @@ function playSearchResult(i) {
 }
 var firstPlayDone = false;
 
+// ============================================================
+//  Provider — label, login, restriction
+// ============================================================
 function playbackProviderLabel(song) {
   var key = Mineradio.util.songProviderKey(song);
   if (key === 'youtube') return 'YouTube';
@@ -131,6 +137,9 @@ function qqPlaybackRetryQualities(requestedQuality, resolvedLevel) {
   }
   return pool.filter(function(q){ return q !== requestedQuality; });
 }
+// ============================================================
+//  Quality — retry, fallback
+// ============================================================
 async function retryQQPlaybackWithCompatibleQuality(song, idx, token, opts, data, requestedQuality) {
   opts = opts || {};
   var tried = Array.isArray(opts.qqQualityTried) ? opts.qqQualityTried.slice() : [];
@@ -288,6 +297,9 @@ function handlePlaybackUnavailable(song, data) {
   }
 }
 
+// ============================================================
+//  Track Switch — pause & release audio
+// ============================================================
 function pauseCurrentAudioForTrackSwitch() {
   playToggleBusy = false;
   if (!audio) return;
@@ -352,6 +364,9 @@ function scheduleAudioResumePosition(media, seconds, token) {
   applyResume();
 }
 
+// ============================================================
+//  Play Queue At — main track play function
+// ============================================================
 async function playQueueAt(idx, opts) {
   opts = opts || {};
   if (idx < 0 || idx >= playQueue.length) return;
@@ -729,6 +744,9 @@ function setPlayIcon(p) {
     ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
     : '<path d="M8 5v14l11-7z"/>';
 }
+// ============================================================
+//  Navigation — next, prev, seek
+// ============================================================
 function nextTrack() {
   if (!playQueue.length) return;
   playToggleBusy = false;
@@ -774,6 +792,9 @@ function removeFromQueue(idx) {
   updateCustomLyricControls();
   updateEmptyHomeVisibility({ forceLoad: false });
 }
+// ============================================================
+//  Play Mode — loop, shuffle, single
+// ============================================================
 function playModeLabel(mode) {
   return { loop: '顺序循环', shuffle: '随机播放', single: '单曲循环' }[mode] || '顺序循环';
 }
