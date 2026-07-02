@@ -352,6 +352,28 @@ function renderHomeDiscover() {
     setHomeArt('home-profile-art', summary.topSong && summary.topSong.cover || podcastItem && podcastItem.cover, 280);
     setHomeArt('home-library-art', cardSongC && cardSongC.cover || summary.topSong && summary.topSong.cover || summary.recent && summary.recent.cover || podcastItem && podcastItem.cover, 280);
   }
+  // 未登录态：给卡片加 logged-out class + 登录按钮
+  var cardEls = document.querySelectorAll('#empty-home .home-card');
+  if (loggedOutHome) {
+    for (var ci = 0; ci < cardEls.length; ci++) {
+      var el = cardEls[ci];
+      el.classList.add('logged-out');
+      if (!el.querySelector('.home-card-login-btn')) {
+        var btn = document.createElement('button');
+        btn.className = 'home-card-login-btn';
+        btn.textContent = '去登录';
+        btn.onclick = function(){ if (typeof showLoginModal === 'function') showLoginModal({ source: 'home-card' }); };
+        el.appendChild(btn);
+      }
+    }
+  } else {
+    for (var ci = 0; ci < cardEls.length; ci++) {
+      var el = cardEls[ci];
+      el.classList.remove('logged-out');
+      var oldBtn = el.querySelector('.home-card-login-btn');
+      if (oldBtn) oldBtn.remove();
+    }
+  }
   renderHomeTiles();
 }
 async function loadHomeDiscover(force) {

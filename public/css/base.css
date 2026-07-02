@@ -276,6 +276,11 @@ body.empty-home-active .home-card:nth-of-type(2){animation-delay:-1.4s}
 body.empty-home-active .home-card:nth-of-type(3){animation-delay:-2.6s}
 body.empty-home-active .home-card:nth-of-type(4){animation-delay:-3.8s}
 body.empty-home-active .home-visual{animation:home-visual-drift 8.8s ease-in-out infinite}
+.home-card.skeleton-loading::before{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent,rgba(255,255,255,.05),transparent);transform:translateX(-100%);animation:skeleton-shimmer 2s ease-in-out infinite;pointer-events:none;z-index:1}
+.home-card.logged-out{background:rgba(12,14,20,.40)!important;backdrop-filter:blur(28px) saturate(1.04)!important;-webkit-backdrop-filter:blur(28px) saturate(1.04)!important;border-color:rgba(255,255,255,.03)!important}
+.home-card.logged-out .home-card-login-btn{display:inline-flex;align-items:center;gap:4px;margin-top:6px;height:24px;padding:0 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:rgba(255,255,255,.55);font-size:10px;font-weight:600;cursor:pointer;transition:background .18s,color .18s;font-family:inherit;position:relative;z-index:2}
+.home-card.logged-out .home-card-login-btn:hover{background:rgba(255,255,255(.1);color:#fff}
+@keyframes skeleton-shimmer{100%{transform:translateX(100%)}}
 body.empty-home-active #bottom-bar.visible{background:rgba(6,8,12,.35);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4)}
 body.empty-home-active .ctrl-btn{color:rgba(255,255,255,.50)}
 @keyframes home-card-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
