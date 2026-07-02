@@ -1445,14 +1445,19 @@ if (!gotSingleInstanceLock) {
   });
 
   app.whenReady().then(async () => {
+    const isWallpaperMode = process.argv.includes('--wallpaper');
     screen.on('display-metrics-changed', () => {
       positionDesktopLyricsWindow();
       positionWallpaperWindow();
-      scheduleWindowStateSend(mainWindow);
+      if (mainWindow && !mainWindow.isDestroyed()) scheduleWindowStateSend(mainWindow);
     });
-    screen.on('display-added', () => scheduleWindowStateSend(mainWindow));
-    screen.on('display-removed', () => scheduleWindowStateSend(mainWindow));
-    await createWindow();
+    screen.on('display-added', () => { if (mainWindow && !mainWindow.isDestroyed()) scheduleWindowStateSend(mainWindow); });
+    screen.on('display-removed', () => { if (mainWindow && !mainWindow.isDestroyed()) scheduleWindowStateSend(mainWindow); });
+    if (isWallpaperMode) {
+      createWallpaperWindow({ opacity: 0.85 });
+    } else {
+      await createWindow();
+    }
   });
 
   app.on('activate', () => {
