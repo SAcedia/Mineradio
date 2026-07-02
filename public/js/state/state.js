@@ -33,6 +33,30 @@ var qqWebLoginBusy = false;
 var qqManualCookieOpen = false;
 var loginStatusChecked = false, loginStatusCheckFailed = false;
 var qrPollTimer = null, qrKey = null;
+
+// 布局 & 名言偏好设置
+var layoutMode = 'auto';       // 'auto' | 'side' | 'stack'
+var quoteLang = 'zh';          // 'zh' | 'en'
+var quoteStyle = 'classic';    // 'classic' | 'modern' | 'zen'
+
+function applyLayoutMode(mode) {
+  var el = document.getElementById('empty-home');
+  if (!el) return;
+  if (mode === 'auto') el.removeAttribute('data-layout');
+  else el.setAttribute('data-layout', mode);
+}
+
+// 从 IPC 加载持久化设置
+if (window.desktopWindow && window.desktopWindow.getSetting) {
+  window.desktopWindow.getSetting(null).then(function(res){
+    var s = res && res.value;
+    if (s) {
+      if (s.layoutMode) { layoutMode = s.layoutMode; applyLayoutMode(s.layoutMode); }
+      if (s.quoteLang) quoteLang = s.quoteLang;
+      if (s.quoteStyle) quoteStyle = s.quoteStyle;
+    }
+  }).catch(function(){});
+}
 var volumeTween = null, trackSwitchToken = 0;
 var audioFadeTimer = null, audioElementFadeFrame = 0, audioFadeSerial = 0;
 var AUDIO_FADE_IN_MS = 460;

@@ -177,16 +177,12 @@ function renderHomeMosaic(items) {
       var qs = window.QuoteService;
       if (!qs) return;
       renderQuote({ text: '加载中…', author: '' }, true);
-      var settings = (window.Mineradio && Mineradio.settings) || {};
-      var prefs = settings.get ? settings.get() : {};
-      qs.refresh({ lang: prefs.quoteLang || 'zh', style: prefs.quoteStyle || 'classic' }).then(function(q){ renderQuote(q, false); });
+      qs.refresh({ lang: typeof quoteLang !== 'undefined' ? quoteLang : 'zh', style: typeof quoteStyle !== 'undefined' ? quoteStyle : 'classic' }).then(function(q){ renderQuote(q, false); });
     };
     // 首次加载
     var qs = window.QuoteService;
     if (qs) {
-      var settings = (window.Mineradio && Mineradio.settings) || {};
-      var prefs = (typeof settings.get === 'function') ? settings.get() : {};
-      qs.fetch({ lang: (prefs && prefs.quoteLang) || 'zh', style: (prefs && prefs.quoteStyle) || 'classic' }).then(function(q){ renderQuote(q, false); });
+      qs.fetch({ lang: typeof quoteLang !== 'undefined' ? quoteLang : 'zh', style: typeof quoteStyle !== 'undefined' ? quoteStyle : 'classic' }).then(function(q){ renderQuote(q, false); });
     } else {
       // QuoteService 未加载 - 兜底
       renderQuote({ text: '音乐是灵魂的语言', author: '尼采' }, false);
