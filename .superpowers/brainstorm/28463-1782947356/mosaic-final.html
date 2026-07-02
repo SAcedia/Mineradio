@@ -1,0 +1,78 @@
+<h2>Mosaic 新方案</h2>
+<p class="subtitle">左名言api + 右统计+提示，每格不重复</p>
+
+<div class="section">
+  <div class="mockup">
+    <div class="mockup-body" style="padding:16px;background:#0c0e14">
+      <div style="display:grid;grid-template-columns:1.2fr .8fr;grid-template-rows:1fr 1fr;gap:6px;height:120px">
+        
+        <!-- Cell 1: 每日名言 -->
+        <div style="background:linear-gradient(135deg,rgba(122,215,194,.06),rgba(10,12,18,.35));backdrop-filter:blur(16px);border-radius:10px;padding:12px;grid-row:1/3;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;justify-content:center">
+          <div style="color:rgba(255,255,255,.2);font-size:7px;text-transform:uppercase;letter-spacing:.4px">每日一言</div>
+          <div style="font-size:12px;font-weight:500;margin-top:4px;color:rgba(255,255,255,.7);line-height:1.5;font-style:italic">
+            "音乐是灵魂的语言"
+          </div>
+          <div style="font-size:8px;color:rgba(255,255,255,.3);margin-top:4px">— 尼采</div>
+          <div style="font-size:7px;color:rgba(255,255,255,.15);margin-top:6px">每日更新 · 来源: 名言API</div>
+        </div>
+        
+        <!-- Cell 2: 听歌统计 -->
+        <div style="background:linear-gradient(135deg,rgba(255,83,103,.06),rgba(10,12,18,.3));backdrop-filter:blur(12px);border-radius:10px;padding:8px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;justify-content:center">
+          <div style="color:rgba(255,255,255,.2);font-size:7px;text-transform:uppercase;letter-spacing:.3px">本周听歌</div>
+          <div style="font-size:14px;font-weight:700;margin-top:1px;color:rgba(255,255,255,.8)">128 分钟</div>
+          <div style="font-size:8px;color:rgba(255,255,255,.3)">45 首 · 12 位歌手</div>
+        </div>
+        
+        <!-- Cell 3: 状态提示 -->
+        <div style="background:linear-gradient(135deg,rgba(244,210,138,.06),rgba(10,12,18,.3));backdrop-filter:blur(12px);border-radius:10px;padding:8px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;justify-content:center">
+          <div style="color:rgba(255,255,255,.2);font-size:7px;text-transform:uppercase;letter-spacing:.3px">提示</div>
+          <div id="mosaic-tip-text" style="font-size:9px;font-weight:500;margin-top:1px;color:rgba(255,255,255,.55);line-height:1.3">按 / 快速搜索歌曲</div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>三个格子设计</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:10px">
+    <div style="background:rgba(122,215,194,.06);border-radius:8px;padding:10px;border:1px solid rgba(122,215,194,.1)">
+      <div style="font-weight:600;color:#7ad7c2;margin-bottom:4px">① 每日一言 (大格)</div>
+      <div style="color:rgba(255,255,255,.55);line-height:1.5">
+        调用免费名言 API（如 <code>https://api.quotable.io/random</code>），每天展示一句与音乐/生活相关的名言。缓存一天，不重复请求。<br><br>
+        无网络时显示本地兜底文案。
+      </div>
+    </div>
+    <div style="background:rgba(255,83,103,.06);border-radius:8px;padding:10px;border:1px solid rgba(255,83,103,.1)">
+      <div style="font-weight:600;color:#ff5367;margin-bottom:4px">② 听歌统计 (右上)</div>
+      <div style="color:rgba(255,255,255,.55);line-height:1.5">
+        本周播放总时长 + 歌数 + 歌手数。<br><br>
+        数据来源 <code>listenStatsState</code>，纯本地计算，无需 API。<br><br>
+        注意：卡片/tile/控制栏 都没有统计数据，这里是唯一展示地方。
+      </div>
+    </div>
+    <div style="background:rgba(244,210,138,.06);border-radius:8px;padding:10px;border:1px solid rgba(244,210,138,.1)">
+      <div style="font-weight:600;color:#f4d28a;margin-bottom:4px">③ 动态提示 (右下)</div>
+      <div style="color:rgba(255,255,255,.55);line-height:1.5">
+        根据状态切换文字：<br>
+        空闲 → "按 / 快速搜索歌曲"<br>
+        未登录 → "登录同步歌单数据"<br>
+        播放中 → "正在播放：歌曲名"<br>
+        有新功能 → "试试右键更多操作"<br><br>
+        目前 UI 没有任何引导性文字。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" onclick="toggleSelect(this)" data-choice="approve">
+    <div class="letter">✓</div>
+    <div class="content"><h3>可以，加进 spec</h3></div>
+  </div>
+  <div class="option" onclick="toggleSelect(this)" data-choice="revise">
+    <div class="letter">!</div>
+    <div class="content"><h3>还要调整</h3></div>
+  </div>
+</div>

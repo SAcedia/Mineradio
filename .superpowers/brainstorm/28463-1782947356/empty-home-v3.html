@@ -1,0 +1,187 @@
+<h2>重新思考：empty-home 不是独立页面</h2>
+<p class="subtitle">它应该是浮在播放视觉特效上的一层半透明界面，底部控制栏始终可见</p>
+
+<div class="section">
+  <h3>核心理念</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,.06)">
+      <div style="font-weight:600;margin-bottom:4px;color:#7ad7c2">当前问题</div>
+      <ul style="margin:0;padding-left:14px;font-size:12px;line-height:1.6;color:rgba(255,255,255,.55)">
+        <li>Home 是一个"页面"挡住了所有内容</li>
+        <li>进入 home 就看不到视觉特效</li>
+        <li>底部控制栏被推到最底下甚至隐藏</li>
+        <li>首页和播放界面是割裂的</li>
+      </ul>
+    </div>
+    <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,.06)">
+      <div style="font-weight:600;margin-bottom:4px;color:#f4d28a">目标状态</div>
+      <ul style="margin:0;padding-left:14px;font-size:12px;line-height:1.6;color:rgba(255,255,255,.55)">
+        <li>粒子/视觉特效全屏运行在底层</li>
+        <li>Home 卡片半透明浮在特效之上</li>
+        <li>底部控制栏始终可见、可用</li>
+        <li>首页就是"播放器界面的一个模式"</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Z 序（从下到上）</h3>
+  <div style="display:flex;flex-direction:column;gap:4px;font-size:12px">
+    <div style="background:rgba(255,255,255,.04);border-radius:6px;padding:8px 12px;border-left:3px solid #7ad7c2">
+      z-index:6 <b>底部控制栏</b> — 始终在最上层
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:6px;padding:8px 12px;border-left:3px solid #f4d28a">
+      z-index:5 <b>顶部按钮</b>（user-btn, settings, etc.）
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:6px;padding:8px 12px;border-left:3px solid #9db8cf">
+      z-index:4 <b>Home 内容</b> — 半透明玻璃卡片，背景模糊让粒子透出
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:6px;padding:8px 12px;border-left:3px solid #ff5367">
+      z-index:1 <b>Canvas 视觉特效</b> — 粒子 / 3D / 歌词 全屏运行
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>布局设想（15.6" 1920×1080）</h3>
+  <div class="mockup">
+    <div class="mockup-header" style="background:#1a2a2a">整体效果</div>
+    <div class="mockup-body" style="padding:14px;min-height:340px;position:relative;background:linear-gradient(135deg,#0a0e14,#1a0a14,#0e1410)">
+      <!-- 模拟背景粒子 -->
+      <div style="position:absolute;inset:0;opacity:.15;background:radial-gradient(circle at 30% 40%,rgba(122,215,194,.3) 0,transparent 50%),radial-gradient(circle at 70% 60%,rgba(255,83,103,.2) 0,transparent 40%),radial-gradient(circle at 50% 80%,rgba(244,210,138,.15) 0,transparent 45%)"></div>
+      
+      <div style="position:relative;z-index:1;height:100%;display:flex;flex-direction:column">
+        <!-- 顶部标题行 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 4px">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:#fff">Mineradio</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.4)">上海 26° · 私人电台</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <div style="background:rgba(255,255,255,.06);padding:4px 12px;border-radius:6px;font-size:10px;color:rgba(255,255,255,.6)">搜索</div>
+            <div style="background:rgba(255,255,255,.06);padding:4px 12px;border-radius:6px;font-size:10px;color:rgba(255,255,255,.6)">导入</div>
+          </div>
+        </div>
+        
+        <!-- 中间卡片区（flex-grow 填充） -->
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:rgba(12,14,20,.55);backdrop-filter:blur(16px);border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,.06)">
+            <div style="font-size:8px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.4px">Library</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px;color:rgba(255,255,255,.9)">我的歌单</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:2px">本地歌单 · 收藏</div>
+          </div>
+          <div style="background:rgba(12,14,20,.55);backdrop-filter:blur(16px);border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,.06)">
+            <div style="font-size:8px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.4px">Daily</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px;color:rgba(255,255,255,.9)">每日推荐</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:2px">今日精选</div>
+          </div>
+          <div style="background:rgba(12,14,20,.55);backdrop-filter:blur(16px);border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,.06)">
+            <div style="font-size:8px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.4px">Mix</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px;color:rgba(255,255,255,.9)">私人电台</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:2px">智能推荐</div>
+          </div>
+          <div style="background:rgba(12,14,20,.55);backdrop-filter:blur(16px);border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,.06)">
+            <div style="font-size:8px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.4px">Continue</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px;color:rgba(255,255,255,.9)">继续听</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:2px">最近播放</div>
+          </div>
+        </div>
+        
+        <!-- 底部 tile 行 -->
+        <div style="background:rgba(12,14,20,.45);backdrop-filter:blur(12px);border-radius:10px;padding:8px;border:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:9px;color:rgba(255,255,255,.4)">为你准备</span>
+            <span style="font-size:8px;color:rgba(255,255,255,.25)">刚刚更新</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px">
+            <div style="background:rgba(255,255,255,.06);border-radius:6px;height:38px"></div>
+            <div style="background:rgba(255,255,255,.06);border-radius:6px;height:38px"></div>
+            <div style="background:rgba(255,255,255,.06);border-radius:6px;height:38px"></div>
+            <div style="background:rgba(255,255,255,.06);border-radius:6px;height:38px"></div>
+            <div style="background:rgba(255,255,255,.06);border-radius:6px;height:38px"></div>
+          </div>
+        </div>
+        
+        <!-- 模拟底部控制栏 -->
+        <div style="margin-top:10px;background:rgba(6,8,12,.5);backdrop-filter:blur(14px);border-radius:30px;padding:6px 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.06)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06)"></div>
+            <div><div style="font-size:10px;color:rgba(255,255,255,.7)">未在播放</div><div style="font-size:8px;color:rgba(255,255,255,.3)">选择歌曲开始</div></div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.04)"></div>
+            <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.04)"></div>
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.06)"></div>
+            <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.04)"></div>
+            <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.04)"></div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.04)"></div>
+            <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.04)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>对比总结</h3>
+  <table style="width:100%;font-size:11px;border-collapse:collapse">
+    <tr style="border-bottom:1px solid rgba(255,255,255,.06)">
+      <th style="text-align:left;padding:6px 8px;color:rgba(255,255,255,.4)">方面</th>
+      <th style="text-align:left;padding:6px 8px;color:rgba(255,255,255,.4)">当前</th>
+      <th style="text-align:left;padding:6px 8px;color:rgba(255,255,255,.4)">建议</th>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+      <td style="padding:6px 8px">背景</td>
+      <td style="padding:6px 8px;color:rgba(255,255,255,.5)">静态渐变</td>
+      <td style="padding:6px 8px;color:#7ad7c2">粒子/视觉特效透出</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+      <td style="padding:6px 8px">卡片背景</td>
+      <td style="padding:6px 8px;color:rgba(255,255,255,.5)">半透明渐变+blur</td>
+      <td style="padding:6px 8px;color:#7ad7c2">更低不透明度 + 更高 blur，让背景更多透出</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+      <td style="padding:6px 8px">控制栏</td>
+      <td style="padding:6px 8px;color:rgba(255,255,255,.5)">被 home 遮挡或推到底部</td>
+      <td style="padding:6px 8px;color:#7ad7c2">始终可见，集成在 home 布局中</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+      <td style="padding:6px 8px">Hero 区</td>
+      <td style="padding:6px 8px;color:rgba(255,255,255,.5)">大块独立区域 (40% 高度)</td>
+      <td style="padding:6px 8px;color:#7ad7c2">精简为一行标题 + 天气文字</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 8px">大屏适配</td>
+      <td style="padding:6px 8px;color:rgba(255,255,255,.5)">卡片拉伸变宽</td>
+      <td style="padding:6px 8px;color:#7ad7c2">max-width 居中，背景特效填满两侧</td>
+    </tr>
+  </table>
+</div>
+
+<div class="options">
+  <div class="option" onclick="toggleSelect(this)" data-choice="approve">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>方向对了</h3>
+      <p>按这个思路细化实现</p>
+    </div>
+  </div>
+  <div class="option" onclick="toggleSelect(this)" data-choice="adjust">
+    <div class="letter">!</div>
+    <div class="content">
+      <h3>有些要调整</h3>
+      <p>说说具体哪些不满意</p>
+    </div>
+  </div>
+  <div class="option" onclick="toggleSelect(this)" data-choice="rethink">
+    <div class="letter">✗</div>
+    <div class="content">
+      <h3>方向不对</h3>
+      <p>重新思考</p>
+    </div>
+  </div>
+</div>
