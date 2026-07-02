@@ -1,4 +1,6 @@
-//  Discover / Home page helpers
+// ============================================================
+//  Discover — Home page, listen history, weather radio
+// ============================================================
 // ============================================================
 function setHomeArt(id, url, size) {
   var el = document.getElementById(id);

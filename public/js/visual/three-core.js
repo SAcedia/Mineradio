@@ -1,3 +1,7 @@
+// ============================================================
+//  Three Core — scene, camera, renderer, animation loop
+// ============================================================
+
 var scene = new THREE.Scene();
 scene.background = null;
 var camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);

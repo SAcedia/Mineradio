@@ -1,3 +1,7 @@
+// ============================================================
+//  Search — orchestration, multi-platform result merge
+// ============================================================
+
 // 11-search.js — Search orchestration, multi-platform result merge
 // Extracted from ui/controls.js (search portion, lines 1-566)
 

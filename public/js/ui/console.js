@@ -1,4 +1,6 @@
-//  控制台 — 预设卡片 + 主滑块 + 开关 + 三态
+// ============================================================
+//  Console — FX panel, presets, sliders, toggles
+// ============================================================
 // ============================================================
 // Forward-decl: hotkeyCaptureState is set by startHotkeyCapture/closeHotkeySettings, read by renderHotkeySettings
 var hotkeyCaptureState = null;

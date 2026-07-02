@@ -1,6 +1,6 @@
-// 41-desktop-overlay.js — Desktop overlay, fullscreen, startup init
-// Extracted from splash.js (lines 620-1046)
-
+// ============================================================
+//  Desktop Overlay — fullscreen, startup init, wallpaper
+// ============================================================
 var desktopOverlayPushState = {
   lyricsAt: 0,
   wallpaperAt: 0,

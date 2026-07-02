@@ -1,3 +1,7 @@
+// ============================================================
+//  Misc UI — toast, idle guide, upload, hotkeys
+// ============================================================
+
 // 34-misc-ui.js — Toast, idle guide, upload, hotkeys, visual guide
 // Extracted from ui/misc.js (non-gesture portions)
 

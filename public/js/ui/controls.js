@@ -1,3 +1,7 @@
+// ============================================================
+//  Controls — queue rendering, playlist panel, transport
+// ============================================================
+
 // 32-controls.js — Queue rendering, playlist panel, transport controls
 // Extracted from ui/controls.js (control portion, lines 570-878)
 

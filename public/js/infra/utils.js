@@ -1,4 +1,6 @@
-// 00-utils.js — Pure utility functions (no side effects, no DOM, no localStorage)
+// ============================================================
+//  Utils — pure utility functions (no side effects)
+// ============================================================
 // Extracted from shared.js
 
 function clamp01(v) {

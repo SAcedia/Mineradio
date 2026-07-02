@@ -1,3 +1,7 @@
+// ============================================================
+//  Storage — localStorage preference read/write
+// ============================================================
+
 // 02-storage.js — localStorage preference read/write functions
 // Extracted from shared.js + core/prefs.js
 

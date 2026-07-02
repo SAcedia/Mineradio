@@ -1,4 +1,6 @@
-//  粒子点纹理 (干净圆点, 无 glow)
+// ============================================================
+//  Particles — dot texture, particle system
+// ============================================================
 // ============================================================
 function makeDotTexture() {
   var cv = document.createElement('canvas'); cv.width = cv.height = 64;

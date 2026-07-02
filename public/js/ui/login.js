@@ -1,4 +1,6 @@
-//  登录系统
+// ============================================================
+//  Login — multi-platform auth, QR code, session
+// ============================================================
 // ============================================================
 window.Mineradio.bus.on('player:statechange', function(data) {
   // login.js already updates UI directly — future hook

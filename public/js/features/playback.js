@@ -1,4 +1,5 @@
-//  播放队列
+// ============================================================
+//  Playback — queue, audio element, track switching
 // ============================================================
 var _audioUrlCache = {};
 function queueItemKey(song) {

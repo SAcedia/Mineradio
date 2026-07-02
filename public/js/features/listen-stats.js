@@ -1,3 +1,7 @@
+// ============================================================
+//  Listen Stats — play counting and listening history
+// ============================================================
+
 // 19-listen-stats.js — Play counting and listening history
 // Extracted from core/api-helper.js
 

@@ -1,4 +1,6 @@
-//  本地歌单（localStorage 存储）
+// ============================================================
+//  Playlists — local playlists (localStorage + cloud)
+// ============================================================
 // ============================================================
 window.Mineradio.bus.on('login:statechange', function(data) {
   if (data.loggedIn) refreshUserPlaylists();

@@ -1,4 +1,6 @@
-//  Collect / playlist helpers
+// ============================================================
+//  Collect — add to playlist modal
+// ============================================================
 // ============================================================
 function openCollectModal(song) {
   if (!isCloudSong(song) && Mineradio.util.songProviderKey(song) !== 'youtube') {

@@ -1,4 +1,6 @@
-//  Cover helpers
+// ============================================================
+//  Cover — album art helpers & custom cover
+// ============================================================
 // ============================================================
 window.Mineradio.bus.on('player:trackchange', function(data) {
   // cover already handles song changes directly — future hook

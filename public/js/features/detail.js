@@ -1,3 +1,7 @@
+// ============================================================
+//  Detail — track/artist detail modal, comments, custom lyrics
+// ============================================================
+
 // 18-detail.js — Track/artist detail modal, comments, custom lyrics
 // Extracted from core/api-helper.js
 

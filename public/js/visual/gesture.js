@@ -1,3 +1,7 @@
+// ============================================================
+//  Gesture — free camera, orbit, head parallax
+// ============================================================
+
 // 24-gesture.js — Free camera, orbit, head parallax, gesture rotation
 // Extracted from ui/misc.js
 

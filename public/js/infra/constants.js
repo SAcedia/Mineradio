@@ -1,3 +1,7 @@
+// ============================================================
+//  Constants — app-wide constants and defaults
+// ============================================================
+
 // 01-constants.js — Application-wide constants and defaults
 // Extracted from shared.js lines 85-309
 

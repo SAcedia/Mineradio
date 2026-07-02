@@ -1,3 +1,7 @@
+// ============================================================
+//  Quality — playback quality management
+// ============================================================
+
 // 10-quality.js — Playback quality management
 // Extracted from core/api-helper.js
 
