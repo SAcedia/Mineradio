@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell, screen, session, globalShortcut, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, screen, session, globalShortcut, dialog, Tray, Menu, nativeImage } = require('electron');
 const net = require('net');
 const path = require('path');
 const fs = require('fs');
@@ -20,6 +20,7 @@ let desktopLyricsHotBounds = null;
 let desktopLyricsLastMiddleAt = 0;
 let wallpaperWindow = null;
 let wallpaperState = {};
+let wallpaperTray = null;
 let htmlFullscreenActive = false;
 let windowFullscreenActive = false;
 let mainWindowStateTimer = null;
@@ -1091,9 +1092,40 @@ function closeWallpaperWindow() {
     wallpaperWindow.close();
   }
   wallpaperWindow = null;
+  destroyWallpaperTray();
 }
 
-function closeOverlayWindows() {
+function createWallpaperTray() {
+  if (wallpaperTray) return;
+  try {
+    const icon = nativeImage.createEmpty();
+    wallpaperTray = new Tray(icon);
+    wallpaperTray.setToolTip('Mineradio 壁纸模式');
+    updateWallpaperTrayMenu();
+  } catch (e) {
+    console.warn('Wallpaper tray creation failed:', e.message);
+  }
+}
+
+function updateWallpaperTrayMenu() {
+  if (!wallpaperTray) return;
+  const menu = Menu.buildFromTemplate([
+    { label: '下一首', click: () => { if (wallpaperWindow && !wallpaperWindow.isDestroyed()) wallpaperWindow.webContents.executeJavaScript('window.__nextTrack && window.__nextTrack()').catch(() => {}); } },
+    { label: '播放/暂停', click: () => { if (wallpaperWindow && !wallpaperWindow.isDestroyed()) wallpaperWindow.webContents.executeJavaScript('window.__togglePlay && window.__togglePlay()').catch(() => {}); } },
+    { label: '上一首', click: () => { if (wallpaperWindow && !wallpaperWindow.isDestroyed()) wallpaperWindow.webContents.executeJavaScript('window.__prevTrack && window.__prevTrack()').catch(() => {}); } },
+    { type: 'separator' },
+    { label: '退出壁纸模式', click: () => { closeWallpaperWindow(); destroyWallpaperTray(); } },
+    { label: '完全退出', click: () => { app.quit(); } }
+  ]);
+  wallpaperTray.setContextMenu(menu);
+}
+
+function destroyWallpaperTray() {
+  if (wallpaperTray) {
+    wallpaperTray.destroy();
+    wallpaperTray = null;
+  }
+}
   closeDesktopLyricsWindow();
   closeWallpaperWindow();
 }
@@ -1460,6 +1492,7 @@ if (!gotSingleInstanceLock) {
     if (isWallpaperMode) {
       await startServer();
       createWallpaperWindow({ opacity: 0.85 });
+      createWallpaperTray();
     } else {
       await createWindow();
     }
