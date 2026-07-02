@@ -1318,9 +1318,7 @@ ipcMain.handle('mineradio-wallpaper-update', async (_event, payload) => {
   }
 });
 
-async function createWindow() {
-  htmlFullscreenActive = false;
-  windowFullscreenActive = false;
+async function startServer() {
   const port = await findOpenPort(3000);
   mainServerPort = port;
 
@@ -1343,6 +1341,12 @@ async function createWindow() {
 
   localServer = require(path.join(__dirname, '..', 'server.js'));
   await waitForServer(localServer);
+}
+
+async function createWindow() {
+  htmlFullscreenActive = false;
+  windowFullscreenActive = false;
+  await startServer();
 
   const initialBounds = getWindowedBounds();
 
@@ -1454,6 +1458,7 @@ if (!gotSingleInstanceLock) {
     screen.on('display-added', () => { if (mainWindow && !mainWindow.isDestroyed()) scheduleWindowStateSend(mainWindow); });
     screen.on('display-removed', () => { if (mainWindow && !mainWindow.isDestroyed()) scheduleWindowStateSend(mainWindow); });
     if (isWallpaperMode) {
+      await startServer();
       createWallpaperWindow({ opacity: 0.85 });
     } else {
       await createWindow();

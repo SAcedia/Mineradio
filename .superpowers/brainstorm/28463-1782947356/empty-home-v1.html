@@ -1,0 +1,135 @@
+<h2>empty-home UI 优化方案</h2>
+<p class="subtitle">当前布局 vs 建议布局 — 你觉得哪个方向合适？</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header" style="background:#2a1a1a">当前</div>
+    <div class="mockup-body" style="padding:12px;font-size:11px;line-height:1.6">
+      <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;margin-bottom:8px">
+        <div style="color:rgba(255,255,255,.5);font-size:9px">☁️ 上海 26° · 私人电台</div>
+        <div style="font-size:14px;font-weight:700;margin-top:4px">Mineradio</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.5)">private visual radio</div>
+        <div style="display:flex;gap:4px;margin-top:6px">
+          <div style="background:rgba(255,255,255,.06);padding:4px 8px;border-radius:6px;font-size:9px">搜索</div>
+          <div style="background:rgba(255,255,255,.06);padding:4px 8px;border-radius:6px;font-size:9px">导入</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px;min-height:60px">
+          <div style="font-size:8px;color:rgba(255,255,255,.4)">Library</div>
+          <div style="font-size:10px;font-weight:600;margin-top:2px">我的歌单</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px">
+          <div style="font-size:8px;color:rgba(255,255,255,.4)">Daily</div>
+          <div style="font-size:10px;font-weight:600;margin-top:2px">每日推荐</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px">
+          <div style="font-size:8px;color:rgba(255,255,255,.4)">Song</div>
+          <div style="font-size:10px;font-weight:600;margin-top:2px">私人电台</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px">
+          <div style="font-size:8px;color:rgba(255,255,255,.4)">Continue</div>
+          <div style="font-size:10px;font-weight:600;margin-top:2px">继续听</div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px">
+        <div style="font-size:9px;color:rgba(255,255,255,.5);margin-bottom:6px">为你准备</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px">
+          <div style="background:rgba(255,255,255,.06);border-radius:6px;height:44px"></div>
+          <div style="background:rgba(255,255,255,.06);border-radius:6px;height:44px"></div>
+          <div style="background:rgba(255,255,255,.06);border-radius:6px;height:44px"></div>
+          <div style="background:rgba(255,255,255,.06);border-radius:6px;height:44px"></div>
+          <div style="background:rgba(255,255,255,.06);border-radius:6px;height:44px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header" style="background:#1a2a1a">建议方案</div>
+    <div class="mockup-body" style="padding:12px;font-size:11px;line-height:1.6">
+      <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:13px;font-weight:700">Mineradio</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.5)" id="home-subtitle">private visual radio</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <div style="background:rgba(255,255,255,.06);padding:4px 8px;border-radius:6px;font-size:9px">🔍</div>
+            <div style="background:rgba(255,255,255,.06);padding:4px 8px;border-radius:6px;font-size:9px">📁</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;font-size:9px;color:rgba(255,255,255,.4)">
+          <span>☁️ 上海 26°</span>
+          <span>·</span>
+          <span>私人电台</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px;border:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:8px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px">Library</div>
+          <div style="font-size:11px;font-weight:600;margin-top:2px">我的歌单</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px;border:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:8px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px">Daily</div>
+          <div style="font-size:11px;font-weight:600;margin-top:2px">每日推荐</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px;border:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:8px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px">Mix</div>
+          <div style="font-size:11px;font-weight:600;margin-top:2px">私人电台</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px;border:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:8px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px">Continue</div>
+          <div style="font-size:11px;font-weight:600;margin-top:2px">继续听</div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <div style="font-size:9px;color:rgba(255,255,255,.5)">为你准备</div>
+          <div style="font-size:8px;color:rgba(255,255,255,.3)">刚刚更新</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px">
+          <div style="background:rgba(255,255,255,.06);border-radius:6px;height:40px"></div>
+          <div style="background:rgba(255,255,255,.06);border-radius:6px;height:40px"></div>
+          <div style="background:rgba(255,255,255,.06);border-radius:6px;height:40px"></div>
+          <div style="background:rgba(255,255,255,.06);border-radius:6px;height:40px"></div>
+          <div style="background:rgba(255,255,255,.06);border-radius:6px;height:40px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>主要改动</h3>
+<div class="options" data-multiselect>
+  <div class="option" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>精简 Hero 区</h3>
+      <p>去掉大图视觉区和 Mosaic，天气信息折叠成一行，标题字号缩小</p>
+    </div>
+  </div>
+  <div class="option" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>卡片加细边框</h3>
+      <p>每个 card 加 1px 半透明边框，hover 时 scale + glow 微动效</p>
+    </div>
+  </div>
+  <div class="option" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content">
+      <h3>动态模糊背景</h3>
+      <p>用歌曲封面颜色生成渐变背景，替代静态深色 (可选，可后续加)</p>
+    </div>
+  </div>
+  <div class="option" onclick="toggleSelect(this)">
+    <div class="letter">4</div>
+    <div class="content">
+      <h3>信息密度提升</h3>
+      <p>卡片内边距 17px→14px，标题 19px→16px，tile 高度降低</p>
+    </div>
+  </div>
+</div>
+
+<p style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.5)">看看布局对比，告诉我你的想法</p>

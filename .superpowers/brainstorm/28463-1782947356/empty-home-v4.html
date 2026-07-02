@@ -1,0 +1,152 @@
+<h2>正确理解当前布局 + 优化方向</h2>
+<p class="subtitle">搜索栏保持不动，在现有结构上优化视觉融合</p>
+
+<div class="section">
+  <h3>当前布局（未登录/无数据时）</h3>
+  <div class="mockup">
+    <div class="mockup-header">实际页面结构</div>
+    <div class="mockup-body" style="padding:10px;font-size:10px;min-height:320px">
+      <!-- 搜索栏（不动） -->
+      <div style="background:rgba(255,255,255,.04);border-radius:16px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.06)">
+        <span style="color:rgba(255,255,255,.3)">🔍</span>
+        <span style="color:rgba(255,255,255,.25);font-size:11px">搜索歌曲、歌手...</span>
+      </div>
+      
+      <!-- 主体：左大卡片 + 右内容 -->
+      <div style="display:grid;grid-template-columns:1.1fr 1.9fr;gap:10px">
+        <!-- 左：Hero 大卡片 -->
+        <div style="background:rgba(255,255,255,.04);border-radius:16px;padding:14px;border:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">MINERADIO · YOUR LIBRARY</div>
+          <div style="font-size:20px;font-weight:700;line-height:1.1">我的音乐库</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:6px;line-height:1.5">登录后同步你的歌单、常听歌手和最近播放</div>
+          <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+            <div style="background:rgba(255,255,255,.05);padding:4px 10px;border-radius:20px;font-size:9px">上海 26°</div>
+            <div style="background:rgba(255,255,255,.05);padding:4px 10px;border-radius:20px;font-size:9px">登录</div>
+            <div style="background:rgba(255,255,255,.05);padding:4px 10px;border-radius:20px;font-size:9px">导入本地</div>
+          </div>
+          <!-- Mosaic -->
+          <div style="display:grid;grid-template-columns:1.2fr .8fr;grid-template-rows:1fr 1fr;gap:4px;margin-top:12px;height:70px">
+            <div style="background:rgba(255,255,255,.04);border-radius:8px;grid-row:1/3"></div>
+            <div style="background:rgba(255,255,255,.04);border-radius:8px"></div>
+            <div style="background:rgba(255,255,255,.04);border-radius:8px"></div>
+          </div>
+        </div>
+        
+        <!-- 右：卡片 2×2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start">
+          <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:10px;border:1px solid rgba(255,255,255,.05);min-height:80px">
+            <div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase">Library</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px">我的歌单</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:2px">打开左侧歌单库</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:10px;border:1px solid rgba(255,255,255,.05);min-height:80px">
+            <div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase">Daily</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px">每日推荐</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:2px">登录后同步今日歌曲</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:10px;border:1px solid rgba(255,255,255,.05);min-height:80px">
+            <div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase">Song</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px">私人电台</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:2px">从推荐和歌单开播</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:10px;border:1px solid rgba(255,255,255,.05);min-height:80px">
+            <div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase">Continue</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px">继续听</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:2px">最近播放会出现在这里</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 底部：Tile 1×5 -->
+      <div style="margin-top:10px;background:rgba(255,255,255,.03);border-radius:10px;padding:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:9px;color:rgba(255,255,255,.35)">为你准备</span>
+          <span style="font-size:8px;color:rgba(255,255,255,.2)">点击即可播放</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px">
+          <div style="background:rgba(255,255,255,.05);border-radius:6px;height:36px"></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:6px;height:36px"></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:6px;height:36px"></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:6px;height:36px"></div>
+          <div style="background:rgba(255,255,255,.05);border-radius:6px;height:36px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>优化方向（不改结构，只改视觉融合）</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+    <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.06)">
+      <div style="font-weight:600;margin-bottom:6px;color:#7ad7c2">1. 背景：视觉特效透出</div>
+      <ul style="margin:0;padding-left:14px;font-size:11px;line-height:1.6;color:rgba(255,255,255,.55)">
+        <li>Home 不遮挡 Canvas</li>
+        <li>卡片背景模糊度提高 blur(30px)→blur(40px)</li>
+        <li>卡片底色降低透明度 rgba(12,14,20,.55)→rgba(12,14,20,.40)</li>
+        <li>粒子/3D 特效透出来作为背景</li>
+      </ul>
+    </div>
+    <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.06)">
+      <div style="font-weight:600;margin-bottom:6px;color:#f4d28a">2. Hero 区简化</div>
+      <ul style="margin:0;padding-left:14px;font-size:11px;line-height:1.6;color:rgba(255,255,255,.55)">
+        <li>去掉 Mosaic（装饰性，不传递信息）</li>
+        <li>天气 pills 改小、更紧凑</li>
+        <li>标题字号缩小，内容更精简</li>
+        <li>把空间留给卡片和 tile</li>
+      </ul>
+    </div>
+    <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.06)">
+      <div style="font-weight:600;margin-bottom:6px;color:#9db8cf">3. 控制栏融合</div>
+      <ul style="margin:0;padding-left:14px;font-size:11px;line-height:1.6;color:rgba(255,255,255,.55)">
+        <li>底部控制栏在 home 模式下透明度更低</li>
+        <li>背景 blur 减轻，让特效更好透出</li>
+        <li>控制按钮保持完整功能</li>
+      </ul>
+    </div>
+    <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.06)">
+      <div style="font-weight:600;margin-bottom:6px;color:#ff5367">4. 卡片微交互</div>
+      <ul style="margin:0;padding-left:14px;font-size:11px;line-height:1.6;color:rgba(255,255,255,.55)">
+        <li>Hover 时轻微上浮 + 边框发光</li>
+        <li>点击缩放反馈</li>
+        <li>封面图片 hover 时微旋转</li>
+        <li>不改变功能，只加细腻反馈</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>关键约束</h3>
+  <ul style="font-size:11px;line-height:1.6;color:rgba(255,255,255,.55)">
+    <li><b>搜索栏不动</b> — 位置、样式、功能保持原样</li>
+    <li><b>不增减卡片</b> — 4 个入口卡片 + 5 个 tile，数量和位置不变</li>
+    <li><b>不改 Z 序</b> — canvas(z-index:1) → home(z-index:4) → 控制栏(z-index:6)</li>
+    <li><b>大屏：</b>内容 max-width 居中，背景特效延伸到两侧</li>
+    <li><b>小屏：</b>保持现有响应式断点，只调整透明度/blur</li>
+  </ul>
+</div>
+
+<div class="options">
+  <div class="option" onclick="toggleSelect(this)" data-choice="approve">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>方向对了，细化实现</h3>
+      <p>保持结构，优化玻璃质感和视觉融合</p>
+    </div>
+  </div>
+  <div class="option" onclick="toggleSelect(this)" data-choice="adjust">
+    <div class="letter">!</div>
+    <div class="content">
+      <h3>有些调整</h3>
+      <p>说说具体哪里不对</p>
+    </div>
+  </div>
+  <div class="option" onclick="toggleSelect(this)" data-choice="skip">
+    <div class="letter">→</div>
+    <div class="content">
+      <h3>先不管这个</h3>
+      <p>先处理其他任务</p>
+    </div>
+  </div>
+</div>

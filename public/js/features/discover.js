@@ -163,18 +163,55 @@ function homeToneForItem(item, index) {
   return ['daily', 'playlist', 'local', 'guide', 'search'][index % 5];
 }
 function renderHomeMosaic(items) {
-  var cells = document.querySelectorAll('#home-mosaic .home-mosaic-cell');
-  if (!cells.length) return;
-  var covers = [];
-  (items || []).forEach(function(item){
-    var cover = homeTileCover(item);
-    if (cover) covers.push(cover);
-  });
-  for (var i = 0; i < cells.length; i++) {
-    var src = covers[i] || covers[(i + 1) % Math.max(1, covers.length)] || '';
-    cells[i].style.backgroundImage = src ? 'url("' + cssImageUrl(src) + '")' : '';
-    cells[i].classList.toggle('has-cover', !!src);
-    cells[i].classList.toggle('home-skeleton', !src && homeDiscoverState.loading);
+  // 每日一言
+  var quoteCell = document.getElementById('mosaic-quote');
+  if (quoteCell) {
+    (function(){
+      var cached = null;
+      try { cached = JSON.parse(localStorage.getItem('mineradio-daily-quote')); } catch(e){}
+      if (cached && cached.ts && Date.now() - cached.ts < 86400000) {
+        quoteCell.innerHTML = '<div style="padding:12px;display:flex;flex-direction:column;justify-content:center;height:100%"><div style="color:rgba(255,255,255,.2);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.65);line-height:1.5;font-style:italic">"' + Mineradio.util.escHtml(cached.text) + '"</div><div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:4px">— ' + Mineradio.util.escHtml(cached.author || '') + '</div></div>';
+      } else {
+        quoteCell.innerHTML = '<div style="padding:12px;display:flex;flex-direction:column;justify-content:center;height:100%"><div style="color:rgba(255,255,255,.2);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.4">音乐是心灵的语言</div></div>';
+        // 异步获取名言
+        fetch('https://api.quotable.io/random?tags=music|inspirational').then(function(r){ return r.json(); }).then(function(data){
+          if (data && data.content) {
+            localStorage.setItem('mineradio-daily-quote', JSON.stringify({ ts: Date.now(), text: data.content, author: data.author }));
+            quoteCell.innerHTML = '<div style="padding:12px;display:flex;flex-direction:column;justify-content:center;height:100%"><div style="color:rgba(255,255,255,.2);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.65);line-height:1.5;font-style:italic">"' + Mineradio.util.escHtml(data.content) + '"</div><div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:4px">— ' + Mineradio.util.escHtml(data.author || '') + '</div></div>';
+          }
+        }).catch(function(){});
+      }
+    })();
+  }
+
+  // 本周听歌统计
+  var statsCell = document.getElementById('mosaic-stats');
+  if (statsCell) {
+    var totalMs = 0, totalSongs = 0, artistSet = {};
+    if (listenStatsState && listenStatsState.history) {
+      var weekAgo = Date.now() - 7 * 86400000;
+      listenStatsState.history.forEach(function(rec){
+        if (rec && rec.playedAt && rec.playedAt >= weekAgo) {
+          totalMs += rec.listenMs || 0;
+          totalSongs++;
+          if (rec.artist) artistSet[rec.artist] = true;
+        }
+      });
+    }
+    var mins = Math.round(totalMs / 60000);
+    var artists = Object.keys(artistSet).length;
+    statsCell.innerHTML = '<div style="padding:8px;display:flex;flex-direction:column;justify-content:center;height:100%"><div style="color:rgba(255,255,255,.2);font-size:7px;text-transform:uppercase;letter-spacing:.3px">本周听歌</div><div style="font-size:14px;font-weight:700;margin-top:1px;color:rgba(255,255,255,.75)">' + mins + ' 分钟</div><div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:1px">' + totalSongs + ' 首 · ' + artists + ' 位歌手</div></div>';
+  }
+
+  // 队列概要
+  var queueCell = document.getElementById('mosaic-queue');
+  if (queueCell) {
+    var qLen = (Array.isArray(playQueue) ? playQueue.length : 0);
+    var qMin = 0;
+    if (qLen > 0 && Array.isArray(playQueue)) {
+      playQueue.forEach(function(s){ if (s && s.duration) qMin += Number(s.duration) / 60000; });
+    }
+    queueCell.innerHTML = '<div style="padding:8px;display:flex;flex-direction:column;justify-content:center;height:100%"><div style="color:rgba(255,255,255,.2);font-size:7px;text-transform:uppercase;letter-spacing:.3px">当前队列</div><div style="font-size:13px;font-weight:700;margin-top:1px;color:rgba(255,255,255,.7)">' + qLen + ' 首</div><div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:1px">约 ' + Math.round(qMin) + ' 分钟</div></div>';
   }
 }
 function renderHomeTiles() {
