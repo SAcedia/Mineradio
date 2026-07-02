@@ -125,6 +125,19 @@ function packagedDefaultLyricLayoutRaw() {
 function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
 // ============================================================
+//  Storage — safe JSON localStorage wrapper
+// ============================================================
+function storageGet(key, fallback) {
+  try { var v = JSON.parse(localStorage.getItem(key)); return v != null ? v : fallback; } catch (e) { return fallback; }
+}
+function storageSet(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
+}
+function storageRemove(key) {
+  try { localStorage.removeItem(key); return true; } catch (e) { return false; }
+}
+
+// ============================================================
 //  API — async fetch wrapper
 // ============================================================
 window.apiJson = async function(url, opts) {
@@ -162,5 +175,8 @@ Mineradio.util = {
   clonePackagedDefaultFxSnapshot: clonePackagedDefaultFxSnapshot,
   packagedDefaultLyricLayoutRaw: packagedDefaultLyricLayoutRaw,
   escHtml: escHtml,
-  apiJson: apiJson
+  apiJson: apiJson,
+  storageGet: storageGet,
+  storageSet: storageSet,
+  storageRemove: storageRemove
 };

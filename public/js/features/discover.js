@@ -168,21 +168,22 @@ function renderHomeMosaic(items) {
   if (quoteCell) {
     (function(){
       var escHtml = (typeof Mineradio !== 'undefined' && Mineradio.util && Mineradio.util.escHtml) || function(s){ return String(s || '').replace(/[&<>"]/g,function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]||m; }); };
-      var cached = null;
-      try { cached = JSON.parse(localStorage.getItem('mineradio-daily-quote')); } catch(e){}
+      var storageGet = (typeof Mineradio !== 'undefined' && Mineradio.util && Mineradio.util.storageGet) || function(){ return null; };
+      var storageSet = (typeof Mineradio !== 'undefined' && Mineradio.util && Mineradio.util.storageSet) || function(){};
+      var apiJson = (typeof window.apiJson === 'function') ? window.apiJson : null;
+      var cached = storageGet('mineradio-daily-quote');
       if (cached && cached.ts && Date.now() - cached.ts < 86400000) {
-        quoteCell.innerHTML = '<div style="color:rgba(255,255,255,.25);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div class="mosaic-quote-text" style="font-size:12px;font-weight:500;color:rgba(255,255,255(.65);line-height:1.5;font-style:italic">"' + escHtml(cached.text) + '"</div><div style="font-size:8px;color:rgba(255,255,255(.2);margin-top:4px">— ' + escHtml(cached.author || '') + '</div>';
+        quoteCell.innerHTML = '<div style="color:rgba(255,255,255,.25);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div class="mosaic-quote-text" style="font-size:12px;font-weight:500;color:rgba(255,255,255,.65);line-height:1.5;font-style:italic">"' + escHtml(cached.text) + '"</div><div style="font-size:8px;color:rgba(255,255,255,.2);margin-top:4px">— ' + escHtml(cached.author || '') + '</div>';
       } else {
         quoteCell.innerHTML = '<div style="color:rgba(255,255,255(.25);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div class="mosaic-quote-text" style="font-size:11px;color:rgba(255,255,255(.45);line-height:1.4">音乐是心灵的语言</div>';
-        var controller = new AbortController();
-        var timer = setTimeout(function(){ controller.abort(); }, 5000);
-        fetch('https://api.quotable.io/random?tags=music|inspirational', { signal: controller.signal }).then(function(r){ return r.json(); }).then(function(data){
-          clearTimeout(timer);
-          if (data && data.content) {
-            localStorage.setItem('mineradio-daily-quote', JSON.stringify({ ts: Date.now(), text: data.content, author: data.author }));
-            quoteCell.innerHTML = '<div style="color:rgba(255,255,255(.25);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div class="mosaic-quote-text" style="font-size:12px;font-weight:500;color:rgba(255,255,255(.65);line-height:1.5;font-style:italic">"' + escHtml(data.content) + '"</div><div style="font-size:8px;color:rgba(255,255,255(.2);margin-top:4px">— ' + escHtml(data.author || '') + '</div>';
-          }
-        }).catch(function(){ clearTimeout(timer); });
+        if (apiJson) {
+          apiJson('https://api.quotable.io/random?tags=music|inspirational', { timeoutMs: 5000 }).then(function(data){
+            if (data && data.content) {
+              storageSet('mineradio-daily-quote', { ts: Date.now(), text: data.content, author: data.author });
+              quoteCell.innerHTML = '<div style="color:rgba(255,255,255(.25);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div class="mosaic-quote-text" style="font-size:12px;font-weight:500;color:rgba(255,255,255(.65);line-height:1.5;font-style:italic">"' + escHtml(data.content) + '"</div><div style="font-size:8px;color:rgba(255,255,255(.2);margin-top:4px">— ' + escHtml(data.author || '') + '</div>';
+            }
+          }).catch(function(){});
+        }
       }
     })();
   }
