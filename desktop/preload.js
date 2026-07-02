@@ -44,6 +44,8 @@ contextBridge.exposeInMainWorld('desktopWindow', {
     ipcRenderer.on('desktop-window-state', listener);
     return () => ipcRenderer.removeListener('desktop-window-state', listener);
   },
+  getSetting: (key) => ipcRenderer.invoke('mineradio-get-setting', key),
+  setSetting: (key, value) => ipcRenderer.invoke('mineradio-set-setting', key, value),
 });
 
 window.addEventListener('DOMContentLoaded', () => {

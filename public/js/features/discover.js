@@ -163,29 +163,34 @@ function homeToneForItem(item, index) {
   return ['daily', 'playlist', 'local', 'guide', 'search'][index % 5];
 }
 function renderHomeMosaic(items) {
-  // 每日一言
+  // 每日一言 — 使用 QuoteService
   var quoteCell = document.getElementById('mosaic-quote');
   if (quoteCell) {
-    (function(){
-      var escHtml = (typeof Mineradio !== 'undefined' && Mineradio.util && Mineradio.util.escHtml) || function(s){ return String(s || '').replace(/[&<>"]/g,function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]||m; }); };
-      var storageGet = (typeof Mineradio !== 'undefined' && Mineradio.util && Mineradio.util.storageGet) || function(){ return null; };
-      var storageSet = (typeof Mineradio !== 'undefined' && Mineradio.util && Mineradio.util.storageSet) || function(){};
-      var apiJson = (typeof window.apiJson === 'function') ? window.apiJson : null;
-      var cached = storageGet('mineradio-daily-quote');
-      if (cached && cached.ts && Date.now() - cached.ts < 86400000) {
-        quoteCell.innerHTML = '<div style="color:rgba(255,255,255,.25);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div class="mosaic-quote-text" style="font-size:12px;font-weight:500;color:rgba(255,255,255,.65);line-height:1.5;font-style:italic">"' + escHtml(cached.text) + '"</div><div style="font-size:8px;color:rgba(255,255,255,.2);margin-top:4px">— ' + escHtml(cached.author || '') + '</div>';
-      } else {
-        quoteCell.innerHTML = '<div style="color:rgba(255,255,255(.25);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div class="mosaic-quote-text" style="font-size:11px;color:rgba(255,255,255(.45);line-height:1.4">音乐是心灵的语言</div>';
-        if (apiJson) {
-          apiJson('https://api.quotable.io/random?tags=music|inspirational', { timeoutMs: 5000 }).then(function(data){
-            if (data && data.content) {
-              storageSet('mineradio-daily-quote', { ts: Date.now(), text: data.content, author: data.author });
-              quoteCell.innerHTML = '<div style="color:rgba(255,255,255(.25);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div class="mosaic-quote-text" style="font-size:12px;font-weight:500;color:rgba(255,255,255(.65);line-height:1.5;font-style:italic">"' + escHtml(data.content) + '"</div><div style="font-size:8px;color:rgba(255,255,255(.2);margin-top:4px">— ' + escHtml(data.author || '') + '</div>';
-            }
-          }).catch(function(){});
-        }
-      }
-    })();
+    var escHtml = (typeof Mineradio !== 'undefined' && Mineradio.util && Mineradio.util.escHtml) || function(s){ return String(s || '').replace(/[&<>"]/g,function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]||m; }); };
+    var renderQuote = function(q, refreshing) {
+      if (!quoteCell) return;
+      var refreshBtn = '<button class="mosaic-refresh-btn" onclick="refreshQuote()" title="刷新名言" style="position:absolute;top:4px;right:4px;width:18px;height:18px;border:0;border-radius:4px;background:rgba(255,255,255,.04);color:rgba(255,255,255(.25);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1;transition:background .18s,transform .18s">' + (refreshing ? '&#8635;' : '&#8635;') + '</button>';
+      quoteCell.innerHTML = refreshBtn + '<div style="color:rgba(255,255,255(.25);font-size:7px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">每日一言</div><div class="mosaic-quote-text" style="font-size:12px;font-weight:500;color:rgba(255,255,255(.65);line-height:1.5;font-style:italic">"' + escHtml(q.text) + '"</div><div style="font-size:8px;color:rgba(255,255,255(.2);margin-top:4px">— ' + escHtml(q.author || '') + '</div>';
+    };
+    // 暴露刷新函数
+    window.refreshQuote = function() {
+      var qs = window.QuoteService;
+      if (!qs) return;
+      renderQuote({ text: '加载中…', author: '' }, true);
+      var settings = (window.Mineradio && Mineradio.settings) || {};
+      var prefs = settings.get ? settings.get() : {};
+      qs.refresh({ lang: prefs.quoteLang || 'zh', style: prefs.quoteStyle || 'classic' }).then(function(q){ renderQuote(q, false); });
+    };
+    // 首次加载
+    var qs = window.QuoteService;
+    if (qs) {
+      var settings = (window.Mineradio && Mineradio.settings) || {};
+      var prefs = (typeof settings.get === 'function') ? settings.get() : {};
+      qs.fetch({ lang: (prefs && prefs.quoteLang) || 'zh', style: (prefs && prefs.quoteStyle) || 'classic' }).then(function(q){ renderQuote(q, false); });
+    } else {
+      // QuoteService 未加载 - 兜底
+      renderQuote({ text: '音乐是灵魂的语言', author: '尼采' }, false);
+    }
   }
 
   // 本周听歌统计

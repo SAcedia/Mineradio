@@ -1300,6 +1300,30 @@ ipcMain.handle('mineradio-wallpaper-set-enabled', async (_event, enabled, payloa
   }
 });
 
+// ============================================================
+//  Settings persistence (JSON file in userData)
+// ============================================================
+const SETTINGS_FILE = path.join(app.getPath('userData'), 'mineradio-settings.json');
+
+function readSettings() {
+  try { if (fs.existsSync(SETTINGS_FILE)) return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8')); } catch (e) {}
+  return {};
+}
+function writeSettings(data) {
+  try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2), 'utf8'); return true; } catch (e) { return false; }
+}
+
+ipcMain.handle('mineradio-get-setting', (_event, key) => {
+  const all = readSettings();
+  return { value: key ? all[key] : all };
+});
+
+ipcMain.handle('mineradio-set-setting', (_event, key, value) => {
+  const all = readSettings();
+  if (value == null) delete all[key]; else all[key] = value;
+  return { ok: writeSettings(all) };
+});
+
 ipcMain.handle('mineradio-wallpaper-update', async (_event, payload) => {
   try {
     wallpaperState = { ...wallpaperState, ...(payload || {}) };
