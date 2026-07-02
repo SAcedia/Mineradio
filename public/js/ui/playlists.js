@@ -7,6 +7,9 @@ window.Mineradio.bus.on('login:statechange', function(data) {
 });
 var LOCAL_PLAYLIST_STORAGE_KEY = 'mineradio-local-playlists-v1';
 
+// ============================================================
+//  Local — load/save playlists
+// ============================================================
 function loadLocalPlaylists() {
   try {
     var raw = Mineradio.util.storageGet(LOCAL_PLAYLIST_STORAGE_KEY);
@@ -198,6 +201,9 @@ function showAddToLocalPlaylistPicker(song) {
   }
 }
 
+// ============================================================
+//  Play — local playlist queue
+// ============================================================
 function playLocalPlaylistSongs(songs, startIdx) {
   if (!songs || !songs.length) return;
   startIdx = startIdx || 0;
@@ -262,6 +268,9 @@ function hideLocalPlaylistDetail() {
   localDetailPlaylistId = '';
 }
 
+// ============================================================
+//  Detail — local playlist songs
+// ============================================================
 function showLocalPlaylistDetail(playlistId) {
   var $panel = document.getElementById('playlist-detail-panel');
   var $title = document.getElementById('detail-panel-title');
@@ -295,6 +304,9 @@ function showLocalPlaylistDetail(playlistId) {
 }
 
 // 渲染本地歌单卡片 → #local-pl-section
+// ============================================================
+//  Render — local playlist cards
+// ============================================================
 function renderLocalPlaylistsIntoView() {
   var $sec = document.getElementById('local-pl-section');
   if (!$sec) return;
